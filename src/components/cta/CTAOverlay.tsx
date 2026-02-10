@@ -1,21 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { CTAEvent } from '@/lib/types';
 
-export interface CTAEvent {
-  /** Video time (seconds) when CTA appears */
-  showAtSec: number;
-  /** Video time (seconds) when CTA disappears */
-  hideAtSec: number;
-  /** Button label */
-  buttonText: string;
-  /** Link URL when button is clicked */
-  url: string;
-  /** Promotional text shown above the button */
-  promoText?: string;
-  /** Whether to show a countdown timer */
-  showCountdown: boolean;
-}
+export type { CTAEvent };
 
 export interface CTAOverlayProps {
   /** Current video playback time in seconds */
