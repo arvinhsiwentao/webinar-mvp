@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Webinar, Session } from '@/lib/types';
 import { formatDateTime, validateEmail } from '@/lib/utils';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
+import { Button, Input, Badge, Card, CardContent } from '@/components/ui';
 
 export default function LandingPage() {
   const params = useParams();
@@ -85,23 +86,20 @@ export default function LandingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+      <div className="min-h-screen bg-[#030303] flex items-center justify-center">
+        <div className="w-12 h-12 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (error || !webinar) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#030303] flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">😕 {error || '找不到研討會'}</h1>
-          <button
-            onClick={() => router.push('/')}
-            className="text-blue-400 hover:text-blue-300"
-          >
+          <h1 className="text-2xl font-bold text-white mb-4">{error || '找不到研討會'}</h1>
+          <Button variant="ghost" onClick={() => router.push('/')}>
             返回首頁
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -110,41 +108,51 @@ export default function LandingPage() {
   const selectedSessionData = webinar.sessions.find((s: Session) => s.id === selectedSession);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
+    <div className="min-h-screen bg-[#030303] text-white">
+      {/* Grain Overlay */}
+      <div className="grain-overlay" />
       
-      {/* ========== 區塊 1：限時公開 + 觀看講座 CTA ========== */}
-      <section className="relative py-12 md:py-20 px-4 overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-blue-500/20 to-transparent blur-3xl" />
+      {/* ========== Hero Section ========== */}
+      <section className="relative min-h-screen flex items-center">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-900/10 via-transparent to-transparent" />
+        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-3xl" />
         
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* 限時公開 Badge */}
-          <div className="inline-flex items-center gap-2 bg-red-600/90 text-white px-5 py-2.5 rounded-full mb-6 shadow-lg shadow-red-600/30">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-            </span>
-            <span className="font-bold tracking-wide">🔥 限時公開</span>
-          </div>
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-16 items-center">
+          {/* Left: Content */}
+          <div className="space-y-8 animate-fade-in-up">
+            <Badge variant="gold" pulse>
+              🔥 限時公開
+            </Badge>
+            
+            <div>
+              <p className="text-amber-400/80 text-sm tracking-[0.3em] uppercase mb-3 font-medium">
+                Financial Freedom
+              </p>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                {webinar.title}
+              </h1>
+            </div>
+            
+            {webinar.subtitle && (
+              <p className="text-xl text-gray-400 leading-relaxed max-w-lg">
+                {webinar.subtitle}
+              </p>
+            )}
 
-          {/* 主標題 */}
-          <h1 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
-            {webinar.title}
-          </h1>
-          
-          {/* 副標題 */}
-          {webinar.subtitle && (
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-              {webinar.subtitle}
-            </p>
-          )}
+            {/* Stats */}
+            <div className="flex items-center gap-8 py-6 border-y border-gray-800">
+              <Stat number="4" label="年達成財務自由" />
+              <div className="w-px h-12 bg-gray-700" />
+              <Stat number="15萬+" label="追蹤者信任" />
+              <div className="w-px h-12 bg-gray-700" />
+              <Stat number="10x" label="特斯拉早期回報" />
+            </div>
 
-          {/* 倒數計時 */}
-          {selectedSessionData && (
-            <div className="mb-8">
-              <p className="text-gray-400 text-sm mb-3">🕐 距離直播開始</p>
-              <div className="inline-block">
+            {/* Countdown */}
+            {selectedSessionData && (
+              <div>
+                <p className="text-gray-500 text-sm mb-3">⏰ 距離直播開始</p>
                 <CountdownTimer 
                   targetTime={selectedSessionData.startTime}
                   size="lg"
@@ -152,173 +160,181 @@ export default function LandingPage() {
                   showLabels={true}
                 />
               </div>
+            )}
+
+            <Button size="lg" variant="gold" onClick={() => document.getElementById('register')?.scrollIntoView({ behavior: 'smooth' })}>
+              📺 立即預約觀看
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </Button>
+
+            <p className="text-gray-600 text-sm">
+              ✅ 已有 <span className="text-amber-500 font-semibold">1,247</span> 人報名
+            </p>
+          </div>
+
+          {/* Right: Speaker Image */}
+          <div className="relative hidden lg:block">
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-transparent rounded-3xl blur-2xl" />
+            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden border border-gray-800">
+              {webinar.speakerImage ? (
+                <Image
+                  src={webinar.speakerImage}
+                  alt={webinar.speakerName}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                  <span className="text-6xl text-gray-600 font-serif">M</span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-transparent" />
             </div>
-          )}
-
-          {/* 觀看講座 CTA Button */}
-          <a 
-            href="#register"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-xl py-4 px-10 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg shadow-blue-600/30"
-          >
-            <span>📺 立即預約觀看</span>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </a>
-
-          {/* 已報名人數 (社會證明) */}
-          <p className="text-gray-500 text-sm mt-4">
-            ✅ 已有 <span className="text-blue-400 font-semibold">1,247</span> 人報名
-          </p>
+            {/* Decorative Frame */}
+            <div className="absolute -bottom-4 -right-4 w-32 h-32 border border-amber-500/30 rounded-lg" />
+          </div>
         </div>
       </section>
 
-      {/* ========== 區塊 2：人物介紹 ========== */}
-      <section className="py-16 px-4 bg-gray-900/50">
+      {/* ========== About Section ========== */}
+      <section className="py-24 px-6 bg-gradient-to-b from-transparent to-gray-900/30">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">
-            👨‍🏫 講者介紹
-          </h2>
-          
-          <div className="bg-gray-800/50 rounded-2xl p-8 md:p-10 border border-gray-700/50">
-            <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-              {/* Speaker Image */}
-              {webinar.speakerImage && (
-                <div className="flex-shrink-0">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-lg opacity-50" />
-                    <Image
-                      src={webinar.speakerImage}
-                      alt={webinar.speakerName}
-                      width={150}
-                      height={150}
-                      className="relative rounded-full object-cover border-4 border-gray-700"
-                    />
-                  </div>
-                </div>
-              )}
+          <div className="flex items-start gap-8">
+            <div className="hidden md:block">
+              <span className="text-xs tracking-[0.3em] text-amber-500 [writing-mode:vertical-rl] rotate-180">
+                ABOUT
+              </span>
+            </div>
+            
+            <div className="flex-1">
+              <p className="text-amber-400/80 text-sm mb-2 font-medium">Who is</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-8">{webinar.speakerName}</h2>
               
-              {/* Speaker Info */}
-              <div className="text-center md:text-left flex-1">
-                <h3 className="text-2xl font-bold text-white mb-2">{webinar.speakerName}</h3>
-                {webinar.speakerTitle && (
-                  <p className="text-blue-400 font-medium mb-4">{webinar.speakerTitle}</p>
-                )}
-                {webinar.speakerBio && (
-                  <p className="text-gray-400 leading-relaxed">{webinar.speakerBio}</p>
-                )}
+              <div className="prose prose-invert prose-lg max-w-none">
+                <p className="text-gray-400 leading-relaxed whitespace-pre-line">
+                  {webinar.speakerBio}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-4 mt-8">
+                <CredentialBadge icon="🎓" text="美國金融背景" />
+                <CredentialBadge icon="🌏" text="全球旅居生活" />
+                <CredentialBadge icon="📈" text="10年+ 投資經驗" />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ========== 區塊 3：直播席次 ========== */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">
-            📅 選擇直播場次
-          </h2>
-          
-          <div className="grid gap-4 max-w-2xl mx-auto">
+      {/* ========== Quote Section ========== */}
+      <section className="py-20 px-6 text-center relative">
+        <div className="absolute left-1/2 top-0 w-px h-20 bg-gradient-to-b from-transparent via-amber-500 to-transparent -translate-x-1/2" />
+        
+        <blockquote className="max-w-2xl mx-auto">
+          <p className="text-2xl md:text-3xl font-serif italic text-gray-200 leading-relaxed">
+            "財務自由不是終點，<br />
+            而是<span className="text-amber-400">選擇權</span>的開始。"
+          </p>
+          <cite className="block mt-6 text-amber-500 not-italic tracking-wider text-sm">
+            — {webinar.speakerName}
+          </cite>
+        </blockquote>
+        
+        <div className="absolute left-1/2 bottom-0 w-px h-20 bg-gradient-to-b from-amber-500 via-amber-500 to-transparent -translate-x-1/2" />
+      </section>
+
+      {/* ========== What You'll Learn ========== */}
+      <section className="py-24 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-amber-400/80 text-sm mb-2 tracking-wider">What You'll Discover</p>
+            <h2 className="text-3xl md:text-4xl font-bold">直播課程內容</h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 stagger-children">
+            {webinar.highlights.map((highlight: string, idx: number) => (
+              <Card key={idx} hover glow={idx === webinar.highlights.length - 1}>
+                <div className="flex gap-4">
+                  <span className="text-4xl font-serif text-gray-700">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <CardContent className="pt-2">
+                    <p className="text-gray-300 leading-relaxed">{highlight}</p>
+                  </CardContent>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========== Sessions Selection ========== */}
+      <section className="py-16 px-6 bg-gray-900/30">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-amber-400/80 text-sm mb-2 tracking-wider">Choose Your Session</p>
+            <h2 className="text-3xl font-bold">選擇直播場次</h2>
+          </div>
+
+          <div className="space-y-4">
             {webinar.sessions.map((session: Session, idx: number) => (
               <button
                 key={session.id}
                 onClick={() => setSelectedSession(session.id)}
                 className={`
-                  relative p-5 rounded-xl border-2 transition-all text-left
+                  w-full p-5 rounded-xl border-2 transition-all text-left flex items-center justify-between
                   ${selectedSession === session.id 
-                    ? 'border-blue-500 bg-blue-500/10' 
-                    : 'border-gray-700 bg-gray-800/30 hover:border-gray-600'
+                    ? 'border-amber-500 bg-amber-500/10' 
+                    : 'border-gray-800 bg-gray-900/50 hover:border-gray-700'
                   }
                 `}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    {/* Radio indicator */}
-                    <div className={`
-                      w-5 h-5 rounded-full border-2 flex items-center justify-center
-                      ${selectedSession === session.id ? 'border-blue-500' : 'border-gray-600'}
-                    `}>
-                      {selectedSession === session.id && (
-                        <div className="w-3 h-3 rounded-full bg-blue-500" />
-                      )}
-                    </div>
-                    
-                    <div>
-                      <div className="text-white font-semibold">
-                        場次 {idx + 1}
-                      </div>
-                      <div className="text-gray-400 text-sm">
-                        {formatDateTime(session.startTime)}
-                      </div>
-                    </div>
+                <div className="flex items-center gap-4">
+                  <div className={`
+                    w-5 h-5 rounded-full border-2 flex items-center justify-center
+                    ${selectedSession === session.id ? 'border-amber-500' : 'border-gray-600'}
+                  `}>
+                    {selectedSession === session.id && (
+                      <div className="w-3 h-3 rounded-full bg-amber-500" />
+                    )}
                   </div>
-                  
-                  {idx === 0 && (
-                    <span className="bg-green-500/20 text-green-400 text-xs font-medium px-3 py-1 rounded-full">
-                      最近場次
-                    </span>
-                  )}
+                  <div>
+                    <div className="font-semibold text-white">場次 {idx + 1}</div>
+                    <div className="text-gray-400 text-sm">{formatDateTime(session.startTime)}</div>
+                  </div>
                 </div>
+                {idx === 0 && (
+                  <Badge variant="success">最近場次</Badge>
+                )}
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ========== 區塊 4：講座中你會獲得什麼 ========== */}
-      <section className="py-16 px-4 bg-gray-900/50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">
-            🎯 講座中你會獲得什麼
-          </h2>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            {webinar.highlights.map((highlight: string, idx: number) => (
-              <div 
-                key={idx}
-                className="flex items-start gap-4 bg-gray-800/30 rounded-xl p-5 border border-gray-700/50"
-              >
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <p className="text-gray-300 leading-relaxed">{highlight}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ========== 區塊 5：最終 Call to Action (報名表單) ========== */}
-      <section id="register" className="py-16 px-4">
+      {/* ========== Registration Form ========== */}
+      <section id="register" className="py-24 px-6">
         <div className="max-w-md mx-auto">
-          <div className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-700">
-            {/* Header */}
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-2 bg-yellow-500/20 text-yellow-400 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-                <span>🎁</span>
-                <span>免費報名</span>
-              </div>
-              <h2 className="text-2xl font-bold text-white">
-                立即預約席位
-              </h2>
-              <p className="text-gray-400 text-sm mt-2">
+          <Card className="p-8 border-amber-500/20">
+            <div className="text-center mb-8">
+              <Badge variant="gold" className="mb-4">🎁 免費報名</Badge>
+              <h2 className="text-2xl font-bold text-white">立即預約席位</h2>
+              <p className="text-gray-500 text-sm mt-2">
                 填寫以下資料，我們會在開播前通知你
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Session Select (if multiple) */}
+            <form onSubmit={handleSubmit} className="space-y-5">
               {webinar.sessions.length > 1 && (
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">選擇場次</label>
                   <select
                     value={selectedSession}
                     onChange={(e) => setSelectedSession(e.target.value)}
-                    className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                    className="w-full bg-gray-900 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-amber-500 focus:outline-none"
                   >
                     {webinar.sessions.map((session: Session, idx: number) => (
                       <option key={session.id} value={session.id}>
@@ -329,84 +345,89 @@ export default function LandingPage() {
                 </div>
               )}
 
-              {/* Name */}
-              <div>
-                <label className="block text-sm text-gray-400 mb-2">姓名 *</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="請輸入你的姓名"
-                  className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none placeholder-gray-500"
-                  required
-                />
-              </div>
+              <Input
+                label="姓名 *"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="請輸入你的姓名"
+                required
+              />
 
-              {/* Email */}
-              <div>
-                <label className="block text-sm text-gray-400 mb-2">Email *</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none placeholder-gray-500"
-                  required
-                />
-              </div>
+              <Input
+                label="Email *"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+              />
 
-              {/* Phone */}
-              <div>
-                <label className="block text-sm text-gray-400 mb-2">手機 (選填)</label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="0912345678"
-                  className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none placeholder-gray-500"
-                />
-              </div>
+              <Input
+                label="手機 (選填)"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="0912345678"
+              />
 
-              {/* Error */}
               {formError && (
                 <div className="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg text-sm">
                   {formError}
                 </div>
               )}
 
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-600/30"
-              >
-                {submitting ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    報名中...
-                  </span>
-                ) : (
-                  '🚀 立即報名（免費）'
-                )}
-              </button>
+              <Button type="submit" variant="gold" size="lg" className="w-full" loading={submitting}>
+                🚀 立即報名（免費）
+              </Button>
             </form>
 
-            <p className="text-center text-gray-500 text-xs mt-4">
+            <p className="text-center text-gray-600 text-xs mt-6">
               🔒 你的資料安全且不會被分享
             </p>
-          </div>
+          </Card>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-4 border-t border-gray-800">
-        <div className="max-w-4xl mx-auto text-center text-gray-500 text-sm">
-          <p>© 2026 Webinar MVP. All rights reserved.</p>
+      {/* ========== Footer ========== */}
+      <footer className="py-12 px-6 border-t border-gray-800">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 border border-amber-500 rounded flex items-center justify-center">
+              <span className="font-serif text-amber-500">M</span>
+            </div>
+            <span className="font-semibold">{webinar.speakerName}</span>
+          </div>
+          
+          <div className="flex gap-6 text-sm text-gray-500">
+            <a href="#" className="hover:text-amber-500 transition-colors">YouTube</a>
+            <a href="#" className="hover:text-amber-500 transition-colors">Instagram</a>
+            <a href="#" className="hover:text-amber-500 transition-colors">Podcast</a>
+          </div>
+          
+          <p className="text-gray-600 text-xs">
+            © 2026 {webinar.speakerName}. All rights reserved.
+          </p>
         </div>
       </footer>
+    </div>
+  );
+}
+
+// Helper Components
+function Stat({ number, label }: { number: string; label: string }) {
+  return (
+    <div className="text-center">
+      <div className="text-3xl md:text-4xl font-bold text-amber-400 font-serif">{number}</div>
+      <div className="text-xs text-gray-500 mt-1">{label}</div>
+    </div>
+  );
+}
+
+function CredentialBadge({ icon, text }: { icon: string; text: string }) {
+  return (
+    <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-sm text-gray-300">
+      <span>{icon}</span>
+      <span>{text}</span>
     </div>
   );
 }

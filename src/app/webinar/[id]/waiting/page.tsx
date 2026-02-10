@@ -2,22 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import { Webinar, Session } from '@/lib/types';
-import { getTimeUntil } from '@/lib/utils';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
+import { Button, Badge, Card } from '@/components/ui';
+import { Webinar, Session } from '@/lib/types';
 
-export default function WaitingRoomPage() {
+export default function WaitingPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
   const webinarId = params.id as string;
-  const sessionId = searchParams.get('session');
-  const userName = searchParams.get('name') || 'Guest';
+  const sessionId = searchParams.get('session') || '';
+  const userName = searchParams.get('name') || '觀眾';
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [totalSeconds, setTotalSeconds] = useState(0);
+  const [canEnter, setCanEnter] = useState(false);
 
   useEffect(() => {
     async function fetchWebinar() {
@@ -38,148 +38,132 @@ export default function WaitingRoomPage() {
     fetchWebinar();
   }, [webinarId, sessionId]);
 
-  // Countdown and auto-redirect
+  // Check if user can enter (10 minutes before start)
   useEffect(() => {
     if (!session) return;
 
-    const updateCountdown = () => {
-      const seconds = getTimeUntil(session.startTime);
-      setTotalSeconds(seconds);
-
-      // Auto-redirect when countdown reaches 0
-      if (seconds <= 0) {
-        router.push(`/webinar/${webinarId}/live?session=${session.id}&name=${encodeURIComponent(userName)}`);
-      }
+    const checkCanEnter = () => {
+      const startTime = new Date(session.startTime).getTime();
+      const now = Date.now();
+      const minutesUntilStart = (startTime - now) / (1000 * 60);
+      setCanEnter(minutesUntilStart <= 10);
     };
 
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
+    checkCanEnter();
+    const interval = setInterval(checkCanEnter, 10000);
     return () => clearInterval(interval);
-  }, [session, webinarId, userName, router]);
+  }, [session]);
+
+  const handleEnterLive = () => {
+    router.push(`/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}`);
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500" />
+      <div className="min-h-screen bg-[#030303] flex items-center justify-center">
+        <div className="w-12 h-12 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!webinar || !session) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-center text-white">
-          <h1 className="text-2xl font-bold mb-4">找不到研討會資訊</h1>
-          <button
-            onClick={() => router.push('/')}
-            className="text-blue-400 hover:text-blue-300"
-          >
+      <div className="min-h-screen bg-[#030303] flex items-center justify-center text-white">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">找不到研討會</h1>
+          <Button variant="ghost" onClick={() => router.push('/')}>
             返回首頁
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
 
-  // If more than 30 minutes away, show a different message
-  const isEarlyArrival = totalSeconds > 30 * 60;
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950/20 to-gray-950 flex items-center justify-center px-4">
-      <div className="text-center max-w-lg">
-        {/* Animated Gradient Ring */}
-        <div className="relative w-48 h-48 mx-auto mb-8">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 animate-spin-slow opacity-50 blur-md" />
-          <div className="absolute inset-2 rounded-full bg-gray-950 flex items-center justify-center">
-            <span className="text-6xl">🎬</span>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#030303] text-white flex items-center justify-center px-6">
+      {/* Grain Overlay */}
+      <div className="grain-overlay" />
+      
+      {/* Background Effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-amber-500/5 rounded-full blur-3xl" />
+      </div>
 
-        {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+      <div className="relative z-10 max-w-2xl w-full text-center">
+        {/* Speaker Image */}
+        {webinar.speakerImage && (
+          <div className="relative w-32 h-32 mx-auto mb-8">
+            <div className="absolute inset-0 bg-amber-500/20 rounded-full blur-xl" />
+            <img
+              src={webinar.speakerImage}
+              alt={webinar.speakerName}
+              className="relative w-full h-full rounded-full object-cover border-2 border-amber-500/30"
+            />
+          </div>
+        )}
+
+        <Badge variant="gold" className="mb-6">候場中</Badge>
+
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">
           {webinar.title}
         </h1>
 
-        <p className="text-gray-400 mb-8">
-          講者: {webinar.speakerName}
+        <p className="text-gray-400 text-lg mb-2">
+          講者：{webinar.speakerName}
         </p>
 
-        {isEarlyArrival ? (
-          <>
-            {/* Early Arrival Message */}
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-6 mb-8">
-              <h2 className="text-xl font-semibold text-yellow-400 mb-2">
-                ⏰ 你來得有點早！
-              </h2>
-              <p className="text-gray-400 text-sm">
-                直播尚未開始，請於開播前 30 分鐘再進入候場頁面。
-              </p>
-            </div>
+        <p className="text-gray-500 mb-12">
+          歡迎，{userName}！直播即將開始
+        </p>
 
-            {/* Long Countdown */}
-            <div className="mb-8">
-              <p className="text-gray-400 text-sm mb-4">距離直播開始</p>
-              <CountdownTimer 
-                targetTime={session.startTime}
-                size="md"
-                showDays={true}
-                showLabels={true}
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Waiting Message */}
-            <h2 className="text-xl text-purple-400 mb-6 animate-pulse">
-              即將開始...
-            </h2>
+        {/* Countdown */}
+        <Card className="p-8 mb-8 border-amber-500/20">
+          <p className="text-gray-400 mb-4">距離直播開始</p>
+          <CountdownTimer
+            targetTime={session.startTime}
+            size="lg"
+            showDays={true}
+            showLabels={true}
+          />
+        </Card>
 
-            {/* Short Countdown (mm:ss) */}
-            <div className="mb-8">
-              <CountdownTimer 
-                targetTime={session.startTime}
-                size="lg"
-                variant="urgent"
-                showDays={false}
-                showLabels={true}
-              />
-            </div>
-
-            {/* Tips */}
-            <div className="bg-gray-800/30 rounded-xl p-4 text-left">
-              <p className="text-gray-400 text-sm mb-2">📌 小提醒：</p>
-              <ul className="text-gray-500 text-sm space-y-1">
-                <li>• 請保持此頁面開啟，開播後自動進入</li>
-                <li>• 建議使用耳機獲得最佳體驗</li>
-                <li>• 準備好筆記本記錄重點內容</li>
-              </ul>
-            </div>
-          </>
-        )}
-
-        {/* Back Button */}
-        <button
-          onClick={() => router.push(`/webinar/${webinarId}/confirm?session=${session.id}&name=${encodeURIComponent(userName)}`)}
-          className="mt-8 text-gray-500 hover:text-gray-300 text-sm transition-colors"
+        {/* Enter Button */}
+        <Button 
+          variant="gold" 
+          size="lg" 
+          className="w-full max-w-md mx-auto"
+          onClick={handleEnterLive}
+          disabled={!canEnter}
         >
-          ← 返回確認頁
-        </button>
-      </div>
+          {canEnter ? (
+            <>
+              🎬 進入直播間
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </>
+          ) : (
+            '直播開始前 10 分鐘可進入'
+          )}
+        </Button>
 
-      {/* Add custom animation */}
-      <style jsx>{`
-        @keyframes spin-slow {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        .animate-spin-slow {
-          animation: spin-slow 8s linear infinite;
-        }
-      `}</style>
+        {/* Tips */}
+        <div className="mt-12 grid md:grid-cols-3 gap-4">
+          <Tip icon="🔔" title="開啟通知" desc="確保不會錯過直播" />
+          <Tip icon="🎧" title="準備耳機" desc="獲得最佳聲音體驗" />
+          <Tip icon="📝" title="準備筆記" desc="記錄重要內容" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Tip({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+  return (
+    <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4 text-left">
+      <span className="text-2xl mb-2 block">{icon}</span>
+      <p className="font-medium text-white text-sm">{title}</p>
+      <p className="text-gray-500 text-xs">{desc}</p>
     </div>
   );
 }
