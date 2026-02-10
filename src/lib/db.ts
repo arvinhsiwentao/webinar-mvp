@@ -45,7 +45,18 @@ export function getAllWebinars(): Webinar[] {
 
 export function getWebinarById(id: string): Webinar | null {
   const webinars = getAllWebinars();
-  return webinars.find(w => w.id === id) || null;
+  
+  // Try to find by id field first
+  const byId = webinars.find(w => w.id === id);
+  if (byId) return byId;
+  
+  // If id is numeric, try to use as array index (1-based for user-friendliness)
+  const numericId = parseInt(id, 10);
+  if (!isNaN(numericId) && numericId >= 1 && numericId <= webinars.length) {
+    return webinars[numericId - 1];
+  }
+  
+  return null;
 }
 
 export function createWebinar(webinar: Omit<Webinar, 'id' | 'createdAt' | 'updatedAt'>): Webinar {
