@@ -484,10 +484,13 @@ function WebinarForm({
               type="url"
               value={formData.videoUrl}
               onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-              placeholder="https://example.com/video.mp4 或 .m3u8"
+              placeholder="https://example.com/video.mp4、.m3u8 或 YouTube 連結"
               className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
               required
             />
+            <p className="text-xs text-gray-500 mt-1">
+              支援格式：MP4 直連、M3U8 (HLS) 串流、YouTube 影片連結
+            </p>
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-2">時長 (分鐘)</label>
