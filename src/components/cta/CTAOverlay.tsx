@@ -86,7 +86,7 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => onCTAClick?.(activeCTA)}
-          className="block w-full text-center bg-white text-red-600 font-bold text-lg py-3 px-6 rounded-lg hover:bg-gray-100 transition-colors shadow-md"
+          className="block w-full text-center bg-white text-red-600 font-bold text-lg py-3 px-6 rounded-lg hover:bg-neutral-100 transition-colors shadow-md"
         >
           {activeCTA.buttonText}
         </a>

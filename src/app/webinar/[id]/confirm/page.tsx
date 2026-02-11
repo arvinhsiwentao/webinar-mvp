@@ -100,16 +100,16 @@ export default function ConfirmPage() {
         <div className="space-y-4 mb-8">
           <div className="flex gap-3">
             <a href={getGoogleCalendarUrl()} target="_blank" rel="noopener noreferrer"
-               className="flex-1 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700 rounded-xl p-4 text-center transition-colors">
+               className="flex-1 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700 rounded-lg p-4 text-center transition-colors">
               📅 Google 日曆
             </a>
             <button onClick={handleDownloadICS}
-              className="flex-1 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700 rounded-xl p-4 text-center transition-colors">
+              className="flex-1 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700 rounded-lg p-4 text-center transition-colors">
               📅 iCal 下載
             </button>
           </div>
 
-          <div className="flex items-center gap-4 p-4 bg-neutral-800/50 rounded-xl border border-neutral-700 text-left">
+          <div className="flex items-center gap-4 p-4 bg-neutral-800/50 rounded-lg border border-neutral-700 text-left">
             <div className="w-10 h-10 rounded-full bg-[#C9A962]/20 flex items-center justify-center flex-shrink-0">
               <span>📧</span>
             </div>

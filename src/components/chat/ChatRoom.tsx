@@ -114,9 +114,9 @@ export default function ChatRoom({
   );
 
   return (
-    <div className="flex flex-col h-full bg-gray-900 text-white rounded-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-neutral-900 text-white rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-700 bg-gray-800">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-neutral-700 bg-neutral-800">
         <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
         <span className="text-sm font-semibold">Live Chat</span>
       </div>
@@ -124,34 +124,34 @@ export default function ChatRoom({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2">
         {messages.length === 0 && (
-          <p className="text-gray-500 text-sm text-center mt-8">
+          <p className="text-neutral-500 text-sm text-center mt-8">
             Chat messages will appear here...
           </p>
         )}
         {messages.map((msg) => (
           <div key={msg.id} className="text-sm">
-            <span className="text-gray-400 text-xs mr-2">{formatTime(msg.timestamp)}</span>
-            <span className="font-semibold text-blue-400">{msg.name}</span>
-            <span className="text-gray-300 ml-1">{msg.message}</span>
+            <span className="text-neutral-500 text-xs mr-2">{formatTime(msg.timestamp)}</span>
+            <span className="font-semibold text-[#C9A962]">{msg.name}</span>
+            <span className="text-neutral-300 ml-1">{msg.message}</span>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="flex items-center gap-2 px-4 py-3 border-t border-gray-700 bg-gray-800">
+      <div className="flex items-center gap-2 px-4 py-3 border-t border-neutral-700 bg-neutral-800">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type a message..."
-          className="flex-1 bg-gray-700 text-white text-sm px-3 py-2 rounded-md outline-none placeholder-gray-400 focus:ring-1 focus:ring-blue-500"
+          className="flex-1 bg-neutral-700 text-white text-sm px-3 py-2 rounded-md outline-none placeholder-neutral-500 focus:ring-1 focus:ring-[#C9A962]"
           maxLength={200}
         />
         <button
           onClick={handleSend}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition-colors"
+          className="bg-[#C9A962] hover:bg-[#D4BA7A] text-neutral-950 text-sm px-4 py-2 rounded-md transition-colors"
         >
           Send
         </button>

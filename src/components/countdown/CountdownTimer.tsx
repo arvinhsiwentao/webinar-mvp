@@ -85,16 +85,16 @@ export default function CountdownTimer({
     if (variant === 'minimal') {
       return {
         container: 'bg-transparent',
-        number: 'bg-gray-800 text-white',
-        label: 'text-gray-500',
-        separator: 'text-gray-600',
+        number: 'bg-neutral-800 text-white',
+        label: 'text-neutral-500',
+        separator: 'text-neutral-600',
       };
     }
     return {
-      container: 'bg-gray-800/50 backdrop-blur',
-      number: 'bg-gray-900 text-white',
-      label: 'text-gray-500',
-      separator: 'text-gray-600',
+      container: 'bg-neutral-800/50 backdrop-blur',
+      number: 'bg-neutral-900 text-white',
+      label: 'text-neutral-500',
+      separator: 'text-neutral-600',
     };
   };
 
@@ -103,7 +103,7 @@ export default function CountdownTimer({
   // If time is up
   if (timeLeft.totalSeconds <= 0) {
     return (
-      <div className={`rounded-xl p-4 ${classes.container}`}>
+      <div className={`rounded-lg p-4 ${classes.container}`}>
         <div className="text-center">
           <span className={`font-bold ${sizeClasses[size]} text-green-400 animate-pulse`}>
             🎬 直播進行中！
@@ -129,7 +129,7 @@ export default function CountdownTimer({
   );
 
   return (
-    <div className={`rounded-xl p-4 ${classes.container} ${isUrgent ? 'animate-pulse' : ''}`}>
+    <div className={`rounded-lg p-4 ${classes.container} ${isUrgent ? 'animate-pulse' : ''}`}>
       {/* Urgent badge */}
       {isUrgent && (
         <div className="text-center mb-3">

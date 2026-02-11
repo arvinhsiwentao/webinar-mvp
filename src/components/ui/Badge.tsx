@@ -12,14 +12,14 @@ interface BadgeProps {
 export default function Badge({ children, variant = 'gold', pulse = false, className }: BadgeProps) {
   const variants = {
     live: 'bg-red-600 text-white',
-    gold: 'bg-gradient-to-r from-amber-500/20 to-yellow-600/20 text-amber-400 border border-amber-500/30',
-    success: 'bg-green-500/20 text-green-400 border border-green-500/30',
-    warning: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
+    gold: 'bg-[#C9A962]/15 text-[#C9A962] border border-[#C9A962]/25',
+    success: 'bg-green-500/15 text-green-400 border border-green-500/25',
+    warning: 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/25',
   };
 
   return (
     <span className={cn(
-      'inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium',
+      'inline-flex items-center gap-2 px-4 py-1.5 rounded-[4px] text-sm font-medium',
       variants[variant],
       className
     )}>

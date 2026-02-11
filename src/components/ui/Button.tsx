@@ -11,13 +11,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', loading, children, disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed';
-    
+    const baseStyles = 'inline-flex items-center justify-center gap-2 font-semibold rounded-[4px] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed';
+
     const variants = {
-      primary: 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg shadow-blue-600/30',
-      secondary: 'bg-gray-800 text-white border border-gray-700 hover:bg-gray-700',
-      ghost: 'bg-transparent text-gray-400 hover:text-white hover:bg-gray-800',
-      gold: 'bg-gradient-to-r from-amber-500 to-yellow-600 text-black font-bold hover:from-amber-600 hover:to-yellow-700 shadow-lg shadow-amber-500/30',
+      primary: 'bg-[#C9A962] text-neutral-950 hover:bg-[#D4BA7A] shadow-lg shadow-[#C9A962]/20',
+      secondary: 'bg-neutral-800 text-white border border-neutral-700 hover:border-neutral-500 hover:bg-neutral-700',
+      ghost: 'bg-transparent text-neutral-400 hover:text-white hover:bg-neutral-800/50',
+      gold: 'bg-[#C9A962] text-neutral-950 font-bold hover:bg-[#D4BA7A] shadow-lg shadow-[#C9A962]/25',
     };
 
     const sizes = {
