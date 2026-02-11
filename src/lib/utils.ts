@@ -98,7 +98,7 @@ export function isYouTubeUrl(url: string): boolean {
     const parsed = new URL(url);
     const host = parsed.hostname.replace('www.', '');
     if (host === 'youtube.com' || host === 'm.youtube.com') {
-      return parsed.pathname === '/watch' && parsed.searchParams.has('v')
+      return (parsed.pathname === '/watch' && parsed.searchParams.has('v'))
         || parsed.pathname.startsWith('/embed/');
     }
     if (host === 'youtu.be') {

@@ -50,9 +50,9 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent }: 
       autoplay: autoPlay,
       preload: 'auto',
       fluid: true,
-      playbackRates: [],
+      playbackRates: [], // no speed options
       controlBar: {
-        progressControl: false,
+        progressControl: false, // disable seeking via progress bar
         remainingTimeDisplay: false,
         playbackRateMenuButton: false,
       },
@@ -83,6 +83,7 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent }: 
     });
 
     // Prevent seeking by monitoring time changes
+    // Allow time to advance naturally (forward within 2s tolerance) but block skipping ahead
     let allowedTime = 0;
     player.on('timeupdate', () => {
       const current = player.currentTime() ?? 0;
@@ -91,6 +92,7 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent }: 
       } else if (current > allowedTime) {
         allowedTime = current;
       }
+      // Also block rewinding — keep the user moving forward only
       if (current < allowedTime - 1) {
         player.currentTime(allowedTime);
       }
