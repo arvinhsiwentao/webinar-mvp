@@ -106,11 +106,19 @@ export default function LiveRoomPage() {
       if (event.type === 'play') {
         setIsPlaying(true);
       }
-      if (event.type === 'pause' || event.type === 'ended') {
+      if (event.type === 'pause') {
         setIsPlaying(false);
       }
+      if (event.type === 'ended') {
+        setIsPlaying(false);
+        track('webinar_leave', { webinarId, reason: 'ended' });
+        // Redirect to end page after short delay
+        setTimeout(() => {
+          router.push(`/webinar/${webinarId}/end?session=${session?.id}&name=${encodeURIComponent(userName)}`);
+        }, 2000);
+      }
     },
-    [webinarId]
+    [webinarId, router, session, userName]
   );
 
   // Handle user chat messages
