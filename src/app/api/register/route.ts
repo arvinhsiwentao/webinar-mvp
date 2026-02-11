@@ -66,6 +66,25 @@ export async function POST(request: NextRequest) {
     const emailData = confirmationEmail(body.name, webinar.title, session!.startTime, liveUrl);
     sendEmail({ ...emailData, to: body.email }); // fire and forget, don't await
 
+    // Fire webhook if configured
+    if (webinar.webhookUrl) {
+      fetch(webinar.webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'registration',
+          webinar: { id: webinar.id, title: webinar.title },
+          registration: {
+            name: body.name,
+            email: body.email,
+            phone: body.phone,
+            sessionId: body.sessionId,
+            registeredAt: new Date().toISOString(),
+          },
+        }),
+      }).catch(() => { /* silent fail */ });
+    }
+
     return NextResponse.json({ registration }, { status: 201 });
   } catch (error) {
     console.error('Error creating registration:', error);

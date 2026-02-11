@@ -367,6 +367,7 @@ function WebinarForm({
     highlights: webinar?.highlights?.join('\n') || '',
     viewerBaseCount: webinar?.viewerBaseCount || 100,
     viewerMultiplier: webinar?.viewerMultiplier || 3,
+    webhookUrl: webinar?.webhookUrl || '',
     status: webinar?.status || 'draft',
   });
 
@@ -793,6 +794,22 @@ function WebinarForm({
               className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
             />
           </div>
+        </div>
+      </section>
+
+      {/* Webhook Integration */}
+      <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+        <h2 className="text-lg font-semibold mb-4">Webhook 整合</h2>
+        <div>
+          <label className="block text-sm text-gray-400 mb-2">Webhook URL</label>
+          <input
+            type="url"
+            value={formData.webhookUrl}
+            onChange={(e) => setFormData({ ...formData, webhookUrl: e.target.value })}
+            placeholder="https://hooks.zapier.com/... 或 CRM webhook URL"
+            className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+          />
+          <p className="text-gray-500 text-xs mt-2">報名時自動 POST 資料到此 URL（適用於 Zapier、CRM 等）</p>
         </div>
       </section>
 

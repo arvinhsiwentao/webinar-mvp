@@ -41,6 +41,7 @@ export interface Webinar {
   status: 'draft' | 'published' | 'ended';
   viewerBaseCount: number;
   viewerMultiplier: number;
+  webhookUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -82,6 +83,7 @@ export interface CreateWebinarRequest {
   ctaEvents?: Omit<CTAEvent, 'id'>[];
   viewerBaseCount?: number;
   viewerMultiplier?: number;
+  webhookUrl?: string;
 }
 
 export interface RegisterRequest {
