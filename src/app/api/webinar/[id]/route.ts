@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getWebinarById, updateWebinar, deleteWebinar, initializeSampleData, getRegistrationsByWebinar } from '@/lib/db';
+import { getWebinarById, updateWebinar, deleteWebinar, generateId, initializeSampleData, getRegistrationsByWebinar } from '@/lib/db';
+import { Session, AutoChatMessage, CTAEvent } from '@/lib/types';
 
 // Initialize sample data
 let initialized = false;
@@ -34,6 +35,27 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
+
+    // Ensure sessions, autoChat, and ctaEvents have IDs (like POST does)
+    if (body.sessions) {
+      body.sessions = body.sessions.map((s: Partial<Session>) => ({
+        ...s,
+        id: s.id || generateId(),
+        status: s.status || 'scheduled',
+      }));
+    }
+    if (body.autoChat) {
+      body.autoChat = body.autoChat.map((m: Partial<AutoChatMessage>) => ({
+        ...m,
+        id: m.id || generateId(),
+      }));
+    }
+    if (body.ctaEvents) {
+      body.ctaEvents = body.ctaEvents.map((c: Partial<CTAEvent>) => ({
+        ...c,
+        id: c.id || generateId(),
+      }));
+    }
 
     const webinar = updateWebinar(id, body);
 
