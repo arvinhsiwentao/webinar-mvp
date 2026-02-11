@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getChatMessages, addChatMessage, getWebinarById } from '@/lib/db';
+import { chatBroker } from '@/lib/chat-broker';
 
 export async function GET(
   request: NextRequest,
@@ -60,6 +61,12 @@ export async function POST(
       message,
       timestamp: timestamp || 0,
     });
+
+    const channel = `webinar-${id}`;
+    chatBroker.publish(channel, JSON.stringify({
+      type: 'message',
+      message: newMessage,
+    }));
 
     return NextResponse.json({ message: newMessage }, { status: 201 });
   } catch (error) {
