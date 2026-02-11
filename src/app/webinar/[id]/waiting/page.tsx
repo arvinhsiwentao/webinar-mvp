@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
 import { Button, Badge, Card } from '@/components/ui';
@@ -46,7 +46,7 @@ export default function WaitingPage() {
       const startTime = new Date(session.startTime).getTime();
       const now = Date.now();
       const minutesUntilStart = (startTime - now) / (1000 * 60);
-      setCanEnter(minutesUntilStart <= 10);
+      setCanEnter(minutesUntilStart <= 30);
     };
 
     checkCanEnter();
@@ -54,21 +54,25 @@ export default function WaitingPage() {
     return () => clearInterval(interval);
   }, [session]);
 
+  const handleCountdownComplete = useCallback(() => {
+    router.push(`/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}`);
+  }, [router, webinarId, sessionId, userName]);
+
   const handleEnterLive = () => {
     router.push(`/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}`);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#030303] flex items-center justify-center">
-        <div className="w-12 h-12 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+        <div className="w-12 h-12 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!webinar || !session) {
     return (
-      <div className="min-h-screen bg-[#030303] flex items-center justify-center text-white">
+      <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-white">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">找不到研討會</h1>
           <Button variant="ghost" onClick={() => router.push('/')}>
@@ -80,24 +84,21 @@ export default function WaitingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white flex items-center justify-center px-6">
-      {/* Grain Overlay */}
-      <div className="grain-overlay" />
-      
+    <div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center px-6">
       {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-amber-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#C9A962]/5 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 max-w-2xl w-full text-center">
         {/* Speaker Image */}
         {webinar.speakerImage && (
           <div className="relative w-32 h-32 mx-auto mb-8">
-            <div className="absolute inset-0 bg-amber-500/20 rounded-full blur-xl" />
+            <div className="absolute inset-0 bg-[#C9A962]/20 rounded-full blur-xl" />
             <img
               src={webinar.speakerImage}
               alt={webinar.speakerName}
-              className="relative w-full h-full rounded-full object-cover border-2 border-amber-500/30"
+              className="relative w-full h-full rounded-full object-cover border-2 border-[#C9A962]/30"
             />
           </div>
         )}
@@ -108,22 +109,23 @@ export default function WaitingPage() {
           {webinar.title}
         </h1>
 
-        <p className="text-gray-400 text-lg mb-2">
+        <p className="text-neutral-400 text-lg mb-2">
           講者：{webinar.speakerName}
         </p>
 
-        <p className="text-gray-500 mb-12">
+        <p className="text-neutral-500 mb-12">
           歡迎，{userName}！直播即將開始
         </p>
 
         {/* Countdown */}
-        <Card className="p-8 mb-8 border-amber-500/20">
-          <p className="text-gray-400 mb-4">距離直播開始</p>
+        <Card className="p-8 mb-8 border-[#C9A962]/20">
+          <p className="text-neutral-400 mb-4">距離直播開始</p>
           <CountdownTimer
             targetTime={session.startTime}
             size="lg"
             showDays={true}
             showLabels={true}
+            onComplete={handleCountdownComplete}
           />
         </Card>
 
@@ -143,7 +145,7 @@ export default function WaitingPage() {
               </svg>
             </>
           ) : (
-            '直播開始前 10 分鐘可進入'
+            '直播開始前 30 分鐘可進入'
           )}
         </Button>
 
@@ -160,10 +162,10 @@ export default function WaitingPage() {
 
 function Tip({ icon, title, desc }: { icon: string; title: string; desc: string }) {
   return (
-    <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4 text-left">
+    <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-4 text-left">
       <span className="text-2xl mb-2 block">{icon}</span>
       <p className="font-medium text-white text-sm">{title}</p>
-      <p className="text-gray-500 text-xs">{desc}</p>
+      <p className="text-neutral-500 text-xs">{desc}</p>
     </div>
   );
 }
