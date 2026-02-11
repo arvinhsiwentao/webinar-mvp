@@ -1,0 +1,25 @@
+[
+  {
+    "event": "page_view",
+    "properties": {
+      "page": "landing",
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-11T03:18:20.175Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-11T07:27:27.720Z"
+  },
+  {
+    "event": "page_view",
+    "properties": {
+      "page": "landing",
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-11T07:43:07.411Z"
+  }
+]
