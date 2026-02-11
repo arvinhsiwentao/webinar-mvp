@@ -8,7 +8,7 @@
 - Backend: Next.js API Routes
 - Realtime: Socket.io
 - Video: Video.js + HLS.js
-- Database: SQLite (MVP) → PostgreSQL (production)
+- Database: JSON files (MVP) → PostgreSQL (production)
 
 ## MVP 範圍 (4-6 週)
 1. 影片播放（無快轉）

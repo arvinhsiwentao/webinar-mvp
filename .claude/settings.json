@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/doc-update-check.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Review this session. Did Claude make structural changes (new/renamed routes, changed data models in types.ts, added/modified API endpoints, created new components, changed db.ts, modified config)? If yes AND docs/architecture.md was NOT updated, respond {\"decision\": \"block\", \"reason\": \"Structural changes detected but docs/architecture.md was not updated. Please update the relevant section.\"}. If changes were cosmetic/internal or docs were already updated, respond {\"decision\": \"allow\"}. If stop_hook_active appears in context, always respond {\"decision\": \"allow\"} to prevent loops.",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
