@@ -195,13 +195,13 @@ function WebinarList({
               <Link
                 href={`/webinar/${webinar.id}`}
                 target="_blank"
-                className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded transition-colors text-center"
+                className="bg-[#C9A962] hover:bg-[#C9A962]/90 text-neutral-950 text-sm px-4 py-2 rounded transition-colors text-center"
               >
                 👁️ 預覽
               </Link>
               <button
                 onClick={() => onEdit(webinar)}
-                className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-4 py-2 rounded transition-colors"
+                className="bg-neutral-700 hover:bg-neutral-600 text-white text-sm px-4 py-2 rounded transition-colors"
               >
                 ✏️ 編輯
               </button>
@@ -238,6 +238,8 @@ function WebinarForm({
     thumbnailUrl: webinar?.thumbnailUrl || '',
     duration: webinar?.duration || 60,
     highlights: webinar?.highlights?.join('\n') || '',
+    viewerBaseCount: webinar?.viewerBaseCount || 100,
+    viewerMultiplier: webinar?.viewerMultiplier || 3,
     status: webinar?.status || 'draft',
   });
 
@@ -641,6 +643,32 @@ function WebinarForm({
         </div>
       </section>
 
+      {/* Viewer Count Config */}
+      <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+        <h2 className="text-lg font-semibold mb-4">社會證明設定</h2>
+        <p className="text-neutral-500 text-sm mb-4">顯示人數 = (實際人數 × 倍率) + 基礎人數 ± 5%</p>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-neutral-400 mb-2">基礎人數</label>
+            <input
+              type="number"
+              value={formData.viewerBaseCount}
+              onChange={(e) => setFormData({ ...formData, viewerBaseCount: parseInt(e.target.value) || 100 })}
+              className="w-full bg-neutral-800 text-white px-4 py-2 rounded border border-neutral-700 focus:border-[#C9A962] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-400 mb-2">倍率</label>
+            <input
+              type="number"
+              value={formData.viewerMultiplier}
+              onChange={(e) => setFormData({ ...formData, viewerMultiplier: parseInt(e.target.value) || 3 })}
+              className="w-full bg-neutral-800 text-white px-4 py-2 rounded border border-neutral-700 focus:border-[#C9A962] focus:outline-none"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Status */}
       <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
         <h2 className="text-lg font-semibold mb-4">發布狀態</h2>
@@ -667,7 +695,7 @@ function WebinarForm({
         <button
           type="submit"
           disabled={saving}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="bg-[#C9A962] hover:bg-[#C9A962]/90 text-neutral-950 font-medium px-8 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? '儲存中...' : webinar ? '更新 Webinar' : '建立 Webinar'}
         </button>
