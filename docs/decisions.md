@@ -26,6 +26,12 @@ Tailwind v4 via PostCSS plugin with `@import "tailwindcss"` syntax. Design token
 
 The simulive model requires viewers to watch linearly (no skipping ahead) to maintain the "live" illusion and ensure CTA/chat timing works. VideoPlayer blocks scrubbing, arrow keys, and programmatic seeks. This is intentional, not a bug.
 
+### 2026-02-11: YouTube video support via videojs-youtube plugin
+
+**Decision:** Use `videojs-youtube` Video.js tech plugin instead of raw iframe embed.
+
+**Why:** Preserves the unified Video.js player API so that seeking prevention, `onTimeUpdate` callbacks (for auto-chat and CTA sync), and playback event tracking all continue to work without separate YouTube-specific code paths. The alternative (raw iframe) would have required reimplementing all time-synced features.
+
 ### 2026-02: Self-sustaining documentation system
 
 Added `docs/architecture.md` (living architecture doc) and `docs/decisions.md` (this file). Claude Code hooks (PostToolUse + Stop) automatically remind and enforce documentation updates when structural changes are made. Goal: reduce doc drift without manual discipline.

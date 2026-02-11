@@ -71,6 +71,8 @@ All under `src/app/api/`:
 - `generateICSContent` — calendar file generation
 - `validateEmail`, `validatePhone` — phone expects Taiwan `09xxxxxxxx` format
 - `cn(...classes)` — className join helper (like `clsx`)
+- `isYouTubeUrl(url)` — detects YouTube video URLs (youtube.com, youtu.be, embed)
+- `getVideoSourceType(url)` — returns Video.js MIME type (`video/youtube`, `application/x-mpegURL`, or `video/mp4`)
 
 ## Component Architecture
 
@@ -88,7 +90,7 @@ VideoPlayer.onTimeUpdate(currentTime)
 
 | Component | Source | Role |
 |-----------|--------|------|
-| `VideoPlayer` | `src/components/video/VideoPlayer.tsx` | Video.js + HLS.js player. Dynamically imported (no SSR). **Seeking disabled** — blocks scrubbing, arrow keys, Home/End. Emits `onTimeUpdate`. |
+| `VideoPlayer` | `src/components/video/VideoPlayer.tsx` | Video.js + HLS.js player. **YouTube support** via `videojs-youtube` plugin — detects YouTube URLs and uses YouTube iframe tech under Video.js's unified API. Supports `youtube.com/watch?v=`, `youtu.be/`, and `youtube.com/embed/` formats. Dynamically imported (no SSR). **Seeking disabled** — blocks scrubbing, arrow keys, Home/End. Emits `onTimeUpdate`. |
 | `ChatRoom` | `src/components/chat/ChatRoom.tsx` | Displays auto-chat messages at configured timestamps (with randomized variance). Accepts real user messages via API polling. |
 | `CTAOverlay` | `src/components/cta/CTAOverlay.tsx` | Promotional overlay shown between `showAtSec`–`hideAtSec`. Optional countdown timer. |
 | `CountdownTimer` | `src/components/countdown/CountdownTimer.tsx` | Waiting room countdown to session start time. |
