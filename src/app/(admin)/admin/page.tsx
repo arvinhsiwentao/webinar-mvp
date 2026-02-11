@@ -20,7 +20,7 @@ export default function AdminPage() {
 
   async function fetchWebinars() {
     try {
-      const res = await fetch('/api/webinar');
+      const res = await fetch('/api/admin/webinar');
       const data = await res.json();
       setWebinars(data.webinars || []);
     } catch (err) {
@@ -39,7 +39,7 @@ export default function AdminPage() {
     if (!confirm('確定要刪除此研討會嗎？')) return;
 
     try {
-      await fetch(`/api/webinar/${id}`, { method: 'DELETE' });
+      await fetch(`/api/admin/webinar/${id}`, { method: 'DELETE' });
       setWebinars(webinars.filter(w => w.id !== id));
     } catch (err) {
       console.error('Failed to delete:', err);
@@ -260,7 +260,7 @@ function RegistrationList({ webinars }: { webinars: Webinar[] }) {
       await Promise.all(
         webinars.map(async (w) => {
           try {
-            const res = await fetch(`/api/webinar/${w.id}`);
+            const res = await fetch(`/api/admin/webinar/${w.id}`);
             const data = await res.json();
             map[w.id] = data.registrations || [];
           } catch {
@@ -431,7 +431,7 @@ function WebinarForm({
         })),
       };
 
-      const url = webinar ? `/api/webinar/${webinar.id}` : '/api/webinar';
+      const url = webinar ? `/api/admin/webinar/${webinar.id}` : '/api/admin/webinar';
       const method = webinar ? 'PUT' : 'POST';
 
       const res = await fetch(url, {

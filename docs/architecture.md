@@ -16,15 +16,22 @@ Landing Page  →  Registration  →  Confirm  →  Waiting Room  →  Live Room
                                   (redirect)     (countdown)
 ```
 
+Pages are organized into **route groups** — parenthesized folders that are invisible in the URL but provide independent layouts:
+
+- `(public)/` — Viewer-facing pages (dark cinematic theme)
+- `(admin)/` — Admin dashboard (separate layout, future auth boundary)
+
+Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only `<html>`, `<body>`, and fonts.
+
 | Route | Source File | Purpose |
 |-------|-------------|---------|
-| `/` | `src/app/page.tsx` | Hardcoded landing for webinar ID `1` ("Mike是麥克"). Registration form inline. |
-| `/demo` | `src/app/demo/page.tsx` | Demo/preview page |
-| `/webinar/[id]` | `src/app/webinar/[id]/page.tsx` | Webinar detail / registration entry point |
-| `/webinar/[id]/confirm` | `src/app/webinar/[id]/confirm/page.tsx` | Post-registration confirmation with calendar download |
-| `/webinar/[id]/waiting` | `src/app/webinar/[id]/waiting/page.tsx` | Pre-show countdown timer |
-| `/webinar/[id]/live` | `src/app/webinar/[id]/live/page.tsx` | Live room: video + chat + CTA |
-| `/admin` | `src/app/admin/page.tsx` | Admin panel (no auth in MVP) |
+| `/` | `src/app/(public)/page.tsx` | Hardcoded landing for webinar ID `1` ("Mike是麥克"). Registration form inline. |
+| `/demo` | `src/app/(public)/demo/page.tsx` | Demo/preview page |
+| `/webinar/[id]` | `src/app/(public)/webinar/[id]/page.tsx` | Webinar detail / registration entry point |
+| `/webinar/[id]/confirm` | `src/app/(public)/webinar/[id]/confirm/page.tsx` | Post-registration confirmation with calendar download |
+| `/webinar/[id]/waiting` | `src/app/(public)/webinar/[id]/waiting/page.tsx` | Pre-show countdown timer |
+| `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + chat + CTA |
+| `/admin` | `src/app/(admin)/admin/page.tsx` | Admin panel (no auth in MVP) |
 
 ## Data Architecture
 
@@ -55,14 +62,24 @@ Key functions:
 
 ### API Routes
 
-All under `src/app/api/`:
+Routes are split into **public** (read-only + user actions) and **admin** (write operations) namespaces. This enables future auth middleware via a single matcher on `/api/admin/:path*`.
+
+#### Public Routes (`src/app/api/`)
 
 | Endpoint | Methods | Source File | Notes |
 |----------|---------|-------------|-------|
-| `/api/webinar` | GET, POST | `src/app/api/webinar/route.ts` | List all / create new |
-| `/api/webinar/[id]` | GET, PUT, DELETE | `src/app/api/webinar/[id]/route.ts` | Single webinar CRUD |
+| `/api/webinar` | GET | `src/app/api/webinar/route.ts` | List all webinars |
+| `/api/webinar/[id]` | GET | `src/app/api/webinar/[id]/route.ts` | Single webinar (no registrations) |
 | `/api/webinar/[id]/chat` | GET, POST | `src/app/api/webinar/[id]/chat/route.ts` | GET requires `sessionId` query param |
 | `/api/register` | POST | `src/app/api/register/route.ts` | Checks duplicate email per webinar |
+
+#### Admin Routes (`src/app/api/admin/`)
+
+| Endpoint | Methods | Source File | Notes |
+|----------|---------|-------------|-------|
+| `/api/admin/webinar` | GET, POST | `src/app/api/admin/webinar/route.ts` | List all / create new |
+| `/api/admin/webinar/[id]` | GET, PUT, DELETE | `src/app/api/admin/webinar/[id]/route.ts` | Full CRUD, GET includes registrations |
+| `/api/admin/registrations` | GET | `src/app/api/admin/registrations/route.ts` | List all registrations |
 
 ### Utilities (`src/lib/utils.ts`)
 
