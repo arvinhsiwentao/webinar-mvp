@@ -13,7 +13,8 @@
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "video.js": "^8.23.6"
+    "video.js": "^8.23.6",
+    "videojs-youtube": "^3.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
