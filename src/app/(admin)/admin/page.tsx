@@ -186,9 +186,9 @@ function WebinarList({
 
               {/* Sessions */}
               <div className="flex flex-wrap gap-2 mb-3">
-                {webinar.sessions.map((session: Session) => (
+                {webinar.sessions.map((session: Session, idx: number) => (
                   <span
-                    key={session.id}
+                    key={idx}
                     className="bg-gray-800 text-gray-300 text-xs px-2 py-1 rounded"
                   >
                     📅 {formatDateTime(session.startTime)}
