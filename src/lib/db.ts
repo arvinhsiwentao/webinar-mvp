@@ -197,6 +197,8 @@ export function initializeSampleData(): void {
         showCountdown: true,
       },
     ],
+    viewerBaseCount: 100,
+    viewerMultiplier: 3,
     status: 'published',
   };
 

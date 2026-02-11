@@ -39,6 +39,8 @@ export interface Webinar {
   autoChat: AutoChatMessage[];
   ctaEvents: CTAEvent[];
   status: 'draft' | 'published' | 'ended';
+  viewerBaseCount: number;
+  viewerMultiplier: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -78,6 +80,8 @@ export interface CreateWebinarRequest {
   sessions?: Omit<Session, 'id' | 'status'>[];
   autoChat?: Omit<AutoChatMessage, 'id'>[];
   ctaEvents?: Omit<CTAEvent, 'id'>[];
+  viewerBaseCount?: number;
+  viewerMultiplier?: number;
 }
 
 export interface RegisterRequest {
