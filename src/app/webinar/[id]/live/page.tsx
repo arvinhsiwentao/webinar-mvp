@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import ChatRoom, { ChatMessage } from '@/components/chat/ChatRoom';
@@ -39,7 +39,17 @@ export default function LiveRoomPage() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Viewer count (simulated)
-  const [viewerCount, setViewerCount] = useState(247);
+  const [realViewerCount, setRealViewerCount] = useState(1);
+
+  // Computed viewer count using configurable formula
+  const viewerCount = useMemo(() => {
+    const base = webinar?.viewerBaseCount ?? 100;
+    const multiplier = webinar?.viewerMultiplier ?? 3;
+    const calculated = (realViewerCount * multiplier) + base;
+    const variance = calculated * 0.05; // ±5%
+    const random = (Math.random() * 2 - 1) * variance;
+    return Math.round(calculated + random);
+  }, [realViewerCount, webinar]);
 
   // Tracking milestones
   const trackedMilestones = useRef<Set<number>>(new Set());
@@ -72,11 +82,8 @@ export default function LiveRoomPage() {
     if (!isPlaying) return;
 
     const interval = setInterval(() => {
-      setViewerCount((prev) => {
-        const delta = Math.floor(Math.random() * 10) - 3;
-        return Math.max(200, prev + delta);
-      });
-    }, 3000);
+      setRealViewerCount(prev => Math.max(1, prev + Math.floor(Math.random() * 3) - 1));
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [isPlaying]);
