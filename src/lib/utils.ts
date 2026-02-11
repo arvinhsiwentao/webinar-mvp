@@ -88,3 +88,33 @@ export function validatePhone(phone: string): boolean {
 export function cn(...classes: (string | boolean | undefined)[]): string {
   return classes.filter(Boolean).join(' ');
 }
+
+/**
+ * Detects if a URL is a YouTube video link.
+ * Supports: youtube.com/watch?v=, youtu.be/, youtube.com/embed/
+ */
+export function isYouTubeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace('www.', '');
+    if (host === 'youtube.com' || host === 'm.youtube.com') {
+      return parsed.pathname === '/watch' && parsed.searchParams.has('v')
+        || parsed.pathname.startsWith('/embed/');
+    }
+    if (host === 'youtu.be') {
+      return parsed.pathname.length > 1;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Determines the Video.js source type for a given URL.
+ */
+export function getVideoSourceType(url: string): string {
+  if (isYouTubeUrl(url)) return 'video/youtube';
+  if (url.endsWith('.m3u8')) return 'application/x-mpegURL';
+  return 'video/mp4';
+}
