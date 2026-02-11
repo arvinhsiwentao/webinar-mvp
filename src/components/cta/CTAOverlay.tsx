@@ -12,6 +12,8 @@ export interface CTAOverlayProps {
   ctaEvents: CTAEvent[];
   /** Called when user clicks the CTA button */
   onCTAClick?: (cta: CTAEvent) => void;
+  /** Called when a CTA becomes visible */
+  onCTAView?: (cta: CTAEvent) => void;
 }
 
 function formatCountdown(seconds: number): string {
@@ -21,7 +23,7 @@ function formatCountdown(seconds: number): string {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick }: CTAOverlayProps) {
+export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAView }: CTAOverlayProps) {
   const [activeCTA, setActiveCTA] = useState<CTAEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const prevActive = useRef<CTAEvent | null>(null);
@@ -41,12 +43,13 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick }: CTAOv
       setActiveCTA(matched);
       // Animate in
       if (matched) {
+        onCTAView?.(matched);
         requestAnimationFrame(() => setVisible(true));
       } else {
         setVisible(false);
       }
     }
-  }, [currentTime, ctaEvents]);
+  }, [currentTime, ctaEvents, onCTAView]);
 
   if (!activeCTA) return null;
 

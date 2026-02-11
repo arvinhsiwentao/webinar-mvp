@@ -77,6 +77,7 @@ export default function LandingPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed');
 
+      track('form_submit', { webinarId, sessionId: selectedSession });
       router.push(`/webinar/${webinarId}/confirm?session=${selectedSession}&name=${encodeURIComponent(name)}`);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : '報名失敗，請稍後再試');
