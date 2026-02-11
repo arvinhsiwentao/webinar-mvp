@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Webinar, Session } from '@/lib/types';
 import { formatDateTime, validateEmail } from '@/lib/utils';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
+import { track } from '@/lib/tracking';
 
 export default function LandingPage() {
   const params = useParams();
@@ -19,8 +20,13 @@ export default function LandingPage() {
   const [selectedSession, setSelectedSession] = useState<string>('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+
+  useEffect(() => {
+    track('page_view', { page: 'landing', webinarId });
+  }, [webinarId]);
 
   useEffect(() => {
     async function fetchWebinar() {
@@ -64,6 +70,7 @@ export default function LandingPage() {
           sessionId: selectedSession,
           name: name.trim(),
           email: email.trim(),
+          phone: phone.trim() || undefined,
         }),
       });
 
@@ -118,14 +125,14 @@ export default function LandingPage() {
             <div className="lg:col-span-7 space-y-8">
               {/* Eyebrow */}
               <div className="flex items-center gap-4">
-                <div className="w-12 h-px bg-white/30" />
-                <span className="text-xs tracking-[0.2em] text-neutral-400 uppercase">Live Webinar</span>
+                <div className="w-12 h-px bg-[#C9A962]/50" />
+                <span className="text-xs tracking-[0.2em] text-[#C9A962]/80 uppercase">Live Webinar</span>
               </div>
 
               {/* Title */}
               <h1 className="text-4xl md:text-5xl lg:text-7xl font-light leading-[1.1] tracking-tight">
                 <span className="block">從零開始</span>
-                <span className="block font-semibold">美股財務自由</span>
+                <span className="block font-semibold"><span className="bg-gradient-to-r from-[#C9A962] to-[#C9A962]/0 bg-[length:100%_2px] bg-no-repeat bg-bottom pb-2">美股財務自由</span></span>
               </h1>
 
               {/* Subtitle - asymmetric width */}
@@ -136,11 +143,11 @@ export default function LandingPage() {
               {/* Key Numbers - horizontal, minimal */}
               <div className="flex items-baseline gap-12 pt-4">
                 <div>
-                  <span className="text-5xl font-light">4</span>
+                  <span className="text-5xl font-light text-[#C9A962]">4</span>
                   <span className="text-neutral-500 ml-2">年財務自由</span>
                 </div>
                 <div>
-                  <span className="text-5xl font-light">15</span>
+                  <span className="text-5xl font-light text-[#C9A962]">15</span>
                   <span className="text-neutral-500 ml-1">萬訂閱</span>
                 </div>
               </div>
@@ -149,7 +156,7 @@ export default function LandingPage() {
               <div className="pt-8 flex items-center gap-6">
                 <a 
                   href="#register"
-                  className="group inline-flex items-center gap-3 bg-white text-black px-8 py-4 text-sm font-medium tracking-wide hover:bg-neutral-200 transition-colors"
+                  className="group inline-flex items-center gap-3 bg-[#C9A962] text-neutral-950 px-8 py-4 text-sm font-semibold tracking-wide hover:bg-[#D4BA7A] hover:shadow-[0_0_30px_rgba(201,169,98,0.3)] transition-all"
                 >
                   預約免費席位
                   <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,7 +165,7 @@ export default function LandingPage() {
                 </a>
                 
                 {selectedSessionData && (
-                  <div className="text-sm text-neutral-500">
+                  <div className="text-sm text-[#C9A962]/70">
                     <CountdownTimer 
                       targetTime={selectedSessionData.startTime}
                       size="sm"
@@ -219,7 +226,7 @@ export default function LandingPage() {
             {/* Right - Content */}
             <div className="lg:col-span-8">
               <blockquote className="text-3xl md:text-4xl font-light leading-relaxed text-neutral-200 mb-12">
-                「財務自由不是終點，<br/>是選擇的開始。」
+                <span className="text-[#C9A962]">「</span>財務自由不是終點，<br/>是選擇的開始。<span className="text-[#C9A962]">」</span>
               </blockquote>
               
               <div className="prose prose-lg prose-invert prose-neutral max-w-none">
@@ -231,7 +238,7 @@ export default function LandingPage() {
               {/* Credentials - minimal pills */}
               <div className="flex flex-wrap gap-3 mt-12">
                 {['美國金融背景', '特斯拉早期投資者', '全球旅居'].map((item) => (
-                  <span key={item} className="text-sm text-neutral-400 border border-neutral-800 px-4 py-2">
+                  <span key={item} className="text-sm text-[#C9A962]/70 border border-[#C9A962]/20 px-4 py-2">
                     {item}
                   </span>
                 ))}
@@ -252,8 +259,8 @@ export default function LandingPage() {
             <div className="lg:col-span-9">
               <div className="space-y-0 divide-y divide-neutral-800">
                 {webinar.highlights.map((highlight: string, idx: number) => (
-                  <div key={idx} className="py-8 grid md:grid-cols-12 gap-4 items-start group">
-                    <span className="md:col-span-1 text-neutral-600 text-sm">
+                  <div key={idx} className="py-8 grid md:grid-cols-12 gap-4 items-start group border-l-2 border-transparent hover:border-[#C9A962] transition-colors">
+                    <span className="md:col-span-1 text-[#C9A962]/60 text-sm">
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                     <p className="md:col-span-11 text-xl text-neutral-300 group-hover:text-white transition-colors">
@@ -280,7 +287,7 @@ export default function LandingPage() {
                 className={`
                   w-full p-6 text-left transition-all border
                   ${selectedSession === session.id 
-                    ? 'border-white bg-white/5' 
+                    ? 'border-[#C9A962] bg-[#C9A962]/5'
                     : 'border-neutral-800 hover:border-neutral-600'
                   }
                 `}
@@ -289,10 +296,10 @@ export default function LandingPage() {
                   <div className="flex items-center gap-6">
                     <div className={`
                       w-4 h-4 rounded-full border-2 flex items-center justify-center
-                      ${selectedSession === session.id ? 'border-white' : 'border-neutral-600'}
+                      ${selectedSession === session.id ? 'border-[#C9A962]' : 'border-neutral-600'}
                     `}>
                       {selectedSession === session.id && (
-                        <div className="w-2 h-2 rounded-full bg-white" />
+                        <div className="w-2 h-2 rounded-full bg-[#C9A962]" />
                       )}
                     </div>
                     <div>
@@ -301,7 +308,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   {idx === 0 && (
-                    <span className="text-xs text-neutral-500">最近</span>
+                    <span className="text-xs text-[#C9A962]/60">最近</span>
                   )}
                 </div>
               </button>
@@ -311,10 +318,10 @@ export default function LandingPage() {
       </section>
 
       {/* ========== Register ========== */}
-      <section id="register" className="py-32 px-6 lg:px-12 bg-neutral-900">
+      <section id="register" className="py-32 px-6 lg:px-12 bg-gradient-to-b from-neutral-900 via-neutral-900 to-[#C9A962]/[0.03]">
         <div className="max-w-xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-xs tracking-[0.2em] text-neutral-500 uppercase mb-4">免費報名</p>
+            <p className="text-xs tracking-[0.2em] text-[#C9A962]/70 uppercase mb-4">免費報名</p>
             <h2 className="text-3xl font-light">預約你的席位</h2>
           </div>
 
@@ -325,7 +332,8 @@ export default function LandingPage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-transparent border-b border-neutral-700 py-3 text-white placeholder-neutral-600 focus:border-white focus:outline-none transition-colors"
+                onFocus={() => track('form_start', { webinarId })}
+                className="w-full bg-transparent border-b border-neutral-700 py-3 text-white placeholder-neutral-600 focus:border-[#C9A962] focus:outline-none transition-colors"
                 placeholder="你的名字"
                 required
               />
@@ -337,9 +345,20 @@ export default function LandingPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-transparent border-b border-neutral-700 py-3 text-white placeholder-neutral-600 focus:border-white focus:outline-none transition-colors"
+                className="w-full bg-transparent border-b border-neutral-700 py-3 text-white placeholder-neutral-600 focus:border-[#C9A962] focus:outline-none transition-colors"
                 placeholder="your@email.com"
                 required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-neutral-400 mb-2">手機號碼（選填）</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full bg-transparent border-b border-neutral-700 py-3 text-white placeholder-neutral-600 focus:border-[#C9A962] focus:outline-none transition-colors"
+                placeholder="0912345678"
               />
             </div>
 
@@ -350,7 +369,7 @@ export default function LandingPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-white text-black py-4 font-medium tracking-wide hover:bg-neutral-200 transition-colors disabled:opacity-50 mt-8"
+              className="w-full bg-[#C9A962] text-neutral-950 py-4 font-semibold tracking-wide hover:bg-[#D4BA7A] hover:shadow-[0_0_30px_rgba(201,169,98,0.3)] transition-all disabled:opacity-50 mt-8"
             >
               {submitting ? '處理中...' : '確認報名'}
             </button>
@@ -363,7 +382,7 @@ export default function LandingPage() {
       </section>
 
       {/* ========== Footer ========== */}
-      <footer className="py-12 px-6 border-t border-neutral-800">
+      <footer className="py-12 px-6 border-t border-[#C9A962]/10">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-neutral-500">
           <span>{webinar.speakerName}</span>
           <span>© 2026</span>
