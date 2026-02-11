@@ -61,6 +61,8 @@ export async function POST(request: NextRequest) {
       autoChat,
       ctaEvents,
       status: 'draft',
+      viewerBaseCount: body.viewerBaseCount ?? 100,
+      viewerMultiplier: body.viewerMultiplier ?? 1.5,
     });
 
     return NextResponse.json({ webinar }, { status: 201 });

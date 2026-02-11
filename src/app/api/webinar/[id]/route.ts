@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getWebinarById, updateWebinar, deleteWebinar, initializeSampleData } from '@/lib/db';
+import { getWebinarById, updateWebinar, deleteWebinar, initializeSampleData, getRegistrationsByWebinar } from '@/lib/db';
 
 // Initialize sample data
 let initialized = false;
@@ -23,7 +23,8 @@ export async function GET(
     );
   }
 
-  return NextResponse.json({ webinar });
+  const registrations = getRegistrationsByWebinar(id);
+  return NextResponse.json({ webinar, registrations });
 }
 
 export async function PUT(
