@@ -276,6 +276,8 @@ export default function LiveRoomPage() {
                 autoMessages={webinar.autoChat}
                 timeVariance={3}
                 userName={userName}
+                webinarId={webinarId}
+                sessionId={session?.id}
                 onSendMessage={handleSendMessage}
               />
             </div>

@@ -27,6 +27,10 @@ export interface ChatRoomProps {
   userName?: string;
   /** Called when user sends a message */
   onSendMessage?: (message: ChatMessage) => void;
+  /** Webinar ID for real-time SSE chat subscription */
+  webinarId?: string;
+  /** Session ID for the current viewer session */
+  sessionId?: string;
 }
 
 function formatTime(seconds: number): string {
@@ -46,6 +50,8 @@ export default function ChatRoom({
   timeVariance = 5,
   userName = 'Anonymous',
   onSendMessage,
+  webinarId,
+  sessionId,
 }: ChatRoomProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -88,6 +94,34 @@ export default function ChatRoom({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Subscribe to real-time chat messages via SSE
+  useEffect(() => {
+    if (!webinarId) return;
+
+    const eventSource = new EventSource(`/api/webinar/${webinarId}/chat/stream`);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'message') {
+          const msg = data.message;
+          setMessages(prev => {
+            // Deduplicate by id
+            if (prev.some(m => m.id === msg.id)) return prev;
+            return [...prev, {
+              id: msg.id,
+              name: msg.name,
+              message: msg.message,
+              timestamp: msg.timestamp,
+            }];
+          });
+        }
+      } catch { /* ignore parse errors */ }
+    };
+
+    return () => eventSource.close();
+  }, [webinarId]);
 
   const handleSend = useCallback(() => {
     const text = input.trim();
