@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRegistration, getRegistrationByEmail, getWebinarById } from '@/lib/db';
 import { RegisterRequest } from '@/lib/types';
 import { validateEmail } from '@/lib/utils';
+import { sendEmail, confirmationEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -58,6 +59,12 @@ export async function POST(request: NextRequest) {
       email: body.email,
       phone: body.phone,
     });
+
+    // Send confirmation email (fire and forget)
+    const origin = request.nextUrl.origin;
+    const liveUrl = `${origin}/webinar/${body.webinarId}/waiting?session=${body.sessionId}&name=${encodeURIComponent(body.name)}`;
+    const emailData = confirmationEmail(body.name, webinar.title, session!.startTime, liveUrl);
+    sendEmail({ ...emailData, to: body.email }); // fire and forget, don't await
 
     return NextResponse.json({ registration }, { status: 201 });
   } catch (error) {

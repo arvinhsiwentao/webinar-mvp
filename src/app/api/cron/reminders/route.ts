@@ -1,0 +1,35 @@
+import { NextResponse } from 'next/server';
+import { getAllWebinars, getRegistrationsByWebinar } from '@/lib/db';
+import { sendEmail, reminderEmail } from '@/lib/email';
+
+export async function GET() {
+  const webinars = getAllWebinars();
+  let sent = 0;
+
+  for (const webinar of webinars) {
+    if (webinar.status !== 'published') continue;
+
+    for (const session of webinar.sessions) {
+      const startTime = new Date(session.startTime).getTime();
+      const now = Date.now();
+      const hoursUntil = (startTime - now) / (1000 * 60 * 60);
+
+      let type: '24h' | '1h' | null = null;
+      if (hoursUntil > 23 && hoursUntil <= 25) type = '24h';
+      if (hoursUntil > 0.5 && hoursUntil <= 1.5) type = '1h';
+
+      if (!type) continue;
+
+      const registrations = getRegistrationsByWebinar(webinar.id);
+      for (const reg of registrations) {
+        if (reg.sessionId !== session.id) continue;
+        const liveUrl = `/webinar/${webinar.id}/waiting?session=${session.id}&name=${encodeURIComponent(reg.name)}`;
+        const emailData = reminderEmail(type, reg.name, webinar.title, liveUrl);
+        await sendEmail({ ...emailData, to: reg.email });
+        sent++;
+      }
+    }
+  }
+
+  return NextResponse.json({ sent });
+}
