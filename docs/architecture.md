@@ -25,12 +25,13 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 
 | Route | Source File | Purpose |
 |-------|-------------|---------|
-| `/` | `src/app/(public)/page.tsx` | Hardcoded landing for webinar ID `1` ("Mike是麥克"). Registration form inline. |
+| `/` | `src/app/(public)/page.tsx` | Hardcoded landing for webinar ID `1` ("Mike是麥克"). Modal registration. Sections: Hero → Credibility → Problem → Benefits → Urgency. |
 | `/demo` | `src/app/(public)/demo/page.tsx` | Demo/preview page |
 | `/webinar/[id]` | `src/app/(public)/webinar/[id]/page.tsx` | Webinar detail / registration entry point |
-| `/webinar/[id]/confirm` | `src/app/(public)/webinar/[id]/confirm/page.tsx` | Post-registration confirmation with calendar download |
-| `/webinar/[id]/waiting` | `src/app/(public)/webinar/[id]/waiting/page.tsx` | Pre-show countdown timer |
-| `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + chat + CTA |
+| `/webinar/[id]/confirm` | `src/app/(public)/webinar/[id]/confirm/page.tsx` | Post-registration confirmation with confetti, calendar download, promo image, auto-redirect |
+| `/webinar/[id]/waiting` | `src/app/(public)/webinar/[id]/waiting/page.tsx` | Pre-show countdown timer with promo banner and calendar buttons |
+| `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + 4-tab sidebar (Info/Viewers/Chat/Offers) + on-video CTA |
+| `/webinar/[id]/end` | `src/app/(public)/webinar/[id]/end/page.tsx` | Dark sales page with purple CTA, social sharing, replay link |
 | `/admin` | `src/app/(admin)/admin/page.tsx` | Admin panel (no auth in MVP) |
 
 ## Data Architecture
@@ -39,10 +40,10 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 
 | Interface | Key Fields | Notes |
 |-----------|-----------|-------|
-| `Webinar` | `id`, `title`, `videoUrl`, `duration`, `sessions[]`, `autoChat[]`, `ctaEvents[]`, `status` | Top-level entity. Embeds sessions, auto-chat, and CTA arrays inline. |
+| `Webinar` | `id`, `title`, `videoUrl`, `duration`, `sessions[]`, `autoChat[]`, `ctaEvents[]`, `status`, `heroImageUrl?`, `promoImageUrl?`, `disclaimerText?`, `endPageSalesCopy?`, `endPageCtaText?`, `endPageCtaUrl?`, `endPageCtaColor?`, `sidebarDescription?` | Top-level entity. Embeds sessions, auto-chat, and CTA arrays inline. Extended with landing/end/sidebar fields. |
 | `Session` | `id`, `startTime`, `status` | Scheduled broadcast slot within a webinar. |
 | `AutoChatMessage` | `id`, `timeSec`, `name`, `message` | Bot message triggered at video timestamp. |
-| `CTAEvent` | `id`, `showAtSec`, `hideAtSec`, `buttonText`, `url`, `showCountdown` | Promotional overlay with optional countdown. |
+| `CTAEvent` | `id`, `showAtSec`, `hideAtSec`, `buttonText`, `url`, `showCountdown`, `position?`, `color?`, `secondaryText?` | Promotional overlay with optional countdown. Supports on-video or below-video positioning. |
 | `Registration` | `id`, `webinarId`, `sessionId`, `name`, `email`, `phone?` | One per email per webinar (duplicate check). |
 | `ChatMessageData` | `id`, `webinarId`, `sessionId`, `name`, `message`, `timestamp`, `createdAt` | Real user chat message. |
 
@@ -108,9 +109,17 @@ VideoPlayer.onTimeUpdate(currentTime)
 | Component | Source | Role |
 |-----------|--------|------|
 | `VideoPlayer` | `src/components/video/VideoPlayer.tsx` | Video.js + HLS.js player. **YouTube support** via `videojs-youtube` plugin — detects YouTube URLs and uses YouTube iframe tech under Video.js's unified API. Supports `youtube.com/watch?v=`, `youtu.be/`, and `youtube.com/embed/` formats. Dynamically imported (no SSR). **Seeking disabled** — blocks scrubbing, arrow keys, Home/End. Emits `onTimeUpdate`. |
-| `ChatRoom` | `src/components/chat/ChatRoom.tsx` | Displays auto-chat messages at configured timestamps (with randomized variance). Accepts real user messages via API polling. |
-| `CTAOverlay` | `src/components/cta/CTAOverlay.tsx` | Promotional overlay shown between `showAtSec`–`hideAtSec`. Optional countdown timer. |
-| `CountdownTimer` | `src/components/countdown/CountdownTimer.tsx` | Waiting room countdown to session start time. |
+| `ChatRoom` | `src/components/chat/ChatRoom.tsx` | Displays auto-chat messages at configured timestamps (with randomized variance). Accepts real user messages via API polling. 65-message 7-phase sales funnel. |
+| `CTAOverlay` | `src/components/cta/CTAOverlay.tsx` | Promotional overlay with `position` support (`on_video`/`below_video`), configurable `color`, and `secondaryText`. |
+| `CountdownTimer` | `src/components/countdown/CountdownTimer.tsx` | Countdown to session start time with `onComplete` callback. |
+| `RegistrationModal` | `src/components/registration/RegistrationModal.tsx` | Full-screen modal overlay for registration. Triggered by landing page CTAs. |
+| `DateCards` | `src/components/registration/DateCards.tsx` | Calendar-style date cards showing available session dates (display-only). |
+| `SidebarTabs` | `src/components/sidebar/SidebarTabs.tsx` | 4-tab container (Info/Viewers/Chat/Offers) for live room sidebar. Dark theme. |
+| `InfoTab` | `src/components/sidebar/InfoTab.tsx` | Webinar info tab: promo image, speaker info, description. |
+| `ViewersTab` | `src/components/sidebar/ViewersTab.tsx` | Simulated viewer list with host badge and randomized names. |
+| `OffersTab` | `src/components/sidebar/OffersTab.tsx` | Time-based offer cards that activate with CTA events. |
+| `JoinOverlay` | `src/components/live/JoinOverlay.tsx` | Pre-playback overlay: "connecting..." → "ready to join" transition. |
+| `BottomBar` | `src/components/live/BottomBar.tsx` | Fixed bottom bar: title, date, LIVE badge, viewer count. |
 
 ### UI Library (`src/components/ui/`)
 
@@ -159,7 +168,6 @@ Modules defined in SPEC.md but **not yet implemented**:
 - **Polls / Q&A** — Interactive engagement features
 - **Email reminders** — Pre-webinar notification system
 - **Advanced admin** — Full CRUD dashboard, analytics, session management
-- **Viewer count simulation** — Fake concurrent viewer display
-- **Social sharing** — Share buttons and OG tags
+- **Social sharing OG tags** — Share buttons added to end page, but OG meta tags not yet implemented
 - **Multi-language support** — Currently zh-CN only, no language switcher
 - **Recording/replay** — Post-live replay functionality
