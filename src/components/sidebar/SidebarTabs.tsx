@@ -1,0 +1,55 @@
+'use client';
+
+import { useState, ReactNode } from 'react';
+
+interface Tab {
+  id: string;
+  icon: ReactNode;
+  label: string;
+  content: ReactNode;
+  badge?: number;
+}
+
+interface SidebarTabsProps {
+  tabs: Tab[];
+  defaultTab?: string;
+}
+
+export default function SidebarTabs({ tabs, defaultTab }: SidebarTabsProps) {
+  const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id || '');
+
+  const activeContent = tabs.find(t => t.id === activeTab)?.content;
+
+  return (
+    <div className="flex flex-col h-full bg-neutral-800 rounded-lg overflow-hidden">
+      {/* Tab bar */}
+      <div className="flex border-b border-neutral-700">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm transition-colors relative ${
+              activeTab === tab.id
+                ? 'text-[#B8953F] border-b-2 border-[#B8953F]'
+                : 'text-neutral-400 hover:text-neutral-200'
+            }`}
+            title={tab.label}
+          >
+            {tab.icon}
+            <span className="hidden sm:inline text-xs">{tab.label}</span>
+            {tab.badge && tab.badge > 0 && (
+              <span className="absolute top-1.5 right-2 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                {tab.badge > 99 ? '99+' : tab.badge}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      <div className="flex-1 overflow-hidden">
+        {activeContent}
+      </div>
+    </div>
+  );
+}
