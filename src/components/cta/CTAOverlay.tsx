@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { CTAEvent } from '@/lib/types';
+import { formatCountdownMMSS } from '@/lib/utils';
 
 export type { CTAEvent };
 
@@ -14,13 +15,6 @@ export interface CTAOverlayProps {
   onCTAClick?: (cta: CTAEvent) => void;
   /** Called when a CTA becomes visible */
   onCTAView?: (cta: CTAEvent) => void;
-}
-
-function formatCountdown(seconds: number): string {
-  if (seconds <= 0) return '00:00';
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
 export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAView }: CTAOverlayProps) {
@@ -75,7 +69,7 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
           <div className="flex items-center justify-center gap-2 mb-3">
             <span className="text-orange-200 text-xs">限时优惠</span>
             <span className="bg-black/30 text-white font-mono text-lg px-3 py-1 rounded-md">
-              {formatCountdown(remainingSec)}
+              {formatCountdownMMSS(remainingSec)}
             </span>
           </div>
         )}

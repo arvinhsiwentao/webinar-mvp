@@ -40,6 +40,7 @@ export function generateId(): string {
 
 // Webinar operations
 export function getAllWebinars(): Webinar[] {
+  initializeSampleData();
   return readJsonFile<Webinar[]>('webinars.json', []);
 }
 
@@ -140,9 +141,21 @@ export function addChatMessage(message: Omit<ChatMessageData, 'id' | 'createdAt'
   return newMessage;
 }
 
+// Tracking events
+export function appendEvent(event: unknown): void {
+  const events = readJsonFile<unknown[]>('events.json', []);
+  events.push(event);
+  writeJsonFile('events.json', events);
+}
+
 // Initialize with sample data if empty
+let _sampleDataInitialized = false;
+
 export function initializeSampleData(): void {
-  const webinars = getAllWebinars();
+  if (_sampleDataInitialized) return;
+  _sampleDataInitialized = true;
+
+  const webinars = readJsonFile<Webinar[]>('webinars.json', []);
   if (webinars.length > 0) return;
 
   const sampleWebinar: Omit<Webinar, 'id' | 'createdAt' | 'updatedAt'> = {
