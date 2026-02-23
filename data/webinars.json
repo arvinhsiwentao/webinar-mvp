@@ -36,61 +36,70 @@
       }
     ],
     "autoChat": [
-      {
-        "timeSec": 3,
-        "name": "David",
-        "message": "終於等到 Mike 的直播了！🎉"
-      },
-      {
-        "timeSec": 8,
-        "name": "小美",
-        "message": "特斯拉早期投資者太厲害了"
-      },
-      {
-        "timeSec": 15,
-        "name": "Alex",
-        "message": "筆記準備好了 📝"
-      },
-      {
-        "timeSec": 22,
-        "name": "阿明",
-        "message": "4年財務自由...太勵志了"
-      },
-      {
-        "timeSec": 30,
-        "name": "Emma",
-        "message": "想學抄底策略！"
-      },
-      {
-        "timeSec": 40,
-        "name": "Kevin",
-        "message": "存股策略很適合上班族"
-      },
-      {
-        "timeSec": 50,
-        "name": "小芳",
-        "message": "Mike 的 YouTube 頻道超讚"
-      },
-      {
-        "timeSec": 60,
-        "name": "Jason",
-        "message": "已經用他的 APP 了，很實用"
-      },
-      {
-        "timeSec": 75,
-        "name": "Linda",
-        "message": "想看持倉清單！"
-      },
-      {
-        "timeSec": 90,
-        "name": "Tom",
-        "message": "美股新手可以學嗎？"
-      },
-      {
-        "timeSec": 100,
-        "name": "小雨",
-        "message": "這個策略太棒了 👏"
-      }
+      { "timeSec": 3, "name": "David", "message": "终于等到 Mike 的直播了！🎉" },
+      { "timeSec": 6, "name": "小美", "message": "1" },
+      { "timeSec": 10, "name": "Alex", "message": "Hello 大家好！从纽约来的" },
+      { "timeSec": 14, "name": "阿明", "message": "Mike 老师好！" },
+      { "timeSec": 18, "name": "Emma", "message": "洛杉矶签到 ✋" },
+      { "timeSec": 23, "name": "Kevin", "message": "1" },
+      { "timeSec": 28, "name": "小芳", "message": "旧金山来的，期待好久了" },
+      { "timeSec": 35, "name": "Jason", "message": "准备好笔记了 📝" },
+      { "timeSec": 42, "name": "Linda", "message": "1" },
+      { "timeSec": 50, "name": "Tom", "message": "温哥华签到！" },
+      { "timeSec": 65, "name": "小雨", "message": "终于有空来看直播了" },
+      { "timeSec": 80, "name": "Ryan", "message": "Mike 老师的 YouTube 每集都看" },
+      { "timeSec": 120, "name": "Nicole", "message": "芝加哥来的 🙋‍♀️" },
+      { "timeSec": 160, "name": "陈静", "message": "好多人啊，太热闹了" },
+      { "timeSec": 900, "name": "王强", "message": "如果你也想学美股，打个 1" },
+      { "timeSec": 908, "name": "Amy", "message": "1" },
+      { "timeSec": 915, "name": "刘洋", "message": "1" },
+      { "timeSec": 922, "name": "Peter", "message": "想学！🙋" },
+      { "timeSec": 930, "name": "黄丽", "message": "1" },
+      { "timeSec": 940, "name": "Bob", "message": "1" },
+      { "timeSec": 955, "name": "赵敏", "message": "很想开始投资" },
+      { "timeSec": 970, "name": "周杰", "message": "1 一直想开始但不知道怎么做" },
+      { "timeSec": 1500, "name": "Lucy", "message": "有投资过美股的打 1，没有的打 0" },
+      { "timeSec": 1510, "name": "吴涛", "message": "0" },
+      { "timeSec": 1518, "name": "孙燕", "message": "1" },
+      { "timeSec": 1525, "name": "Jack", "message": "0 完全新手" },
+      { "timeSec": 1535, "name": "李明", "message": "0 但很想学" },
+      { "timeSec": 1550, "name": "张伟", "message": "1 买过一点 ETF" },
+      { "timeSec": 2400, "name": "Grace", "message": "这个观点太棒了 👏" },
+      { "timeSec": 2420, "name": "赵鑫", "message": "第一次听到这种分析方法" },
+      { "timeSec": 2450, "name": "周芳", "message": "涨知识了！" },
+      { "timeSec": 2480, "name": "Brian", "message": "笔记都记满了" },
+      { "timeSec": 2510, "name": "郭靖", "message": "Mike 解释得好清楚" },
+      { "timeSec": 2550, "name": "许可", "message": "这比看书容易理解多了" },
+      { "timeSec": 3000, "name": "钱伟", "message": "APP 看起来好用！" },
+      { "timeSec": 3030, "name": "Chris", "message": "灯号系统很直觉" },
+      { "timeSec": 3060, "name": "蒋勇", "message": "在哪里可以下载？" },
+      { "timeSec": 3100, "name": "David", "message": "我已经在用了，真的很实用" },
+      { "timeSec": 3130, "name": "小美", "message": "抄底提醒功能太实用了" },
+      { "timeSec": 3600, "name": "Alex", "message": "888" },
+      { "timeSec": 3610, "name": "阿明", "message": "加入！" },
+      { "timeSec": 3620, "name": "Emma", "message": "888" },
+      { "timeSec": 3635, "name": "Kevin", "message": "已下单 ✅" },
+      { "timeSec": 3650, "name": "小芳", "message": "888" },
+      { "timeSec": 3670, "name": "Jason", "message": "刚刚加入了 🎉" },
+      { "timeSec": 3700, "name": "Linda", "message": "买了！感觉很值" },
+      { "timeSec": 3730, "name": "Tom", "message": "888 冲了" },
+      { "timeSec": 4200, "name": "小雨", "message": "请问新手也能用吗？" },
+      { "timeSec": 4230, "name": "Ryan", "message": "我没有很多钱可以开始吗？" },
+      { "timeSec": 4260, "name": "Nicole", "message": "Mike 说 $100 就可以开始了！" },
+      { "timeSec": 4300, "name": "陈静", "message": "是美金账户吗？台湾可以用吗？" },
+      { "timeSec": 4350, "name": "王强", "message": "美股开户很简单的" },
+      { "timeSec": 4400, "name": "Amy", "message": "我刚加入，界面很好用" },
+      { "timeSec": 4450, "name": "刘洋", "message": "推荐给我朋友了" },
+      { "timeSec": 4500, "name": "Peter", "message": "客服回复很快 👍" },
+      { "timeSec": 4560, "name": "黄丽", "message": "这个价格真的很划算" },
+      { "timeSec": 4630, "name": "Bob", "message": "比其他课程便宜很多" },
+      { "timeSec": 4700, "name": "赵敏", "message": "还有退款保证，放心" },
+      { "timeSec": 4800, "name": "周杰", "message": "谢谢 Mike！学到很多" },
+      { "timeSec": 4900, "name": "Lucy", "message": "太感谢了 🙏" },
+      { "timeSec": 5000, "name": "吴涛", "message": "期待下次直播！" },
+      { "timeSec": 5100, "name": "孙燕", "message": "Mike 是真的用心在教" },
+      { "timeSec": 5200, "name": "Jack", "message": "值得推荐给朋友 👏" },
+      { "timeSec": 5300, "name": "李明", "message": "感谢分享！我们下次见" }
     ],
     "ctaEvents": [
       {
