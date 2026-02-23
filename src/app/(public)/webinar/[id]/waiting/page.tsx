@@ -5,6 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
 import { Button, Badge, Card } from '@/components/ui';
 import { Webinar, Session } from '@/lib/types';
+import { generateICSContent } from '@/lib/utils';
 
 export default function WaitingPage() {
   const params = useParams();
@@ -62,6 +63,32 @@ export default function WaitingPage() {
     router.push(`/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}`);
   };
 
+  function handleDownloadICS() {
+    if (!webinar || !session) return;
+    const ics = generateICSContent(
+      webinar.title,
+      session.startTime,
+      webinar.duration,
+      `讲者: ${webinar.speakerName}`,
+      `${window.location.origin}/webinar/${webinar.id}/waiting?session=${session.id}`
+    );
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${webinar.title}.ics`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function getGoogleCalendarUrl(): string {
+    if (!webinar || !session) return '#';
+    const start = new Date(session.startTime);
+    const end = new Date(start.getTime() + webinar.duration * 60 * 1000);
+    const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    return `https://calendar.google.com/calendar/event?action=TEMPLATE&text=${encodeURIComponent(webinar.title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(`讲者: ${webinar.speakerName}`)}`;
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
@@ -91,17 +118,24 @@ export default function WaitingPage() {
       </div>
 
       <div className="relative z-10 max-w-2xl w-full text-center">
-        {/* Speaker Image */}
-        {(webinar.speakerAvatar || webinar.speakerImage) && (
-          <div className="relative w-32 h-32 mx-auto mb-8">
-            <div className="absolute inset-0 bg-[#B8953F]/10 rounded-full blur-xl" />
+        {/* Speaker/Promo Image */}
+        <div className="relative w-full max-w-lg mx-auto mb-8 rounded-lg overflow-hidden border border-[#E8E5DE]">
+          {webinar.promoImageUrl ? (
             <img
-              src={webinar.speakerAvatar || webinar.speakerImage}
-              alt={webinar.speakerName}
-              className="relative w-full h-full rounded-full object-cover border-2 border-[#B8953F]/30"
+              src={webinar.promoImageUrl}
+              alt={webinar.title}
+              className="w-full h-auto"
             />
-          </div>
-        )}
+          ) : (webinar.speakerAvatar || webinar.speakerImage) ? (
+            <div className="flex items-center justify-center py-8 bg-white/80">
+              <img
+                src={webinar.speakerAvatar || webinar.speakerImage}
+                alt={webinar.speakerName}
+                className="w-32 h-32 rounded-full object-cover border-2 border-[#B8953F]/30"
+              />
+            </div>
+          ) : null}
+        </div>
 
         <Badge variant="gold" className="mb-6">候場中</Badge>
 
@@ -119,7 +153,7 @@ export default function WaitingPage() {
 
         {/* Countdown */}
         <Card className="p-8 mb-8 border-[#B8953F]/25">
-          <p className="text-neutral-500 mb-4">距离直播开始</p>
+          <p className="text-neutral-500 mb-4">距离下一场讲座开始</p>
           <CountdownTimer
             targetTime={session.startTime}
             size="lg"
@@ -128,6 +162,18 @@ export default function WaitingPage() {
             onComplete={handleCountdownComplete}
           />
         </Card>
+
+        {/* Calendar buttons */}
+        <div className="flex gap-3 max-w-md mx-auto mb-8">
+          <a href={getGoogleCalendarUrl()} target="_blank" rel="noopener noreferrer"
+             className="flex-1 bg-white/80 hover:bg-white border border-[#E8E5DE] rounded-lg p-3 text-center text-sm transition-colors">
+            📅 Google 日历
+          </a>
+          <button onClick={handleDownloadICS}
+            className="flex-1 bg-white/80 hover:bg-white border border-[#E8E5DE] rounded-lg p-3 text-center text-sm transition-colors">
+            📅 iCal 下载
+          </button>
+        </div>
 
         {/* Enter Button */}
         <Button
