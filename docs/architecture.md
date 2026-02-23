@@ -11,10 +11,11 @@ Simulive (simulated-live) webinar platform. A pre-recorded video plays on a sche
 ## Page Flow & Routing
 
 ```
-Landing Page  →  Registration  →  Confirm  →  Waiting Room  →  Live Room
-/                (inline form)    /webinar/[id]  /webinar/[id]   /webinar/[id]/live
-                                  (redirect)     (countdown)
+Landing Page  →  Registration  →  Confirm           →  Waiting Room        →  Live Room          →  End
+/                (modal)          /webinar/[id]/confirm  /webinar/[id]/waiting  /webinar/[id]/live    /webinar/[id]/end
 ```
+
+The root `/` is the only landing page — a single-purpose entry point hardcoded to webinar ID `1`. There is no `/webinar/[id]` landing page; the dynamic `[id]` namespace only contains the post-registration sub-routes (confirm, waiting, live, end).
 
 Pages are organized into **route groups** — parenthesized folders that are invisible in the URL but provide independent layouts:
 
@@ -25,9 +26,8 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 
 | Route | Source File | Purpose |
 |-------|-------------|---------|
-| `/` | `src/app/(public)/page.tsx` | Hardcoded landing for webinar ID `1` ("Mike是麥克"). Modal registration. Sections: Hero → Credibility → Problem → Benefits → Urgency. |
+| `/` | `src/app/(public)/page.tsx` | Single landing page for webinar ID `1` ("Mike是麥克"). Modal registration. Sections: Hero → Credibility → Problem → Benefits → Urgency. |
 | `/demo` | `src/app/(public)/demo/page.tsx` | Demo/preview page |
-| `/webinar/[id]` | `src/app/(public)/webinar/[id]/page.tsx` | Webinar detail / registration entry point |
 | `/webinar/[id]/confirm` | `src/app/(public)/webinar/[id]/confirm/page.tsx` | Post-registration confirmation with confetti, calendar download, promo image, auto-redirect |
 | `/webinar/[id]/waiting` | `src/app/(public)/webinar/[id]/waiting/page.tsx` | Pre-show countdown timer with promo banner and calendar buttons |
 | `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + 4-tab sidebar (Info/Viewers/Chat/Offers) + on-video CTA |

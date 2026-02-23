@@ -45,11 +45,11 @@ No test framework is configured yet.
 ### User Journey (page flow)
 
 ```
-Landing Page → Registration → Confirm → Waiting Room → Live Room
-/              (inline form)   /webinar/[id]/confirm  /webinar/[id]/waiting  /webinar/[id]/live
+Landing Page → Registration → Confirm → Waiting Room → Live Room → End
+/              (modal)         /webinar/[id]/confirm  /webinar/[id]/waiting  /webinar/[id]/live  /webinar/[id]/end
 ```
 
-The root landing page (`src/app/page.tsx`) is currently hardcoded for a specific webinar ("Mike是麥克", webinar ID `1`). The dynamic webinar routes under `src/app/webinar/[id]/` handle the full attendee flow.
+The root `/` is the only landing page, hardcoded for webinar ID `1` ("Mike是麥克"). There is no `/webinar/[id]` landing page — the `[id]` namespace only contains post-registration sub-routes (confirm, waiting, live, end).
 
 ### Key Directories
 
