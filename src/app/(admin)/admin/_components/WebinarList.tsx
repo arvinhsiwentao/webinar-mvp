@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { Webinar, Session } from '@/lib/types';
 import { formatDateTime } from '@/lib/utils';
 
@@ -79,13 +78,6 @@ export default function WebinarList({
 
             {/* Actions */}
             <div className="flex flex-col gap-2">
-              <Link
-                href={`/webinar/${webinar.id}`}
-                target="_blank"
-                className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded transition-colors text-center"
-              >
-                预览
-              </Link>
               <button
                 onClick={() => onEdit(webinar)}
                 className="bg-neutral-100 hover:bg-neutral-200 text-neutral-900 text-sm px-4 py-2 rounded transition-colors"
