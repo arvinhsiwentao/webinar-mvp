@@ -36,13 +36,13 @@ export async function sendEmail({ to, subject, html }: EmailParams): Promise<boo
   }
 }
 
-export function confirmationEmail(name: string, title: string, startTime: string, liveUrl: string): EmailParams {
+export function confirmationEmail(to: string, name: string, title: string, startTime: string, liveUrl: string): EmailParams {
   const date = new Date(startTime).toLocaleString('zh-CN', {
     year: 'numeric', month: '2-digit', day: '2-digit',
     weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
   });
   return {
-    to: '',
+    to,
     subject: `报名成功！${title}`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -55,7 +55,7 @@ export function confirmationEmail(name: string, title: string, startTime: string
   };
 }
 
-export function reminderEmail(type: '24h' | '1h', name: string, title: string, liveUrl: string): EmailParams {
+export function reminderEmail(to: string, type: '24h' | '1h', name: string, title: string, liveUrl: string): EmailParams {
   const subject = type === '24h'
     ? `明天见！${title} 即将开始`
     : `${title} 1 小时后开始！`;
@@ -64,7 +64,7 @@ export function reminderEmail(type: '24h' | '1h', name: string, title: string, l
     : `<p>${title} 将在 1 小时后开始！</p><p>建议提前 5 分钟进入，确保网络顺畅。</p>`;
 
   return {
-    to: '',
+    to,
     subject,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -76,9 +76,9 @@ export function reminderEmail(type: '24h' | '1h', name: string, title: string, l
   };
 }
 
-export function followUpEmail(name: string, title: string, replayUrl: string, ctaUrl?: string): EmailParams {
+export function followUpEmail(to: string, name: string, title: string, replayUrl: string, ctaUrl?: string): EmailParams {
   return {
-    to: '',
+    to,
     subject: `${title} 重播链接`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">

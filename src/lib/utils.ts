@@ -24,6 +24,12 @@ export function formatDateTime(dateString: string): string {
   return `${formatDate(dateString)} ${formatTime(dateString)}`;
 }
 
+export function formatElapsedTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 export function formatCountdown(totalSeconds: number): {
   days: number;
   hours: number;
@@ -91,10 +97,6 @@ export function cn(...classes: (string | boolean | undefined)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-/**
- * Detects if a URL is a YouTube video link.
- * Supports: youtube.com/watch?v=, youtu.be/, youtube.com/embed/
- */
 export function isYouTubeUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
@@ -112,9 +114,6 @@ export function isYouTubeUrl(url: string): boolean {
   }
 }
 
-/**
- * Determines the Video.js source type for a given URL.
- */
 export function getVideoSourceType(url: string): string {
   if (isYouTubeUrl(url)) return 'video/youtube';
   if (url.endsWith('.m3u8')) return 'application/x-mpegURL';

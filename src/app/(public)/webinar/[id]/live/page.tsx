@@ -8,6 +8,7 @@ import CTAOverlay from '@/components/cta/CTAOverlay';
 import { Webinar, Session, CTAEvent } from '@/lib/types';
 import { Badge, Button } from '@/components/ui';
 import { track } from '@/lib/tracking';
+import { formatElapsedTime } from '@/lib/utils';
 
 // Dynamically import VideoPlayer to avoid SSR issues with video.js
 const VideoPlayer = dynamic(() => import('@/components/video/VideoPlayer'), {
@@ -247,7 +248,7 @@ export default function LiveRoomPage() {
 
                 <div className="text-right text-sm">
                   <div className="flex items-center gap-2 text-neutral-400">
-                    <span>⏱️ {formatTime(currentTime)}</span>
+                    <span>⏱️ {formatElapsedTime(currentTime)}</span>
                     <span className={`px-2 py-0.5 rounded text-xs ${isPlaying ? 'bg-green-500/20 text-green-400' : 'bg-neutral-200 text-neutral-500'}`}>
                       {isPlaying ? '播放中' : '暂停'}
                     </span>
@@ -306,10 +307,4 @@ export default function LiveRoomPage() {
       </footer>
     </div>
   );
-}
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
 }

@@ -24,8 +24,8 @@ export async function GET() {
       for (const reg of registrations) {
         if (reg.sessionId !== session.id) continue;
         const liveUrl = `/webinar/${webinar.id}/waiting?session=${session.id}&name=${encodeURIComponent(reg.name)}`;
-        const emailData = reminderEmail(type, reg.name, webinar.title, liveUrl);
-        await sendEmail({ ...emailData, to: reg.email });
+        const emailData = reminderEmail(reg.email, type, reg.name, webinar.title, liveUrl);
+        await sendEmail(emailData);
         sent++;
       }
     }

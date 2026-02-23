@@ -63,8 +63,8 @@ export async function POST(request: NextRequest) {
     // Send confirmation email (fire and forget)
     const origin = request.nextUrl.origin;
     const liveUrl = `${origin}/webinar/${body.webinarId}/waiting?session=${body.sessionId}&name=${encodeURIComponent(body.name)}`;
-    const emailData = confirmationEmail(body.name, webinar.title, session!.startTime, liveUrl);
-    sendEmail({ ...emailData, to: body.email }); // fire and forget, don't await
+    const emailData = confirmationEmail(body.email, body.name, webinar.title, session.startTime, liveUrl);
+    sendEmail(emailData); // fire and forget, don't await
 
     // Fire webhook if configured
     if (webinar.webhookUrl) {

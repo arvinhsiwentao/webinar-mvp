@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { formatElapsedTime } from '@/lib/utils';
 
 export interface AutoChatMessage {
   timeSec: number;
@@ -31,12 +32,6 @@ export interface ChatRoomProps {
   webinarId?: string;
   /** Session ID for the current viewer session */
   sessionId?: string;
-}
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
 let msgIdCounter = 0;
@@ -117,7 +112,9 @@ export default function ChatRoom({
             }];
           });
         }
-      } catch { /* ignore parse errors */ }
+      } catch (err) {
+        console.warn('[ChatRoom] Failed to parse SSE message:', err);
+      }
     };
 
     return () => eventSource.close();
@@ -164,7 +161,7 @@ export default function ChatRoom({
         )}
         {messages.map((msg) => (
           <div key={msg.id} className="text-sm">
-            <span className="text-neutral-400 text-xs mr-2">{formatTime(msg.timestamp)}</span>
+            <span className="text-neutral-400 text-xs mr-2">{formatElapsedTime(msg.timestamp)}</span>
             <span className="font-semibold text-[#B8953F]">{msg.name}</span>
             <span className="text-neutral-600 ml-1">{msg.message}</span>
           </div>

@@ -7,6 +7,10 @@ import 'video.js/dist/video-js.css';
 import 'videojs-youtube';
 import { isYouTubeUrl, getVideoSourceType } from '@/lib/utils';
 
+const SEEK_FORWARD_TOLERANCE_SEC = 2;
+const SEEK_REWIND_TOLERANCE_SEC = 1;
+const BLOCKED_KEYS = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+
 export interface PlaybackEvent {
   type: 'play' | 'pause' | 'timeupdate' | 'ended' | 'ready';
   currentTime: number;
@@ -73,38 +77,31 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent }: 
     const player = videojs(videoElement, playerOptions);
     playerRef.current = player;
 
-    // Disable keyboard seeking (left/right arrows, etc.)
     player.on('keydown', (e: KeyboardEvent) => {
-      const blocked = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
-      if (blocked.includes(e.key)) {
+      if (BLOCKED_KEYS.includes(e.key)) {
         e.preventDefault();
         e.stopPropagation();
       }
     });
 
-    // Prevent seeking by monitoring time changes
-    // Allow time to advance naturally (forward within 2s tolerance) but block skipping ahead
     let allowedTime = 0;
     player.on('timeupdate', () => {
       const current = player.currentTime() ?? 0;
-      if (current > allowedTime + 2) {
+      if (current > allowedTime + SEEK_FORWARD_TOLERANCE_SEC) {
         player.currentTime(allowedTime);
       } else if (current > allowedTime) {
         allowedTime = current;
       }
-      // Also block rewinding — keep the user moving forward only
-      if (current < allowedTime - 1) {
+      if (current < allowedTime - SEEK_REWIND_TOLERANCE_SEC) {
         player.currentTime(allowedTime);
       }
     });
 
-    // Emit playback events
     player.on('ready', () => emitEvent('ready', player));
     player.on('play', () => emitEvent('play', player));
     player.on('pause', () => emitEvent('pause', player));
     player.on('ended', () => emitEvent('ended', player));
 
-    // Throttled timeupdate events (every 1 second)
     player.on('timeupdate', () => {
       const current = Math.floor(player.currentTime() ?? 0);
       if (current !== lastReportedTime.current) {
