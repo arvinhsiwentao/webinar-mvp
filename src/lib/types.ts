@@ -8,6 +8,10 @@ export interface CTAEvent {
   url: string;
   promoText?: string;
   showCountdown: boolean;
+  position?: 'on_video' | 'below_video';
+  color?: string;
+  secondaryText?: string;
+  icon?: string;
 }
 
 export interface AutoChatMessage {
@@ -43,6 +47,32 @@ export interface Webinar {
   viewerBaseCount: number;
   viewerMultiplier: number;
   webhookUrl?: string;
+
+  // Landing page hero
+  heroImageUrl?: string;
+  heroEyebrowText?: string;
+
+  // Promotional image (confirm/waiting/info tab)
+  promoImageUrl?: string;
+
+  // Disclaimer
+  disclaimerText?: string;
+
+  // End page
+  endPageSalesCopy?: string;
+  endPageCtaText?: string;
+  endPageCtaUrl?: string;
+  endPageCtaColor?: string;
+
+  // Sidebar content
+  sidebarDescription?: string;
+
+  // Missed webinar redirect
+  missedWebinarUrl?: string;
+
+  // Preroll video
+  prerollVideoUrl?: string;
+
   createdAt: string;
   updatedAt: string;
 }
@@ -86,6 +116,17 @@ export interface CreateWebinarRequest {
   viewerBaseCount?: number;
   viewerMultiplier?: number;
   webhookUrl?: string;
+  heroImageUrl?: string;
+  heroEyebrowText?: string;
+  promoImageUrl?: string;
+  disclaimerText?: string;
+  endPageSalesCopy?: string;
+  endPageCtaText?: string;
+  endPageCtaUrl?: string;
+  endPageCtaColor?: string;
+  sidebarDescription?: string;
+  missedWebinarUrl?: string;
+  prerollVideoUrl?: string;
 }
 
 export interface RegisterRequest {
