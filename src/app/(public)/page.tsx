@@ -6,8 +6,7 @@ import Image from 'next/image';
 import { Webinar, Session } from '@/lib/types';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
 import { useRegistrationForm } from '@/components/registration/useRegistrationForm';
-import SessionSelector from '@/components/registration/SessionSelector';
-import RegistrationForm from '@/components/registration/RegistrationForm';
+import RegistrationModal from '@/components/registration/RegistrationModal';
 
 // Mike是麦克 专属 Landing Page
 // 这是一个 Single-purpose site，默认显示 Mike 的 webinar
@@ -26,6 +25,8 @@ export default function HomePage() {
       router.push(`/webinar/${DEFAULT_WEBINAR_ID}/confirm?session=${sessionId}&name=${encodeURIComponent(name)}`);
     },
   });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchWebinar() {
@@ -74,43 +75,59 @@ export default function HomePage() {
   }
 
   const selectedSessionData = webinar.sessions.find((s: Session) => s.id === form.selectedSession);
+  const hasHeroImage = !!webinar.heroImageUrl;
 
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-neutral-900">
 
       {/* ========== Section 1: HERO — Urgency-First ========== */}
       <section className="min-h-screen relative overflow-hidden flex items-center">
-        {/* Subtle gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FAFAF7] via-[#FAFAF7] to-white" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(184,149,63,0.06),transparent_60%)]" />
+        {/* Background: dark overlay for hero image, or subtle gradient for default */}
+        {hasHeroImage ? (
+          <>
+            <Image
+              src={webinar.heroImageUrl!}
+              alt=""
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-black/60" />
+          </>
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-b from-[#FAFAF7] via-[#FAFAF7] to-white" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(184,149,63,0.06),transparent_60%)]" />
+          </>
+        )}
 
-        <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-12 text-center py-20">
+        <div className={`relative z-10 max-w-4xl mx-auto px-6 lg:px-12 text-center py-20 ${hasHeroImage ? 'text-white' : ''}`}>
           {/* Urgency Badge */}
-          <div className="inline-flex items-center gap-2 border border-[#B8953F]/30 bg-[#B8953F]/8 px-5 py-2 mb-10">
-            <span className="w-2 h-2 rounded-full bg-[#B8953F] animate-pulse" />
-            <span className="text-sm text-[#B8953F]">免费名额有限 — 额满即止</span>
+          <div className={`inline-flex items-center gap-2 border px-5 py-2 mb-10 ${hasHeroImage ? 'border-white/30 bg-white/10' : 'border-[#B8953F]/30 bg-[#B8953F]/8'}`}>
+            <span className={`w-2 h-2 rounded-full animate-pulse ${hasHeroImage ? 'bg-white' : 'bg-[#B8953F]'}`} />
+            <span className={`text-sm ${hasHeroImage ? 'text-white/90' : 'text-[#B8953F]'}`}>免费名额有限 — 额满即止</span>
           </div>
 
           {/* Main Headline — Pain Point */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light leading-[1.15] tracking-tight mb-6">
-            <span className="block text-neutral-500 text-2xl md:text-3xl font-normal mb-4">你还在用时间换薪水？</span>
+            <span className={`block text-2xl md:text-3xl font-normal mb-4 ${hasHeroImage ? 'text-white/70' : 'text-neutral-500'}`}>你还在用时间换薪水？</span>
             <span className="block font-semibold">
               90 分钟揭秘
-              <span className="bg-gradient-to-r from-[#B8953F] to-[#B8953F]/0 bg-[length:100%_2px] bg-no-repeat bg-bottom pb-2">
+              <span className={`bg-gradient-to-r ${hasHeroImage ? 'from-white to-white/0' : 'from-[#B8953F] to-[#B8953F]/0'} bg-[length:100%_2px] bg-no-repeat bg-bottom pb-2`}>
                 财务自由完整路径
               </span>
             </span>
           </h1>
 
           {/* Subheadline — Specific Promise */}
-          <p className="text-lg md:text-xl text-neutral-500 max-w-2xl mx-auto leading-relaxed mb-8">
+          <p className={`text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-8 ${hasHeroImage ? 'text-white/70' : 'text-neutral-500'}`}>
             43 岁达成财务自由的美股投资人 Mike，将毫无保留地分享他从负债到自由的完整策略与持仓清单。
           </p>
 
           {/* Countdown Timer */}
           {selectedSessionData && (
             <div className="flex justify-center mb-10">
-              <div className="text-[#B8953F]">
+              <div className={hasHeroImage ? 'text-white' : 'text-[#B8953F]'}>
                 <CountdownTimer
                   targetTime={selectedSessionData.startTime}
                   size="sm"
@@ -122,71 +139,34 @@ export default function HomePage() {
           )}
 
           {/* Primary CTA */}
-          <a
-            href="#register"
+          <button
+            onClick={() => setIsModalOpen(true)}
             className="group inline-flex items-center gap-3 bg-[#B8953F] text-white px-10 py-4 text-base font-semibold tracking-wide hover:bg-[#A6842F] hover:shadow-[0_0_40px_rgba(184,149,63,0.3)] transition-all"
           >
             立即预约免费席位
             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
-          </a>
+          </button>
 
           {/* Social Proof Strip */}
-          <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10 mt-12 text-sm text-neutral-400">
+          <div className={`flex flex-wrap justify-center items-center gap-6 md:gap-10 mt-12 text-sm ${hasHeroImage ? 'text-white/50' : 'text-neutral-400'}`}>
             <span>20 万+ YouTube 订阅</span>
-            <span className="hidden md:inline text-neutral-300">|</span>
+            <span className={`hidden md:inline ${hasHeroImage ? 'text-white/30' : 'text-neutral-300'}`}>|</span>
             <span>3,000+ 付费会员</span>
-            <span className="hidden md:inline text-neutral-300">|</span>
+            <span className={`hidden md:inline ${hasHeroImage ? 'text-white/30' : 'text-neutral-300'}`}>|</span>
             <span>4 年达成财务自由</span>
           </div>
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-neutral-400">
+        <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 ${hasHeroImage ? 'text-white/40' : 'text-neutral-400'}`}>
           <span className="text-xs tracking-widest">SCROLL</span>
-          <div className="w-px h-12 bg-gradient-to-b from-neutral-400 to-transparent" />
+          <div className={`w-px h-12 bg-gradient-to-b ${hasHeroImage ? 'from-white/40' : 'from-neutral-400'} to-transparent`} />
         </div>
       </section>
 
-      {/* ========== Section 2: PROBLEM — Pain Amplification ========== */}
-      <section className="py-24 md:py-32 px-6 lg:px-12 bg-white/80">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-xs tracking-[0.2em] text-neutral-400 uppercase mb-12 text-center">听起来熟悉吗？</p>
-
-          <div className="space-y-6">
-            {[
-              '每天辛苦工作，存款增加的速度永远追不上物价',
-              '想投资美股，但信息太多、太杂，不知从何下手',
-              '看别人靠被动收入过自己想要的生活，自己却不知道怎么开始',
-              '担心选错标的，赔掉辛苦存下来的钱',
-            ].map((pain, idx) => (
-              <div
-                key={idx}
-                className="flex items-start gap-4 p-5 border border-neutral-200/80 bg-neutral-50 hover:border-[#B8953F]/30 transition-colors"
-              >
-                <div className="flex-shrink-0 w-6 h-6 border border-neutral-400 flex items-center justify-center mt-0.5">
-                  <svg className="w-3.5 h-3.5 text-[#B8953F]/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <p className="text-lg text-neutral-600">{pain}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <p className="text-xl text-neutral-800">
-              如果你至少勾了一项——
-            </p>
-            <p className="text-[#B8953F] text-lg mt-2">
-              这场免费在线直播，就是为你准备的。
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== Section 3: CREDIBILITY — Speaker + Social Proof ========== */}
+      {/* ========== Section 2: CREDIBILITY — Speaker + Social Proof ========== */}
       <section className="py-24 md:py-32 px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
@@ -220,7 +200,7 @@ export default function HomePage() {
               <p className="text-xs tracking-[0.2em] text-neutral-400 uppercase">他是谁？</p>
 
               <blockquote className="text-2xl md:text-3xl font-light leading-relaxed text-neutral-800">
-                <span className="text-[#B8953F]">"</span>你赚不到认知以外的钱。<span className="text-[#B8953F]">"</span>
+                <span className="text-[#B8953F]">&ldquo;</span>你赚不到认知以外的钱。<span className="text-[#B8953F]">&rdquo;</span>
               </blockquote>
 
               {/* Transformation Timeline */}
@@ -265,6 +245,43 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ========== Section 3: PROBLEM — Pain Amplification ========== */}
+      <section className="py-24 md:py-32 px-6 lg:px-12 bg-white/80">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-xs tracking-[0.2em] text-neutral-400 uppercase mb-12 text-center">听起来熟悉吗？</p>
+
+          <div className="space-y-6">
+            {[
+              '每天辛苦工作，存款增加的速度永远追不上物价',
+              '想投资美股，但信息太多、太杂，不知从何下手',
+              '看别人靠被动收入过自己想要的生活，自己却不知道怎么开始',
+              '担心选错标的，赔掉辛苦存下来的钱',
+            ].map((pain, idx) => (
+              <div
+                key={idx}
+                className="flex items-start gap-4 p-5 border border-neutral-200/80 bg-neutral-50 hover:border-[#B8953F]/30 transition-colors"
+              >
+                <div className="flex-shrink-0 w-6 h-6 border border-neutral-400 flex items-center justify-center mt-0.5">
+                  <svg className="w-3.5 h-3.5 text-[#B8953F]/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-lg text-neutral-600">{pain}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-xl text-neutral-800">
+              如果你至少勾了一项——
+            </p>
+            <p className="text-[#B8953F] text-lg mt-2">
+              这场免费在线直播，就是为你准备的。
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ========== Section 4: BENEFITS — Transformation-Focused ========== */}
       <section className="py-24 md:py-32 px-6 lg:px-12 bg-white/80">
         <div className="max-w-4xl mx-auto">
@@ -297,6 +314,10 @@ export default function HomePage() {
                 headline: '认识能帮你省时间的投资工具',
                 result: '不用每天盯盘，把时间留给生活',
               },
+              {
+                headline: '获得 Mike 的美股入门行动路线图',
+                result: '一步步照着做，不再迷茫',
+              },
             ].map((benefit, idx) => (
               <div
                 key={idx}
@@ -319,101 +340,73 @@ export default function HomePage() {
 
           {/* Mid-page CTA */}
           <div className="text-center mt-16">
-            <a
-              href="#register"
+            <button
+              onClick={() => setIsModalOpen(true)}
               className="group inline-flex items-center gap-3 bg-[#B8953F] text-white px-10 py-4 text-base font-semibold tracking-wide hover:bg-[#A6842F] hover:shadow-[0_0_40px_rgba(184,149,63,0.3)] transition-all"
             >
               免费报名，立即预约
               <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
-            </a>
+            </button>
           </div>
         </div>
       </section>
 
-      {/* ========== Section 5: SESSION + REGISTER — Combined ========== */}
-      <section id="register" className="py-24 md:py-32 px-6 lg:px-12 bg-gradient-to-b from-white via-white to-[#B8953F]/[0.03]">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-xs tracking-[0.2em] text-[#B8953F]/80 uppercase mb-4">免费报名</p>
-            <h2 className="text-3xl font-light mb-3">选择场次，预约你的席位</h2>
-            <p className="text-neutral-400 text-sm">每场限额 200 名 — 额满即止</p>
-          </div>
-
-          {/* Session Selector */}
-          <SessionSelector
-            sessions={webinar.sessions}
-            selectedId={form.selectedSession}
-            onSelect={form.setSelectedSession}
-            className="space-y-3 mb-10"
-            buttonPadding="p-5"
-            innerGap="gap-5"
-            firstBadgeLabel="最近场次"
-          />
-
-          {/* Registration Form */}
-          <RegistrationForm
-            name={form.name}
-            onNameChange={form.setName}
-            email={form.email}
-            onEmailChange={form.setEmail}
-            phone={form.phone}
-            onPhoneChange={form.setPhone}
-            onSubmit={form.handleSubmit}
-            submitting={form.submitting}
-            formError={form.formError}
-            submitLabel="确认报名 — 100% 免费"
-            emailLabel="邮箱"
-            phoneLabel={<>手机号码 <span className="text-neutral-400">（选填）</span></>}
-            phonePlaceholder="09xx-xxx-xxx"
-            submitClassName="mt-4"
-          />
-
-          {/* Trust Signals */}
-          <div className="flex flex-wrap justify-center gap-4 mt-6 text-xs text-neutral-400">
-            <span>100% 免费</span>
-            <span>|</span>
-            <span>不会被推销</span>
-            <span>|</span>
-            <span>资料仅用于活动通知</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== Section 6: FINAL CTA — Scarcity + Transformation ========== */}
-      <section className="py-24 md:py-32 px-6 lg:px-12">
-        <div className="max-w-3xl mx-auto text-center">
-          <blockquote className="text-2xl md:text-3xl font-light leading-relaxed text-neutral-800 mb-8">
-            <span className="text-[#B8953F]">"</span>投资这条路不会一夜暴富，<br className="hidden md:inline" />但它会让你越来越自由。<span className="text-[#B8953F]">"</span>
-          </blockquote>
-          <p className="text-neutral-400 mb-4">— {webinar.speakerName}</p>
-
-          <p className="text-lg text-neutral-500 max-w-xl mx-auto mb-10">
-            每天不行动，差距就在拉大。你光是出现在这里，就已经领先 90% 的人。
-            <br />
-            现在只差一步——填好资料，我们线上见。
+      {/* ========== Section 5: URGENCY / DISCLAIMER ========== */}
+      <section className="py-20 px-6 lg:px-12 bg-white border-t-[3px] border-[#B8953F]">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="text-6xl mb-6">&#x26A0;&#xFE0F;</div>
+          <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-6">
+            限时公开，名额有限
+          </h2>
+          <p className="text-sm text-neutral-500 mb-8 leading-relaxed">
+            本次讲座内容仅为知识分享与经验探讨，不构成任何形式的投资建议、
+            理财推荐或收益保证。所有提及的策略、工具及案例均为 Mike 个人投资经验分享。
           </p>
-
-          <a
-            href="#register"
+          <button
+            onClick={() => setIsModalOpen(true)}
             className="group inline-flex items-center gap-3 bg-[#B8953F] text-white px-10 py-4 text-base font-semibold tracking-wide hover:bg-[#A6842F] hover:shadow-[0_0_40px_rgba(184,149,63,0.3)] transition-all"
           >
-            免费报名，把握最后机会
+            锁定名额，免费观看讲座
             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
-          </a>
+          </button>
         </div>
       </section>
 
       {/* ========== Footer ========== */}
-      <footer className="py-12 px-6 border-t border-[#B8953F]/10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-neutral-400">
-          <span>{webinar.speakerName}</span>
-          <span>© 2026</span>
+      <footer className="py-8 px-6 bg-[#F5F5F0] border-t border-[#E8E5DE]">
+        <div className="max-w-4xl mx-auto text-center text-xs text-neutral-400 space-y-2">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <a href="#" className="hover:text-[#B8953F] underline">隐私政策</a>
+            <span>|</span>
+            <a href="#" className="hover:text-[#B8953F] underline">服务条款</a>
+            <span>|</span>
+            <a href="#" className="hover:text-[#B8953F] underline">退款政策</a>
+          </div>
+          <p>&copy; {new Date().getFullYear()} {webinar.speakerName}. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* ========== Registration Modal ========== */}
+      <RegistrationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        sessions={webinar.sessions}
+        selectedSession={form.selectedSession}
+        onSessionChange={form.setSelectedSession}
+        name={form.name}
+        onNameChange={form.setName}
+        email={form.email}
+        onEmailChange={form.setEmail}
+        phone={form.phone}
+        onPhoneChange={form.setPhone}
+        onSubmit={form.handleSubmit}
+        submitting={form.submitting}
+        formError={form.formError}
+      />
     </div>
   );
 }
