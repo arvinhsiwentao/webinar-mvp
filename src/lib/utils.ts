@@ -81,8 +81,10 @@ export function validateEmail(email: string): boolean {
 }
 
 export function validatePhone(phone: string): boolean {
-  const re = /^09\d{8}$/;
-  return re.test(phone.replace(/[-\s]/g, ''));
+  // Accept North American phone formats: (xxx) xxx-xxxx, xxx-xxx-xxxx, xxxxxxxxxx, +1xxxxxxxxxx
+  const cleaned = phone.replace(/[\s\-().+]/g, '');
+  // 10 digits or 11 digits starting with 1
+  return /^\d{10}$/.test(cleaned) || /^1\d{10}$/.test(cleaned);
 }
 
 export function cn(...classes: (string | boolean | undefined)[]): string {

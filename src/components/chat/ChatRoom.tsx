@@ -148,44 +148,44 @@ export default function ChatRoom({
   );
 
   return (
-    <div className="flex flex-col h-full bg-neutral-900 text-white rounded-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-white text-neutral-900 rounded-lg overflow-hidden border border-[#E8E5DE]">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-neutral-700 bg-neutral-800">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-[#E8E5DE] bg-[#F5F5F0]">
         <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-        <span className="text-sm font-semibold">实时聊天</span>
+        <span className="text-sm font-semibold text-neutral-800">实时聊天</span>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2">
         {messages.length === 0 && (
-          <p className="text-neutral-500 text-sm text-center mt-8">
+          <p className="text-neutral-400 text-sm text-center mt-8">
             聊天消息将显示在这里...
           </p>
         )}
         {messages.map((msg) => (
           <div key={msg.id} className="text-sm">
-            <span className="text-neutral-500 text-xs mr-2">{formatTime(msg.timestamp)}</span>
-            <span className="font-semibold text-[#C9A962]">{msg.name}</span>
-            <span className="text-neutral-300 ml-1">{msg.message}</span>
+            <span className="text-neutral-400 text-xs mr-2">{formatTime(msg.timestamp)}</span>
+            <span className="font-semibold text-[#B8953F]">{msg.name}</span>
+            <span className="text-neutral-600 ml-1">{msg.message}</span>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="flex items-center gap-2 px-4 py-3 border-t border-neutral-700 bg-neutral-800">
+      <div className="flex items-center gap-2 px-4 py-3 border-t border-[#E8E5DE] bg-[#F5F5F0]">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="输入消息..."
-          className="flex-1 bg-neutral-700 text-white text-sm px-3 py-2 rounded-md outline-none placeholder-neutral-500 focus:ring-1 focus:ring-[#C9A962]"
+          className="flex-1 bg-white text-neutral-900 text-sm px-3 py-2 rounded-md outline-none border border-[#E8E5DE] placeholder-neutral-400 focus:ring-1 focus:ring-[#B8953F]"
           maxLength={200}
         />
         <button
           onClick={handleSend}
-          className="bg-[#C9A962] hover:bg-[#D4BA7A] text-neutral-950 text-sm px-4 py-2 rounded-md transition-colors"
+          className="bg-[#B8953F] hover:bg-[#A6842F] text-white text-sm px-4 py-2 rounded-md transition-colors"
         >
           发送
         </button>

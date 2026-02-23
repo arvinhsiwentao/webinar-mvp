@@ -12,9 +12,9 @@ interface BadgeProps {
 export default function Badge({ children, variant = 'gold', pulse = false, className }: BadgeProps) {
   const variants = {
     live: 'bg-red-600 text-white',
-    gold: 'bg-[#C9A962]/15 text-[#C9A962] border border-[#C9A962]/25',
-    success: 'bg-green-500/15 text-green-400 border border-green-500/25',
-    warning: 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/25',
+    gold: 'bg-[#B8953F]/10 text-[#B8953F] border border-[#B8953F]/20',
+    success: 'bg-green-50 text-green-700 border border-green-200',
+    warning: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
   };
 
   return (

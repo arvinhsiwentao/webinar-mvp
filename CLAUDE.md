@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A "pseudo-live" webinar platform MVP — plays pre-recorded video with real-time interactive features (auto-chat, CTA overlays, viewer count simulation) to create a live-stream experience. Built for the Taiwan market; UI text is Traditional Chinese (zh-TW).
+A "pseudo-live" webinar platform MVP — plays pre-recorded video with real-time interactive features (auto-chat, CTA overlays, viewer count simulation) to create a live-stream experience. Built for the 北美華人 (North American Chinese) market; UI text is Simplified Chinese (zh-CN).
 
 Reference platform: JoinLive (live.yongmingu.com)
 
@@ -87,18 +87,18 @@ A `Webinar` contains embedded arrays of `sessions`, `autoChat`, and `ctaEvents` 
 
 ## Design System
 
-- Dark theme: near-black background (`#030303`), off-white text (`#f5f5f5`)
-- Neutral palette defined in `src/styles/design-tokens.css` (surface `#141414`, border `#262626`)
-- Gold accent color: `#c9a962` (used for CTAs and highlights in globals.css)
+- Light luxury theme: warm ivory background (`#FAFAF7`), dark text (`#1A1A1A`)
+- Neutral palette defined in `src/styles/design-tokens.css` (surface `#FFFFFF`, border `#E8E5DE`)
+- Deep gold accent color: `#B8953F` (used for CTAs and highlights in globals.css)
 - Fonts: Geist Sans / Geist Mono (loaded via Next.js)
-- Minimal editorial aesthetic — avoid decorative elements
+- Minimal editorial aesthetic — warm ivory base, avoid decorative elements
 
 ## Important Constraints
 
 - **No video seeking:** VideoPlayer intentionally blocks seeking, arrow keys, Home/End. This is a business requirement, not a bug.
 - **No WebSocket yet:** Chat is simulated via auto-chat messages and polling. Socket.io integration is planned.
 - **No auth:** Admin panel has no authentication in MVP.
-- **Taiwan locale:** Phone validation expects Taiwan format. Date formatting uses Chinese weekday names.
+- **North American Chinese locale:** Phone validation accepts US/Canada 10-digit format. Date formatting uses `zh-CN` locale.
 - **Unsplash images:** `next.config.ts` allows remote images from `*.unsplash.com`.
 
 ## Spec Documents

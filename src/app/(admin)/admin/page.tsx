@@ -53,19 +53,19 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <div className="min-h-screen bg-[#FAFAF7] text-neutral-900">
       {/* Header */}
-      <header className="bg-neutral-900 border-b border-neutral-800 px-6 py-4">
+      <header className="bg-white border-b border-neutral-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold">研讨会管理后台</h1>
-          <Link href="/" className="text-gray-400 hover:text-white text-sm">
+          <Link href="/" className="text-neutral-500 hover:text-neutral-900 text-sm">
             ← 返回首页
           </Link>
         </div>
       </header>
 
       {/* Navigation Tabs */}
-      <div className="bg-neutral-900/50 border-b border-neutral-800">
+      <div className="bg-white/80 border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-6">
           <nav className="flex gap-4">
             <button
@@ -73,7 +73,7 @@ export default function AdminPage() {
               className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'list'
                   ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-400 hover:text-white'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-900'
               }`}
             >
               场次管理
@@ -83,7 +83,7 @@ export default function AdminPage() {
               className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'create'
                   ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-400 hover:text-white'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-900'
               }`}
             >
               创建研讨会
@@ -93,7 +93,7 @@ export default function AdminPage() {
               className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'registrations'
                   ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-400 hover:text-white'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-900'
               }`}
             >
               报名名单
@@ -154,7 +154,7 @@ function WebinarList({
   if (webinars.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 mb-4">尚未创建任何研讨会</p>
+        <p className="text-neutral-400 mb-4">尚未创建任何研讨会</p>
       </div>
     );
   }
@@ -164,7 +164,7 @@ function WebinarList({
       {webinars.map((webinar) => (
         <div
           key={webinar.id}
-          className="bg-neutral-900 rounded-lg p-6 border border-neutral-800 hover:border-gray-700 transition-colors"
+          className="bg-white rounded-lg p-6 border border-neutral-200 hover:border-neutral-300 transition-colors"
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
@@ -174,13 +174,13 @@ function WebinarList({
                   webinar.status === 'published'
                     ? 'bg-green-500/20 text-green-400'
                     : webinar.status === 'ended'
-                    ? 'bg-gray-500/20 text-gray-400'
+                    ? 'bg-neutral-100 text-neutral-500'
                     : 'bg-yellow-500/20 text-yellow-400'
                 }`}>
                   {webinar.status === 'published' ? '已发布' : webinar.status === 'ended' ? '已结束' : '草稿'}
                 </span>
               </div>
-              <p className="text-gray-400 text-sm mb-3">
+              <p className="text-neutral-500 text-sm mb-3">
                 讲者: {webinar.speakerName} | 时长: {webinar.duration} 分钟
               </p>
 
@@ -189,7 +189,7 @@ function WebinarList({
                 {webinar.sessions.map((session: Session, idx: number) => (
                   <span
                     key={idx}
-                    className="bg-gray-800 text-gray-300 text-xs px-2 py-1 rounded"
+                    className="bg-neutral-100 text-neutral-600 text-xs px-2 py-1 rounded"
                   >
                     {formatDateTime(session.startTime)}
                   </span>
@@ -197,7 +197,7 @@ function WebinarList({
               </div>
 
               {/* Quick Stats */}
-              <div className="flex gap-4 text-xs text-gray-500">
+              <div className="flex gap-4 text-xs text-neutral-400">
                 <span>{webinar.autoChat.length} 条自动消息</span>
                 <span>{webinar.ctaEvents.length} 个 CTA</span>
               </div>
@@ -214,7 +214,7 @@ function WebinarList({
               </Link>
               <button
                 onClick={() => onEdit(webinar)}
-                className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-4 py-2 rounded transition-colors"
+                className="bg-neutral-100 hover:bg-neutral-200 text-neutral-900 text-sm px-4 py-2 rounded transition-colors"
               >
                 编辑
               </button>
@@ -291,7 +291,7 @@ function RegistrationList({ webinars }: { webinars: Webinar[] }) {
   if (totalRegistrations === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 mb-4">暂无报名数据</p>
+        <p className="text-neutral-400 mb-4">暂无报名数据</p>
       </div>
     );
   }
@@ -302,11 +302,11 @@ function RegistrationList({ webinars }: { webinars: Webinar[] }) {
         const regs = registrationMap[webinar.id] || [];
         if (regs.length === 0) return null;
         return (
-          <div key={webinar.id} className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+          <div key={webinar.id} className="bg-white rounded-lg p-6 border border-neutral-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">
                 {webinar.title}
-                <span className="ml-2 text-sm text-gray-400">({regs.length} 条报名)</span>
+                <span className="ml-2 text-sm text-neutral-500">({regs.length} 条报名)</span>
               </h3>
               <button
                 onClick={() => exportCSV(regs, webinar.title)}
@@ -318,7 +318,7 @@ function RegistrationList({ webinars }: { webinars: Webinar[] }) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-neutral-800 text-gray-400">
+                  <tr className="border-b border-neutral-200 text-neutral-500">
                     <th className="text-left py-2 pr-4">姓名</th>
                     <th className="text-left py-2 pr-4">Email</th>
                     <th className="text-left py-2 pr-4">电话</th>
@@ -328,7 +328,7 @@ function RegistrationList({ webinars }: { webinars: Webinar[] }) {
                 </thead>
                 <tbody>
                   {regs.map((r) => (
-                    <tr key={r.id} className="border-b border-neutral-800/50 text-gray-300">
+                    <tr key={r.id} className="border-b border-neutral-200/80 text-neutral-600">
                       <td className="py-2 pr-4">{r.name}</td>
                       <td className="py-2 pr-4">{r.email}</td>
                       <td className="py-2 pr-4">{r.phone || '-'}</td>
@@ -456,113 +456,113 @@ function WebinarForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Basic Info */}
-      <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
         <h2 className="text-lg font-semibold mb-4">基本信息</h2>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">标题 *</label>
+            <label className="block text-sm text-neutral-500 mb-2">标题 *</label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
               required
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">副标题</label>
+            <label className="block text-sm text-neutral-500 mb-2">副标题</label>
             <input
               type="text"
               value={formData.subtitle}
               onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">视频 URL *</label>
+            <label className="block text-sm text-neutral-500 mb-2">视频 URL *</label>
             <input
               type="url"
               value={formData.videoUrl}
               onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
               placeholder="https://example.com/video.mp4、.m3u8 或 YouTube 链接"
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-neutral-400 mt-1">
               支持格式：MP4 直链、M3U8 (HLS) 流媒体、YouTube 视频链接
             </p>
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">时长 (分钟)</label>
+            <label className="block text-sm text-neutral-500 mb-2">时长 (分钟)</label>
             <input
               type="number"
               value={formData.duration}
               onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 60 })}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
             />
           </div>
         </div>
       </section>
 
       {/* Speaker Info */}
-      <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
         <h2 className="text-lg font-semibold mb-4">讲者信息</h2>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">讲者姓名 *</label>
+            <label className="block text-sm text-neutral-500 mb-2">讲者姓名 *</label>
             <input
               type="text"
               value={formData.speakerName}
               onChange={(e) => setFormData({ ...formData, speakerName: e.target.value })}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
               required
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">讲者头衔</label>
+            <label className="block text-sm text-neutral-500 mb-2">讲者头衔</label>
             <input
               type="text"
               value={formData.speakerTitle}
               onChange={(e) => setFormData({ ...formData, speakerTitle: e.target.value })}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">讲者照片 URL</label>
+            <label className="block text-sm text-neutral-500 mb-2">讲者照片 URL</label>
             <input
               type="url"
               value={formData.speakerImage}
               onChange={(e) => setFormData({ ...formData, speakerImage: e.target.value })}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">讲者简介</label>
+            <label className="block text-sm text-neutral-500 mb-2">讲者简介</label>
             <textarea
               value={formData.speakerBio}
               onChange={(e) => setFormData({ ...formData, speakerBio: e.target.value })}
               rows={3}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
             />
           </div>
         </div>
       </section>
 
       {/* Highlights */}
-      <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
         <h2 className="text-lg font-semibold mb-4">学习要点</h2>
-        <p className="text-gray-500 text-sm mb-2">每行一个要点</p>
+        <p className="text-neutral-400 text-sm mb-2">每行一个要点</p>
         <textarea
           value={formData.highlights}
           onChange={(e) => setFormData({ ...formData, highlights: e.target.value })}
           rows={4}
           placeholder="了解 2026 年最具潜力的投资趋势&#10;学习 AI 产业的核心投资逻辑&#10;掌握数字资产配置的黄金比例"
-          className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+          className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
         />
       </section>
 
       {/* Sessions */}
-      <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">场次设置</h2>
           <button
@@ -576,7 +576,7 @@ function WebinarForm({
         <div className="space-y-3">
           {sessions.map((session, idx) => (
             <div key={idx} className="flex items-center gap-3">
-              <span className="text-gray-500 text-sm w-16">场次 {idx + 1}</span>
+              <span className="text-neutral-400 text-sm w-16">场次 {idx + 1}</span>
               <input
                 type="datetime-local"
                 value={session.startTime}
@@ -585,7 +585,7 @@ function WebinarForm({
                   newSessions[idx].startTime = e.target.value;
                   setSessions(newSessions);
                 }}
-                className="flex-1 bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+                className="flex-1 bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
               />
               {sessions.length > 1 && (
                 <button
@@ -602,7 +602,7 @@ function WebinarForm({
       </section>
 
       {/* Auto Chat */}
-      <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">自动聊天消息</h2>
           <button
@@ -615,10 +615,10 @@ function WebinarForm({
         </div>
         <div className="space-y-3">
           {autoChat.length === 0 && (
-            <p className="text-gray-500 text-sm">尚未设置自动消息</p>
+            <p className="text-neutral-400 text-sm">尚未设置自动消息</p>
           )}
           {autoChat.map((msg, idx) => (
-            <div key={idx} className="flex items-center gap-3 bg-gray-800/50 p-3 rounded">
+            <div key={idx} className="flex items-center gap-3 bg-[#F5F5F0] p-3 rounded">
               <input
                 type="number"
                 value={msg.timeSec}
@@ -628,7 +628,7 @@ function WebinarForm({
                   setAutoChat(newChat);
                 }}
                 placeholder="秒"
-                className="w-20 bg-gray-800 text-white px-3 py-2 rounded border border-gray-700 text-sm"
+                className="w-20 bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
               />
               <input
                 type="text"
@@ -639,7 +639,7 @@ function WebinarForm({
                   setAutoChat(newChat);
                 }}
                 placeholder="昵称"
-                className="w-24 bg-gray-800 text-white px-3 py-2 rounded border border-gray-700 text-sm"
+                className="w-24 bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
               />
               <input
                 type="text"
@@ -650,7 +650,7 @@ function WebinarForm({
                   setAutoChat(newChat);
                 }}
                 placeholder="消息内容"
-                className="flex-1 bg-gray-800 text-white px-3 py-2 rounded border border-gray-700 text-sm"
+                className="flex-1 bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
               />
               <button
                 type="button"
@@ -665,7 +665,7 @@ function WebinarForm({
       </section>
 
       {/* CTA Events */}
-      <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">CTA 设置</h2>
           <button
@@ -685,12 +685,12 @@ function WebinarForm({
         </div>
         <div className="space-y-4">
           {ctaEvents.length === 0 && (
-            <p className="text-gray-500 text-sm">尚未设置 CTA</p>
+            <p className="text-neutral-400 text-sm">尚未设置 CTA</p>
           )}
           {ctaEvents.map((cta, idx) => (
-            <div key={idx} className="bg-gray-800/50 p-4 rounded space-y-3">
+            <div key={idx} className="bg-[#F5F5F0] p-4 rounded space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-400">CTA #{idx + 1}</span>
+                <span className="text-sm text-neutral-500">CTA #{idx + 1}</span>
                 <button
                   type="button"
                   onClick={() => setCtaEvents(ctaEvents.filter((_, i) => i !== idx))}
@@ -709,7 +709,7 @@ function WebinarForm({
                     setCtaEvents(newCta);
                   }}
                   placeholder="显示时间 (秒)"
-                  className="bg-gray-800 text-white px-3 py-2 rounded border border-gray-700 text-sm"
+                  className="bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
                 />
                 <input
                   type="number"
@@ -720,7 +720,7 @@ function WebinarForm({
                     setCtaEvents(newCta);
                   }}
                   placeholder="隐藏时间 (秒)"
-                  className="bg-gray-800 text-white px-3 py-2 rounded border border-gray-700 text-sm"
+                  className="bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
                 />
               </div>
               <input
@@ -732,7 +732,7 @@ function WebinarForm({
                   setCtaEvents(newCta);
                 }}
                 placeholder="按钮文字"
-                className="w-full bg-gray-800 text-white px-3 py-2 rounded border border-gray-700 text-sm"
+                className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
               />
               <input
                 type="url"
@@ -743,7 +743,7 @@ function WebinarForm({
                   setCtaEvents(newCta);
                 }}
                 placeholder="链接 URL"
-                className="w-full bg-gray-800 text-white px-3 py-2 rounded border border-gray-700 text-sm"
+                className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
               />
               <input
                 type="text"
@@ -754,9 +754,9 @@ function WebinarForm({
                   setCtaEvents(newCta);
                 }}
                 placeholder="优惠文案 (选填)"
-                className="w-full bg-gray-800 text-white px-3 py-2 rounded border border-gray-700 text-sm"
+                className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
               />
-              <label className="flex items-center gap-2 text-sm text-gray-400">
+              <label className="flex items-center gap-2 text-sm text-neutral-500">
                 <input
                   type="checkbox"
                   checked={cta.showCountdown}
@@ -775,54 +775,54 @@ function WebinarForm({
       </section>
 
       {/* Viewer Config */}
-      <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
         <h2 className="text-lg font-semibold mb-4">观看人数设置</h2>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">基础观看人数</label>
+            <label className="block text-sm text-neutral-500 mb-2">基础观看人数</label>
             <input
               type="number"
               value={formData.viewerBaseCount}
               onChange={(e) => setFormData({ ...formData, viewerBaseCount: parseInt(e.target.value) || 100 })}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-2">观看人数倍率</label>
+            <label className="block text-sm text-neutral-500 mb-2">观看人数倍率</label>
             <input
               type="number"
               step="0.1"
               value={formData.viewerMultiplier}
               onChange={(e) => setFormData({ ...formData, viewerMultiplier: parseFloat(e.target.value) || 1.5 })}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
             />
           </div>
         </div>
       </section>
 
       {/* Webhook Integration */}
-      <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
         <h2 className="text-lg font-semibold mb-4">Webhook 集成</h2>
         <div>
-          <label className="block text-sm text-gray-400 mb-2">Webhook URL</label>
+          <label className="block text-sm text-neutral-500 mb-2">Webhook URL</label>
           <input
             type="url"
             value={formData.webhookUrl}
             onChange={(e) => setFormData({ ...formData, webhookUrl: e.target.value })}
             placeholder="https://hooks.zapier.com/... 或 CRM webhook URL"
-            className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+            className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
           />
-          <p className="text-gray-500 text-xs mt-2">报名时自动 POST 数据到此 URL（适用于 Zapier、CRM 等）</p>
+          <p className="text-neutral-400 text-xs mt-2">报名时自动 POST 数据到此 URL（适用于 Zapier、CRM 等）</p>
         </div>
       </section>
 
       {/* Status */}
-      <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
         <h2 className="text-lg font-semibold mb-4">发布状态</h2>
         <select
           value={formData.status}
           onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'published' | 'ended' })}
-          className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-700 focus:border-blue-500 focus:outline-none"
+          className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
         >
           <option value="draft">草稿</option>
           <option value="published">已发布</option>

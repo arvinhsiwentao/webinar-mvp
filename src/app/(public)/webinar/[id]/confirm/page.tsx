@@ -57,11 +57,11 @@ export default function ConfirmPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#FAFAF7] text-neutral-900 flex items-center justify-center px-6">
       {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-green-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#C9A962]/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-green-50 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#B8953F]/8 rounded-full blur-3xl" />
       </div>
 
       <Card className="relative z-10 max-w-md w-full text-center p-10 border-green-500/20">
@@ -78,7 +78,7 @@ export default function ConfirmPage() {
           {name}，你已成功报名！
         </h1>
 
-        <p className="text-neutral-400 mb-8 leading-relaxed">
+        <p className="text-neutral-500 mb-8 leading-relaxed">
           我们已将直播信息发送到你的邮箱。<br />
           请在直播开始前进入等候室。
         </p>
@@ -86,7 +86,7 @@ export default function ConfirmPage() {
         {/* Countdown Timer */}
         {session && (
           <div className="mb-8">
-            <p className="text-neutral-400 text-sm mb-3">距离直播还有</p>
+            <p className="text-neutral-500 text-sm mb-3">距离直播还有</p>
             <CountdownTimer
               targetTime={session.startTime}
               size="md"
@@ -100,21 +100,21 @@ export default function ConfirmPage() {
         <div className="space-y-4 mb-8">
           <div className="flex gap-3">
             <a href={getGoogleCalendarUrl()} target="_blank" rel="noopener noreferrer"
-               className="flex-1 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700 rounded-lg p-4 text-center transition-colors">
+               className="flex-1 bg-[#F5F5F0] hover:bg-neutral-100 border border-[#E8E5DE] rounded-lg p-4 text-center transition-colors">
               📅 Google 日历
             </a>
             <button onClick={handleDownloadICS}
-              className="flex-1 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700 rounded-lg p-4 text-center transition-colors">
+              className="flex-1 bg-[#F5F5F0] hover:bg-neutral-100 border border-[#E8E5DE] rounded-lg p-4 text-center transition-colors">
               📅 iCal 下载
             </button>
           </div>
 
-          <div className="flex items-center gap-4 p-4 bg-neutral-800/50 rounded-lg border border-neutral-700 text-left">
-            <div className="w-10 h-10 rounded-full bg-[#C9A962]/20 flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center gap-4 p-4 bg-[#F5F5F0] rounded-lg border border-[#E8E5DE] text-left">
+            <div className="w-10 h-10 rounded-full bg-[#B8953F]/10 flex items-center justify-center flex-shrink-0">
               <span>📧</span>
             </div>
             <div>
-              <p className="text-sm text-neutral-400">确认邮件</p>
+              <p className="text-sm text-neutral-500">确认邮件</p>
               <p className="font-medium">检查你的收件箱</p>
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function ConfirmPage() {
           </Button>
         </Link>
 
-        <p className="text-neutral-600 text-xs mt-6">
+        <p className="text-neutral-400 text-xs mt-6">
           直播开始前 10 分钟可进入直播间
         </p>
       </Card>

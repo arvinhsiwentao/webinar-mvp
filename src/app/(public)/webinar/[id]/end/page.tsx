@@ -33,18 +33,18 @@ export default function EndPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <div className="w-10 h-10 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-[#B8953F] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!webinar) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-white">
+      <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center text-neutral-900">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">找不到直播</h1>
-          <Link href="/" className="text-[#C9A962] hover:underline">返回首页</Link>
+          <Link href="/" className="text-[#B8953F] hover:underline">返回首页</Link>
         </div>
       </div>
     );
@@ -54,39 +54,39 @@ export default function EndPage() {
   const replayUrl = `/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}&replay=true`;
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <div className="min-h-screen bg-[#FAFAF7] text-neutral-900">
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         {/* Thank you header */}
         <div className="mb-10">
-          <div className="w-16 h-16 bg-[#C9A962]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 bg-[#B8953F]/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-3xl">🎉</span>
           </div>
           <h1 className="text-3xl font-bold mb-3">
             感谢你的参与，{userName}！
           </h1>
-          <p className="text-neutral-400 text-lg">
+          <p className="text-neutral-500 text-lg">
             {webinar.title} 已结束
           </p>
         </div>
 
         {/* Speaker info */}
-        <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-6 mb-8">
+        <div className="bg-white/80 border border-neutral-200 rounded-lg p-6 mb-8">
           <div className="flex items-center justify-center gap-4 mb-4">
             {webinar.speakerImage && (
               <img
                 src={webinar.speakerImage}
                 alt={webinar.speakerName}
-                className="w-16 h-16 rounded-full object-cover border-2 border-[#C9A962]/30"
+                className="w-16 h-16 rounded-full object-cover border-2 border-[#B8953F]/30"
               />
             )}
             <div className="text-left">
               <p className="font-bold text-lg">{webinar.speakerName}</p>
               {webinar.speakerTitle && (
-                <p className="text-sm text-[#C9A962]">{webinar.speakerTitle}</p>
+                <p className="text-sm text-[#B8953F]">{webinar.speakerTitle}</p>
               )}
             </div>
           </div>
-          <p className="text-neutral-400 text-sm">
+          <p className="text-neutral-500 text-sm">
             感谢 {webinar.speakerName} 的精彩分享！
           </p>
         </div>
@@ -95,7 +95,7 @@ export default function EndPage() {
         {firstCTA && (
           <div className="bg-gradient-to-r from-red-600/20 to-orange-600/20 border border-red-500/30 rounded-lg p-6 mb-8">
             {firstCTA.promoText && (
-              <p className="text-lg font-bold text-white mb-3">{firstCTA.promoText}</p>
+              <p className="text-lg font-bold text-neutral-900 mb-3">{firstCTA.promoText}</p>
             )}
             <a
               href={firstCTA.url}
@@ -112,15 +112,15 @@ export default function EndPage() {
         <div className="mb-8">
           <Link
             href={replayUrl}
-            className="inline-block bg-neutral-800 hover:bg-neutral-700 text-white px-6 py-3 rounded-lg transition-colors"
+            className="inline-block bg-[#F5F5F0] hover:bg-neutral-100 text-neutral-900 px-6 py-3 rounded-lg transition-colors"
           >
             🔄 观看回放
           </Link>
         </div>
 
         {/* Footer */}
-        <footer className="border-t border-neutral-800 pt-6 mt-8">
-          <p className="text-neutral-600 text-sm">
+        <footer className="border-t border-neutral-200 pt-6 mt-8">
+          <p className="text-neutral-400 text-sm">
             © 2026 {webinar.speakerName}. All rights reserved.
           </p>
         </footer>

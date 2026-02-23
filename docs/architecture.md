@@ -1,12 +1,12 @@
 # Architecture
 
-> Last verified: 2026-02-11
+> Last verified: 2026-02-23
 
 Living document. Hooks remind Claude to keep this current when structural changes are made.
 
 ## System Overview
 
-Simulive (simulated-live) webinar platform. A pre-recorded video plays on a schedule while interactive features — auto-chat, CTA overlays, viewer count — create the feel of a live broadcast. Built for the Taiwan market (Traditional Chinese, zh-TW locale). The MVP uses JSON file storage and polling; production targets PostgreSQL and WebSocket.
+Simulive (simulated-live) webinar platform. A pre-recorded video plays on a schedule while interactive features — auto-chat, CTA overlays, viewer count — create the feel of a live broadcast. Built for the 北美華人 (North American Chinese) market (Simplified Chinese, zh-CN locale). The MVP uses JSON file storage and polling; production targets PostgreSQL and WebSocket.
 
 ## Page Flow & Routing
 
@@ -18,7 +18,7 @@ Landing Page  →  Registration  →  Confirm  →  Waiting Room  →  Live Room
 
 Pages are organized into **route groups** — parenthesized folders that are invisible in the URL but provide independent layouts:
 
-- `(public)/` — Viewer-facing pages (dark cinematic theme)
+- `(public)/` — Viewer-facing pages (light luxury ivory theme)
 - `(admin)/` — Admin dashboard (separate layout, future auth boundary)
 
 Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only `<html>`, `<body>`, and fonts.
@@ -83,10 +83,10 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 
 ### Utilities (`src/lib/utils.ts`)
 
-- `formatDate`, `formatTime`, `formatDateTime` — `zh-TW` locale formatting
+- `formatDate`, `formatTime`, `formatDateTime` — `zh-CN` locale formatting
 - `formatCountdown`, `getTimeUntil` — countdown math
 - `generateICSContent` — calendar file generation
-- `validateEmail`, `validatePhone` — phone expects Taiwan `09xxxxxxxx` format
+- `validateEmail`, `validatePhone` — phone accepts North American 10-digit format (with optional +1)
 - `cn(...classes)` — className join helper (like `clsx`)
 - `isYouTubeUrl(url)` — detects YouTube video URLs (youtube.com, youtu.be, embed)
 - `getVideoSourceType(url)` — returns Video.js MIME type (`video/youtube`, `application/x-mpegURL`, or `video/mp4`)
@@ -126,26 +126,26 @@ Defined in `src/styles/design-tokens.css` as CSS custom properties.
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--color-bg` | `#0a0a0a` | Page background |
-| `--color-surface` | `#141414` | Card/panel background |
-| `--color-surface-elevated` | `#1a1a1a` | Elevated surfaces |
-| `--color-border` | `#262626` | Default borders |
-| `--color-text` | `#fafafa` | Primary text |
-| `--color-text-secondary` | `#a3a3a3` | Secondary text |
-| `--color-gold` | `#C9A962` | Accent — CTAs, highlights, focus rings |
-| `--color-gold-dim` | `rgba(201,169,98,0.15)` | Gold tint backgrounds |
+| `--color-bg` | `#FAFAF7` | Warm ivory page background |
+| `--color-surface` | `#FFFFFF` | Card/panel background |
+| `--color-surface-elevated` | `#F5F5F0` | Elevated surfaces |
+| `--color-border` | `#E8E5DE` | Warm default borders |
+| `--color-text` | `#1A1A1A` | Primary text |
+| `--color-text-secondary` | `#6B6B6B` | Secondary text |
+| `--color-gold` | `#B8953F` | Deep gold accent — CTAs, highlights, focus rings |
+| `--color-gold-dim` | `rgba(184,149,63,0.08)` | Gold tint backgrounds |
 | `--color-live` | `#ef4444` | Live indicator red |
 
 - **Fonts:** Geist Sans / Geist Mono (via Next.js font loading)
 - **Radii:** Subtle editorial — `2px` / `4px` / `8px`
-- **Aesthetic:** Dark, minimal, editorial. No decorative elements. Gold accent for CTAs.
+- **Aesthetic:** Light, minimal, editorial. Warm ivory base. Deep gold accent for CTAs.
 
 ## Key Constraints
 
 1. **No video seeking** — Business requirement. VideoPlayer blocks scrubbing, keyboard seeks, and programmatic seeking. Not a bug.
 2. **No WebSocket** — Chat uses auto-chat messages + API polling. Socket.io planned for production.
 3. **No authentication** — Admin panel is open. Auth planned for production.
-4. **Taiwan locale** — Phone validation: `09xxxxxxxx`. Date formatting: `zh-TW` locale with Chinese weekdays.
+4. **North American Chinese locale** — Phone validation: US/Canada 10-digit format. Date formatting: `zh-CN` locale.
 5. **i18n required** — All UI text must use translation keys, never hardcoded strings.
 6. **Unsplash images** — `next.config.ts` allows remote images from `*.unsplash.com`.
 7. **Dynamic video import** — Video.js imported client-side only to avoid SSR issues.
@@ -161,5 +161,5 @@ Modules defined in SPEC.md but **not yet implemented**:
 - **Advanced admin** — Full CRUD dashboard, analytics, session management
 - **Viewer count simulation** — Fake concurrent viewer display
 - **Social sharing** — Share buttons and OG tags
-- **Multi-language support** — Currently zh-TW only, no language switcher
+- **Multi-language support** — Currently zh-CN only, no language switcher
 - **Recording/replay** — Post-live replay functionality

@@ -1,29 +1,29 @@
 /* ========================================
-   Design Tokens - Editorial Luxury
+   Design Tokens - Editorial Light Luxury
    ======================================== */
 
 :root {
-  /* Core Palette */
-  --color-bg: #0a0a0a;
-  --color-surface: #141414;
-  --color-surface-elevated: #1a1a1a;
-  --color-border: #262626;
-  --color-border-subtle: #1f1f1f;
+  /* Core Palette - Light Ivory */
+  --color-bg: #FAFAF7;
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #F5F5F0;
+  --color-border: #E8E5DE;
+  --color-border-subtle: #F0EDE6;
 
   /* Text */
-  --color-text: #fafafa;
-  --color-text-secondary: #a3a3a3;
-  --color-text-muted: #525252;
+  --color-text: #1A1A1A;
+  --color-text-secondary: #6B6B6B;
+  --color-text-muted: #9CA3AF;
 
-  /* Accent - Champagne Gold */
-  --color-gold: #C9A962;
-  --color-gold-light: #D4BA7A;
-  --color-gold-dim: rgba(201, 169, 98, 0.15);
-  --color-gold-glow: rgba(201, 169, 98, 0.3);
+  /* Accent - Deep Gold (richer on light backgrounds) */
+  --color-gold: #B8953F;
+  --color-gold-light: #C9A962;
+  --color-gold-dim: rgba(184, 149, 63, 0.08);
+  --color-gold-glow: rgba(184, 149, 63, 0.15);
 
   /* Semantic */
-  --color-success: #4ade80;
-  --color-error: #f87171;
+  --color-success: #16a34a;
+  --color-error: #dc2626;
   --color-live: #ef4444;
 
   /* Typography */
@@ -47,9 +47,9 @@
   outline-offset: 2px;
 }
 
-/* Selection - gold tint */
+/* Selection - gold tint on light */
 ::selection {
-  background: var(--color-gold-dim);
+  background: var(--color-gold-glow);
   color: var(--color-text);
 }
 

@@ -77,7 +77,7 @@ export default function CountdownTimer({
     if (variant === 'urgent' || isUrgent) {
       return {
         container: 'bg-gradient-to-r from-red-600 to-orange-500 shadow-lg shadow-red-500/20',
-        number: 'bg-black/30 text-white',
+        number: 'bg-white/20 text-white',
         label: 'text-red-100',
         separator: 'text-white',
       };
@@ -85,16 +85,16 @@ export default function CountdownTimer({
     if (variant === 'minimal') {
       return {
         container: 'bg-transparent',
-        number: 'bg-neutral-800 text-white',
+        number: 'bg-[#F5F5F0] text-neutral-800',
         label: 'text-neutral-500',
-        separator: 'text-neutral-600',
+        separator: 'text-neutral-400',
       };
     }
     return {
-      container: 'bg-neutral-800/50 backdrop-blur',
-      number: 'bg-neutral-900 text-white',
+      container: 'bg-white/80 backdrop-blur border border-[#E8E5DE]',
+      number: 'bg-[#F5F5F0] text-neutral-800',
       label: 'text-neutral-500',
-      separator: 'text-neutral-600',
+      separator: 'text-neutral-400',
     };
   };
 
@@ -105,7 +105,7 @@ export default function CountdownTimer({
     return (
       <div className={`rounded-lg p-4 ${classes.container}`}>
         <div className="text-center">
-          <span className={`font-bold ${sizeClasses[size]} text-green-400 animate-pulse`}>
+          <span className={`font-bold ${sizeClasses[size]} text-green-600 animate-pulse`}>
             🎬 直播进行中！
           </span>
         </div>

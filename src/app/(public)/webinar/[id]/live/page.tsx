@@ -13,10 +13,10 @@ import { track } from '@/lib/tracking';
 const VideoPlayer = dynamic(() => import('@/components/video/VideoPlayer'), {
   ssr: false,
   loading: () => (
-    <div className="w-full aspect-video bg-neutral-900 flex items-center justify-center rounded-lg border border-neutral-800">
+    <div className="w-full aspect-video bg-white flex items-center justify-center rounded-lg border border-neutral-200">
       <div className="text-center">
-        <div className="w-10 h-10 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <span className="text-neutral-500">加载播放器中...</span>
+        <div className="w-10 h-10 border-2 border-[#B8953F] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <span className="text-neutral-400">加载播放器中...</span>
       </div>
     </div>
   ),
@@ -61,7 +61,7 @@ export default function LiveRoomPage() {
         if (!res.ok) throw new Error('Webinar not found');
         const data = await res.json();
         setWebinar(data.webinar);
-        
+
         const foundSession = data.webinar.sessions.find((s: Session) => s.id === sessionId);
         setSession(foundSession || data.webinar.sessions[0]);
       } catch {
@@ -151,10 +151,10 @@ export default function LiveRoomPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-neutral-500">加载直播中...</p>
+          <div className="w-12 h-12 border-2 border-[#B8953F] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-neutral-400">加载直播中...</p>
         </div>
       </div>
     );
@@ -162,8 +162,8 @@ export default function LiveRoomPage() {
 
   if (!webinar || !session) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <div className="text-center text-white">
+      <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
+        <div className="text-center text-neutral-900">
           <h1 className="text-2xl font-bold mb-4">找不到直播</h1>
           <Button variant="ghost" onClick={() => router.push('/')}>
             返回首页
@@ -174,14 +174,14 @@ export default function LiveRoomPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <div className="min-h-screen bg-[#FAFAF7] text-neutral-900">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-neutral-950/90 backdrop-blur-md border-b border-neutral-800/50">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-neutral-200/80">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 border border-[#C9A962] rounded flex items-center justify-center">
-                <span className="font-serif text-[#C9A962] text-sm">M</span>
+              <div className="w-8 h-8 border border-[#B8953F] rounded flex items-center justify-center">
+                <span className="font-serif text-[#B8953F] text-sm">M</span>
               </div>
               <h1 className="text-lg font-bold truncate max-w-[200px] md:max-w-none">
                 {webinar.title}
@@ -191,8 +191,8 @@ export default function LiveRoomPage() {
               LIVE
             </Badge>
           </div>
-          
-          <div className="flex items-center gap-2 text-neutral-400 text-sm">
+
+          <div className="flex items-center gap-2 text-neutral-500 text-sm">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
             </svg>
@@ -207,7 +207,7 @@ export default function LiveRoomPage() {
           {/* Video + CTA section */}
           <div className="lg:col-span-2 space-y-4">
             {/* Video Player Container */}
-            <div className="relative rounded-lg overflow-hidden border border-neutral-800 bg-neutral-900">
+            <div className="relative rounded-lg overflow-hidden border border-neutral-200 bg-white">
               <VideoPlayer
                 src={webinar.videoUrl}
                 autoPlay={false}
@@ -224,31 +224,31 @@ export default function LiveRoomPage() {
             />
 
             {/* Video info card */}
-            <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-5">
+            <div className="bg-white/80 border border-neutral-200 rounded-lg p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <h2 className="text-lg font-bold mb-2">{webinar.title}</h2>
-                  <div className="flex items-center gap-4 text-sm text-neutral-400">
+                  <div className="flex items-center gap-4 text-sm text-neutral-500">
                     {webinar.speakerImage && (
                       <img
                         src={webinar.speakerImage}
                         alt={webinar.speakerName}
-                        className="w-10 h-10 rounded-full object-cover border border-neutral-700"
+                        className="w-10 h-10 rounded-full object-cover border border-[#E8E5DE]"
                       />
                     )}
                     <div>
-                      <p className="font-medium text-white">{webinar.speakerName}</p>
+                      <p className="font-medium text-neutral-900">{webinar.speakerName}</p>
                       {webinar.speakerTitle && (
-                        <p className="text-neutral-500 text-xs">{webinar.speakerTitle}</p>
+                        <p className="text-neutral-400 text-xs">{webinar.speakerTitle}</p>
                       )}
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="text-right text-sm">
-                  <div className="flex items-center gap-2 text-neutral-500">
+                  <div className="flex items-center gap-2 text-neutral-400">
                     <span>⏱️ {formatTime(currentTime)}</span>
-                    <span className={`px-2 py-0.5 rounded text-xs ${isPlaying ? 'bg-green-500/20 text-green-400' : 'bg-neutral-700 text-neutral-400'}`}>
+                    <span className={`px-2 py-0.5 rounded text-xs ${isPlaying ? 'bg-green-500/20 text-green-400' : 'bg-neutral-200 text-neutral-500'}`}>
                       {isPlaying ? '播放中' : '暂停'}
                     </span>
                   </div>
@@ -257,19 +257,19 @@ export default function LiveRoomPage() {
             </div>
 
             {/* Mobile: Speaker Info */}
-            <div className="lg:hidden bg-neutral-900/50 border border-neutral-800 rounded-lg p-5">
+            <div className="lg:hidden bg-white/80 border border-neutral-200 rounded-lg p-5">
               <div className="flex items-center gap-4">
                 {webinar.speakerImage && (
                   <img
                     src={webinar.speakerImage}
                     alt={webinar.speakerName}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-[#C9A962]/30"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-[#B8953F]/30"
                   />
                 )}
                 <div>
                   <h3 className="font-bold text-lg">{webinar.speakerName}</h3>
                   {webinar.speakerTitle && (
-                    <p className="text-sm text-[#C9A962]">{webinar.speakerTitle}</p>
+                    <p className="text-sm text-[#B8953F]">{webinar.speakerTitle}</p>
                   )}
                 </div>
               </div>
@@ -278,7 +278,7 @@ export default function LiveRoomPage() {
 
           {/* Chat section */}
           <div className="lg:col-span-1 h-[500px] lg:h-[600px]">
-            <div className="h-full bg-neutral-900/50 border border-neutral-800 rounded-lg overflow-hidden">
+            <div className="h-full bg-white/80 border border-neutral-200 rounded-lg overflow-hidden">
               <ChatRoom
                 currentTime={currentTime}
                 autoMessages={webinar.autoChat}
@@ -294,12 +294,12 @@ export default function LiveRoomPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-neutral-800 px-4 py-6 mt-8">
+      <footer className="border-t border-neutral-200 px-4 py-6 mt-8">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-neutral-600 text-sm">
+          <p className="text-neutral-400 text-sm">
             🔒 请勿录影或截图分享
           </p>
-          <p className="text-neutral-700 text-xs mt-2">
+          <p className="text-neutral-400 text-xs mt-2">
             © 2026 {webinar.speakerName}. All rights reserved.
           </p>
         </div>
