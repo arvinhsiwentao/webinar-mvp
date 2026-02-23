@@ -21,6 +21,16 @@ export interface AutoChatMessage {
   message: string;
 }
 
+export interface WebinarSubtitleCue {
+  id: string;
+  start: number;
+  end: number;
+  text: string;
+  lines: string[];
+  cps?: number;
+  cpl?: number;
+}
+
 export interface Session {
   id: string;
   startTime: string; // ISO datetime
@@ -43,6 +53,9 @@ export interface Webinar {
   sessions: Session[];
   autoChat: AutoChatMessage[];
   ctaEvents: CTAEvent[];
+  subtitleCues?: WebinarSubtitleCue[];
+  subtitleLanguage?: string;
+  subtitleLastGeneratedAt?: string;
   status: 'draft' | 'published' | 'ended';
   viewerBaseCount: number;
   viewerMultiplier: number;
@@ -113,6 +126,8 @@ export interface CreateWebinarRequest {
   sessions?: Omit<Session, 'id' | 'status'>[];
   autoChat?: Omit<AutoChatMessage, 'id'>[];
   ctaEvents?: Omit<CTAEvent, 'id'>[];
+  subtitleCues?: WebinarSubtitleCue[];
+  subtitleLanguage?: string;
   viewerBaseCount?: number;
   viewerMultiplier?: number;
   webhookUrl?: string;

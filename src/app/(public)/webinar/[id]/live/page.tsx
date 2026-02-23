@@ -5,6 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import ChatRoom, { ChatMessage } from '@/components/chat/ChatRoom';
 import CTAOverlay from '@/components/cta/CTAOverlay';
+import SubtitleOverlay from '@/components/subtitles/SubtitleOverlay';
 import SidebarTabs from '@/components/sidebar/SidebarTabs';
 import InfoTab from '@/components/sidebar/InfoTab';
 import ViewersTab from '@/components/sidebar/ViewersTab';
@@ -218,6 +219,7 @@ export default function LiveRoomPage() {
                 autoPlay={false}
                 onPlaybackEvent={handlePlaybackEvent}
               />
+              <SubtitleOverlay currentTime={currentTime} cues={webinar.subtitleCues} />
               {/* On-video CTA overlays */}
               <CTAOverlay
                 currentTime={currentTime}

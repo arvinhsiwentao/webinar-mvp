@@ -9,6 +9,7 @@ import { isYouTubeUrl, getVideoSourceType } from '@/lib/utils';
 
 const SEEK_FORWARD_TOLERANCE_SEC = 2;
 const SEEK_REWIND_TOLERANCE_SEC = 1;
+const TIMEUPDATE_EMIT_INTERVAL_SEC = 0.1;
 const BLOCKED_KEYS = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
 
 export interface PlaybackEvent {
@@ -26,7 +27,7 @@ export interface VideoPlayerProps {
 export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent }: VideoPlayerProps) {
   const videoRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
-  const lastReportedTime = useRef(0);
+  const lastReportedTime = useRef(-1);
 
   const emitEvent = useCallback(
     (type: PlaybackEvent['type'], player: Player) => {
@@ -103,8 +104,8 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent }: 
     player.on('ended', () => emitEvent('ended', player));
 
     player.on('timeupdate', () => {
-      const current = Math.floor(player.currentTime() ?? 0);
-      if (current !== lastReportedTime.current) {
+      const current = player.currentTime() ?? 0;
+      if (Math.abs(current - lastReportedTime.current) >= TIMEUPDATE_EMIT_INTERVAL_SEC) {
         lastReportedTime.current = current;
         emitEvent('timeupdate', player);
       }
