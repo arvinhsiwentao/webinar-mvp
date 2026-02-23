@@ -99,7 +99,10 @@
         "buttonText": "🚀 立即下載 MIKE是麥克 APP",
         "url": "https://www.cmoney.tw/app/itemcontent.aspx?id=6643",
         "promoText": "🔥 限時優惠！原價 NT$32,000 → 直播限定 NT$17,250",
-        "showCountdown": true
+        "showCountdown": true,
+        "position": "on_video",
+        "color": "#16a34a",
+        "secondaryText": "前 20 名加入的学员，免费获赠一对一专属指导"
       },
       {
         "showAtSec": 180,
@@ -107,13 +110,27 @@
         "buttonText": "📱 免費體驗 APP 完整功能",
         "url": "https://www.cmoney.tw/app/itemcontent.aspx?id=6643",
         "promoText": "限時免費體驗，享有軟體完整權限！",
-        "showCountdown": true
+        "showCountdown": true,
+        "position": "on_video",
+        "color": "#dc2626",
+        "secondaryText": "限时免费体验，享有软件完整权限！"
       }
     ],
     "status": "published",
     "viewerBaseCount": 100,
     "viewerMultiplier": 3,
     "webhookUrl": "",
+    "heroImageUrl": "/images/mike-speaker.jpg",
+    "heroEyebrowText": "限时公开 · 免费席位有限",
+    "promoImageUrl": "",
+    "disclaimerText": "本次讲座内容仅为知识分享与经验探讨，不构成任何形式的投资建议、理财推荐或收益保证。所有提及的策略、工具及案例均为 Mike 个人投资经验分享。",
+    "endPageSalesCopy": "",
+    "endPageCtaText": "限时特惠加入 Mike是麥克 APP",
+    "endPageCtaUrl": "https://www.cmoney.tw/app/itemcontent.aspx?id=6643",
+    "endPageCtaColor": "#7C3AED",
+    "sidebarDescription": "90 分钟揭秘：从特斯拉早期投资者到 4 年达成财务自由的完整路径。Mike 将分享他的抄底存股双策略、真实持仓清单，以及普通人也能复制的财务自由方法。",
+    "missedWebinarUrl": "",
+    "prerollVideoUrl": "",
     "updatedAt": "2026-02-11T06:32:44.418Z"
   }
 ]
