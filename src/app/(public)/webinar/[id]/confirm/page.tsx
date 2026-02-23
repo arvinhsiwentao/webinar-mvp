@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Badge, Card } from '@/components/ui';
 import { Webinar, Session } from '@/lib/types';
@@ -15,8 +15,13 @@ export default function ConfirmPage() {
   const sessionId = searchParams.get('session') || '';
   const name = searchParams.get('name') || '你';
 
+  const router = useRouter();
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+
+  const handleCountdownComplete = useCallback(() => {
+    router.push(`/webinar/${webinarId}/waiting?session=${sessionId}&name=${encodeURIComponent(name)}`);
+  }, [router, webinarId, sessionId, name]);
 
   useEffect(() => {
     async function fetchWebinar() {
@@ -65,11 +70,11 @@ export default function ConfirmPage() {
       </div>
 
       <Card className="relative z-10 max-w-md w-full text-center p-10 border-green-500/20">
-        {/* Success Icon */}
-        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center">
-          <svg className="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
+        {/* Confetti celebration */}
+        <div className="relative mb-6">
+          <div className="text-6xl mb-2">🎉</div>
+          <div className="absolute -top-2 left-1/4 text-2xl animate-bounce" style={{ animationDelay: '0.1s' }}>🎊</div>
+          <div className="absolute -top-1 right-1/4 text-2xl animate-bounce" style={{ animationDelay: '0.3s' }}>✨</div>
         </div>
 
         <Badge variant="success" className="mb-6">报名成功</Badge>
@@ -92,6 +97,18 @@ export default function ConfirmPage() {
               size="md"
               showDays={true}
               showLabels={true}
+              onComplete={handleCountdownComplete}
+            />
+          </div>
+        )}
+
+        {/* Promotional Image */}
+        {webinar?.promoImageUrl && (
+          <div className="mb-8 rounded-lg overflow-hidden border border-[#E8E5DE]">
+            <img
+              src={webinar.promoImageUrl}
+              alt={webinar.title}
+              className="w-full h-auto"
             />
           </div>
         )}
