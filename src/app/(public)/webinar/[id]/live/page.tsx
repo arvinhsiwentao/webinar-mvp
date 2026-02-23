@@ -5,6 +5,10 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import ChatRoom, { ChatMessage } from '@/components/chat/ChatRoom';
 import CTAOverlay from '@/components/cta/CTAOverlay';
+import SidebarTabs from '@/components/sidebar/SidebarTabs';
+import InfoTab from '@/components/sidebar/InfoTab';
+import ViewersTab from '@/components/sidebar/ViewersTab';
+import OffersTab from '@/components/sidebar/OffersTab';
 import { Webinar, Session, CTAEvent } from '@/lib/types';
 import { Badge, Button } from '@/components/ui';
 import { track } from '@/lib/tracking';
@@ -214,14 +218,23 @@ export default function LiveRoomPage() {
                 autoPlay={false}
                 onPlaybackEvent={handlePlaybackEvent}
               />
+              {/* On-video CTA overlays */}
+              <CTAOverlay
+                currentTime={currentTime}
+                ctaEvents={webinar.ctaEvents.filter(c => c.position === 'on_video')}
+                onCTAClick={handleCTAClick}
+                onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText })}
+                position="on_video"
+              />
             </div>
 
-            {/* CTA Overlay */}
+            {/* Below-video CTA overlays */}
             <CTAOverlay
               currentTime={currentTime}
-              ctaEvents={webinar.ctaEvents}
+              ctaEvents={webinar.ctaEvents.filter(c => c.position !== 'on_video')}
               onCTAClick={handleCTAClick}
               onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText })}
+              position="below_video"
             />
 
             {/* Video info card */}
@@ -277,19 +290,68 @@ export default function LiveRoomPage() {
             </div>
           </div>
 
-          {/* Chat section */}
+          {/* Sidebar with tabs */}
           <div className="lg:col-span-1 h-[500px] lg:h-[600px]">
-            <div className="h-full bg-white/80 border border-neutral-200 rounded-lg overflow-hidden">
-              <ChatRoom
-                currentTime={currentTime}
-                autoMessages={webinar.autoChat}
-                timeVariance={3}
-                userName={userName}
-                webinarId={webinarId}
-                sessionId={session?.id}
-                onSendMessage={handleSendMessage}
-              />
-            </div>
+            <SidebarTabs
+              defaultTab="chat"
+              tabs={[
+                {
+                  id: 'info',
+                  icon: <span className="text-base">ℹ️</span>,
+                  label: '简介',
+                  content: (
+                    <InfoTab
+                      title={webinar.title}
+                      speakerName={webinar.speakerName}
+                      speakerTitle={webinar.speakerTitle}
+                      speakerImage={webinar.speakerAvatar || webinar.speakerImage}
+                      description={webinar.sidebarDescription}
+                      promoImageUrl={webinar.promoImageUrl}
+                    />
+                  ),
+                },
+                {
+                  id: 'viewers',
+                  icon: <span className="text-base">👁</span>,
+                  label: '观众',
+                  content: (
+                    <ViewersTab
+                      viewerCount={viewerCount}
+                      hostName={webinar.speakerName}
+                      hostAvatar={webinar.speakerAvatar || webinar.speakerImage}
+                    />
+                  ),
+                },
+                {
+                  id: 'chat',
+                  icon: <span className="text-base">💬</span>,
+                  label: '聊天',
+                  content: (
+                    <ChatRoom
+                      currentTime={currentTime}
+                      autoMessages={webinar.autoChat}
+                      timeVariance={3}
+                      userName={userName}
+                      webinarId={webinarId}
+                      sessionId={session?.id}
+                      onSendMessage={handleSendMessage}
+                    />
+                  ),
+                },
+                {
+                  id: 'offers',
+                  icon: <span className="text-base">⭐</span>,
+                  label: '优惠',
+                  content: (
+                    <OffersTab
+                      ctaEvents={webinar.ctaEvents}
+                      currentTime={currentTime}
+                      onOfferClick={handleCTAClick}
+                    />
+                  ),
+                },
+              ]}
+            />
           </div>
         </div>
       </main>
