@@ -7,6 +7,7 @@ import { Webinar, Session } from '@/lib/types';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
 import { useRegistrationForm } from '@/components/registration/useRegistrationForm';
 import RegistrationModal from '@/components/registration/RegistrationModal';
+import DateCards from '@/components/registration/DateCards';
 
 // Mike是麦克 专属 Landing Page
 // 这是一个 Single-purpose site，默认显示 Mike 的 webinar
@@ -290,6 +291,11 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-light">
               不只是知识，是<span className="text-[#B8953F]">行动的方向</span>
             </h2>
+          </div>
+
+          {/* Schedule date cards */}
+          <div className="mb-12">
+            <DateCards sessions={webinar.sessions} />
           </div>
 
           <div className="space-y-0 divide-y divide-neutral-200">
