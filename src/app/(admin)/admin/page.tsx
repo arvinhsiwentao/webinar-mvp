@@ -361,6 +361,7 @@ function WebinarForm({
     speakerTitle: webinar?.speakerTitle || '',
     speakerBio: webinar?.speakerBio || '',
     speakerImage: webinar?.speakerImage || '',
+    speakerAvatar: webinar?.speakerAvatar || '',
     videoUrl: webinar?.videoUrl || '',
     thumbnailUrl: webinar?.thumbnailUrl || '',
     duration: webinar?.duration || 60,
@@ -534,6 +535,16 @@ function WebinarForm({
               value={formData.speakerImage}
               onChange={(e) => setFormData({ ...formData, speakerImage: e.target.value })}
               className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">讲者头像 URL（圆形头像，建议正方形）</label>
+            <input
+              type="url"
+              value={formData.speakerAvatar}
+              onChange={(e) => setFormData({ ...formData, speakerAvatar: e.target.value })}
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              placeholder="/images/mike-avatar.jpg"
             />
           </div>
           <div>

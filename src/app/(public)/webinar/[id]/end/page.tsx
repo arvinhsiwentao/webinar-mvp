@@ -72,9 +72,9 @@ export default function EndPage() {
         {/* Speaker info */}
         <div className="bg-white/80 border border-neutral-200 rounded-lg p-6 mb-8">
           <div className="flex items-center justify-center gap-4 mb-4">
-            {webinar.speakerImage && (
+            {(webinar.speakerAvatar || webinar.speakerImage) && (
               <img
-                src={webinar.speakerImage}
+                src={webinar.speakerAvatar || webinar.speakerImage}
                 alt={webinar.speakerName}
                 className="w-16 h-16 rounded-full object-cover border-2 border-[#B8953F]/30"
               />

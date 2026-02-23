@@ -31,6 +31,7 @@ export interface Webinar {
   speakerTitle?: string;
   speakerBio?: string;
   speakerImage?: string;
+  speakerAvatar?: string;
   videoUrl: string;
   thumbnailUrl?: string;
   duration: number; // minutes
@@ -74,6 +75,7 @@ export interface CreateWebinarRequest {
   speakerTitle?: string;
   speakerBio?: string;
   speakerImage?: string;
+  speakerAvatar?: string;
   videoUrl: string;
   thumbnailUrl?: string;
   duration: number;

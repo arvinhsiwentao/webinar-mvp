@@ -92,11 +92,11 @@ export default function WaitingPage() {
 
       <div className="relative z-10 max-w-2xl w-full text-center">
         {/* Speaker Image */}
-        {webinar.speakerImage && (
+        {(webinar.speakerAvatar || webinar.speakerImage) && (
           <div className="relative w-32 h-32 mx-auto mb-8">
             <div className="absolute inset-0 bg-[#B8953F]/10 rounded-full blur-xl" />
             <img
-              src={webinar.speakerImage}
+              src={webinar.speakerAvatar || webinar.speakerImage}
               alt={webinar.speakerName}
               className="relative w-full h-full rounded-full object-cover border-2 border-[#B8953F]/30"
             />

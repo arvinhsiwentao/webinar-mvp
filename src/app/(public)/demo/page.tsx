@@ -179,9 +179,9 @@ export default function DemoPage() {
                 <div className="flex-1">
                   <h2 className="text-lg font-bold mb-2">{webinar.title}</h2>
                   <div className="flex items-center gap-4 text-sm text-neutral-500">
-                    {webinar.speakerImage && (
+                    {(webinar.speakerAvatar || webinar.speakerImage) && (
                       <img
-                        src={webinar.speakerImage}
+                        src={webinar.speakerAvatar || webinar.speakerImage}
                         alt={webinar.speakerName}
                         className="w-10 h-10 rounded-full object-cover border border-[#E8E5DE]"
                       />
