@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Webinar, Session } from '@/lib/types';
-import { formatDateTime, validateEmail } from '@/lib/utils';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
+import { useRegistrationForm } from '@/components/registration/useRegistrationForm';
+import SessionSelector from '@/components/registration/SessionSelector';
+import RegistrationForm from '@/components/registration/RegistrationForm';
 
 // Mike是麦克 专属 Landing Page
 // 这是一个 Single-purpose site，默认显示 Mike 的 webinar
@@ -18,12 +20,12 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [selectedSession, setSelectedSession] = useState<string>('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState('');
+  const form = useRegistrationForm({
+    webinarId: DEFAULT_WEBINAR_ID,
+    onSuccess: (sessionId, name) => {
+      router.push(`/webinar/${DEFAULT_WEBINAR_ID}/confirm?session=${sessionId}&name=${encodeURIComponent(name)}`);
+    },
+  });
 
   useEffect(() => {
     async function fetchWebinar() {
@@ -38,7 +40,7 @@ export default function HomePage() {
           const futureSession = data.webinar.sessions.find(
             (s: Session) => new Date(s.startTime) > now
           );
-          setSelectedSession(futureSession?.id || data.webinar.sessions[0].id);
+          form.setSelectedSession(futureSession?.id || data.webinar.sessions[0].id);
         }
       } catch {
         setError('找不到此研讨会');
@@ -47,45 +49,8 @@ export default function HomePage() {
       }
     }
     fetchWebinar();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError('');
-
-    if (!name.trim()) {
-      setFormError('请输入姓名');
-      return;
-    }
-    if (!validateEmail(email)) {
-      setFormError('请输入有效的邮箱地址');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          webinarId: DEFAULT_WEBINAR_ID,
-          sessionId: selectedSession,
-          name: name.trim(),
-          email: email.trim(),
-          phone: phone.trim() || undefined,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Registration failed');
-
-      router.push(`/webinar/${DEFAULT_WEBINAR_ID}/confirm?session=${selectedSession}&name=${encodeURIComponent(name)}`);
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : '报名失败，请稍后再试');
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -108,7 +73,7 @@ export default function HomePage() {
     );
   }
 
-  const selectedSessionData = webinar.sessions.find((s: Session) => s.id === selectedSession);
+  const selectedSessionData = webinar.sessions.find((s: Session) => s.id === form.selectedSession);
 
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-neutral-900">
@@ -377,91 +342,33 @@ export default function HomePage() {
           </div>
 
           {/* Session Selector */}
-          <div className="space-y-3 mb-10">
-            {webinar.sessions.map((session: Session, idx: number) => (
-              <button
-                key={session.id || `session-${idx}`}
-                onClick={() => setSelectedSession(session.id)}
-                className={`
-                  w-full p-5 text-left transition-all border
-                  ${selectedSession === session.id
-                    ? 'border-[#B8953F] bg-[#B8953F]/8'
-                    : 'border-neutral-200 hover:border-neutral-400'
-                  }
-                `}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-5">
-                    <div className={`
-                      w-4 h-4 rounded-full border-2 flex items-center justify-center
-                      ${selectedSession === session.id ? 'border-[#B8953F]' : 'border-neutral-400'}
-                    `}>
-                      {selectedSession === session.id && (
-                        <div className="w-2 h-2 rounded-full bg-[#B8953F]" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium">场次 {idx + 1}</p>
-                      <p className="text-sm text-neutral-500">{formatDateTime(session.startTime)}</p>
-                    </div>
-                  </div>
-                  {idx === 0 && (
-                    <span className="text-xs text-[#B8953F]/70">最近场次</span>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
+          <SessionSelector
+            sessions={webinar.sessions}
+            selectedId={form.selectedSession}
+            onSelect={form.setSelectedSession}
+            className="space-y-3 mb-10"
+            buttonPadding="p-5"
+            innerGap="gap-5"
+            firstBadgeLabel="最近场次"
+          />
 
           {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm text-neutral-500 mb-2">姓名</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-transparent border-b border-[#E8E5DE] py-3 text-neutral-900 placeholder-neutral-400 focus:border-[#B8953F] focus:outline-none transition-colors"
-                placeholder="你的名字"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-neutral-500 mb-2">邮箱</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-transparent border-b border-[#E8E5DE] py-3 text-neutral-900 placeholder-neutral-400 focus:border-[#B8953F] focus:outline-none transition-colors"
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-neutral-500 mb-2">手机号码 <span className="text-neutral-400">（选填）</span></label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-transparent border-b border-[#E8E5DE] py-3 text-neutral-900 placeholder-neutral-400 focus:border-[#B8953F] focus:outline-none transition-colors"
-                placeholder="09xx-xxx-xxx"
-              />
-            </div>
-
-            {formError && (
-              <p className="text-red-400 text-sm">{formError}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full bg-[#B8953F] text-white py-4 font-semibold tracking-wide hover:bg-[#A6842F] hover:shadow-[0_0_30px_rgba(184,149,63,0.3)] transition-all disabled:opacity-50 mt-4"
-            >
-              {submitting ? '处理中...' : '确认报名 — 100% 免费'}
-            </button>
-          </form>
+          <RegistrationForm
+            name={form.name}
+            onNameChange={form.setName}
+            email={form.email}
+            onEmailChange={form.setEmail}
+            phone={form.phone}
+            onPhoneChange={form.setPhone}
+            onSubmit={form.handleSubmit}
+            submitting={form.submitting}
+            formError={form.formError}
+            submitLabel="确认报名 — 100% 免费"
+            emailLabel="邮箱"
+            phoneLabel={<>手机号码 <span className="text-neutral-400">（选填）</span></>}
+            phonePlaceholder="09xx-xxx-xxx"
+            submitClassName="mt-4"
+          />
 
           {/* Trust Signals */}
           <div className="flex flex-wrap justify-center gap-4 mt-6 text-xs text-neutral-400">
