@@ -380,7 +380,7 @@ export default function HomePage() {
           <div className="space-y-3 mb-10">
             {webinar.sessions.map((session: Session, idx: number) => (
               <button
-                key={session.id}
+                key={session.id || `session-${idx}`}
                 onClick={() => setSelectedSession(session.id)}
                 className={`
                   w-full p-5 text-left transition-all border
