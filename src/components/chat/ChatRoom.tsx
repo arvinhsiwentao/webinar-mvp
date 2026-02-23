@@ -48,7 +48,7 @@ export default function ChatRoom({
   currentTime,
   autoMessages = [],
   timeVariance = 5,
-  userName = 'Anonymous',
+  userName = '匿名用户',
   onSendMessage,
   webinarId,
   sessionId,
@@ -152,14 +152,14 @@ export default function ChatRoom({
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-neutral-700 bg-neutral-800">
         <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-        <span className="text-sm font-semibold">Live Chat</span>
+        <span className="text-sm font-semibold">实时聊天</span>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2">
         {messages.length === 0 && (
           <p className="text-neutral-500 text-sm text-center mt-8">
-            Chat messages will appear here...
+            聊天消息将显示在这里...
           </p>
         )}
         {messages.map((msg) => (
@@ -179,7 +179,7 @@ export default function ChatRoom({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type a message..."
+          placeholder="输入消息..."
           className="flex-1 bg-neutral-700 text-white text-sm px-3 py-2 rounded-md outline-none placeholder-neutral-500 focus:ring-1 focus:ring-[#C9A962]"
           maxLength={200}
         />
@@ -187,7 +187,7 @@ export default function ChatRoom({
           onClick={handleSend}
           className="bg-[#C9A962] hover:bg-[#D4BA7A] text-neutral-950 text-sm px-4 py-2 rounded-md transition-colors"
         >
-          Send
+          发送
         </button>
       </div>
     </div>

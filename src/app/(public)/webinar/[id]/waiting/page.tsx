@@ -12,7 +12,7 @@ export default function WaitingPage() {
   const router = useRouter();
   const webinarId = params.id as string;
   const sessionId = searchParams.get('session') || '';
-  const userName = searchParams.get('name') || '觀眾';
+  const userName = searchParams.get('name') || '观众';
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -74,9 +74,9 @@ export default function WaitingPage() {
     return (
       <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-white">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">找不到研討會</h1>
+          <h1 className="text-2xl font-bold mb-4">找不到研讨会</h1>
           <Button variant="ghost" onClick={() => router.push('/')}>
-            返回首頁
+            返回首页
           </Button>
         </div>
       </div>
@@ -110,16 +110,16 @@ export default function WaitingPage() {
         </h1>
 
         <p className="text-neutral-400 text-lg mb-2">
-          講者：{webinar.speakerName}
+          讲者：{webinar.speakerName}
         </p>
 
         <p className="text-neutral-500 mb-12">
-          歡迎，{userName}！直播即將開始
+          欢迎，{userName}！直播即将开始
         </p>
 
         {/* Countdown */}
         <Card className="p-8 mb-8 border-[#C9A962]/20">
-          <p className="text-neutral-400 mb-4">距離直播開始</p>
+          <p className="text-neutral-400 mb-4">距离直播开始</p>
           <CountdownTimer
             targetTime={session.startTime}
             size="lg"
@@ -139,21 +139,21 @@ export default function WaitingPage() {
         >
           {canEnter ? (
             <>
-              🎬 進入直播間
+              🎬 进入直播间
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </>
           ) : (
-            '直播開始前 30 分鐘可進入'
+            '直播开始前 30 分钟可进入'
           )}
         </Button>
 
         {/* Tips */}
         <div className="mt-12 grid md:grid-cols-3 gap-4">
-          <Tip icon="🔔" title="開啟通知" desc="確保不會錯過直播" />
-          <Tip icon="🎧" title="準備耳機" desc="獲得最佳聲音體驗" />
-          <Tip icon="📝" title="準備筆記" desc="記錄重要內容" />
+          <Tip icon="🔔" title="开启通知" desc="确保不会错过直播" />
+          <Tip icon="🎧" title="准备耳机" desc="获得最佳音效体验" />
+          <Tip icon="📝" title="准备笔记" desc="记录重要内容" />
         </div>
       </div>
     </div>

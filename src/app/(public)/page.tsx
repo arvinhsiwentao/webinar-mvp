@@ -7,8 +7,8 @@ import { Webinar, Session } from '@/lib/types';
 import { formatDateTime, validateEmail } from '@/lib/utils';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
 
-// Mike是麥克 專屬 Landing Page
-// 這是一個 Single-purpose site，預設顯示 Mike 的 webinar
+// Mike是麦克 专属 Landing Page
+// 这是一个 Single-purpose site，默认显示 Mike 的 webinar
 const DEFAULT_WEBINAR_ID = '1';
 
 export default function HomePage() {
@@ -33,7 +33,7 @@ export default function HomePage() {
         const data = await res.json();
         setWebinar(data.webinar);
         if (data.webinar.sessions.length > 0) {
-          // 選擇最近的未過期場次，或第一個場次
+          // 选择最近的未过期场次，或第一个场次
           const now = new Date();
           const futureSession = data.webinar.sessions.find(
             (s: Session) => new Date(s.startTime) > now
@@ -41,7 +41,7 @@ export default function HomePage() {
           setSelectedSession(futureSession?.id || data.webinar.sessions[0].id);
         }
       } catch {
-        setError('找不到此研討會');
+        setError('找不到此研讨会');
       } finally {
         setLoading(false);
       }
@@ -54,11 +54,11 @@ export default function HomePage() {
     setFormError('');
 
     if (!name.trim()) {
-      setFormError('請輸入姓名');
+      setFormError('请输入姓名');
       return;
     }
     if (!validateEmail(email)) {
-      setFormError('請輸入有效的 Email');
+      setFormError('请输入有效的邮箱地址');
       return;
     }
 
@@ -81,7 +81,7 @@ export default function HomePage() {
 
       router.push(`/webinar/${DEFAULT_WEBINAR_ID}/confirm?session=${selectedSession}&name=${encodeURIComponent(name)}`);
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : '報名失敗，請稍後再試');
+      setFormError(err instanceof Error ? err.message : '报名失败，请稍后再试');
     } finally {
       setSubmitting(false);
     }
@@ -99,9 +99,9 @@ export default function HomePage() {
     return (
       <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
         <div className="text-center text-white">
-          <p className="text-xl mb-4">{error || '找不到研討會'}</p>
+          <p className="text-xl mb-4">{error || '找不到研讨会'}</p>
           <a href="/admin" className="text-neutral-400 hover:text-white">
-            前往後台設定
+            前往后台设置
           </a>
         </div>
       </div>
@@ -123,23 +123,23 @@ export default function HomePage() {
           {/* Urgency Badge */}
           <div className="inline-flex items-center gap-2 border border-[#C9A962]/30 bg-[#C9A962]/5 px-5 py-2 mb-10">
             <span className="w-2 h-2 rounded-full bg-[#C9A962] animate-pulse" />
-            <span className="text-sm text-[#C9A962]">免費名額有限 — 額滿即止</span>
+            <span className="text-sm text-[#C9A962]">免费名额有限 — 额满即止</span>
           </div>
 
           {/* Main Headline — Pain Point */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light leading-[1.15] tracking-tight mb-6">
-            <span className="block text-neutral-400 text-2xl md:text-3xl font-normal mb-4">你還在用時間換薪水？</span>
+            <span className="block text-neutral-400 text-2xl md:text-3xl font-normal mb-4">你还在用时间换薪水？</span>
             <span className="block font-semibold">
-              90 分鐘揭露
+              90 分钟揭秘
               <span className="bg-gradient-to-r from-[#C9A962] to-[#C9A962]/0 bg-[length:100%_2px] bg-no-repeat bg-bottom pb-2">
-                財務自由完整路徑
+                财务自由完整路径
               </span>
             </span>
           </h1>
 
           {/* Subheadline — Specific Promise */}
           <p className="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto leading-relaxed mb-8">
-            43 歲達成財務自由的美股投資人 Mike，將毫無保留地分享他從負債到自由的完整策略與持倉清單。
+            43 岁达成财务自由的美股投资人 Mike，将毫无保留地分享他从负债到自由的完整策略与持仓清单。
           </p>
 
           {/* Countdown Timer */}
@@ -161,7 +161,7 @@ export default function HomePage() {
             href="#register"
             className="group inline-flex items-center gap-3 bg-[#C9A962] text-neutral-950 px-10 py-4 text-base font-semibold tracking-wide hover:bg-[#D4BA7A] hover:shadow-[0_0_40px_rgba(201,169,98,0.3)] transition-all"
           >
-            立即預約免費席位
+            立即预约免费席位
             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
@@ -169,11 +169,11 @@ export default function HomePage() {
 
           {/* Social Proof Strip */}
           <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10 mt-12 text-sm text-neutral-500">
-            <span>20 萬+ YouTube 訂閱</span>
+            <span>20 万+ YouTube 订阅</span>
             <span className="hidden md:inline text-neutral-700">|</span>
-            <span>3,000+ 付費會員</span>
+            <span>3,000+ 付费会员</span>
             <span className="hidden md:inline text-neutral-700">|</span>
-            <span>4 年達成財務自由</span>
+            <span>4 年达成财务自由</span>
           </div>
         </div>
 
@@ -187,14 +187,14 @@ export default function HomePage() {
       {/* ========== Section 2: PROBLEM — Pain Amplification ========== */}
       <section className="py-24 md:py-32 px-6 lg:px-12 bg-neutral-900/50">
         <div className="max-w-3xl mx-auto">
-          <p className="text-xs tracking-[0.2em] text-neutral-500 uppercase mb-12 text-center">聽起來熟悉嗎？</p>
+          <p className="text-xs tracking-[0.2em] text-neutral-500 uppercase mb-12 text-center">听起来熟悉吗？</p>
 
           <div className="space-y-6">
             {[
-              '每天辛苦工作，存款增加的速度永遠追不上物價',
-              '想投資美股，但資訊太多、太雜，不知從何下手',
-              '看別人靠被動收入過自己想要的生活，自己卻不知道怎麼開始',
-              '擔心選錯標的，賠掉辛苦存下來的錢',
+              '每天辛苦工作，存款增加的速度永远追不上物价',
+              '想投资美股，但信息太多、太杂，不知从何下手',
+              '看别人靠被动收入过自己想要的生活，自己却不知道怎么开始',
+              '担心选错标的，赔掉辛苦存下来的钱',
             ].map((pain, idx) => (
               <div
                 key={idx}
@@ -212,10 +212,10 @@ export default function HomePage() {
 
           <div className="text-center mt-12">
             <p className="text-xl text-neutral-200">
-              如果你至少勾了一項——
+              如果你至少勾了一项——
             </p>
             <p className="text-[#C9A962] text-lg mt-2">
-              這場免費研討會，就是為你準備的。
+              这场免费在线直播，就是为你准备的。
             </p>
           </div>
         </div>
@@ -244,7 +244,7 @@ export default function HomePage() {
                 </div>
                 {/* Name Overlay */}
                 <div className="absolute -bottom-4 -right-4 md:-bottom-6 md:-right-6 bg-neutral-950 px-6 py-4">
-                  <p className="text-sm text-neutral-400">講者</p>
+                  <p className="text-sm text-neutral-400">讲师</p>
                   <p className="text-xl font-medium">{webinar.speakerName}</p>
                 </div>
               </div>
@@ -252,26 +252,26 @@ export default function HomePage() {
 
             {/* Right — Content */}
             <div className="lg:col-span-7 space-y-8">
-              <p className="text-xs tracking-[0.2em] text-neutral-500 uppercase">他是誰？</p>
+              <p className="text-xs tracking-[0.2em] text-neutral-500 uppercase">他是谁？</p>
 
               <blockquote className="text-2xl md:text-3xl font-light leading-relaxed text-neutral-200">
-                <span className="text-[#C9A962]">「</span>你賺不到認知以外的錢。<span className="text-[#C9A962]">」</span>
+                <span className="text-[#C9A962]">"</span>你赚不到认知以外的钱。<span className="text-[#C9A962]">"</span>
               </blockquote>
 
               {/* Transformation Timeline */}
               <div className="space-y-3 text-neutral-400">
-                <p>從一般上班族、背負債務，到移民美國後開始接觸美股；</p>
-                <p>2018 年認真投入，2022 年達成財務自由。</p>
-                <p>Mike 用 4 年走完大多數人不敢想的路。</p>
+                <p>从一般上班族、背负债务，到移民美国后开始接触美股；</p>
+                <p>2018 年认真投入，2022 年达成财务自由。</p>
+                <p>Mike 用 4 年走完大多数人不敢想的路。</p>
               </div>
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4">
                 {[
-                  { number: '4', unit: '年', label: '達成財務自由' },
-                  { number: '20', unit: '萬+', label: 'YouTube 訂閱' },
-                  { number: '15-20', unit: '%', label: '年化報酬率' },
-                  { number: '3,000', unit: '+', label: '付費會員' },
+                  { number: '4', unit: '年', label: '达成财务自由' },
+                  { number: '20', unit: '万+', label: 'YouTube 订阅' },
+                  { number: '15-20', unit: '%', label: '年化收益率' },
+                  { number: '3,000', unit: '+', label: '付费会员' },
                 ].map((stat) => (
                   <div key={stat.label} className="text-center md:text-left">
                     <div className="text-2xl md:text-3xl font-light text-[#C9A962]">
@@ -285,10 +285,10 @@ export default function HomePage() {
               {/* Credential Pills */}
               <div className="flex flex-wrap gap-3 pt-2">
                 {[
-                  'CMoney 合作講師',
-                  '暢銷書《破局致富》作者',
-                  '特斯拉早期投資者',
-                  '美國金融背景',
+                  'CMoney 合作讲师',
+                  '畅销书《破局致富》作者',
+                  '特斯拉早期投资者',
+                  '美国金融背景',
                 ].map((item) => (
                   <span key={item} className="text-sm text-[#C9A962]/70 border border-[#C9A962]/20 px-4 py-2">
                     {item}
@@ -304,33 +304,33 @@ export default function HomePage() {
       <section className="py-24 md:py-32 px-6 lg:px-12 bg-neutral-900/50">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-xs tracking-[0.2em] text-neutral-500 uppercase mb-4">90 分鐘，你會帶走什麼？</p>
+            <p className="text-xs tracking-[0.2em] text-neutral-500 uppercase mb-4">90 分钟，你会带走什么？</p>
             <h2 className="text-3xl md:text-4xl font-light">
-              不只是知識，是<span className="text-[#C9A962]">行動的方向</span>
+              不只是知识，是<span className="text-[#C9A962]">行动的方向</span>
             </h2>
           </div>
 
           <div className="space-y-0 divide-y divide-neutral-800">
             {[
               {
-                headline: '學會辨識「別人恐懼時的買入機會」',
-                result: '不再追高殺低，用紀律戰勝情緒',
+                headline: '学会辨识"别人恐惧时的买入机会"',
+                result: '不再追涨杀跌，用纪律战胜情绪',
               },
               {
-                headline: '掌握建立被動收入的存股策略',
-                result: '讓錢為你工作，而不是你為錢工作',
+                headline: '掌握建立被动收入的存股策略',
+                result: '让钱为你工作，而不是你为钱工作',
               },
               {
-                headline: '了解從零到財務自由的完整路徑',
-                result: '有清楚的方向感，知道下一步該做什麼',
+                headline: '了解从零到财务自由的完整路径',
+                result: '有清楚的方向感，知道下一步该做什么',
               },
               {
-                headline: '看到 Mike 真實持倉清單',
-                result: '知道有經驗的人怎麼配置，少走冤枉路',
+                headline: '看到 Mike 真实持仓清单',
+                result: '知道有经验的人怎么配置，少走弯路',
               },
               {
-                headline: '認識能幫你省時間的投資工具',
-                result: '不用每天盯盤，把時間留給生活',
+                headline: '认识能帮你省时间的投资工具',
+                result: '不用每天盯盘，把时间留给生活',
               },
             ].map((benefit, idx) => (
               <div
@@ -358,7 +358,7 @@ export default function HomePage() {
               href="#register"
               className="group inline-flex items-center gap-3 bg-[#C9A962] text-neutral-950 px-10 py-4 text-base font-semibold tracking-wide hover:bg-[#D4BA7A] hover:shadow-[0_0_40px_rgba(201,169,98,0.3)] transition-all"
             >
-              免費報名，立即預約
+              免费报名，立即预约
               <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
@@ -371,9 +371,9 @@ export default function HomePage() {
       <section id="register" className="py-24 md:py-32 px-6 lg:px-12 bg-gradient-to-b from-neutral-900 via-neutral-900 to-[#C9A962]/[0.03]">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-xs tracking-[0.2em] text-[#C9A962]/70 uppercase mb-4">免費報名</p>
-            <h2 className="text-3xl font-light mb-3">選擇場次，預約你的席位</h2>
-            <p className="text-neutral-500 text-sm">每場限額 200 名 — 額滿即止</p>
+            <p className="text-xs tracking-[0.2em] text-[#C9A962]/70 uppercase mb-4">免费报名</p>
+            <h2 className="text-3xl font-light mb-3">选择场次，预约你的席位</h2>
+            <p className="text-neutral-500 text-sm">每场限额 200 名 — 额满即止</p>
           </div>
 
           {/* Session Selector */}
@@ -401,12 +401,12 @@ export default function HomePage() {
                       )}
                     </div>
                     <div>
-                      <p className="font-medium">場次 {idx + 1}</p>
+                      <p className="font-medium">场次 {idx + 1}</p>
                       <p className="text-sm text-neutral-400">{formatDateTime(session.startTime)}</p>
                     </div>
                   </div>
                   {idx === 0 && (
-                    <span className="text-xs text-[#C9A962]/60">最近場次</span>
+                    <span className="text-xs text-[#C9A962]/60">最近场次</span>
                   )}
                 </div>
               </button>
@@ -428,7 +428,7 @@ export default function HomePage() {
             </div>
 
             <div>
-              <label className="block text-sm text-neutral-400 mb-2">Email</label>
+              <label className="block text-sm text-neutral-400 mb-2">邮箱</label>
               <input
                 type="email"
                 value={email}
@@ -440,7 +440,7 @@ export default function HomePage() {
             </div>
 
             <div>
-              <label className="block text-sm text-neutral-400 mb-2">手機號碼 <span className="text-neutral-600">（選填）</span></label>
+              <label className="block text-sm text-neutral-400 mb-2">手机号码 <span className="text-neutral-600">（选填）</span></label>
               <input
                 type="tel"
                 value={phone}
@@ -459,17 +459,17 @@ export default function HomePage() {
               disabled={submitting}
               className="w-full bg-[#C9A962] text-neutral-950 py-4 font-semibold tracking-wide hover:bg-[#D4BA7A] hover:shadow-[0_0_30px_rgba(201,169,98,0.3)] transition-all disabled:opacity-50 mt-4"
             >
-              {submitting ? '處理中...' : '確認報名 — 100% 免費'}
+              {submitting ? '处理中...' : '确认报名 — 100% 免费'}
             </button>
           </form>
 
           {/* Trust Signals */}
           <div className="flex flex-wrap justify-center gap-4 mt-6 text-xs text-neutral-600">
-            <span>100% 免費</span>
+            <span>100% 免费</span>
             <span>|</span>
-            <span>不會被推銷</span>
+            <span>不会被推销</span>
             <span>|</span>
-            <span>資料僅用於活動通知</span>
+            <span>资料仅用于活动通知</span>
           </div>
         </div>
       </section>
@@ -478,21 +478,21 @@ export default function HomePage() {
       <section className="py-24 md:py-32 px-6 lg:px-12">
         <div className="max-w-3xl mx-auto text-center">
           <blockquote className="text-2xl md:text-3xl font-light leading-relaxed text-neutral-200 mb-8">
-            <span className="text-[#C9A962]">「</span>投資這條路不會一夜暴富，<br className="hidden md:inline" />但它會讓你越來越自由。<span className="text-[#C9A962]">」</span>
+            <span className="text-[#C9A962]">"</span>投资这条路不会一夜暴富，<br className="hidden md:inline" />但它会让你越来越自由。<span className="text-[#C9A962]">"</span>
           </blockquote>
           <p className="text-neutral-500 mb-4">— {webinar.speakerName}</p>
 
           <p className="text-lg text-neutral-400 max-w-xl mx-auto mb-10">
-            每天不行動，差距就在拉大。你光是出現在這裡，就已經領先 90% 的人。
+            每天不行动，差距就在拉大。你光是出现在这里，就已经领先 90% 的人。
             <br />
-            現在只差一步——填好資料，我們線上見。
+            现在只差一步——填好资料，我们线上见。
           </p>
 
           <a
             href="#register"
             className="group inline-flex items-center gap-3 bg-[#C9A962] text-neutral-950 px-10 py-4 text-base font-semibold tracking-wide hover:bg-[#D4BA7A] hover:shadow-[0_0_40px_rgba(201,169,98,0.3)] transition-all"
           >
-            免費報名，把握最後機會
+            免费报名，把握最后机会
             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>

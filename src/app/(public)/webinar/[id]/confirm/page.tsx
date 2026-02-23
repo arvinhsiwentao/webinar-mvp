@@ -36,7 +36,7 @@ export default function ConfirmPage() {
       webinar.title,
       session.startTime,
       webinar.duration,
-      `講者: ${webinar.speakerName}`,
+      `讲者: ${webinar.speakerName}`,
       `${window.location.origin}/webinar/${webinar.id}/waiting?session=${session.id}`
     );
     const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
@@ -53,7 +53,7 @@ export default function ConfirmPage() {
     const start = new Date(session.startTime);
     const end = new Date(start.getTime() + webinar.duration * 60 * 1000);
     const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    return `https://calendar.google.com/calendar/event?action=TEMPLATE&text=${encodeURIComponent(webinar.title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(`講者: ${webinar.speakerName}`)}`;
+    return `https://calendar.google.com/calendar/event?action=TEMPLATE&text=${encodeURIComponent(webinar.title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(`讲者: ${webinar.speakerName}`)}`;
   }
 
   return (
@@ -72,21 +72,21 @@ export default function ConfirmPage() {
           </svg>
         </div>
 
-        <Badge variant="success" className="mb-6">報名成功</Badge>
+        <Badge variant="success" className="mb-6">报名成功</Badge>
 
         <h1 className="text-2xl font-bold mb-4">
-          {name}，你已成功報名！
+          {name}，你已成功报名！
         </h1>
 
         <p className="text-neutral-400 mb-8 leading-relaxed">
-          我們已將直播資訊寄送到你的信箱。<br />
-          請在直播開始前進入候場室。
+          我们已将直播信息发送到你的邮箱。<br />
+          请在直播开始前进入等候室。
         </p>
 
         {/* Countdown Timer */}
         {session && (
           <div className="mb-8">
-            <p className="text-neutral-400 text-sm mb-3">距離直播還有</p>
+            <p className="text-neutral-400 text-sm mb-3">距离直播还有</p>
             <CountdownTimer
               targetTime={session.startTime}
               size="md"
@@ -101,11 +101,11 @@ export default function ConfirmPage() {
           <div className="flex gap-3">
             <a href={getGoogleCalendarUrl()} target="_blank" rel="noopener noreferrer"
                className="flex-1 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700 rounded-lg p-4 text-center transition-colors">
-              📅 Google 日曆
+              📅 Google 日历
             </a>
             <button onClick={handleDownloadICS}
               className="flex-1 bg-neutral-800/50 hover:bg-neutral-700/50 border border-neutral-700 rounded-lg p-4 text-center transition-colors">
-              📅 iCal 下載
+              📅 iCal 下载
             </button>
           </div>
 
@@ -114,8 +114,8 @@ export default function ConfirmPage() {
               <span>📧</span>
             </div>
             <div>
-              <p className="text-sm text-neutral-400">確認信</p>
-              <p className="font-medium">檢查你的收件匣</p>
+              <p className="text-sm text-neutral-400">确认邮件</p>
+              <p className="font-medium">检查你的收件箱</p>
             </div>
           </div>
         </div>
@@ -123,7 +123,7 @@ export default function ConfirmPage() {
         {/* CTA Button */}
         <Link href={`/webinar/${webinarId}/waiting?session=${sessionId}&name=${encodeURIComponent(name)}`}>
           <Button variant="gold" size="lg" className="w-full">
-            進入候場室
+            进入等候室
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
@@ -131,7 +131,7 @@ export default function ConfirmPage() {
         </Link>
 
         <p className="text-neutral-600 text-xs mt-6">
-          直播開始前 10 分鐘可進入直播間
+          直播开始前 10 分钟可进入直播间
         </p>
       </Card>
     </div>

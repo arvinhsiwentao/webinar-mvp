@@ -8,12 +8,12 @@ export function formatDate(dateString: string): string {
     day: '2-digit',
     weekday: 'short',
   };
-  return date.toLocaleDateString('zh-TW', options);
+  return date.toLocaleDateString('zh-CN', options);
 }
 
 export function formatTime(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleTimeString('zh-TW', {
+  return date.toLocaleTimeString('zh-CN', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,

@@ -14,7 +14,7 @@ const VideoPlayer = dynamic(() => import('@/components/video/VideoPlayer'), {
     <div className="w-full aspect-video bg-neutral-900 flex items-center justify-center rounded-lg border border-neutral-800">
       <div className="text-center">
         <div className="w-10 h-10 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <span className="text-neutral-500">載入播放器中...</span>
+        <span className="text-neutral-500">加载播放器中...</span>
       </div>
     </div>
   ),
@@ -97,7 +97,7 @@ export default function DemoPage() {
       <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-neutral-500">載入中...</p>
+          <p className="text-neutral-500">加载中...</p>
         </div>
       </div>
     );
@@ -107,9 +107,9 @@ export default function DemoPage() {
     return (
       <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
         <div className="text-center text-white">
-          <h1 className="text-2xl font-bold mb-4">找不到 Webinar 資料</h1>
+          <h1 className="text-2xl font-bold mb-4">找不到 Webinar 资料</h1>
           <Button variant="ghost" onClick={() => window.location.href = '/admin'}>
-            前往後台設定
+            前往后台设置
           </Button>
         </div>
       </div>
@@ -118,7 +118,7 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
-      {/* Header - 與 Live Room 統一風格 */}
+      {/* Header - 与 Live Room 统一风格 */}
       <header className="sticky top-0 z-50 bg-neutral-950/90 backdrop-blur-md border-b border-neutral-800/50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -146,13 +146,13 @@ export default function DemoPage() {
               href="/admin"
               className="text-neutral-400 hover:text-white text-sm hidden md:inline"
             >
-              ⚙️ 後台
+              ⚙️ 后台
             </a>
           </div>
         </div>
       </header>
 
-      {/* Main content - 與 Live Room 統一結構 */}
+      {/* Main content - 与 Live Room 统一结构 */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Video + CTA section */}
@@ -173,7 +173,7 @@ export default function DemoPage() {
               onCTAClick={handleCTAClick}
             />
 
-            {/* Video info card - 與 Live Room 統一 */}
+            {/* Video info card - 与 Live Room 统一 */}
             <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
@@ -210,8 +210,8 @@ export default function DemoPage() {
             <div className="bg-[#C9A962]/10 border border-[#C9A962]/30 rounded-lg p-4">
               <p className="text-[#C9A962] text-sm font-medium mb-2">🎯 Demo 模式</p>
               <p className="text-neutral-400 text-xs">
-                這是測試頁面。播放影片後，自動聊天訊息和 CTA 會依照時間觸發。
-                正式直播請從首頁報名進入。
+                这是测试页面。播放视频后，自动聊天消息和 CTA 会依照时间触发。
+                正式直播请从首页报名进入。
               </p>
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function DemoPage() {
                 currentTime={currentTime}
                 autoMessages={webinar.autoChat}
                 timeVariance={3}
-                userName="Demo 觀眾"
+                userName="Demo 观众"
                 onSendMessage={handleSendMessage}
               />
             </div>
@@ -235,13 +235,13 @@ export default function DemoPage() {
       <footer className="border-t border-neutral-800 px-4 py-6 mt-8">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-neutral-600 text-sm">
-            Webinar Demo — 功能測試頁面
+            Webinar Demo — 功能测试页面
           </p>
           <div className="mt-2 flex justify-center gap-4 text-xs text-neutral-500">
-            <span>✅ 影片播放</span>
-            <span>✅ 自動聊天</span>
-            <span>✅ CTA 觸發</span>
-            <span>✅ 觀看人數</span>
+            <span>✅ 视频播放</span>
+            <span>✅ 自动聊天</span>
+            <span>✅ CTA 触发</span>
+            <span>✅ 观看人数</span>
           </div>
         </div>
       </footer>

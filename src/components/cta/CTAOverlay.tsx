@@ -73,7 +73,7 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
         {/* Countdown */}
         {activeCTA.showCountdown && remainingSec > 0 && (
           <div className="flex items-center justify-center gap-2 mb-3">
-            <span className="text-orange-200 text-xs">Limited time remaining</span>
+            <span className="text-orange-200 text-xs">限时优惠</span>
             <span className="bg-black/30 text-white font-mono text-lg px-3 py-1 rounded-md">
               {formatCountdown(remainingSec)}
             </span>

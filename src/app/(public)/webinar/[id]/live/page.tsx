@@ -16,7 +16,7 @@ const VideoPlayer = dynamic(() => import('@/components/video/VideoPlayer'), {
     <div className="w-full aspect-video bg-neutral-900 flex items-center justify-center rounded-lg border border-neutral-800">
       <div className="text-center">
         <div className="w-10 h-10 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <span className="text-neutral-500">載入播放器中...</span>
+        <span className="text-neutral-500">加载播放器中...</span>
       </div>
     </div>
   ),
@@ -28,7 +28,7 @@ export default function LiveRoomPage() {
   const router = useRouter();
   const webinarId = params.id as string;
   const sessionId = searchParams.get('session');
-  const userName = searchParams.get('name') || '觀眾';
+  const userName = searchParams.get('name') || '观众';
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -154,7 +154,7 @@ export default function LiveRoomPage() {
       <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-2 border-[#C9A962] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-neutral-500">載入直播中...</p>
+          <p className="text-neutral-500">加载直播中...</p>
         </div>
       </div>
     );
@@ -166,7 +166,7 @@ export default function LiveRoomPage() {
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold mb-4">找不到直播</h1>
           <Button variant="ghost" onClick={() => router.push('/')}>
-            返回首頁
+            返回首页
           </Button>
         </div>
       </div>
@@ -196,7 +196,7 @@ export default function LiveRoomPage() {
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
             </svg>
-            <span>{viewerCount.toLocaleString()} watching</span>
+            <span>{viewerCount.toLocaleString()} 正在观看</span>
           </div>
         </div>
       </header>
@@ -249,7 +249,7 @@ export default function LiveRoomPage() {
                   <div className="flex items-center gap-2 text-neutral-500">
                     <span>⏱️ {formatTime(currentTime)}</span>
                     <span className={`px-2 py-0.5 rounded text-xs ${isPlaying ? 'bg-green-500/20 text-green-400' : 'bg-neutral-700 text-neutral-400'}`}>
-                      {isPlaying ? '播放中' : '暫停'}
+                      {isPlaying ? '播放中' : '暂停'}
                     </span>
                   </div>
                 </div>
@@ -297,7 +297,7 @@ export default function LiveRoomPage() {
       <footer className="border-t border-neutral-800 px-4 py-6 mt-8">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-neutral-600 text-sm">
-            🔒 請勿錄影或截圖分享
+            🔒 请勿录影或截图分享
           </p>
           <p className="text-neutral-700 text-xs mt-2">
             © 2026 {webinar.speakerName}. All rights reserved.

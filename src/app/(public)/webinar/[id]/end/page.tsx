@@ -9,7 +9,7 @@ export default function EndPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const webinarId = params.id as string;
-  const userName = searchParams.get('name') || '觀眾';
+  const userName = searchParams.get('name') || '观众';
   const sessionId = searchParams.get('session') || '';
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
@@ -44,7 +44,7 @@ export default function EndPage() {
       <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-white">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">找不到直播</h1>
-          <Link href="/" className="text-[#C9A962] hover:underline">返回首頁</Link>
+          <Link href="/" className="text-[#C9A962] hover:underline">返回首页</Link>
         </div>
       </div>
     );
@@ -62,10 +62,10 @@ export default function EndPage() {
             <span className="text-3xl">🎉</span>
           </div>
           <h1 className="text-3xl font-bold mb-3">
-            感謝你的參與，{userName}！
+            感谢你的参与，{userName}！
           </h1>
           <p className="text-neutral-400 text-lg">
-            {webinar.title} 已結束
+            {webinar.title} 已结束
           </p>
         </div>
 
@@ -87,7 +87,7 @@ export default function EndPage() {
             </div>
           </div>
           <p className="text-neutral-400 text-sm">
-            感謝 {webinar.speakerName} 的精彩分享！
+            感谢 {webinar.speakerName} 的精彩分享！
           </p>
         </div>
 
@@ -114,7 +114,7 @@ export default function EndPage() {
             href={replayUrl}
             className="inline-block bg-neutral-800 hover:bg-neutral-700 text-white px-6 py-3 rounded-lg transition-colors"
           >
-            🔄 觀看重播
+            🔄 观看回放
           </Link>
         </div>
 

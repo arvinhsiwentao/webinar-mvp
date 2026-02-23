@@ -106,7 +106,7 @@ export default function CountdownTimer({
       <div className={`rounded-lg p-4 ${classes.container}`}>
         <div className="text-center">
           <span className={`font-bold ${sizeClasses[size]} text-green-400 animate-pulse`}>
-            🎬 直播進行中！
+            🎬 直播进行中！
           </span>
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function CountdownTimer({
         <div className="text-center mb-3">
           <span className="inline-flex items-center gap-1 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-bounce">
             <span className="w-2 h-2 bg-white rounded-full animate-ping" />
-            即將開始！
+            即将开始！
           </span>
         </div>
       )}
@@ -147,7 +147,7 @@ export default function CountdownTimer({
             <Separator />
           </>
         )}
-        <TimeBlock value={timeLeft.hours} label="時" />
+        <TimeBlock value={timeLeft.hours} label="时" />
         <Separator />
         <TimeBlock value={timeLeft.minutes} label="分" />
         <Separator />
