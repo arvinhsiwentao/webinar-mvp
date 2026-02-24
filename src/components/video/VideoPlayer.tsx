@@ -100,23 +100,32 @@ export default function VideoPlayer({
     });
 
     let allowedTime = initialTime && initialTime > 0 ? initialTime : 0;
+    let isAdjustingTime = false; // reentrancy guard — prevents stack overflow
 
     // Late join: seek to initial position once metadata is loaded
     if (initialTime && initialTime > 0) {
       player.on('loadedmetadata', () => {
+        isAdjustingTime = true;
         player.currentTime(initialTime);
+        isAdjustingTime = false;
       });
     }
 
     player.on('timeupdate', () => {
+      if (isAdjustingTime) return;
+
       const current = player.currentTime() ?? 0;
       if (current > allowedTime + SEEK_FORWARD_TOLERANCE_SEC) {
+        isAdjustingTime = true;
         player.currentTime(allowedTime);
+        isAdjustingTime = false;
       } else if (current > allowedTime) {
         allowedTime = current;
       }
       if (current < allowedTime - SEEK_REWIND_TOLERANCE_SEC) {
+        isAdjustingTime = true;
         player.currentTime(allowedTime);
+        isAdjustingTime = false;
       }
     });
 
