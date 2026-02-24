@@ -1,19 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getWebinarById, updateWebinar, deleteWebinar, generateId, initializeSampleData, getRegistrationsByWebinar } from '@/lib/db';
+import { getWebinarById, updateWebinar, deleteWebinar, generateId, getRegistrationsByWebinar } from '@/lib/db';
 import { Session, AutoChatMessage, CTAEvent } from '@/lib/types';
-
-// Initialize sample data
-let initialized = false;
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!initialized) {
-    initializeSampleData();
-    initialized = true;
-  }
-
   const { id } = await params;
   const webinar = getWebinarById(id);
 

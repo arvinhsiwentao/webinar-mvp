@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllWebinars, createWebinar, generateId, initializeSampleData } from '@/lib/db';
+import { getAllWebinars, createWebinar, generateId } from '@/lib/db';
 import { CreateWebinarRequest, Session, AutoChatMessage, CTAEvent } from '@/lib/types';
 
-let initialized = false;
-
 export async function GET() {
-  if (!initialized) {
-    initializeSampleData();
-    initialized = true;
-  }
-
   const webinars = getAllWebinars();
   return NextResponse.json({ webinars });
 }
@@ -52,6 +45,7 @@ export async function POST(request: NextRequest) {
       speakerTitle: body.speakerTitle,
       speakerBio: body.speakerBio,
       speakerImage: body.speakerImage,
+      speakerAvatar: body.speakerAvatar,
       videoUrl: body.videoUrl,
       thumbnailUrl: body.thumbnailUrl,
       duration: body.duration || 60,
@@ -59,9 +53,11 @@ export async function POST(request: NextRequest) {
       sessions,
       autoChat,
       ctaEvents,
-      status: 'draft',
+      status: body.status || 'draft',
       viewerBaseCount: body.viewerBaseCount ?? 100,
       viewerMultiplier: body.viewerMultiplier ?? 1.5,
+      webhookUrl: body.webhookUrl,
+      evergreen: body.evergreen,
     });
 
     return NextResponse.json({ webinar }, { status: 201 });

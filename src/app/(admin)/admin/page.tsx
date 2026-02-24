@@ -42,7 +42,7 @@ export default function AdminPage() {
 
     try {
       await fetch(`/api/admin/webinar/${id}`, { method: 'DELETE' });
-      setWebinars(webinars.filter(w => w.id !== id));
+      setWebinars(prev => prev.filter(w => w.id !== id));
     } catch (err) {
       console.error('Failed to delete:', err);
     }

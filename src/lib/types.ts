@@ -157,6 +157,7 @@ export interface CreateWebinarRequest {
   viewerBaseCount?: number;
   viewerMultiplier?: number;
   webhookUrl?: string;
+  status?: 'draft' | 'published' | 'ended';
   heroImageUrl?: string;
   heroEyebrowText?: string;
   promoImageUrl?: string;

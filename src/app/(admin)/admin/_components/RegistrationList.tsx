@@ -4,12 +4,19 @@ import { useState, useEffect } from 'react';
 import { Webinar, Registration } from '@/lib/types';
 import { formatDateTime } from '@/lib/utils';
 
+function escapeCSVField(field: string): string {
+  if (field.includes(',') || field.includes('"') || field.includes('\n')) {
+    return `"${field.replace(/"/g, '""')}"`;
+  }
+  return field;
+}
+
 function exportCSV(registrations: Registration[], webinarTitle: string) {
   const headers = ['姓名', 'Email', '电话', '场次', '报名时间'];
   const rows = registrations.map(r => [
     r.name, r.email, r.phone || '', r.sessionId, r.registeredAt
   ]);
-  const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+  const csv = [headers, ...rows].map(row => row.map(escapeCSVField).join(',')).join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
