@@ -5,6 +5,7 @@ import { Session } from '@/lib/types';
 
 interface PersistentCountdownProps {
   sessions: Session[];
+  targetTime?: string;  // ISO datetime — if provided, overrides session-based calculation
 }
 
 /**
@@ -12,8 +13,14 @@ interface PersistentCountdownProps {
  * When all sessions are past, it projects session times-of-day onto future dates
  * so there is ALWAYS an active countdown visible (creates perpetual urgency).
  */
-export default function PersistentCountdown({ sessions }: PersistentCountdownProps) {
+export default function PersistentCountdown({ sessions, targetTime }: PersistentCountdownProps) {
   const getNextTarget = useCallback((): Date => {
+    // If an explicit targetTime is provided (e.g. evergreen slot), use it directly
+    if (targetTime) {
+      const t = new Date(targetTime);
+      if (t > new Date()) return t;
+    }
+
     const now = new Date();
 
     // 1. Try to find a real future session
@@ -63,7 +70,7 @@ export default function PersistentCountdown({ sessions }: PersistentCountdownPro
     const fallback = new Date(now);
     fallback.setDate(fallback.getDate() + 1);
     return fallback;
-  }, [sessions]);
+  }, [sessions, targetTime]);
 
   const [target, setTarget] = useState<Date>(() => getNextTarget());
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });

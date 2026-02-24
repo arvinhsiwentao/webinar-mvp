@@ -19,6 +19,8 @@ interface RegistrationModalProps {
   onSubmit: (e: React.FormEvent) => void;
   submitting: boolean;
   formError: string;
+  isEvergreen?: boolean;
+  evergreenSlotLabel?: string;
 }
 
 export default function RegistrationModal({
@@ -36,6 +38,8 @@ export default function RegistrationModal({
   onSubmit,
   submitting,
   formError,
+  isEvergreen,
+  evergreenSlotLabel,
 }: RegistrationModalProps) {
   const [showPhone, setShowPhone] = useState(false);
 
@@ -128,27 +132,38 @@ export default function RegistrationModal({
             </div>
 
             {/* Session selector */}
-            <div>
-              <label className="block text-sm font-semibold text-neutral-700 mb-2">
-                选择一个时间
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedSession}
-                  onChange={(e) => onSessionChange(e.target.value)}
-                  className="w-full h-[50px] px-4 pr-10 text-base bg-white border border-[#E8E5DE] rounded focus:border-[#B8953F] focus:outline-none appearance-none transition-colors"
-                >
-                  {sessions.map((session) => (
-                    <option key={session.id} value={session.id}>
-                      {formatDate(session.startTime)} - {formatTime(session.startTime)}
-                    </option>
-                  ))}
-                </select>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none">
-                  ▼
-                </span>
+            {isEvergreen ? (
+              <div>
+                <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  讲座时间
+                </label>
+                <div className="w-full h-[50px] px-4 text-base bg-[#F5F5F0] border border-[#E8E5DE] rounded flex items-center text-neutral-700">
+                  {evergreenSlotLabel || '即将开始'}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  选择一个时间
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedSession}
+                    onChange={(e) => onSessionChange(e.target.value)}
+                    className="w-full h-[50px] px-4 pr-10 text-base bg-white border border-[#E8E5DE] rounded focus:border-[#B8953F] focus:outline-none appearance-none transition-colors"
+                  >
+                    {sessions.map((session) => (
+                      <option key={session.id} value={session.id}>
+                        {formatDate(session.startTime)} - {formatTime(session.startTime)}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none">
+                    ▼
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* SMS checkbox */}
             <div>

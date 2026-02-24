@@ -8,9 +8,10 @@ interface UseRegistrationFormOptions {
   onSuccess: (sessionId: string, name: string) => void;
   onFormSubmit?: () => void;
   emailErrorMessage?: string;
+  assignedSlot?: string;  // evergreen slot time
 }
 
-export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailErrorMessage = '请输入有效的邮箱地址' }: UseRegistrationFormOptions) {
+export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailErrorMessage = '请输入有效的邮箱地址', assignedSlot }: UseRegistrationFormOptions) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -42,6 +43,7 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
           name: name.trim(),
           email: email.trim(),
           phone: phone.trim() || undefined,
+          assignedSlot: assignedSlot || undefined,
         }),
       });
 

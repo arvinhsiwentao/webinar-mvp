@@ -18,11 +18,24 @@ export default function HomePage() {
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [evergreenSlots, setEvergreenSlots] = useState<Array<{ slotTime: string; type: string }>>([]);
+  const [isEvergreen, setIsEvergreen] = useState(false);
 
   const form = useRegistrationForm({
     webinarId: DEFAULT_WEBINAR_ID,
     onSuccess: (sessionId, name) => {
-      router.push(`/webinar/${DEFAULT_WEBINAR_ID}/confirm?session=${sessionId}&name=${encodeURIComponent(name)}`);
+      // Update sticky session as registered
+      const sticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
+      if (sticky) {
+        try {
+          const parsed = JSON.parse(sticky);
+          parsed.registered = true;
+          localStorage.setItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`, JSON.stringify(parsed));
+        } catch { /* ignore */ }
+      }
+
+      const slotParam = evergreenSlots[0]?.slotTime ? `&slot=${encodeURIComponent(evergreenSlots[0].slotTime)}` : '';
+      router.push(`/webinar/${DEFAULT_WEBINAR_ID}/confirm?session=${sessionId}&name=${encodeURIComponent(name)}${slotParam}`);
     },
   });
 
@@ -35,7 +48,57 @@ export default function HomePage() {
         if (!res.ok) throw new Error('Webinar not found');
         const data = await res.json();
         setWebinar(data.webinar);
-        if (data.webinar.sessions.length > 0) {
+
+        // Fetch evergreen slots if enabled
+        if (data.webinar.evergreen?.enabled) {
+          setIsEvergreen(true);
+          try {
+            const slotRes = await fetch(`/api/webinar/${DEFAULT_WEBINAR_ID}/next-slot`);
+            if (slotRes.ok) {
+              const slotData = await slotRes.json();
+              setEvergreenSlots(slotData.slots);
+
+              // Store sticky session in localStorage
+              const existingSticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
+              const now = new Date();
+              let shouldUpdate = true;
+
+              if (existingSticky) {
+                try {
+                  const parsed = JSON.parse(existingSticky);
+                  // Only update if existing session has expired
+                  if (new Date(parsed.expiresAt) > now && new Date(parsed.assignedSlot) > now) {
+                    shouldUpdate = false;
+                    // Use the stored slot instead
+                    setEvergreenSlots(prev => {
+                      const stored = { slotTime: parsed.assignedSlot, type: 'stored' };
+                      // Replace first slot with stored one if it's still valid
+                      return [stored, ...prev.filter(s => s.slotTime !== parsed.assignedSlot)].slice(0, slotData.slots.length);
+                    });
+                  }
+                } catch { /* invalid stored data, update */ }
+              }
+
+              if (shouldUpdate && slotData.slots.length > 0) {
+                const visitorId = localStorage.getItem('webinar-visitor-id') || `v_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+                if (!localStorage.getItem('webinar-visitor-id')) {
+                  localStorage.setItem('webinar-visitor-id', visitorId);
+                }
+                localStorage.setItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`, JSON.stringify({
+                  visitorId,
+                  assignedSlot: slotData.countdownTarget,
+                  expiresAt: slotData.expiresAt,
+                  registered: false,
+                  registrationId: null,
+                }));
+              }
+            }
+          } catch {
+            // Fall back to static sessions
+          }
+        }
+
+        if (!data.webinar.evergreen?.enabled && data.webinar.sessions.length > 0) {
           const now = new Date();
           const futureSession = data.webinar.sessions.find(
             (s: Session) => new Date(s.startTime) > now
@@ -177,8 +240,9 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto flex flex-col items-center">
           {/* Date Schedule */}
           <div className="space-y-6 md:space-y-8 mb-14 w-full max-w-xl">
-            {sortedSessions.map((session) => {
-              const date = new Date(session.startTime);
+            {(isEvergreen ? evergreenSlots : sortedSessions).map((item, idx) => {
+              const dateStr = 'slotTime' in item ? (item as { slotTime: string }).slotTime : (item as Session).startTime;
+              const date = new Date(dateStr);
               const month = date.getMonth() + 1;
               const day = date.getDate();
               const fullDate = date.toLocaleDateString('zh-CN', {
@@ -194,18 +258,15 @@ export default function HomePage() {
 
               return (
                 <div
-                  key={session.id}
+                  key={idx}
                   className="flex items-center gap-5 md:gap-7 justify-center"
                 >
-                  {/* Month Badge + Day */}
                   <div className="flex-shrink-0 w-16 md:w-20 text-center">
                     <div className="bg-[#B8953F] text-white text-xs md:text-sm font-medium px-2.5 py-1 rounded-sm mb-1">
                       {month}月
                     </div>
                     <div className="text-2xl md:text-3xl font-bold text-neutral-900">{day}</div>
                   </div>
-
-                  {/* Date + Time */}
                   <div>
                     <p className="text-lg md:text-2xl font-bold text-neutral-900">{fullDate}</p>
                     <p className="text-sm md:text-base text-neutral-500">
@@ -218,7 +279,10 @@ export default function HomePage() {
           </div>
 
           {/* Countdown Timer */}
-          <PersistentCountdown sessions={webinar.sessions} />
+          <PersistentCountdown
+            sessions={webinar.sessions}
+            targetTime={evergreenSlots[0]?.slotTime}
+          />
         </div>
       </section>
 

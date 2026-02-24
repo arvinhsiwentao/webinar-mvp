@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
+import MissedSessionPrompt from '@/components/evergreen/MissedSessionPrompt';
 import { Button, Badge, Card } from '@/components/ui';
 import { Webinar, Session } from '@/lib/types';
+import { getEvergreenState, getSlotExpiresAt } from '@/lib/evergreen';
 import { generateICSContent } from '@/lib/utils';
 
 export default function WaitingPage() {
@@ -20,6 +22,8 @@ export default function WaitingPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [canEnter, setCanEnter] = useState(false);
+  const [evergreenState, setEvergreenState] = useState<string | null>(null);
+  const [nextSlotTime, setNextSlotTime] = useState<string>('');
 
   const countdownTarget = slotTime || session?.startTime || '';
 
@@ -33,6 +37,33 @@ export default function WaitingPage() {
 
         const foundSession = data.webinar.sessions.find((s: Session) => s.id === sessionId);
         setSession(foundSession || data.webinar.sessions[0]);
+
+        // Check evergreen state
+        if (slotTime && data.webinar.evergreen?.enabled) {
+          const expiresAt = getSlotExpiresAt(slotTime, data.webinar.evergreen.videoDurationMinutes);
+          const state = getEvergreenState(slotTime, expiresAt, true);
+          setEvergreenState(state);
+
+          if (state === 'LIVE') {
+            // Late join — redirect to live room immediately
+            const slotParam = `&slot=${encodeURIComponent(slotTime)}`;
+            router.push(`/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}${slotParam}`);
+            return;
+          }
+
+          if (state === 'MISSED') {
+            // Get next available slot
+            try {
+              const slotRes = await fetch(`/api/webinar/${webinarId}/next-slot`);
+              if (slotRes.ok) {
+                const slotData = await slotRes.json();
+                if (slotData.countdownTarget) {
+                  setNextSlotTime(slotData.countdownTarget);
+                }
+              }
+            } catch { /* use empty nextSlotTime */ }
+          }
+        }
       } catch {
         console.error('Failed to fetch webinar');
       } finally {
@@ -112,6 +143,32 @@ export default function WaitingPage() {
           </Button>
         </div>
       </div>
+    );
+  }
+
+  if (evergreenState === 'MISSED' && nextSlotTime) {
+    // Get registrationId from localStorage
+    const sticky = typeof window !== 'undefined' ? localStorage.getItem(`webinar-${webinarId}-evergreen`) : null;
+    const registrationId = sticky ? JSON.parse(sticky).registrationId : '';
+
+    return (
+      <MissedSessionPrompt
+        missedSlotTime={slotTime!}
+        nextSlotTime={nextSlotTime}
+        webinarId={webinarId}
+        registrationId={registrationId || ''}
+        onReassigned={(newSlot, expiresAt) => {
+          // Update localStorage
+          if (sticky) {
+            const parsed = JSON.parse(sticky);
+            parsed.assignedSlot = newSlot;
+            parsed.expiresAt = expiresAt;
+            localStorage.setItem(`webinar-${webinarId}-evergreen`, JSON.stringify(parsed));
+          }
+          // Redirect to waiting with new slot
+          router.push(`/webinar/${webinarId}/waiting?session=${sessionId}&name=${encodeURIComponent(userName)}&slot=${encodeURIComponent(newSlot)}`);
+        }}
+      />
     );
   }
 
