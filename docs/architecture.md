@@ -11,11 +11,11 @@ Simulive (simulated-live) webinar platform. A pre-recorded video plays on a sche
 ## Page Flow & Routing
 
 ```
-Landing Page  →  Registration  →  Confirm           →  Waiting Room        →  Live Room          →  End
-/                (modal)          /webinar/[id]/confirm  /webinar/[id]/waiting  /webinar/[id]/live    /webinar/[id]/end
+Landing Page  →  Registration  →  Lobby              →  Live Room          →  End
+/                (modal)          /webinar/[id]/lobby    /webinar/[id]/live    /webinar/[id]/end
 ```
 
-The root `/` is the only landing page — a single-purpose entry point hardcoded to webinar ID `1`. There is no `/webinar/[id]` landing page; the dynamic `[id]` namespace only contains the post-registration sub-routes (confirm, waiting, live, end).
+The root `/` is the only landing page — a single-purpose entry point hardcoded to webinar ID `1`. There is no `/webinar/[id]` landing page; the dynamic `[id]` namespace only contains the post-registration sub-routes (lobby, live, end).
 
 Pages are organized into **route groups** — parenthesized folders that are invisible in the URL but provide independent layouts:
 
@@ -28,8 +28,9 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 |-------|-------------|---------|
 | `/` | `src/app/(public)/page.tsx` | Single landing page for webinar ID `1` ("Mike是麥克"). Modal registration. Sections: Hero → Credibility → Problem → Benefits → Urgency. |
 | `/demo` | `src/app/(public)/demo/page.tsx` | Demo/preview page |
-| `/webinar/[id]/confirm` | `src/app/(public)/webinar/[id]/confirm/page.tsx` | Post-registration confirmation with confetti, calendar download, promo image, auto-redirect |
-| `/webinar/[id]/waiting` | `src/app/(public)/webinar/[id]/waiting/page.tsx` | Pre-show countdown timer with promo banner and calendar buttons |
+| `/webinar/[id]/lobby` | `src/app/(public)/webinar/[id]/lobby/page.tsx` | Event lobby: two-phase pre-show (confirmation celebration → urgency countdown). Auto-redirects to live at T=0. |
+| `/webinar/[id]/confirm` | Redirect stub → `/lobby` | Backward compatibility |
+| `/webinar/[id]/waiting` | Redirect stub → `/lobby` | Backward compatibility |
 | `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + 4-tab sidebar (Info/Viewers/Chat/Offers) + on-video CTA |
 | `/webinar/[id]/end` | `src/app/(public)/webinar/[id]/end/page.tsx` | Dark sales page with purple CTA, social sharing, replay link |
 | `/admin` | `src/app/(admin)/admin/page.tsx` | Admin panel (no auth in MVP) |

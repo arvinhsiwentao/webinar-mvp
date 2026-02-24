@@ -45,11 +45,11 @@ No test framework is configured yet.
 ### User Journey (page flow)
 
 ```
-Landing Page → Registration → Confirm → Waiting Room → Live Room → End
-/              (modal)         /webinar/[id]/confirm  /webinar/[id]/waiting  /webinar/[id]/live  /webinar/[id]/end
+Landing Page → Registration → Lobby → Live Room → End
+/              (modal)         /webinar/[id]/lobby  /webinar/[id]/live  /webinar/[id]/end
 ```
 
-The root `/` is the only landing page, hardcoded for webinar ID `1` ("Mike是麥克"). There is no `/webinar/[id]` landing page — the `[id]` namespace only contains post-registration sub-routes (confirm, waiting, live, end).
+The root `/` is the only landing page, hardcoded for webinar ID `1` ("Mike是麥克"). There is no `/webinar/[id]` landing page — the `[id]` namespace only contains post-registration sub-routes (lobby, live, end).
 
 ### Key Directories
 

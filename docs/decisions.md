@@ -43,3 +43,7 @@ The simulive model requires viewers to watch linearly (no skipping ahead) to mai
 ### 2026-02: Self-sustaining documentation system
 
 Added `docs/architecture.md` (living architecture doc) and `docs/decisions.md` (this file). Claude Code hooks (PostToolUse + Stop) automatically remind and enforce documentation updates when structural changes are made. Goal: reduce doc drift without manual discipline.
+
+### 2026-02-24: Merge Confirm + Waiting into Event Lobby
+
+Merged the Confirmation Page (`/confirm`) and Waiting Room (`/waiting`) into a single Event Lobby (`/lobby`). The two pages had duplicate functionality (countdown, calendar buttons, data fetching). The lobby uses a two-phase UI: celebration mode (>30 min) and urgency mode (<=30 min). Old routes become redirect stubs for backward compatibility with bookmarks and sent emails.
