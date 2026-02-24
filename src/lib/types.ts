@@ -37,6 +37,25 @@ export interface Session {
   status: 'scheduled' | 'live' | 'ended';
 }
 
+export interface EvergreenConfig {
+  enabled: boolean;
+  dailySchedule: Array<{ time: string }>;  // HH:mm 24hr format, e.g. ["08:00", "21:00"]
+  immediateSlot: {
+    enabled: boolean;
+    intervalMinutes: number;      // 15 → snaps to :00/:15/:30/:45
+    bufferMinutes: number;        // 3 → min gap before slot
+    maxWaitMinutes: number;       // 30 → only inject if next anchor > 30 min
+  };
+  videoDurationMinutes: number;
+  timezone: string;               // IANA, e.g. "America/Chicago"
+  displaySlotCount: number;       // e.g. 4
+}
+
+export interface EvergreenSlot {
+  slotTime: string;   // ISO datetime
+  type: 'anchor' | 'immediate';
+}
+
 export interface Webinar {
   id: string;
   title: string;
@@ -83,6 +102,9 @@ export interface Webinar {
   // Missed webinar redirect
   missedWebinarUrl?: string;
 
+  // Evergreen countdown config
+  evergreen?: EvergreenConfig;
+
   // Preroll video
   prerollVideoUrl?: string;
 
@@ -94,6 +116,10 @@ export interface Registration {
   id: string;
   webinarId: string;
   sessionId: string;
+  // Evergreen: computed slot time (replaces static sessionId when evergreen enabled)
+  assignedSlot?: string;       // ISO datetime
+  slotExpiresAt?: string;      // assignedSlot + videoDuration
+  reassignedFrom?: string;     // previous slot if missed
   name: string;
   email: string;
   phone?: string;
@@ -141,12 +167,14 @@ export interface CreateWebinarRequest {
   endPageCtaColor?: string;
   sidebarDescription?: string;
   missedWebinarUrl?: string;
+  evergreen?: EvergreenConfig;
   prerollVideoUrl?: string;
 }
 
 export interface RegisterRequest {
   webinarId: string;
   sessionId: string;
+  assignedSlot?: string;
   name: string;
   email: string;
   phone?: string;
