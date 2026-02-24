@@ -10,9 +10,9 @@ export async function POST(request: NextRequest) {
     const body: RegisterRequest = await request.json();
 
     // Validate required fields
-    if (!body.webinarId || !body.sessionId || !body.name || !body.email) {
+    if (!body.webinarId || !body.name || !body.email) {
       return NextResponse.json(
-        { error: 'Missing required fields: webinarId, sessionId, name, email' },
+        { error: 'Missing required fields: webinarId, name, email' },
         { status: 400 }
       );
     }

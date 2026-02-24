@@ -23,6 +23,7 @@ export default function HomePage() {
 
   const form = useRegistrationForm({
     webinarId: DEFAULT_WEBINAR_ID,
+    assignedSlot: evergreenSlots[0]?.slotTime,
     onSuccess: (sessionId, name) => {
       // Update sticky session as registered
       const sticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
@@ -368,6 +369,8 @@ export default function HomePage() {
         onSubmit={form.handleSubmit}
         submitting={form.submitting}
         formError={form.formError}
+        isEvergreen={isEvergreen}
+        evergreenSlotLabel={evergreenSlots[0]?.slotTime ? new Date(evergreenSlots[0].slotTime).toLocaleString('zh-CN', { timeZone: 'America/Chicago' }) : undefined}
       />
     </div>
   );
