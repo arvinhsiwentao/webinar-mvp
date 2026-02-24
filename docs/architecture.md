@@ -84,7 +84,6 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 |----------|---------|-------------|-------|
 | `/api/admin/webinar` | GET, POST | `src/app/api/admin/webinar/route.ts` | List all / create new |
 | `/api/admin/webinar/[id]` | GET, PUT, DELETE | `src/app/api/admin/webinar/[id]/route.ts` | Full CRUD, GET includes registrations |
-| `/api/admin/registrations` | GET | `src/app/api/admin/registrations/route.ts` | List all registrations |
 
 ### Utilities (`src/lib/utils.ts`)
 

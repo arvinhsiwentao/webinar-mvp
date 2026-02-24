@@ -74,7 +74,7 @@ export default function AdminPage() {
               onClick={() => { setActiveTab('list'); setEditingWebinar(null); }}
               className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'list'
-                  ? 'border-blue-500 text-blue-400'
+                  ? 'border-[#B8953F] text-[#B8953F]'
                   : 'border-transparent text-neutral-500 hover:text-neutral-900'
               }`}
             >
@@ -84,7 +84,7 @@ export default function AdminPage() {
               onClick={() => { setActiveTab('create'); setEditingWebinar(null); }}
               className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'create'
-                  ? 'border-blue-500 text-blue-400'
+                  ? 'border-[#B8953F] text-[#B8953F]'
                   : 'border-transparent text-neutral-500 hover:text-neutral-900'
               }`}
             >
@@ -94,14 +94,14 @@ export default function AdminPage() {
               onClick={() => { setActiveTab('registrations'); setEditingWebinar(null); }}
               className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'registrations'
-                  ? 'border-blue-500 text-blue-400'
+                  ? 'border-[#B8953F] text-[#B8953F]'
                   : 'border-transparent text-neutral-500 hover:text-neutral-900'
               }`}
             >
               报名名单
             </button>
             {activeTab === 'edit' && (
-              <span className="py-3 px-4 text-sm font-medium border-b-2 border-blue-500 text-blue-400">
+              <span className="py-3 px-4 text-sm font-medium border-b-2 border-[#B8953F] text-[#B8953F]">
                 编辑研讨会
               </span>
             )}

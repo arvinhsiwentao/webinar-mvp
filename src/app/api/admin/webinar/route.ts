@@ -39,25 +39,15 @@ export async function POST(request: NextRequest) {
     }));
 
     const webinar = createWebinar({
-      title: body.title,
-      subtitle: body.subtitle,
-      speakerName: body.speakerName,
-      speakerTitle: body.speakerTitle,
-      speakerBio: body.speakerBio,
-      speakerImage: body.speakerImage,
-      speakerAvatar: body.speakerAvatar,
-      videoUrl: body.videoUrl,
-      thumbnailUrl: body.thumbnailUrl,
-      duration: body.duration || 60,
-      highlights: body.highlights || [],
+      ...body,
       sessions,
       autoChat,
       ctaEvents,
+      duration: body.duration || 60,
+      highlights: body.highlights || [],
       status: body.status || 'draft',
       viewerBaseCount: body.viewerBaseCount ?? 100,
       viewerMultiplier: body.viewerMultiplier ?? 1.5,
-      webhookUrl: body.webhookUrl,
-      evergreen: body.evergreen,
     });
 
     return NextResponse.json({ webinar }, { status: 201 });

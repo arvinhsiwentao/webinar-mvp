@@ -39,11 +39,22 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
     speakerAvatar: webinar?.speakerAvatar || '',
     videoUrl: webinar?.videoUrl || '',
     thumbnailUrl: webinar?.thumbnailUrl || '',
+    prerollVideoUrl: webinar?.prerollVideoUrl || '',
     duration: webinar?.duration || 60,
     highlights: webinar?.highlights?.join('\n') || '',
     viewerBaseCount: webinar?.viewerBaseCount || 100,
     viewerMultiplier: webinar?.viewerMultiplier || 3,
     webhookUrl: webinar?.webhookUrl || '',
+    heroImageUrl: webinar?.heroImageUrl || '',
+    heroEyebrowText: webinar?.heroEyebrowText || '',
+    promoImageUrl: webinar?.promoImageUrl || '',
+    disclaimerText: webinar?.disclaimerText || '',
+    sidebarDescription: webinar?.sidebarDescription || '',
+    missedWebinarUrl: webinar?.missedWebinarUrl || '',
+    endPageSalesCopy: webinar?.endPageSalesCopy || '',
+    endPageCtaText: webinar?.endPageCtaText || '',
+    endPageCtaUrl: webinar?.endPageCtaUrl || '',
+    endPageCtaColor: webinar?.endPageCtaColor || '',
     status: webinar?.status || 'draft',
   });
 
@@ -170,7 +181,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
               required
             />
           </div>
@@ -180,7 +191,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               type="text"
               value={formData.subtitle}
               onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />
           </div>
           <div>
@@ -190,7 +201,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               value={formData.videoUrl}
               onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
               placeholder="https://example.com/video.mp4、.m3u8 或 YouTube 链接"
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
               required
             />
             <p className="text-xs text-neutral-400 mt-1">
@@ -203,7 +214,27 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               type="number"
               value={formData.duration}
               onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 60 })}
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">缩略图 URL</label>
+            <input
+              type="text"
+              value={formData.thumbnailUrl}
+              onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
+              placeholder="https://example.com/thumbnail.jpg"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">片头视频 URL</label>
+            <input
+              type="text"
+              value={formData.prerollVideoUrl}
+              onChange={(e) => setFormData({ ...formData, prerollVideoUrl: e.target.value })}
+              placeholder="https://example.com/preroll.mp4"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />
           </div>
         </div>
@@ -219,7 +250,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               type="text"
               value={formData.speakerName}
               onChange={(e) => setFormData({ ...formData, speakerName: e.target.value })}
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
               required
             />
           </div>
@@ -229,25 +260,25 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               type="text"
               value={formData.speakerTitle}
               onChange={(e) => setFormData({ ...formData, speakerTitle: e.target.value })}
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />
           </div>
           <div>
             <label className="block text-sm text-neutral-500 mb-2">讲者照片 URL</label>
             <input
-              type="url"
+              type="text"
               value={formData.speakerImage}
               onChange={(e) => setFormData({ ...formData, speakerImage: e.target.value })}
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />
           </div>
           <div>
             <label className="block text-sm text-neutral-500 mb-2">讲者头像 URL（圆形头像，建议正方形）</label>
             <input
-              type="url"
+              type="text"
               value={formData.speakerAvatar}
               onChange={(e) => setFormData({ ...formData, speakerAvatar: e.target.value })}
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
               placeholder="/images/mike-avatar.jpg"
             />
           </div>
@@ -257,7 +288,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               value={formData.speakerBio}
               onChange={(e) => setFormData({ ...formData, speakerBio: e.target.value })}
               rows={3}
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />
           </div>
         </div>
@@ -272,8 +303,35 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
           onChange={(e) => setFormData({ ...formData, highlights: e.target.value })}
           rows={4}
           placeholder="了解 2026 年最具潜力的投资趋势&#10;学习 AI 产业的核心投资逻辑&#10;掌握数字资产配置的黄金比例"
-          className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+          className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
         />
+      </section>
+
+      {/* Landing Page Hero */}
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
+        <h2 className="text-lg font-semibold mb-4">落地页横幅</h2>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">横幅图片 URL</label>
+            <input
+              type="text"
+              value={formData.heroImageUrl}
+              onChange={(e) => setFormData({ ...formData, heroImageUrl: e.target.value })}
+              placeholder="https://example.com/hero.jpg"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">眉题文字</label>
+            <input
+              type="text"
+              value={formData.heroEyebrowText}
+              onChange={(e) => setFormData({ ...formData, heroEyebrowText: e.target.value })}
+              placeholder="限时免费直播"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+            />
+          </div>
+        </div>
       </section>
 
       {/* Sessions (hidden when evergreen is enabled) */}
@@ -284,7 +342,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
           <button
             type="button"
             onClick={() => setSessions([...sessions, { startTime: '' }])}
-            className="text-blue-400 text-sm hover:text-blue-300"
+            className="text-[#B8953F] text-sm hover:text-[#A07A2F]"
           >
             + 添加场次
           </button>
@@ -300,7 +358,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
                   type="datetime-local"
                   value={session.startTime}
                   onChange={(e) => update('startTime', e.target.value)}
-                  className="flex-1 bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+                  className="flex-1 bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
                 />
                 {sessions.length > 1 && (
                   <button
@@ -327,7 +385,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               type="checkbox"
               checked={evergreenEnabled}
               onChange={(e) => setEvergreenEnabled(e.target.checked)}
-              className="rounded accent-blue-600"
+              className="rounded accent-[#B8953F]"
             />
             启用
           </label>
@@ -349,7 +407,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
                         updated[idx] = e.target.value;
                         setDailySchedule(updated);
                       }}
-                      className="bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+                      className="bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
                     />
                     {dailySchedule.length > 1 && (
                       <button
@@ -365,7 +423,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
                 <button
                   type="button"
                   onClick={() => setDailySchedule([...dailySchedule, '12:00'])}
-                  className="text-blue-400 text-sm hover:text-blue-300"
+                  className="text-[#B8953F] text-sm hover:text-[#A07A2F]"
                 >
                   + 添加时间
                 </button>
@@ -379,7 +437,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
                   type="checkbox"
                   checked={immediateSlotEnabled}
                   onChange={(e) => setImmediateSlotEnabled(e.target.checked)}
-                  className="rounded accent-blue-600"
+                  className="rounded accent-[#B8953F]"
                 />
                 启用即时场次
               </label>
@@ -461,7 +519,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
           <button
             type="button"
             onClick={() => setAutoChat([...autoChat, { timeSec: '', name: '', message: '' }])}
-            className="text-blue-400 text-sm hover:text-blue-300"
+            className="text-[#B8953F] text-sm hover:text-[#A07A2F]"
           >
             + 添加消息
           </button>
@@ -521,7 +579,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               promoText: '',
               showCountdown: true
             }])}
-            className="text-blue-400 text-sm hover:text-blue-300"
+            className="text-[#B8953F] text-sm hover:text-[#A07A2F]"
           >
             + 添加 CTA
           </button>
@@ -567,7 +625,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
                   className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
                 />
                 <input
-                  type="url"
+                  type="text"
                   value={cta.url}
                   onChange={(e) => update('url', e.target.value)}
                   placeholder="链接 URL"
@@ -605,7 +663,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               type="number"
               value={formData.viewerBaseCount}
               onChange={(e) => setFormData({ ...formData, viewerBaseCount: parseInt(e.target.value) || 100 })}
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />
           </div>
           <div>
@@ -615,7 +673,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               step="0.1"
               value={formData.viewerMultiplier}
               onChange={(e) => setFormData({ ...formData, viewerMultiplier: parseFloat(e.target.value) || 1.5 })}
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />
           </div>
         </div>
@@ -627,13 +685,117 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
         <div>
           <label className="block text-sm text-neutral-500 mb-2">Webhook URL</label>
           <input
-            type="url"
+            type="text"
             value={formData.webhookUrl}
             onChange={(e) => setFormData({ ...formData, webhookUrl: e.target.value })}
             placeholder="https://hooks.zapier.com/... 或 CRM webhook URL"
-            className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+            className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
           />
           <p className="text-neutral-400 text-xs mt-2">报名时自动 POST 数据到此 URL（适用于 Zapier、CRM 等）</p>
+        </div>
+      </section>
+
+      {/* Promotional Content */}
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
+        <h2 className="text-lg font-semibold mb-4">推广内容</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">推广图片 URL</label>
+            <input
+              type="text"
+              value={formData.promoImageUrl}
+              onChange={(e) => setFormData({ ...formData, promoImageUrl: e.target.value })}
+              placeholder="https://example.com/promo.jpg"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">免责声明</label>
+            <textarea
+              value={formData.disclaimerText}
+              onChange={(e) => setFormData({ ...formData, disclaimerText: e.target.value })}
+              rows={3}
+              placeholder="投资有风险，入市需谨慎..."
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">侧边栏描述</label>
+            <textarea
+              value={formData.sidebarDescription}
+              onChange={(e) => setFormData({ ...formData, sidebarDescription: e.target.value })}
+              rows={3}
+              placeholder="关于此次直播的详细描述..."
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">错过直播跳转 URL</label>
+            <input
+              type="text"
+              value={formData.missedWebinarUrl}
+              onChange={(e) => setFormData({ ...formData, missedWebinarUrl: e.target.value })}
+              placeholder="https://example.com/replay"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* End Page Settings */}
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
+        <h2 className="text-lg font-semibold mb-4">结束页设置</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">销售文案</label>
+            <textarea
+              value={formData.endPageSalesCopy}
+              onChange={(e) => setFormData({ ...formData, endPageSalesCopy: e.target.value })}
+              rows={4}
+              placeholder="限时优惠，立即行动..."
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+            />
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-neutral-500 mb-2">CTA 按钮文字</label>
+              <input
+                type="text"
+                value={formData.endPageCtaText}
+                onChange={(e) => setFormData({ ...formData, endPageCtaText: e.target.value })}
+                placeholder="立即报名"
+                className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-neutral-500 mb-2">CTA 按钮链接</label>
+              <input
+                type="text"
+                value={formData.endPageCtaUrl}
+                onChange={(e) => setFormData({ ...formData, endPageCtaUrl: e.target.value })}
+                placeholder="https://example.com/offer"
+                className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">CTA 按钮颜色</label>
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                value={formData.endPageCtaColor}
+                onChange={(e) => setFormData({ ...formData, endPageCtaColor: e.target.value })}
+                placeholder="#B8953F"
+                className="flex-1 bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+              />
+              {formData.endPageCtaColor && (
+                <div
+                  className="w-10 h-10 rounded border border-neutral-300 shrink-0"
+                  style={{ backgroundColor: formData.endPageCtaColor }}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -643,7 +805,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
         <select
           value={formData.status}
           onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'published' | 'ended' })}
-          className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-blue-500 focus:outline-none"
+          className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
         >
           <option value="draft">草稿</option>
           <option value="published">已发布</option>
@@ -663,7 +825,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
         <button
           type="submit"
           disabled={saving}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="bg-[#B8953F] hover:bg-[#A07A2F] text-white font-medium px-8 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? '保存中...' : webinar ? '更新研讨会' : '创建研讨会'}
         </button>

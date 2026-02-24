@@ -228,7 +228,7 @@ export default function LiveRoomPage() {
               {/* On-video CTA overlays */}
               <CTAOverlay
                 currentTime={currentTime}
-                ctaEvents={webinar.ctaEvents.filter(c => c.position === 'on_video')}
+                ctaEvents={(webinar.ctaEvents || []).filter(c => c.position === 'on_video')}
                 onCTAClick={handleCTAClick}
                 onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText })}
                 position="on_video"
@@ -238,7 +238,7 @@ export default function LiveRoomPage() {
             {/* Below-video CTA overlays */}
             <CTAOverlay
               currentTime={currentTime}
-              ctaEvents={webinar.ctaEvents.filter(c => c.position !== 'on_video')}
+              ctaEvents={(webinar.ctaEvents || []).filter(c => c.position !== 'on_video')}
               onCTAClick={handleCTAClick}
               onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText })}
               position="below_video"
@@ -336,7 +336,7 @@ export default function LiveRoomPage() {
                   content: (
                     <ChatRoom
                       currentTime={currentTime}
-                      autoMessages={webinar.autoChat}
+                      autoMessages={webinar.autoChat || []}
                       timeVariance={3}
                       userName={userName}
                       webinarId={webinarId}
@@ -352,7 +352,7 @@ export default function LiveRoomPage() {
                   label: '优惠',
                   content: (
                     <OffersTab
-                      ctaEvents={webinar.ctaEvents}
+                      ctaEvents={webinar.ctaEvents || []}
                       currentTime={currentTime}
                       onOfferClick={handleCTAClick}
                     />
