@@ -49,6 +49,7 @@ export default function LiveRoomPage() {
   const [loading, setLoading] = useState(true);
   const [eventPhase, setEventPhase] = useState<'loading' | 'pre_event' | 'pre_show' | 'live' | 'ended'>('loading');
   const [isMuted, setIsMuted] = useState(true);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const playerInstanceRef = useRef<Player | null>(null);
 
   // Video state
@@ -215,7 +216,21 @@ export default function LiveRoomPage() {
   // Expose player instance for unmute control
   const handlePlayerReady = useCallback((player: Player) => {
     playerInstanceRef.current = player;
-  }, []);
+
+    // Detect autoplay failure — if video hasn't started playing within 3 seconds
+    if (!isReplay) {
+      const timeout = setTimeout(() => {
+        if (player.paused()) {
+          setAutoplayBlocked(true);
+        }
+      }, 3000);
+
+      player.on('play', () => {
+        clearTimeout(timeout);
+        setAutoplayBlocked(false);
+      });
+    }
+  }, [isReplay]);
 
   // Handle CTA clicks
   const handleCTAClick = useCallback((cta: CTAEvent) => {
@@ -307,6 +322,26 @@ export default function LiveRoomPage() {
                       visible={isMuted}
                       onUnmute={handleUnmute}
                     />
+                  )}
+                  {/* Autoplay blocked fallback */}
+                  {autoplayBlocked && !isReplay && eventPhase === 'live' && (
+                    <button
+                      onClick={() => {
+                        playerInstanceRef.current?.play();
+                        setAutoplayBlocked(false);
+                      }}
+                      className="absolute inset-0 z-30 flex items-center justify-center bg-black/50 cursor-pointer"
+                      aria-label="点击开始直播"
+                    >
+                      <div className="flex flex-col items-center gap-3 text-white">
+                        <div className="w-20 h-20 rounded-full bg-[#B8953F] flex items-center justify-center">
+                          <svg className="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </div>
+                        <span className="text-sm font-medium">点击开始直播</span>
+                      </div>
+                    </button>
                   )}
                 </>
               )}
