@@ -14,6 +14,7 @@ import { Webinar, Session, CTAEvent } from '@/lib/types';
 import { Badge, Button } from '@/components/ui';
 import { track } from '@/lib/tracking';
 import { formatElapsedTime } from '@/lib/utils';
+import { calculateLateJoinPosition } from '@/lib/evergreen';
 
 // Dynamically import VideoPlayer to avoid SSR issues with video.js
 const VideoPlayer = dynamic(() => import('@/components/video/VideoPlayer'), {
@@ -35,6 +36,9 @@ export default function LiveRoomPage() {
   const webinarId = params.id as string;
   const sessionId = searchParams.get('session');
   const userName = searchParams.get('name') || '观众';
+  const slotTime = searchParams.get('slot');
+
+  const lateJoinSeconds = slotTime ? calculateLateJoinPosition(slotTime) : 0;
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -216,8 +220,9 @@ export default function LiveRoomPage() {
             <div className="relative rounded-lg overflow-hidden border border-neutral-200 bg-white">
               <VideoPlayer
                 src={webinar.videoUrl}
-                autoPlay={false}
+                autoPlay={lateJoinSeconds > 0}
                 onPlaybackEvent={handlePlaybackEvent}
+                initialTime={lateJoinSeconds}
               />
               <SubtitleOverlay currentTime={currentTime} cues={webinar.subtitleCues} />
               {/* On-video CTA overlays */}
@@ -337,6 +342,7 @@ export default function LiveRoomPage() {
                       webinarId={webinarId}
                       sessionId={session?.id}
                       onSendMessage={handleSendMessage}
+                      initialTime={lateJoinSeconds}
                     />
                   ),
                 },

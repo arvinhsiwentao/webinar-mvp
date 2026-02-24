@@ -14,11 +14,14 @@ export default function WaitingPage() {
   const webinarId = params.id as string;
   const sessionId = searchParams.get('session') || '';
   const userName = searchParams.get('name') || '观众';
+  const slotTime = searchParams.get('slot');
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [canEnter, setCanEnter] = useState(false);
+
+  const countdownTarget = slotTime || session?.startTime || '';
 
   useEffect(() => {
     async function fetchWebinar() {
@@ -39,12 +42,12 @@ export default function WaitingPage() {
     fetchWebinar();
   }, [webinarId, sessionId]);
 
-  // Check if user can enter (10 minutes before start)
+  // Check if user can enter (30 minutes before start)
   useEffect(() => {
-    if (!session) return;
+    if (!countdownTarget) return;
 
     const checkCanEnter = () => {
-      const startTime = new Date(session.startTime).getTime();
+      const startTime = new Date(countdownTarget).getTime();
       const now = Date.now();
       const minutesUntilStart = (startTime - now) / (1000 * 60);
       setCanEnter(minutesUntilStart <= 30);
@@ -53,21 +56,23 @@ export default function WaitingPage() {
     checkCanEnter();
     const interval = setInterval(checkCanEnter, 10000);
     return () => clearInterval(interval);
-  }, [session]);
+  }, [countdownTarget]);
 
   const handleCountdownComplete = useCallback(() => {
-    router.push(`/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}`);
-  }, [router, webinarId, sessionId, userName]);
+    const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
+    router.push(`/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}${slotParam}`);
+  }, [router, webinarId, sessionId, userName, slotTime]);
 
   const handleEnterLive = () => {
-    router.push(`/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}`);
+    const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
+    router.push(`/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}${slotParam}`);
   };
 
   function handleDownloadICS() {
     if (!webinar || !session) return;
     const ics = generateICSContent(
       webinar.title,
-      session.startTime,
+      countdownTarget || session.startTime,
       webinar.duration,
       `讲者: ${webinar.speakerName}`,
       `${window.location.origin}/webinar/${webinar.id}/waiting?session=${session.id}`
@@ -83,7 +88,7 @@ export default function WaitingPage() {
 
   function getGoogleCalendarUrl(): string {
     if (!webinar || !session) return '#';
-    const start = new Date(session.startTime);
+    const start = new Date(countdownTarget || session.startTime);
     const end = new Date(start.getTime() + webinar.duration * 60 * 1000);
     const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     return `https://calendar.google.com/calendar/event?action=TEMPLATE&text=${encodeURIComponent(webinar.title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(`讲者: ${webinar.speakerName}`)}`;
@@ -155,7 +160,7 @@ export default function WaitingPage() {
         <Card className="p-8 mb-8 border-[#B8953F]/25">
           <p className="text-neutral-500 mb-4">距离下一场讲座开始</p>
           <CountdownTimer
-            targetTime={session.startTime}
+            targetTime={countdownTarget}
             size="lg"
             showDays={true}
             showLabels={true}

@@ -22,9 +22,10 @@ export interface VideoPlayerProps {
   src: string;
   autoPlay?: boolean;
   onPlaybackEvent?: (event: PlaybackEvent) => void;
+  initialTime?: number;  // seconds — seek to this position on load (late join)
 }
 
-export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent }: VideoPlayerProps) {
+export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent, initialTime }: VideoPlayerProps) {
   const videoRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
   const lastReportedTime = useRef(-1);
@@ -85,7 +86,15 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent }: 
       }
     });
 
-    let allowedTime = 0;
+    let allowedTime = initialTime && initialTime > 0 ? initialTime : 0;
+
+    // Late join: seek to initial position once metadata is loaded
+    if (initialTime && initialTime > 0) {
+      player.on('loadedmetadata', () => {
+        player.currentTime(initialTime);
+      });
+    }
+
     player.on('timeupdate', () => {
       const current = player.currentTime() ?? 0;
       if (current > allowedTime + SEEK_FORWARD_TOLERANCE_SEC) {
@@ -117,7 +126,7 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent }: 
         playerRef.current = null;
       }
     };
-  }, [src, autoPlay, emitEvent]);
+  }, [src, autoPlay, emitEvent, initialTime]);
 
   return (
     <div className="video-player-wrapper">

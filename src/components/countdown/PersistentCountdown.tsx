@@ -95,12 +95,12 @@ export default function PersistentCountdown({ sessions }: PersistentCountdownPro
 
   const TimeBlock = ({ value, label }: { value: number; label: string }) => (
     <div className="flex flex-col items-center">
-      <div className="w-14 h-14 md:w-16 md:h-16 bg-[#B8953F] flex items-center justify-center">
-        <span className="text-xl md:text-2xl font-bold text-white font-mono">
+      <div className="w-[72px] h-[72px] md:w-[96px] md:h-[96px] bg-[#B8953F] rounded-md flex items-center justify-center">
+        <span className="text-3xl md:text-5xl font-bold text-white font-mono">
           {String(value).padStart(2, '0')}
         </span>
       </div>
-      <span className="text-[11px] md:text-xs text-neutral-500 mt-1.5 tracking-wider">
+      <span className="text-xs md:text-sm text-neutral-500 mt-2 tracking-wider font-medium">
         {label}
       </span>
     </div>
@@ -108,10 +108,10 @@ export default function PersistentCountdown({ sessions }: PersistentCountdownPro
 
   return (
     <div className="flex flex-col items-center">
-      <p className="text-base md:text-lg text-neutral-600 mb-3">
+      <p className="text-lg md:text-xl font-semibold text-neutral-700 mb-5">
         距离讲座开始还有...
       </p>
-      <div className="flex items-start justify-center gap-2.5 md:gap-3">
+      <div className="flex items-start justify-center gap-3 md:gap-5">
         <TimeBlock value={timeLeft.days} label="天" />
         <TimeBlock value={timeLeft.hours} label="时" />
         <TimeBlock value={timeLeft.minutes} label="分" />

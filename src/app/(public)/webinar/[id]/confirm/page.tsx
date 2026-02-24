@@ -13,15 +13,19 @@ export default function ConfirmPage() {
   const searchParams = useSearchParams();
   const webinarId = params.id as string;
   const sessionId = searchParams.get('session') || '';
+  const slotTime = searchParams.get('slot');
   const name = searchParams.get('name') || '你';
 
   const router = useRouter();
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [session, setSession] = useState<Session | null>(null);
 
+  const countdownTarget = slotTime || session?.startTime || '';
+
   const handleCountdownComplete = useCallback(() => {
-    router.push(`/webinar/${webinarId}/waiting?session=${sessionId}&name=${encodeURIComponent(name)}`);
-  }, [router, webinarId, sessionId, name]);
+    const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
+    router.push(`/webinar/${webinarId}/waiting?session=${sessionId}&name=${encodeURIComponent(name)}${slotParam}`);
+  }, [router, webinarId, sessionId, name, slotTime]);
 
   useEffect(() => {
     async function fetchWebinar() {
@@ -39,7 +43,7 @@ export default function ConfirmPage() {
     if (!webinar || !session) return;
     const ics = generateICSContent(
       webinar.title,
-      session.startTime,
+      countdownTarget || session.startTime,
       webinar.duration,
       `讲者: ${webinar.speakerName}`,
       `${window.location.origin}/webinar/${webinar.id}/waiting?session=${session.id}`
@@ -55,7 +59,7 @@ export default function ConfirmPage() {
 
   function getGoogleCalendarUrl(): string {
     if (!webinar || !session) return '#';
-    const start = new Date(session.startTime);
+    const start = new Date(countdownTarget || session.startTime);
     const end = new Date(start.getTime() + webinar.duration * 60 * 1000);
     const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     return `https://calendar.google.com/calendar/event?action=TEMPLATE&text=${encodeURIComponent(webinar.title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(`讲者: ${webinar.speakerName}`)}`;
@@ -93,7 +97,7 @@ export default function ConfirmPage() {
           <div className="mb-8">
             <p className="text-neutral-500 text-sm mb-3">距离直播还有</p>
             <CountdownTimer
-              targetTime={session.startTime}
+              targetTime={countdownTarget}
               size="md"
               showDays={true}
               showLabels={true}
@@ -138,7 +142,7 @@ export default function ConfirmPage() {
         </div>
 
         {/* CTA Button */}
-        <Link href={`/webinar/${webinarId}/waiting?session=${sessionId}&name=${encodeURIComponent(name)}`}>
+        <Link href={`/webinar/${webinarId}/waiting?session=${sessionId}&name=${encodeURIComponent(name)}${slotTime ? `&slot=${encodeURIComponent(slotTime)}` : ''}`}>
           <Button variant="gold" size="lg" className="w-full">
             进入等候室
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

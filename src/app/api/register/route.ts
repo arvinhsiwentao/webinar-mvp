@@ -3,6 +3,7 @@ import { createRegistration, getRegistrationByEmail, getWebinarById } from '@/li
 import { RegisterRequest } from '@/lib/types';
 import { validateEmail } from '@/lib/utils';
 import { sendEmail, confirmationEmail } from '@/lib/email';
+import { getSlotExpiresAt } from '@/lib/evergreen';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,13 +34,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if session exists
-    const session = webinar.sessions.find((s) => s.id === body.sessionId);
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Session not found' },
-        { status: 404 }
-      );
+    const isEvergreen = webinar.evergreen?.enabled;
+
+    // Validate session (skip for evergreen — sessions are computed, not stored)
+    let session = null;
+    if (!isEvergreen) {
+      session = webinar.sessions.find((s) => s.id === body.sessionId);
+      if (!session) {
+        return NextResponse.json(
+          { error: 'Session not found' },
+          { status: 404 }
+        );
+      }
     }
 
     // Check if already registered
@@ -52,19 +58,33 @@ export async function POST(request: NextRequest) {
     }
 
     // Create registration
-    const registration = createRegistration({
+    const registrationData: Record<string, unknown> = {
       webinarId: body.webinarId,
-      sessionId: body.sessionId,
+      sessionId: body.sessionId || '',
       name: body.name,
       email: body.email,
       phone: body.phone,
-    });
+    };
+
+    // Add evergreen slot info
+    if (isEvergreen && body.assignedSlot) {
+      registrationData.assignedSlot = body.assignedSlot;
+      registrationData.slotExpiresAt = getSlotExpiresAt(
+        body.assignedSlot,
+        webinar.evergreen!.videoDurationMinutes
+      );
+    }
+
+    const registration = createRegistration(registrationData as Parameters<typeof createRegistration>[0]);
 
     // Send confirmation email (fire and forget)
     const origin = request.nextUrl.origin;
     const liveUrl = `${origin}/webinar/${body.webinarId}/waiting?session=${body.sessionId}&name=${encodeURIComponent(body.name)}`;
-    const emailData = confirmationEmail(body.email, body.name, webinar.title, session.startTime, liveUrl);
-    sendEmail(emailData); // fire and forget, don't await
+    const sessionStartTime = isEvergreen ? body.assignedSlot : session?.startTime;
+    if (sessionStartTime) {
+      const emailData = confirmationEmail(body.email, body.name, webinar.title, sessionStartTime, liveUrl);
+      sendEmail(emailData);
+    }
 
     // Fire webhook if configured
     if (webinar.webhookUrl) {

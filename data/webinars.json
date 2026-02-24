@@ -139,6 +139,22 @@
     "endPageCtaColor": "#7C3AED",
     "sidebarDescription": "90 分钟揭秘：从特斯拉早期投资者到 4 年达成财务自由的完整路径。Mike 将分享他的抄底存股双策略、真实持仓清单，以及普通人也能复制的财务自由方法。",
     "missedWebinarUrl": "",
+    "evergreen": {
+      "enabled": true,
+      "dailySchedule": [
+        { "time": "08:00" },
+        { "time": "21:00" }
+      ],
+      "immediateSlot": {
+        "enabled": true,
+        "intervalMinutes": 15,
+        "bufferMinutes": 3,
+        "maxWaitMinutes": 30
+      },
+      "videoDurationMinutes": 90,
+      "timezone": "America/Chicago",
+      "displaySlotCount": 4
+    },
     "prerollVideoUrl": "",
     "updatedAt": "2026-02-11T06:32:44.418Z"
   }

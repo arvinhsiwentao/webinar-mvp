@@ -32,6 +32,8 @@ export interface ChatRoomProps {
   webinarId?: string;
   /** Session ID for the current viewer session */
   sessionId?: string;
+  /** For late join — backfill messages up to this time */
+  initialTime?: number;
 }
 
 let msgIdCounter = 0;
@@ -47,6 +49,7 @@ export default function ChatRoom({
   onSendMessage,
   webinarId,
   sessionId,
+  initialTime,
 }: ChatRoomProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -84,6 +87,33 @@ export default function ChatRoom({
       }
     });
   }, [currentTime, autoMessages]);
+
+  // Backfill auto-chat messages for late join (runs once on mount)
+  const hasBackfilled = useRef(false);
+  useEffect(() => {
+    if (hasBackfilled.current || !initialTime || initialTime <= 0) return;
+    hasBackfilled.current = true;
+
+    const backfillMsgs: ChatMessage[] = autoMessages
+      .filter(msg => msg.timeSec <= initialTime)
+      .map((msg, idx) => ({
+        id: `backfill-${idx}`,
+        name: msg.name,
+        message: msg.message,
+        timestamp: msg.timeSec,
+        isAuto: true,
+      }));
+
+    if (backfillMsgs.length > 0) {
+      setMessages(prev => [...backfillMsgs, ...prev]);
+      // Mark as fired so they don't trigger again during playback
+      autoMessages.forEach((msg, idx) => {
+        if (msg.timeSec <= initialTime) {
+          firedAutoIds.current.add(idx);
+        }
+      });
+    }
+  }, [initialTime, autoMessages]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {

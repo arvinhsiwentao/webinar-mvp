@@ -123,6 +123,15 @@ export function createRegistration(registration: Omit<Registration, 'id' | 'regi
   return newReg;
 }
 
+export function updateRegistration(id: string, updates: Partial<Registration>): Registration | null {
+  const registrations = readJsonFile<Registration[]>('registrations.json', []);
+  const idx = registrations.findIndex(r => r.id === id);
+  if (idx === -1) return null;
+  registrations[idx] = { ...registrations[idx], ...updates };
+  writeJsonFile('registrations.json', registrations);
+  return registrations[idx];
+}
+
 // Chat operations
 export function getChatMessages(webinarId: string, sessionId: string): ChatMessageData[] {
   const allMessages = readJsonFile<ChatMessageData[]>('chat-messages.json', []);
