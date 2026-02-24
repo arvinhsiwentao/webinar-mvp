@@ -20,10 +20,11 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const [evergreenSlots, setEvergreenSlots] = useState<Array<{ slotTime: string; type: string }>>([]);
   const [isEvergreen, setIsEvergreen] = useState(false);
+  const [selectedSlotTime, setSelectedSlotTime] = useState('');
 
   const form = useRegistrationForm({
     webinarId: DEFAULT_WEBINAR_ID,
-    assignedSlot: evergreenSlots[0]?.slotTime,
+    assignedSlot: selectedSlotTime || evergreenSlots[0]?.slotTime,
     onSuccess: (sessionId, name) => {
       // Update sticky session as registered
       const sticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
@@ -35,10 +36,18 @@ export default function HomePage() {
         } catch { /* ignore */ }
       }
 
-      const slotParam = evergreenSlots[0]?.slotTime ? `&slot=${encodeURIComponent(evergreenSlots[0].slotTime)}` : '';
+      const slotTime = selectedSlotTime || evergreenSlots[0]?.slotTime;
+      const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
       router.push(`/webinar/${DEFAULT_WEBINAR_ID}/lobby?session=${sessionId}&name=${encodeURIComponent(name)}${slotParam}`);
     },
   });
+
+  // Auto-select first slot when evergreen slots load (if no selection yet)
+  useEffect(() => {
+    if (evergreenSlots.length > 0 && !selectedSlotTime) {
+      setSelectedSlotTime(evergreenSlots[0].slotTime);
+    }
+  }, [evergreenSlots, selectedSlotTime]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -379,7 +388,9 @@ export default function HomePage() {
         submitting={form.submitting}
         formError={form.formError}
         isEvergreen={isEvergreen}
-        evergreenSlotLabel={evergreenSlots[0]?.slotTime ? new Date(evergreenSlots[0].slotTime).toLocaleString('zh-CN', { timeZone: 'America/Chicago' }) : undefined}
+        evergreenSlots={evergreenSlots}
+        selectedSlotTime={selectedSlotTime}
+        onSlotTimeChange={setSelectedSlotTime}
       />
     </div>
   );
