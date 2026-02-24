@@ -47,3 +47,7 @@ Added `docs/architecture.md` (living architecture doc) and `docs/decisions.md` (
 ### 2026-02-24: Merge Confirm + Waiting into Event Lobby
 
 Merged the Confirmation Page (`/confirm`) and Waiting Room (`/waiting`) into a single Event Lobby (`/lobby`). The two pages had duplicate functionality (countdown, calendar buttons, data fetching). The lobby uses a two-phase UI: celebration mode (>30 min) and urgency mode (<=30 min). Old routes become redirect stubs for backward compatibility with bookmarks and sent emails.
+
+### 2026-02-24: Access Control and Muted Autoplay for Fake Live
+
+Added client-side access gate to `/live` route with event state machine (PRE_EVENT/PRE_SHOW/LIVE/ENDED). Video auto-plays muted with click-to-unmute overlay to comply with browser autoplay policies while maintaining livestream illusion. Chose client-side gate over middleware since MVP has no auth and video URLs are already public — the goal is preventing accidental illusion-breaking, not security. `replay=true` query param provides bypass for end-page replay links.

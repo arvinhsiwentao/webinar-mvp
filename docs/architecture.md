@@ -108,11 +108,22 @@ VideoPlayer.onTimeUpdate(currentTime)
     └── CTAOverlay — shows/hides between showAtSec and hideAtSec
 ```
 
+### Live Room Access Gate
+
+The live page enforces timing-based access control via a client-side event state machine:
+
+- **PRE_EVENT** (>30 min before start): Redirects to `/lobby`
+- **PRE_SHOW** (<=30 min, before start): Shows PreShowOverlay in video area, rest of live room visible
+- **LIVE** (after start): VideoPlayer with muted autoplay + UnmuteOverlay
+- **ENDED** (after video duration): Redirects to `/end`
+
+The `replay=true` query parameter bypasses all gates (used by the end page replay link).
+
 ### Components
 
 | Component | Source | Role |
 |-----------|--------|------|
-| `VideoPlayer` | `src/components/video/VideoPlayer.tsx` | Video.js + HLS.js player. **YouTube support** via `videojs-youtube` plugin. Dynamically imported (no SSR). **Seeking disabled** — blocks scrubbing, arrow keys, Home/End. Emits `onTimeUpdate`. Supports `initialTime` prop for late-join video seeking. |
+| `VideoPlayer` | `src/components/video/VideoPlayer.tsx` | Video.js + HLS.js player. **YouTube support** via `videojs-youtube` plugin. Dynamically imported (no SSR). **Seeking disabled** — blocks scrubbing, arrow keys, Home/End. Emits `onTimeUpdate`. Supports `initialTime` prop for late-join video seeking. `livestreamMode` prop hides controls and enables muted autoplay. |
 | `ChatRoom` | `src/components/chat/ChatRoom.tsx` | Displays auto-chat messages at configured timestamps (with randomized variance). Accepts real user messages via API polling. Supports `initialTime` prop for late-join chat backfill. |
 | `MissedSessionPrompt` | `src/components/evergreen/MissedSessionPrompt.tsx` | Shows missed session message with countdown to next slot and reassignment button. |
 | `CTAOverlay` | `src/components/cta/CTAOverlay.tsx` | Promotional overlay with `position` support (`on_video`/`below_video`), configurable `color`, and `secondaryText`. |
@@ -123,6 +134,8 @@ VideoPlayer.onTimeUpdate(currentTime)
 | `InfoTab` | `src/components/sidebar/InfoTab.tsx` | Webinar info tab: promo image, speaker info, description. |
 | `ViewersTab` | `src/components/sidebar/ViewersTab.tsx` | Simulated viewer list with host badge and randomized names. |
 | `OffersTab` | `src/components/sidebar/OffersTab.tsx` | Time-based offer cards that activate with CTA events. |
+| `UnmuteOverlay` | `src/components/video/UnmuteOverlay.tsx` | Click-to-unmute overlay for muted autoplay compliance. Shows over video when audio is muted. |
+| `PreShowOverlay` | `src/components/video/PreShowOverlay.tsx` | Pre-event countdown shown in the video area for users who enter the live room before the event starts (within 30 min gate). |
 | `JoinOverlay` | `src/components/live/JoinOverlay.tsx` | Pre-playback overlay: "connecting..." → "ready to join" transition. |
 | `BottomBar` | `src/components/live/BottomBar.tsx` | Fixed bottom bar: title, date, LIVE badge, viewer count. |
 
