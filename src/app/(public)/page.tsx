@@ -173,10 +173,10 @@ export default function HomePage() {
       </section>
 
       {/* ========== Section 3+4: DATE SCHEDULE + COUNTDOWN (unified) ========== */}
-      <section className="py-12 md:py-16 px-6 lg:px-12 bg-[#F5F5F0]">
-        <div className="max-w-2xl mx-auto">
+      <section className="py-16 md:py-24 px-6 lg:px-12 bg-[#F5F5F0]">
+        <div className="max-w-3xl mx-auto flex flex-col items-center">
           {/* Date Schedule */}
-          <div className="space-y-4 mb-10">
+          <div className="space-y-6 md:space-y-8 mb-14 w-full max-w-xl">
             {sortedSessions.map((session) => {
               const date = new Date(session.startTime);
               const month = date.getMonth() + 1;
@@ -195,20 +195,20 @@ export default function HomePage() {
               return (
                 <div
                   key={session.id}
-                  className="flex items-center gap-4 md:gap-6"
+                  className="flex items-center gap-5 md:gap-7 justify-center"
                 >
                   {/* Month Badge + Day */}
-                  <div className="flex-shrink-0 w-14 text-center">
-                    <div className="bg-[#B8953F] text-white text-xs font-medium px-2 py-0.5 rounded-sm mb-0.5">
+                  <div className="flex-shrink-0 w-16 md:w-20 text-center">
+                    <div className="bg-[#B8953F] text-white text-xs md:text-sm font-medium px-2.5 py-1 rounded-sm mb-1">
                       {month}月
                     </div>
-                    <div className="text-xl font-bold text-neutral-900">{day}</div>
+                    <div className="text-2xl md:text-3xl font-bold text-neutral-900">{day}</div>
                   </div>
 
                   {/* Date + Time */}
                   <div>
-                    <p className="text-base md:text-lg font-semibold text-neutral-900">{fullDate}</p>
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-lg md:text-2xl font-bold text-neutral-900">{fullDate}</p>
+                    <p className="text-sm md:text-base text-neutral-500">
                       {time} Central Standard Time
                     </p>
                   </div>
@@ -254,19 +254,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========== Section 6: MID-PAGE CTA ========== */}
-      <section className="py-14 md:py-20 px-6 lg:px-12 bg-white">
-        <div className="max-w-2xl mx-auto text-center">
-          <p className="text-xl md:text-2xl text-neutral-800 mb-2">准备好改变了吗？</p>
-          <p className="text-[#B8953F] text-lg mb-8">这场免费在线直播，就是为你准备的。</p>
-          <button
-            onClick={openModal}
-            className="inline-block bg-[#B8953F] text-white px-10 py-4 text-base font-semibold tracking-wide hover:bg-[#A6842F] hover:shadow-[0_0_40px_rgba(184,149,63,0.3)] transition-all"
-          >
-            免费报名，立即预约
-          </button>
-        </div>
-      </section>
 
       {/* ========== Section 7: URGENCY / DISCLAIMER ========== */}
       <section className="py-16 md:py-20 px-6 lg:px-12 bg-white border-t-[3px] border-[#B8953F]">
