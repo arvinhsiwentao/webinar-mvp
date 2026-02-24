@@ -30,8 +30,8 @@ export interface ChatRoomProps {
   onSendMessage?: (message: ChatMessage) => void;
   /** Webinar ID for real-time SSE chat subscription */
   webinarId?: string;
-  /** Slot time for scoping real-time chat (ISO datetime) */
-  slotTime?: string;
+  /** Session ID for the current viewer session */
+  sessionId?: string;
   /** For late join — backfill messages up to this time */
   initialTime?: number;
 }
@@ -48,7 +48,7 @@ export default function ChatRoom({
   userName = '匿名用户',
   onSendMessage,
   webinarId,
-  slotTime,
+  sessionId,
   initialTime,
 }: ChatRoomProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -124,15 +124,15 @@ export default function ChatRoom({
   useEffect(() => {
     if (!webinarId) return;
 
-    const eventSource = new EventSource(`/api/webinar/${webinarId}/chat/stream?slotTime=${encodeURIComponent(slotTime || '')}`);
+    const eventSource = new EventSource(`/api/webinar/${webinarId}/chat/stream`);
 
     eventSource.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'message') {
           const msg = data.message;
-          // Skip messages from own slot — already added locally via optimistic update
-          if (slotTime && msg.slotTime === slotTime) return;
+          // Skip messages from own session — already added locally via optimistic update
+          if (sessionId && msg.sessionId === sessionId) return;
           setMessages(prev => {
             // Deduplicate by id
             if (prev.some(m => m.id === msg.id)) return prev;
@@ -150,7 +150,7 @@ export default function ChatRoom({
     };
 
     return () => eventSource.close();
-  }, [webinarId, slotTime]);
+  }, [webinarId, sessionId]);
 
   const handleSend = useCallback(() => {
     const text = input.trim();

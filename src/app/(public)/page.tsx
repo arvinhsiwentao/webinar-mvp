@@ -290,6 +290,7 @@ export default function HomePage() {
 
           {/* Countdown Timer */}
           <PersistentCountdown
+            sessions={webinar.sessions}
             targetTime={evergreenSlots[0]?.slotTime}
           />
         </div>

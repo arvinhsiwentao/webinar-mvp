@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "webinarId": "1770712845552-z9fdts5",
+    "sessionId": "session-1",
+    "name": "測試用戶",
+    "message": "這是測試訊息",
+    "timestamp": 0,
+    "id": "1770715273925-a6nb12h",
+    "createdAt": "2026-02-10T09:21:13.925Z"
+  }
+]
