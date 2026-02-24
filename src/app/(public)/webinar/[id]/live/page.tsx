@@ -42,7 +42,11 @@ export default function LiveRoomPage() {
   const slotTime = searchParams.get('slot');
   const isReplay = searchParams.get('replay') === 'true';
 
-  const lateJoinSeconds = isReplay ? 0 : (slotTime ? calculateLateJoinPosition(slotTime) : 0);
+  // Compute once on mount — must not recalculate on re-renders or it
+  // changes `initialTime`, causing VideoPlayer to dispose/recreate the player.
+  const [lateJoinSeconds] = useState(() =>
+    isReplay ? 0 : (slotTime ? calculateLateJoinPosition(slotTime) : 0)
+  );
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [session, setSession] = useState<Session | null>(null);
