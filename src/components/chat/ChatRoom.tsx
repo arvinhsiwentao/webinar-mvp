@@ -150,7 +150,7 @@ export default function ChatRoom({
     };
 
     return () => eventSource.close();
-  }, [webinarId]);
+  }, [webinarId, sessionId]);
 
   const handleSend = useCallback(() => {
     const text = input.trim();
