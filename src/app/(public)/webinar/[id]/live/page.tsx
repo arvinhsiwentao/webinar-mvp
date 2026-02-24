@@ -461,7 +461,7 @@ export default function LiveRoomPage() {
                       timeVariance={3}
                       userName={userName}
                       webinarId={webinarId}
-                      sessionId={session?.id}
+                      slotTime={slotTime || undefined}
                       onSendMessage={handleSendMessage}
                       initialTime={lateJoinSeconds}
                     />

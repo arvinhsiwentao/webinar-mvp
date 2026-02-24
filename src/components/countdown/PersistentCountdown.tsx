@@ -1,76 +1,26 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Session } from '@/lib/types';
 
 interface PersistentCountdownProps {
-  sessions: Session[];
-  targetTime?: string;  // ISO datetime — if provided, overrides session-based calculation
+  targetTime?: string;
 }
 
 /**
- * A persistent countdown that always shows time remaining to the next session.
- * When all sessions are past, it projects session times-of-day onto future dates
- * so there is ALWAYS an active countdown visible (creates perpetual urgency).
+ * A persistent countdown that always shows time remaining to the next slot.
+ * When the target time passes, it falls back to 24 hours from now.
  */
-export default function PersistentCountdown({ sessions, targetTime }: PersistentCountdownProps) {
+export default function PersistentCountdown({ targetTime }: PersistentCountdownProps) {
   const getNextTarget = useCallback((): Date => {
-    // If an explicit targetTime is provided (e.g. evergreen slot), use it directly
     if (targetTime) {
       const t = new Date(targetTime);
       if (t > new Date()) return t;
     }
-
-    const now = new Date();
-
-    // 1. Try to find a real future session
-    const futureSessions = sessions
-      .map(s => new Date(s.startTime))
-      .filter(d => d > now)
-      .sort((a, b) => a.getTime() - b.getTime());
-
-    if (futureSessions.length > 0) {
-      return futureSessions[0];
-    }
-
-    // 2. All sessions are past — use rolling schedule
-    // Extract unique times-of-day from sessions, project onto today/tomorrow
-    const timesOfDay = sessions.map(s => {
-      const d = new Date(s.startTime);
-      return { hours: d.getHours(), minutes: d.getMinutes() };
-    });
-
-    // Remove duplicates
-    const uniqueTimes = timesOfDay.filter(
-      (t, i, arr) => arr.findIndex(u => u.hours === t.hours && u.minutes === t.minutes) === i
-    );
-
-    // Sort by time of day
-    uniqueTimes.sort((a, b) => a.hours * 60 + a.minutes - (b.hours * 60 + b.minutes));
-
-    // Project onto today and tomorrow, find nearest future
-    const candidates: Date[] = [];
-    for (let dayOffset = 0; dayOffset <= 2; dayOffset++) {
-      for (const time of uniqueTimes) {
-        const candidate = new Date(now);
-        candidate.setDate(candidate.getDate() + dayOffset);
-        candidate.setHours(time.hours, time.minutes, 0, 0);
-        if (candidate > now) {
-          candidates.push(candidate);
-        }
-      }
-    }
-
-    if (candidates.length > 0) {
-      candidates.sort((a, b) => a.getTime() - b.getTime());
-      return candidates[0];
-    }
-
-    // Fallback: 24 hours from now (should never reach here)
-    const fallback = new Date(now);
+    // Fallback: 24 hours from now (should only happen if no slots available)
+    const fallback = new Date();
     fallback.setDate(fallback.getDate() + 1);
     return fallback;
-  }, [sessions, targetTime]);
+  }, [targetTime]);
 
   const [target, setTarget] = useState<Date>(() => getNextTarget());
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -82,7 +32,7 @@ export default function PersistentCountdown({ sessions, targetTime }: Persistent
       const totalSeconds = Math.floor(diff / 1000);
 
       if (totalSeconds <= 0) {
-        // Auto-advance to next session
+        // Auto-advance to next slot
         setTarget(getNextTarget());
         return;
       }

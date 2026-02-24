@@ -1,35 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getAllWebinars, getRegistrationsByWebinar } from '@/lib/db';
-import { sendEmail, reminderEmail } from '@/lib/email';
 
+// TODO: Implement evergreen-aware reminders.
+// Evergreen slots are computed dynamically (not stored), so reminders need to:
+// 1. Query registrations with upcoming assignedSlot times
+// 2. Send reminders based on (assignedSlot - now) thresholds
+// This requires querying registrations by assignedSlot range, not iterating sessions.
 export async function GET() {
-  const webinars = getAllWebinars();
-  let sent = 0;
-
-  for (const webinar of webinars) {
-    if (webinar.status !== 'published') continue;
-
-    for (const session of webinar.sessions) {
-      const startTime = new Date(session.startTime).getTime();
-      const now = Date.now();
-      const hoursUntil = (startTime - now) / (1000 * 60 * 60);
-
-      let type: '24h' | '1h' | null = null;
-      if (hoursUntil > 23 && hoursUntil <= 25) type = '24h';
-      if (hoursUntil > 0.5 && hoursUntil <= 1.5) type = '1h';
-
-      if (!type) continue;
-
-      const registrations = getRegistrationsByWebinar(webinar.id);
-      for (const reg of registrations) {
-        if (reg.sessionId !== session.id) continue;
-        const liveUrl = `/webinar/${webinar.id}/lobby?session=${session.id}&name=${encodeURIComponent(reg.name)}`;
-        const emailData = reminderEmail(reg.email, type, reg.name, webinar.title, liveUrl);
-        await sendEmail(emailData);
-        sent++;
-      }
-    }
-  }
-
-  return NextResponse.json({ sent });
+  return NextResponse.json({
+    sent: 0,
+    message: 'Evergreen reminders not yet implemented',
+  });
 }
