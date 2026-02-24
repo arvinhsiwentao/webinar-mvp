@@ -131,6 +131,8 @@ export default function ChatRoom({
         const data = JSON.parse(event.data);
         if (data.type === 'message') {
           const msg = data.message;
+          // Skip messages from own session — already added locally via optimistic update
+          if (sessionId && msg.sessionId === sessionId) return;
           setMessages(prev => {
             // Deduplicate by id
             if (prev.some(m => m.id === msg.id)) return prev;
@@ -175,11 +177,11 @@ export default function ChatRoom({
   );
 
   return (
-    <div className="flex flex-col h-full bg-white text-neutral-900 rounded-lg overflow-hidden border border-[#E8E5DE]">
+    <div className="flex flex-col h-full bg-white text-[#1A1A1A] overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-[#E8E5DE] bg-[#F5F5F0]">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-[#E8E5DE] bg-[#FAFAF7]">
         <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-        <span className="text-sm font-semibold text-neutral-800">实时聊天</span>
+        <span className="text-sm font-semibold text-[#1A1A1A]">实时聊天</span>
       </div>
 
       {/* Messages */}
@@ -200,14 +202,14 @@ export default function ChatRoom({
       </div>
 
       {/* Input */}
-      <div className="flex items-center gap-2 px-4 py-3 border-t border-[#E8E5DE] bg-[#F5F5F0]">
+      <div className="flex items-center gap-2 px-4 py-3 border-t border-[#E8E5DE] bg-[#FAFAF7]">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="输入消息..."
-          className="flex-1 bg-white text-neutral-900 text-sm px-3 py-2 rounded-md outline-none border border-[#E8E5DE] placeholder-neutral-400 focus:ring-1 focus:ring-[#B8953F]"
+          className="flex-1 bg-white text-[#1A1A1A] text-sm px-3 py-2 rounded-md outline-none border border-[#E8E5DE] placeholder-[#9CA3AF] focus:ring-1 focus:ring-[#B8953F]"
           maxLength={200}
         />
         <button

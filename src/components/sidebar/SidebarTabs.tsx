@@ -21,17 +21,17 @@ export default function SidebarTabs({ tabs, defaultTab }: SidebarTabsProps) {
   const activeContent = tabs.find(t => t.id === activeTab)?.content;
 
   return (
-    <div className="flex flex-col h-full bg-neutral-800 rounded-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden border border-[#E8E5DE] shadow-sm">
       {/* Tab bar */}
-      <div className="flex border-b border-neutral-700">
+      <div className="flex border-b border-[#E8E5DE] bg-[#FAFAF7]">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm transition-colors relative ${
               activeTab === tab.id
-                ? 'text-[#B8953F] border-b-2 border-[#B8953F]'
-                : 'text-neutral-400 hover:text-neutral-200'
+                ? 'text-[#B8953F] border-b-2 border-[#B8953F] bg-white'
+                : 'text-[#6B6B6B] hover:text-[#1A1A1A]'
             }`}
             title={tab.label}
           >
