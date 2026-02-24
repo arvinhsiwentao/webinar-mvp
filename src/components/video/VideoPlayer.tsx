@@ -23,9 +23,18 @@ export interface VideoPlayerProps {
   autoPlay?: boolean;
   onPlaybackEvent?: (event: PlaybackEvent) => void;
   initialTime?: number;  // seconds — seek to this position on load (late join)
+  livestreamMode?: boolean;   // hides controls, enables muted autoplay
+  onPlayerReady?: (player: Player) => void;  // exposes Video.js player instance
 }
 
-export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent, initialTime }: VideoPlayerProps) {
+export default function VideoPlayer({
+  src,
+  autoPlay = false,
+  onPlaybackEvent,
+  initialTime,
+  livestreamMode = false,
+  onPlayerReady,
+}: VideoPlayerProps) {
   const videoRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
   const lastReportedTime = useRef(-1);
@@ -52,8 +61,8 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent, in
     const sourceType = getVideoSourceType(src);
 
     const playerOptions: Record<string, unknown> = {
-      controls: true,
-      autoplay: autoPlay,
+      controls: !livestreamMode,
+      autoplay: livestreamMode ? 'muted' : autoPlay,
       preload: 'auto',
       fluid: true,
       playbackRates: [], // no speed options
@@ -64,6 +73,10 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent, in
       },
       sources: [{ src, type: sourceType }],
     };
+
+    if (livestreamMode) {
+      playerOptions.muted = true;
+    }
 
     if (isYT) {
       playerOptions.techOrder = ['youtube'];
@@ -107,7 +120,10 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent, in
       }
     });
 
-    player.on('ready', () => emitEvent('ready', player));
+    player.on('ready', () => {
+      emitEvent('ready', player);
+      onPlayerReady?.(player);
+    });
     player.on('play', () => emitEvent('play', player));
     player.on('pause', () => emitEvent('pause', player));
     player.on('ended', () => emitEvent('ended', player));
@@ -126,10 +142,10 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent, in
         playerRef.current = null;
       }
     };
-  }, [src, autoPlay, emitEvent, initialTime]);
+  }, [src, autoPlay, emitEvent, initialTime, livestreamMode, onPlayerReady]);
 
   return (
-    <div className="video-player-wrapper">
+    <div className={`video-player-wrapper ${livestreamMode ? 'livestream-mode' : ''}`}>
       <div ref={videoRef} data-vjs-player />
       <style jsx>{`
         .video-player-wrapper {
@@ -153,6 +169,12 @@ export default function VideoPlayer({ src, autoPlay = false, onPlaybackEvent, in
         }
         .video-player-wrapper :global(.vjs-time-divider) {
           display: block !important;
+        }
+        .video-player-wrapper.livestream-mode :global(.vjs-big-play-button) {
+          display: none !important;
+        }
+        .video-player-wrapper.livestream-mode :global(.vjs-control-bar) {
+          display: none !important;
         }
       `}</style>
     </div>
