@@ -32,6 +32,14 @@ The simulive model requires viewers to watch linearly (no skipping ahead) to mai
 
 **Why:** Preserves the unified Video.js player API so that seeking prevention, `onTimeUpdate` callbacks (for auto-chat and CTA sync), and playback event tracking all continue to work without separate YouTube-specific code paths. The alternative (raw iframe) would have required reimplementing all time-synced features.
 
+### 2026-02-24: Evergreen countdown — hybrid schedule approach
+
+**Decision:** Use daily anchor times + immediate slot injection instead of pure interval-based or pure fixed scheduling.
+
+**Why:** Pure intervals (every 15 min) look unrealistic — real webinars don't run every 15 minutes. Pure anchor times (2-3/day) create long waits with no urgency. The hybrid approach shows immediate urgency via injected slots while displaying a realistic daily schedule via anchor times. Immediate slots only appear when the next anchor is > `maxWaitMinutes` away. Server-side calculation prevents clock manipulation.
+
+**Alternatives rejected:** (1) Fixed intervals only — too frequent, looks fake. (2) Anchor times only — max wait could be hours. (3) Client-side calculation — vulnerable to clock manipulation.
+
 ### 2026-02: Self-sustaining documentation system
 
 Added `docs/architecture.md` (living architecture doc) and `docs/decisions.md` (this file). Claude Code hooks (PostToolUse + Stop) automatically remind and enforce documentation updates when structural changes are made. Goal: reduce doc drift without manual discipline.

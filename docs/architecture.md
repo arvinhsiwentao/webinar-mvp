@@ -1,6 +1,6 @@
 # Architecture
 
-> Last verified: 2026-02-23
+> Last verified: 2026-02-24
 
 Living document. Hooks remind Claude to keep this current when structural changes are made.
 
@@ -40,11 +40,13 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 
 | Interface | Key Fields | Notes |
 |-----------|-----------|-------|
-| `Webinar` | `id`, `title`, `videoUrl`, `duration`, `sessions[]`, `autoChat[]`, `ctaEvents[]`, `status`, `heroImageUrl?`, `promoImageUrl?`, `disclaimerText?`, `endPageSalesCopy?`, `endPageCtaText?`, `endPageCtaUrl?`, `endPageCtaColor?`, `sidebarDescription?` | Top-level entity. Embeds sessions, auto-chat, and CTA arrays inline. Extended with landing/end/sidebar fields. |
-| `Session` | `id`, `startTime`, `status` | Scheduled broadcast slot within a webinar. |
+| `Webinar` | `id`, `title`, `videoUrl`, `duration`, `sessions[]`, `autoChat[]`, `ctaEvents[]`, `status`, `evergreen?`, `heroImageUrl?`, `promoImageUrl?`, `disclaimerText?`, `endPageSalesCopy?`, `endPageCtaText?`, `endPageCtaUrl?`, `endPageCtaColor?`, `sidebarDescription?` | Top-level entity. Embeds sessions, auto-chat, and CTA arrays inline. Extended with landing/end/sidebar fields. Optional `evergreen` config for dynamic scheduling. |
+| `Session` | `id`, `startTime`, `status` | Scheduled broadcast slot within a webinar. Used for static scheduling; ignored when evergreen is enabled. |
+| `EvergreenConfig` | `enabled`, `dailySchedule[]`, `immediateSlot{}`, `videoDurationMinutes`, `timezone`, `displaySlotCount` | Configures dynamic session generation. Daily anchor times + immediate slot injection for perpetual urgency. |
+| `EvergreenSlot` | `slotTime`, `type` | Computed session slot — either `'anchor'` (daily recurring) or `'immediate'` (dynamically injected). |
 | `AutoChatMessage` | `id`, `timeSec`, `name`, `message` | Bot message triggered at video timestamp. |
 | `CTAEvent` | `id`, `showAtSec`, `hideAtSec`, `buttonText`, `url`, `showCountdown`, `position?`, `color?`, `secondaryText?` | Promotional overlay with optional countdown. Supports on-video or below-video positioning. |
-| `Registration` | `id`, `webinarId`, `sessionId`, `name`, `email`, `phone?` | One per email per webinar (duplicate check). |
+| `Registration` | `id`, `webinarId`, `sessionId`, `name`, `email`, `phone?`, `assignedSlot?`, `slotExpiresAt?`, `reassignedFrom?` | One per email per webinar (duplicate check). Evergreen fields store computed slot times. |
 | `ChatMessageData` | `id`, `webinarId`, `sessionId`, `name`, `message`, `timestamp`, `createdAt` | Real user chat message. |
 
 ### Storage Layer (`src/lib/db.ts`)
@@ -72,7 +74,9 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/webinar` | GET | `src/app/api/webinar/route.ts` | List all webinars |
 | `/api/webinar/[id]` | GET | `src/app/api/webinar/[id]/route.ts` | Single webinar (no registrations) |
 | `/api/webinar/[id]/chat` | GET, POST | `src/app/api/webinar/[id]/chat/route.ts` | GET requires `sessionId` query param |
-| `/api/register` | POST | `src/app/api/register/route.ts` | Checks duplicate email per webinar |
+| `/api/register` | POST | `src/app/api/register/route.ts` | Checks duplicate email per webinar. Evergreen-aware: accepts `assignedSlot`, computes `slotExpiresAt`. |
+| `/api/webinar/[id]/next-slot` | GET | `src/app/api/webinar/[id]/next-slot/route.ts` | Computes upcoming evergreen slots from config. Returns `slots[]`, `countdownTarget`, `expiresAt`. |
+| `/api/webinar/[id]/reassign` | POST | `src/app/api/webinar/[id]/reassign/route.ts` | Reassigns a registered user to the next available slot (for missed sessions). |
 
 #### Admin Routes (`src/app/api/admin/`)
 
@@ -108,8 +112,9 @@ VideoPlayer.onTimeUpdate(currentTime)
 
 | Component | Source | Role |
 |-----------|--------|------|
-| `VideoPlayer` | `src/components/video/VideoPlayer.tsx` | Video.js + HLS.js player. **YouTube support** via `videojs-youtube` plugin — detects YouTube URLs and uses YouTube iframe tech under Video.js's unified API. Supports `youtube.com/watch?v=`, `youtu.be/`, and `youtube.com/embed/` formats. Dynamically imported (no SSR). **Seeking disabled** — blocks scrubbing, arrow keys, Home/End. Emits `onTimeUpdate`. |
-| `ChatRoom` | `src/components/chat/ChatRoom.tsx` | Displays auto-chat messages at configured timestamps (with randomized variance). Accepts real user messages via API polling. 65-message 7-phase sales funnel. |
+| `VideoPlayer` | `src/components/video/VideoPlayer.tsx` | Video.js + HLS.js player. **YouTube support** via `videojs-youtube` plugin. Dynamically imported (no SSR). **Seeking disabled** — blocks scrubbing, arrow keys, Home/End. Emits `onTimeUpdate`. Supports `initialTime` prop for late-join video seeking. |
+| `ChatRoom` | `src/components/chat/ChatRoom.tsx` | Displays auto-chat messages at configured timestamps (with randomized variance). Accepts real user messages via API polling. Supports `initialTime` prop for late-join chat backfill. |
+| `MissedSessionPrompt` | `src/components/evergreen/MissedSessionPrompt.tsx` | Shows missed session message with countdown to next slot and reassignment button. |
 | `CTAOverlay` | `src/components/cta/CTAOverlay.tsx` | Promotional overlay with `position` support (`on_video`/`below_video`), configurable `color`, and `secondaryText`. |
 | `CountdownTimer` | `src/components/countdown/CountdownTimer.tsx` | Countdown to session start time with `onComplete` callback. |
 | `RegistrationModal` | `src/components/registration/RegistrationModal.tsx` | Full-screen modal overlay for registration. Triggered by landing page CTAs. |
@@ -148,6 +153,43 @@ Defined in `src/styles/design-tokens.css` as CSS custom properties.
 - **Fonts:** Geist Sans / Geist Mono (via Next.js font loading)
 - **Radii:** Subtle editorial — `2px` / `4px` / `8px`
 - **Aesthetic:** Light, minimal, editorial. Warm ivory base. Deep gold accent for CTAs.
+
+## Evergreen Countdown System
+
+The evergreen system dynamically generates session slots so visitors always see a webinar starting soon. Core logic lives in `src/lib/evergreen.ts`.
+
+### Slot Generation
+
+Two slot types work together:
+- **Anchor slots** — Admin-configured daily recurring times (e.g., 8:00 AM, 9:00 PM). Creates realistic schedule appearance.
+- **Immediate slots** — Dynamically injected when the next anchor is too far away (> `maxWaitMinutes`). Snaps to round clock boundaries (:00, :15, :30, :45).
+
+`generateEvergreenSlots(config)` produces a sorted list of upcoming slots for display.
+
+### User State Machine
+
+```
+FIRST_VISIT → assign slot → PRE_REG → register → CONFIRMED → slot time → LIVE → video ends → MISSED
+                                                                                              ↓
+                                                                               "预约下一场" → CONFIRMED (new slot)
+```
+
+State determined by `getEvergreenState(assignedSlot, expiresAt, registered)` in `src/lib/evergreen.ts`.
+
+### Late Join
+
+When a user enters after their slot started but before it expired (slot + video duration):
+- **Video**: Seeks to `(now - slotTime)` seconds via `initialTime` prop on `VideoPlayer`
+- **Chat**: Backfills all auto-chat messages with `timeSec <= elapsedSeconds` (rendered without animation)
+- **CTAs**: Follow video position as normal (no change needed)
+
+### Sticky Session (Client-Side)
+
+`localStorage` key `webinar-{id}-evergreen` stores: `{ visitorId, assignedSlot, expiresAt, registered, registrationId }`. Ensures consistent countdown across page refreshes.
+
+### Admin Configuration
+
+The admin panel (`WebinarForm.tsx`) exposes evergreen settings: daily anchor times, immediate slot interval/buffer/trigger threshold, timezone, and display slot count. When evergreen is enabled, the static sessions section is hidden.
 
 ## Key Constraints
 
