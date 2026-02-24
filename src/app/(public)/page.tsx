@@ -224,12 +224,12 @@ export default function HomePage() {
 
       {/* ========== Section 5: BENEFITS — Checklist Style ========== */}
       <section className="py-16 md:py-24 px-6 lg:px-12 bg-[#FAFAF7]">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-10 text-center">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-10">
             讲座中你将会获得什么：
           </h2>
 
-          <div className="space-y-6">
+          <div className="space-y-5 pl-1">
             {(webinar.highlights && webinar.highlights.length > 0
               ? webinar.highlights
               : [
@@ -240,14 +240,14 @@ export default function HomePage() {
                   '认识【MIKE是麥克】APP 的核心功能与实战应用',
                 ]
             ).map((item, idx) => (
-              <div key={idx} className="flex items-start gap-4">
+              <div key={idx} className="flex items-start gap-3.5">
                 {/* Gold checkmark circle */}
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#B8953F] flex items-center justify-center mt-0.5">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-[#B8953F] flex items-center justify-center mt-0.5">
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <p className="text-lg text-neutral-800 leading-relaxed">{item}</p>
+                <p className="text-base md:text-lg text-neutral-800 leading-relaxed">{item}</p>
               </div>
             ))}
           </div>
