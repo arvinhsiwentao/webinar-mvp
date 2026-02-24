@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Webinar, Session } from '@/lib/types';
@@ -42,6 +42,52 @@ export default function HomePage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Fetch fresh evergreen slots from the API, respecting localStorage sticky session
+  const refreshEvergreenSlots = useCallback(async () => {
+    try {
+      const slotRes = await fetch(`/api/webinar/${DEFAULT_WEBINAR_ID}/next-slot`);
+      if (!slotRes.ok) return;
+      const slotData = await slotRes.json();
+      setEvergreenSlots(slotData.slots);
+
+      // Store sticky session in localStorage
+      const existingSticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
+      const now = new Date();
+      let shouldUpdate = true;
+
+      if (existingSticky) {
+        try {
+          const parsed = JSON.parse(existingSticky);
+          // Only reuse stored slot if it hasn't expired and is still in the future
+          if (new Date(parsed.expiresAt) > now && new Date(parsed.assignedSlot) > now) {
+            shouldUpdate = false;
+            // Use the stored slot instead
+            setEvergreenSlots(prev => {
+              const stored = { slotTime: parsed.assignedSlot, type: 'stored' };
+              return [stored, ...prev.filter(s => s.slotTime !== parsed.assignedSlot)].slice(0, slotData.slots.length);
+            });
+          }
+        } catch { /* invalid stored data, update */ }
+      }
+
+      if (shouldUpdate && slotData.slots.length > 0) {
+        const visitorId = localStorage.getItem('webinar-visitor-id') || `v_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        if (!localStorage.getItem('webinar-visitor-id')) {
+          localStorage.setItem('webinar-visitor-id', visitorId);
+        }
+        localStorage.setItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`, JSON.stringify({
+          visitorId,
+          assignedSlot: slotData.countdownTarget,
+          expiresAt: slotData.expiresAt,
+          registered: false,
+          registrationId: null,
+        }));
+      }
+    } catch {
+      // Fall back to existing slots
+    }
+  }, []);
+
   useEffect(() => {
     async function fetchWebinar() {
       try {
@@ -53,50 +99,7 @@ export default function HomePage() {
         // Fetch evergreen slots if enabled
         if (data.webinar.evergreen?.enabled) {
           setIsEvergreen(true);
-          try {
-            const slotRes = await fetch(`/api/webinar/${DEFAULT_WEBINAR_ID}/next-slot`);
-            if (slotRes.ok) {
-              const slotData = await slotRes.json();
-              setEvergreenSlots(slotData.slots);
-
-              // Store sticky session in localStorage
-              const existingSticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
-              const now = new Date();
-              let shouldUpdate = true;
-
-              if (existingSticky) {
-                try {
-                  const parsed = JSON.parse(existingSticky);
-                  // Only update if existing session has expired
-                  if (new Date(parsed.expiresAt) > now && new Date(parsed.assignedSlot) > now) {
-                    shouldUpdate = false;
-                    // Use the stored slot instead
-                    setEvergreenSlots(prev => {
-                      const stored = { slotTime: parsed.assignedSlot, type: 'stored' };
-                      // Replace first slot with stored one if it's still valid
-                      return [stored, ...prev.filter(s => s.slotTime !== parsed.assignedSlot)].slice(0, slotData.slots.length);
-                    });
-                  }
-                } catch { /* invalid stored data, update */ }
-              }
-
-              if (shouldUpdate && slotData.slots.length > 0) {
-                const visitorId = localStorage.getItem('webinar-visitor-id') || `v_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-                if (!localStorage.getItem('webinar-visitor-id')) {
-                  localStorage.setItem('webinar-visitor-id', visitorId);
-                }
-                localStorage.setItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`, JSON.stringify({
-                  visitorId,
-                  assignedSlot: slotData.countdownTarget,
-                  expiresAt: slotData.expiresAt,
-                  registered: false,
-                  registrationId: null,
-                }));
-              }
-            }
-          } catch {
-            // Fall back to static sessions
-          }
+          await refreshEvergreenSlots();
         }
 
         if (!data.webinar.evergreen?.enabled && data.webinar.sessions.length > 0) {
@@ -137,10 +140,16 @@ export default function HomePage() {
     );
   }
 
-  const openModal = () => setIsModalOpen(true);
+  const openModal = async () => {
+    // Re-fetch fresh evergreen slots so the displayed time is current
+    if (isEvergreen) {
+      await refreshEvergreenSlots();
+    }
+    setIsModalOpen(true);
+  };
 
   // Sort sessions chronologically for date display
-  const sortedSessions = [...webinar.sessions].sort(
+  const sortedSessions = [...(webinar.sessions || [])].sort(
     (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
   );
 
