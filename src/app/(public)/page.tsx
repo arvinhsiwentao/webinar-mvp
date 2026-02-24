@@ -36,7 +36,7 @@ export default function HomePage() {
       }
 
       const slotParam = evergreenSlots[0]?.slotTime ? `&slot=${encodeURIComponent(evergreenSlots[0].slotTime)}` : '';
-      router.push(`/webinar/${DEFAULT_WEBINAR_ID}/confirm?session=${sessionId}&name=${encodeURIComponent(name)}${slotParam}`);
+      router.push(`/webinar/${DEFAULT_WEBINAR_ID}/lobby?session=${sessionId}&name=${encodeURIComponent(name)}${slotParam}`);
     },
   });
 
