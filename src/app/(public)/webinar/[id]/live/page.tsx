@@ -10,11 +10,14 @@ import SidebarTabs from '@/components/sidebar/SidebarTabs';
 import InfoTab from '@/components/sidebar/InfoTab';
 import ViewersTab from '@/components/sidebar/ViewersTab';
 import OffersTab from '@/components/sidebar/OffersTab';
+import UnmuteOverlay from '@/components/video/UnmuteOverlay';
+import PreShowOverlay from '@/components/video/PreShowOverlay';
 import { Webinar, Session, CTAEvent } from '@/lib/types';
 import { Badge, Button } from '@/components/ui';
 import { track } from '@/lib/tracking';
 import { formatElapsedTime } from '@/lib/utils';
 import { calculateLateJoinPosition } from '@/lib/evergreen';
+import type Player from 'video.js/dist/types/player';
 
 // Dynamically import VideoPlayer to avoid SSR issues with video.js
 const VideoPlayer = dynamic(() => import('@/components/video/VideoPlayer'), {
@@ -37,12 +40,16 @@ export default function LiveRoomPage() {
   const sessionId = searchParams.get('session');
   const userName = searchParams.get('name') || '观众';
   const slotTime = searchParams.get('slot');
+  const isReplay = searchParams.get('replay') === 'true';
 
-  const lateJoinSeconds = slotTime ? calculateLateJoinPosition(slotTime) : 0;
+  const lateJoinSeconds = isReplay ? 0 : (slotTime ? calculateLateJoinPosition(slotTime) : 0);
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [eventPhase, setEventPhase] = useState<'loading' | 'pre_event' | 'pre_show' | 'live' | 'ended'>('loading');
+  const [isMuted, setIsMuted] = useState(true);
+  const playerInstanceRef = useRef<Player | null>(null);
 
   // Video state
   const [currentTime, setCurrentTime] = useState(0);
@@ -74,6 +81,31 @@ export default function LiveRoomPage() {
 
         const foundSession = data.webinar.sessions.find((s: Session) => s.id === sessionId);
         setSession(foundSession || data.webinar.sessions[0]);
+
+        // Compute event phase
+        if (isReplay) {
+          setEventPhase('live');
+        } else {
+          const startTimeStr = slotTime || foundSession?.startTime || data.webinar.sessions[0]?.startTime;
+          if (startTimeStr) {
+            const startMs = new Date(startTimeStr).getTime();
+            const now = Date.now();
+            const minutesUntil = (startMs - now) / (1000 * 60);
+
+            if (minutesUntil > 30) {
+              // Too early — redirect to lobby
+              const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
+              router.replace(`/webinar/${webinarId}/lobby?session=${sessionId}&name=${encodeURIComponent(userName)}${slotParam}`);
+              return;
+            } else if (minutesUntil > 0) {
+              setEventPhase('pre_show');
+            } else {
+              setEventPhase('live');
+            }
+          } else {
+            setEventPhase('live'); // fallback for missing start time
+          }
+        }
       } catch {
         console.error('Failed to fetch webinar');
       } finally {
@@ -81,7 +113,26 @@ export default function LiveRoomPage() {
       }
     }
     fetchWebinar();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [webinarId, sessionId]);
+
+  // Auto-transition from pre_show to live when start time arrives
+  useEffect(() => {
+    if (eventPhase !== 'pre_show') return;
+    const startTimeStr = slotTime || session?.startTime;
+    if (!startTimeStr) return;
+
+    const checkPhase = () => {
+      const now = Date.now();
+      const startMs = new Date(startTimeStr).getTime();
+      if (now >= startMs) {
+        setEventPhase('live');
+      }
+    };
+
+    const interval = setInterval(checkPhase, 1000);
+    return () => clearInterval(interval);
+  }, [eventPhase, slotTime, session?.startTime]);
 
   useEffect(() => {
     track('webinar_join', { webinarId });
@@ -153,6 +204,19 @@ export default function LiveRoomPage() {
     [webinarId, session]
   );
 
+  // Handle unmute from overlay
+  const handleUnmute = useCallback(() => {
+    if (playerInstanceRef.current) {
+      playerInstanceRef.current.muted(false);
+    }
+    setIsMuted(false);
+  }, []);
+
+  // Expose player instance for unmute control
+  const handlePlayerReady = useCallback((player: Player) => {
+    playerInstanceRef.current = player;
+  }, []);
+
   // Handle CTA clicks
   const handleCTAClick = useCallback((cta: CTAEvent) => {
     console.log('CTA clicked:', cta.buttonText);
@@ -197,8 +261,8 @@ export default function LiveRoomPage() {
                 {webinar.title}
               </h1>
             </div>
-            <Badge variant="live" pulse>
-              LIVE
+            <Badge variant="live" pulse={eventPhase === 'live'}>
+              {eventPhase === 'pre_show' ? 'STARTING SOON' : 'LIVE'}
             </Badge>
           </div>
 
@@ -218,12 +282,34 @@ export default function LiveRoomPage() {
           <div className="lg:col-span-2 space-y-4">
             {/* Video Player Container */}
             <div className="relative rounded-lg overflow-hidden border border-neutral-200 bg-white">
-              <VideoPlayer
-                src={webinar.videoUrl}
-                autoPlay={lateJoinSeconds > 0}
-                onPlaybackEvent={handlePlaybackEvent}
-                initialTime={lateJoinSeconds}
-              />
+              {eventPhase === 'pre_show' ? (
+                <PreShowOverlay
+                  targetTime={slotTime || session.startTime}
+                  title={webinar.title}
+                  speakerName={webinar.speakerName}
+                  promoImage={webinar.promoImageUrl}
+                  speakerImage={webinar.speakerAvatar || webinar.speakerImage}
+                  onCountdownComplete={() => setEventPhase('live')}
+                />
+              ) : (
+                <>
+                  <VideoPlayer
+                    src={webinar.videoUrl}
+                    autoPlay={isReplay ? false : true}
+                    livestreamMode={!isReplay}
+                    onPlaybackEvent={handlePlaybackEvent}
+                    onPlayerReady={handlePlayerReady}
+                    initialTime={lateJoinSeconds}
+                  />
+                  {/* Unmute overlay (only in livestream mode, not replay) */}
+                  {!isReplay && (
+                    <UnmuteOverlay
+                      visible={isMuted}
+                      onUnmute={handleUnmute}
+                    />
+                  )}
+                </>
+              )}
               <SubtitleOverlay currentTime={currentTime} cues={webinar.subtitleCues} />
               {/* On-video CTA overlays */}
               <CTAOverlay
