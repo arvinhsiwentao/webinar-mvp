@@ -82,8 +82,13 @@ export default function PersistentCountdown({ sessions, targetTime }: Persistent
       const totalSeconds = Math.floor(diff / 1000);
 
       if (totalSeconds <= 0) {
-        // Auto-advance to next session
-        setTarget(getNextTarget());
+        // Auto-advance to next session target.
+        // Compare timestamps to avoid infinite re-render when getNextTarget()
+        // returns a date that is also in the past (new object, same/similar time).
+        const next = getNextTarget();
+        if (next.getTime() !== target.getTime()) {
+          setTarget(next);
+        }
         return;
       }
 
