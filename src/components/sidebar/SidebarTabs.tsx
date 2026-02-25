@@ -18,8 +18,6 @@ interface SidebarTabsProps {
 export default function SidebarTabs({ tabs, defaultTab }: SidebarTabsProps) {
   const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id || '');
 
-  const activeContent = tabs.find(t => t.id === activeTab)?.content;
-
   return (
     <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden border border-[#E8E5DE] shadow-sm">
       {/* Tab bar */}
@@ -46,9 +44,16 @@ export default function SidebarTabs({ tabs, defaultTab }: SidebarTabsProps) {
         ))}
       </div>
 
-      {/* Tab content */}
-      <div className="flex-1 overflow-hidden">
-        {activeContent}
+      {/* Tab content — all tabs stay mounted to preserve state */}
+      <div className="flex-1 overflow-hidden relative">
+        {tabs.map((tab) => (
+          <div
+            key={tab.id}
+            className={`h-full ${activeTab === tab.id ? '' : 'hidden'}`}
+          >
+            {tab.content}
+          </div>
+        ))}
       </div>
     </div>
   );
