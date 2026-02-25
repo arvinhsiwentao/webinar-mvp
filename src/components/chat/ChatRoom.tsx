@@ -205,6 +205,28 @@ export default function ChatRoom({
     return () => eventSource.close();
   }, [webinarId]);
 
+  // Personal join message — "你已加入直播" after a short delay
+  const hasShownJoin = useRef(false);
+  useEffect(() => {
+    if (hasShownJoin.current) return;
+    hasShownJoin.current = true;
+
+    const delay = 2000 + Math.random() * 1500; // 2-3.5s
+    const timerId = setTimeout(() => {
+      setMessages(prev => [...prev, {
+        id: nextId(),
+        name: '',
+        message: '你已加入直播',
+        timestamp: currentTimeRef.current,
+        wallTime: Date.now(),
+        isSystem: true,
+      }]);
+    }, delay);
+
+    return () => clearTimeout(timerId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Simulate viewer join notifications
   useEffect(() => {
     if (!sessionStartTime) return;

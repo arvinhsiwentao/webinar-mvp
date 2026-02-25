@@ -483,7 +483,7 @@ export default function LiveRoomPage() {
               tabs={[
                 {
                   id: 'info',
-                  icon: <span className="text-base">ℹ️</span>,
+                  icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
                   label: '简介',
                   content: (
                     <InfoTab
@@ -498,19 +498,20 @@ export default function LiveRoomPage() {
                 },
                 {
                   id: 'viewers',
-                  icon: <span className="text-base">👁</span>,
+                  icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>,
                   label: '观众',
                   content: (
                     <ViewersTab
                       viewerCount={viewerCount}
                       hostName={webinar.speakerName}
                       hostAvatar={webinar.speakerAvatar || webinar.speakerImage}
+                      userName={userName}
                     />
                   ),
                 },
                 {
                   id: 'chat',
-                  icon: <span className="text-base">💬</span>,
+                  icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
                   label: '聊天',
                   content: (
                     <ChatRoom
@@ -527,7 +528,7 @@ export default function LiveRoomPage() {
                 },
                 {
                   id: 'offers',
-                  icon: <span className="text-base">⭐</span>,
+                  icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
                   label: '优惠',
                   content: (
                     <OffersTab
@@ -546,8 +547,9 @@ export default function LiveRoomPage() {
       {/* Footer */}
       <footer className="border-t border-neutral-200 px-4 py-6 mt-8">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-neutral-400 text-sm">
-            🔒 请勿录影或截图分享
+          <p className="text-neutral-400 text-sm flex items-center justify-center gap-1.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            请勿录影或截图分享
           </p>
           <p className="text-neutral-400 text-xs mt-2">
             © 2026 {webinar.speakerName}. All rights reserved.

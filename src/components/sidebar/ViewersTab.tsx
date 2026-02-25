@@ -16,15 +16,17 @@ interface ViewersTabProps {
   viewerCount: number;
   hostName: string;
   hostAvatar?: string;
+  userName?: string;
 }
 
-export default function ViewersTab({ viewerCount, hostName, hostAvatar }: ViewersTabProps) {
-  // Generate simulated viewer list based on count
+export default function ViewersTab({ viewerCount, hostName, hostAvatar, userName }: ViewersTabProps) {
+  // Generate simulated viewer list based on count, excluding userName to avoid duplicates
   const viewers = useMemo(() => {
-    const count = Math.min(viewerCount, NAME_POOL.length);
-    const shuffled = [...NAME_POOL].sort(() => Math.random() - 0.5);
+    const pool = userName ? NAME_POOL.filter(n => n !== userName) : NAME_POOL;
+    const count = Math.min(viewerCount, pool.length);
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, count);
-  }, [viewerCount]);
+  }, [viewerCount, userName]);
 
   return (
     <div className="h-full overflow-y-auto p-4 text-[#1A1A1A]">
@@ -50,6 +52,19 @@ export default function ViewersTab({ viewerCount, hostName, hostAvatar }: Viewer
           Host
         </span>
       </div>
+
+      {/* Current user (pinned) */}
+      {userName && (
+        <div className="flex items-center gap-2 py-1.5 px-2 rounded-md bg-[#FAFAF7] border border-[#F0EDE6] mb-3">
+          <div className="w-6 h-6 rounded-full bg-[#B8953F]/20 flex items-center justify-center text-[10px] text-[#B8953F] font-medium">
+            {userName.charAt(0)}
+          </div>
+          <span className="text-sm text-[#1A1A1A] font-medium flex-1">{userName}</span>
+          <span className="text-[10px] bg-[#B8953F]/15 text-[#B8953F] px-1.5 py-0.5 rounded font-medium">
+            你
+          </span>
+        </div>
+      )}
 
       {/* Viewer list */}
       <div className="space-y-0.5">
