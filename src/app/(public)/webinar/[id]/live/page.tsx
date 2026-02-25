@@ -516,6 +516,7 @@ export default function LiveRoomPage() {
                       onSendMessage={handleSendMessage}
                       initialTime={lateJoinSeconds}
                       sessionStartTime={slotTime || undefined}
+                      viewers={viewers}
                     />
                   ),
                 },
