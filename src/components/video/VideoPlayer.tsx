@@ -62,7 +62,7 @@ export default function VideoPlayer({
 
     const playerOptions: Record<string, unknown> = {
       controls: !livestreamMode,
-      autoplay: livestreamMode ? 'muted' : autoPlay,
+      autoplay: livestreamMode ? 'any' : autoPlay,
       preload: 'auto',
       fluid: true,
       playbackRates: [], // no speed options
@@ -73,10 +73,6 @@ export default function VideoPlayer({
       },
       sources: [{ src, type: sourceType }],
     };
-
-    if (livestreamMode) {
-      playerOptions.muted = true;
-    }
 
     if (isYT) {
       playerOptions.techOrder = ['youtube'];

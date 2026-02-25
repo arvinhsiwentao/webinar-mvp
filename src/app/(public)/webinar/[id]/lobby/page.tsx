@@ -98,6 +98,23 @@ export default function LobbyPage() {
     router.push(buildLiveUrl());
   };
 
+  // Immediate transition when tab becomes visible and countdown has passed
+  // (background tabs throttle setInterval, so the countdown callback may be delayed)
+  useEffect(() => {
+    if (!countdownTarget) return;
+
+    const handleVisibility = () => {
+      if (document.visibilityState !== 'visible') return;
+      const startTime = new Date(countdownTarget).getTime();
+      if (Date.now() >= startTime) {
+        router.push(buildLiveUrl());
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [countdownTarget, router, buildLiveUrl]);
+
   function handleDownloadICS() {
     if (!webinar || !countdownTarget) return;
     const ics = generateICSContent(

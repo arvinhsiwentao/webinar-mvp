@@ -50,7 +50,7 @@ export default function LiveRoomPage() {
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [loading, setLoading] = useState(true);
   const [eventPhase, setEventPhase] = useState<'loading' | 'pre_event' | 'pre_show' | 'live' | 'ended'>('loading');
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const playerInstanceRef = useRef<Player | null>(null);
 
@@ -131,6 +131,54 @@ export default function LiveRoomPage() {
 
     const interval = setInterval(checkPhase, 1000);
     return () => clearInterval(interval);
+  }, [eventPhase, slotTime]);
+
+  // Resume playback when tab returns to foreground (background tabs block autoplay)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState !== 'visible') return;
+
+      // If still in pre_show but start time has passed, transition immediately
+      if (eventPhase === 'pre_show' && slotTime) {
+        const now = Date.now();
+        const startMs = new Date(slotTime).getTime();
+        if (now >= startMs) {
+          setEventPhase('live');
+          return;
+        }
+      }
+
+      // If live but video is paused, try to resume playback
+      if (eventPhase === 'live') {
+        const player = playerInstanceRef.current;
+        if (!player || player.isDisposed() || !player.paused()) return;
+
+        // Try unmuted play first (user just switched to tab = user gesture context)
+        player.muted(false);
+        const playPromise = player.play();
+        if (playPromise && typeof playPromise.then === 'function') {
+          playPromise.then(() => {
+            setIsMuted(false);
+            setAutoplayBlocked(false);
+          }).catch(() => {
+            // Unmuted play blocked — fall back to muted
+            player.muted(true);
+            setIsMuted(true);
+            const mutedPromise = player.play();
+            if (mutedPromise && typeof mutedPromise.then === 'function') {
+              mutedPromise.then(() => {
+                setAutoplayBlocked(false);
+              }).catch(() => {
+                setAutoplayBlocked(true);
+              });
+            }
+          });
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [eventPhase, slotTime]);
 
   useEffect(() => {
@@ -216,8 +264,17 @@ export default function LiveRoomPage() {
   const handlePlayerReady = useCallback((player: Player) => {
     playerInstanceRef.current = player;
 
-    // Detect autoplay failure — if video hasn't started playing within 3 seconds
     if (!isReplay) {
+      // Detect if autoplay fell back to muted (browser policy blocked unmuted play)
+      const onPlaying = () => {
+        if (player.muted()) {
+          setIsMuted(true);
+        }
+        player.off('playing', onPlaying);
+      };
+      player.on('playing', onPlaying);
+
+      // Detect total autoplay failure — if video hasn't started playing within 3 seconds
       const timeout = setTimeout(() => {
         if (player.paused()) {
           setAutoplayBlocked(true);
