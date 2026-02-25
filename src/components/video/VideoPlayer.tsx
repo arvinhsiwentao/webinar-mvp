@@ -10,7 +10,7 @@ import { isYouTubeUrl, getVideoSourceType } from '@/lib/utils';
 const SEEK_FORWARD_TOLERANCE_SEC = 2;
 const SEEK_REWIND_TOLERANCE_SEC = 1;
 const TIMEUPDATE_EMIT_INTERVAL_SEC = 0.1;
-const BLOCKED_KEYS = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+const BLOCKED_KEYS = ['ArrowLeft', 'ArrowRight', 'Home', 'End', ' '];
 
 export interface PlaybackEvent {
   type: 'play' | 'pause' | 'timeupdate' | 'ended' | 'ready';
@@ -93,7 +93,11 @@ export default function VideoPlayer({
     playerRef.current = player;
 
     player.on('keydown', (e: KeyboardEvent) => {
-      if (BLOCKED_KEYS.includes(e.key)) {
+      if (livestreamMode) {
+        // In livestream mode, block ALL keyboard shortcuts on the player
+        e.preventDefault();
+        e.stopPropagation();
+      } else if (BLOCKED_KEYS.includes(e.key)) {
         e.preventDefault();
         e.stopPropagation();
       }
@@ -154,7 +158,10 @@ export default function VideoPlayer({
   }, [src, autoPlay, emitEvent, initialTime, livestreamMode, onPlayerReady]);
 
   return (
-    <div className={`video-player-wrapper ${livestreamMode ? 'livestream-mode' : ''}`}>
+    <div
+      className={`video-player-wrapper ${livestreamMode ? 'livestream-mode' : ''}`}
+      onContextMenu={livestreamMode ? (e) => e.preventDefault() : undefined}
+    >
       <div ref={videoRef} data-vjs-player />
       <style jsx>{`
         .video-player-wrapper {

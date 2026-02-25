@@ -59,7 +59,6 @@ export default function EndPage() {
   }
 
   const firstCTA = webinar.ctaEvents?.[0];
-  const replayUrl = `/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}&replay=true`;
 
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-neutral-900 flex items-center justify-center px-6">
@@ -147,13 +146,12 @@ export default function EndPage() {
           </a>
         </div>
 
-        {/* Replay link */}
+        {/* Replay link — delayed to maintain livestream illusion */}
         <div className="mb-10">
-          <Link href={replayUrl}>
-            <Button variant="secondary">
-              观看回放
-            </Button>
-          </Link>
+          <p className="text-neutral-400 text-sm mb-2">回放将在讲座结束后通过邮件发送</p>
+          <Button variant="secondary" disabled className="opacity-50 cursor-not-allowed">
+            回放准备中...
+          </Button>
         </div>
 
         {/* Footer */}

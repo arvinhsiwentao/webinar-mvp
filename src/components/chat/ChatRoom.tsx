@@ -15,6 +15,7 @@ export interface ChatMessage {
   message: string;
   timestamp: number; // video time in seconds
   isAuto?: boolean;
+  isSystem?: boolean;
 }
 
 export interface ChatRoomProps {
@@ -34,6 +35,8 @@ export interface ChatRoomProps {
   sessionId?: string;
   /** For late join — backfill messages up to this time */
   initialTime?: number;
+  /** ISO start time of the session — used to compute wall-clock display times */
+  sessionStartTime?: string;
 }
 
 let msgIdCounter = 0;
@@ -50,11 +53,24 @@ export default function ChatRoom({
   webinarId,
   sessionId,
   initialTime,
+  sessionStartTime,
 }: ChatRoomProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const firedAutoIds = useRef<Set<number>>(new Set());
+
+  // Convert video-time seconds to wall-clock HH:MM display
+  const formatWallClock = useCallback((videoSeconds: number) => {
+    if (!sessionStartTime) return formatElapsedTime(videoSeconds);
+    const startMs = new Date(sessionStartTime).getTime();
+    if (isNaN(startMs)) return formatElapsedTime(videoSeconds);
+    const displayDate = new Date(startMs + videoSeconds * 1000);
+    return displayDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }, [sessionStartTime]);
+
+  const currentTimeRef = useRef(currentTime);
+  useEffect(() => { currentTimeRef.current = currentTime; }, [currentTime]);
 
   // Pre-compute randomized trigger times on first render
   const randomizedTimes = useRef<Map<number, number>>(new Map());
@@ -152,6 +168,34 @@ export default function ChatRoom({
     return () => eventSource.close();
   }, [webinarId, sessionId]);
 
+  // Simulate viewer join notifications
+  useEffect(() => {
+    if (!sessionStartTime) return;
+
+    const joinNames = [
+      '小美', '阿明', 'David', 'Emma', 'Kevin', '小芳', 'Jason', 'Linda',
+      'Alex', '小雨', 'Tom', '阿华', 'Jenny', '小李', 'Michael', '小张',
+    ];
+    let timerId: ReturnType<typeof setTimeout>;
+    const scheduleNext = () => {
+      const delay = 15000 + Math.random() * 30000; // 15-45 seconds
+      timerId = setTimeout(() => {
+        const name = joinNames[Math.floor(Math.random() * joinNames.length)];
+        setMessages(prev => [...prev, {
+          id: nextId(),
+          name: '',
+          message: `${name} 加入了直播`,
+          timestamp: currentTimeRef.current,
+          isSystem: true,
+        }]);
+        scheduleNext();
+      }, delay);
+    };
+
+    scheduleNext();
+    return () => clearTimeout(timerId);
+  }, [sessionStartTime]);
+
   const handleSend = useCallback(() => {
     const text = input.trim();
     if (!text) return;
@@ -193,9 +237,15 @@ export default function ChatRoom({
         )}
         {messages.map((msg) => (
           <div key={msg.id} className="text-sm">
-            <span className="text-neutral-400 text-xs mr-2">{formatElapsedTime(msg.timestamp)}</span>
-            <span className="font-semibold text-[#B8953F]">{msg.name}</span>
-            <span className="text-neutral-600 ml-1">{msg.message}</span>
+            {msg.isSystem ? (
+              <span className="text-neutral-400 text-xs italic">{msg.message}</span>
+            ) : (
+              <>
+                <span className="text-neutral-400 text-xs mr-2">{formatWallClock(msg.timestamp)}</span>
+                <span className="font-semibold text-[#B8953F]">{msg.name}</span>
+                <span className="text-neutral-600 ml-1">{msg.message}</span>
+              </>
+            )}
           </div>
         ))}
         <div ref={messagesEndRef} />

@@ -147,11 +147,14 @@ export default function LiveRoomPage() {
   useEffect(() => {
     if (!isPlaying) return;
 
-    const interval = setInterval(() => {
+    let timerId: ReturnType<typeof setTimeout>;
+    const tick = () => {
       setRealViewerCount(prev => Math.max(1, prev + Math.floor(Math.random() * 3) - 1));
-    }, 5000);
+      timerId = setTimeout(tick, 3000 + Math.random() * 5000);
+    };
+    timerId = setTimeout(tick, 3000 + Math.random() * 5000);
 
-    return () => clearInterval(interval);
+    return () => clearTimeout(timerId);
   }, [isPlaying]);
 
   // Handle video playback events
@@ -393,10 +396,12 @@ export default function LiveRoomPage() {
 
                 <div className="text-right text-sm">
                   <div className="flex items-center gap-2 text-neutral-400">
-                    <span>⏱️ {formatElapsedTime(currentTime)}</span>
-                    <span className={`px-2 py-0.5 rounded text-xs ${isPlaying ? 'bg-green-500/20 text-green-400' : 'bg-neutral-200 text-neutral-500'}`}>
-                      {isPlaying ? '播放中' : '暂停'}
-                    </span>
+                    {isReplay && <span>⏱️ {formatElapsedTime(currentTime)}</span>}
+                    {isReplay && (
+                      <span className={`px-2 py-0.5 rounded text-xs ${isPlaying ? 'bg-green-500/20 text-green-400' : 'bg-neutral-200 text-neutral-500'}`}>
+                        {isPlaying ? '播放中' : '暂停'}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -468,6 +473,7 @@ export default function LiveRoomPage() {
                       sessionId={session?.id}
                       onSendMessage={handleSendMessage}
                       initialTime={lateJoinSeconds}
+                      sessionStartTime={slotTime || session?.startTime}
                     />
                   ),
                 },
