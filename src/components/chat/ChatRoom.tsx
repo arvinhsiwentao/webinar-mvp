@@ -14,6 +14,7 @@ export interface ChatMessage {
   name: string;
   message: string;
   timestamp: number; // video time in seconds
+  wallTime?: number; // real wall-clock epoch ms (for display)
   isAuto?: boolean;
   isSystem?: boolean;
 }
@@ -57,11 +58,15 @@ export default function ChatRoom({
 }: ChatRoomProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const firedAutoIds = useRef<Set<number>>(new Set());
 
-  // Convert video-time seconds to wall-clock HH:MM display
-  const formatWallClock = useCallback((videoSeconds: number) => {
+  // Format wall-clock epoch ms as HH:MM, falling back to video-time-based display
+  const formatWallClock = useCallback((wallTime: number | undefined, videoSeconds: number) => {
+    if (wallTime) {
+      return new Date(wallTime).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+    // Fallback for messages without wallTime (e.g., legacy data)
     if (!sessionStartTime) return formatElapsedTime(videoSeconds);
     const startMs = new Date(sessionStartTime).getTime();
     if (isNaN(startMs)) return formatElapsedTime(videoSeconds);
@@ -97,6 +102,7 @@ export default function ChatRoom({
             name: msg.name,
             message: msg.message,
             timestamp: currentTime,
+            wallTime: Date.now(),
             isAuto: true,
           },
         ]);
@@ -110,6 +116,7 @@ export default function ChatRoom({
     if (hasBackfilled.current || !initialTime || initialTime <= 0) return;
     hasBackfilled.current = true;
 
+    const now = Date.now();
     const backfillMsgs: ChatMessage[] = autoMessages
       .filter(msg => msg.timeSec <= initialTime)
       .map((msg, idx) => ({
@@ -117,6 +124,7 @@ export default function ChatRoom({
         name: msg.name,
         message: msg.message,
         timestamp: msg.timeSec,
+        wallTime: now - (initialTime - msg.timeSec) * 1000,
         isAuto: true,
       }));
 
@@ -131,9 +139,17 @@ export default function ChatRoom({
     }
   }, [initialTime, autoMessages]);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages — only if user is already near the bottom.
+  // Uses scrollTop directly instead of scrollIntoView to avoid scrolling ancestor
+  // containers (which causes the whole page to shift/glitch).
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 80;
+    if (isNearBottom) {
+      container.scrollTo({ top: scrollHeight, behavior: 'smooth' });
+    }
   }, [messages]);
 
   // Subscribe to real-time chat messages via SSE
@@ -157,6 +173,7 @@ export default function ChatRoom({
               name: msg.name,
               message: msg.message,
               timestamp: msg.timestamp,
+              wallTime: Date.now(),
             }];
           });
         }
@@ -186,6 +203,7 @@ export default function ChatRoom({
           name: '',
           message: `${name} 加入了直播`,
           timestamp: currentTimeRef.current,
+          wallTime: Date.now(),
           isSystem: true,
         }]);
         scheduleNext();
@@ -204,6 +222,7 @@ export default function ChatRoom({
       name: userName,
       message: text,
       timestamp: currentTime,
+      wallTime: Date.now(),
     };
     setMessages((prev) => [...prev, msg]);
     onSendMessage?.(msg);
@@ -229,7 +248,7 @@ export default function ChatRoom({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-2">
         {messages.length === 0 && (
           <p className="text-neutral-400 text-sm text-center mt-8">
             聊天消息将显示在这里...
@@ -241,14 +260,13 @@ export default function ChatRoom({
               <span className="text-neutral-400 text-xs italic">{msg.message}</span>
             ) : (
               <>
-                <span className="text-neutral-400 text-xs mr-2">{formatWallClock(msg.timestamp)}</span>
+                <span className="text-neutral-400 text-xs mr-2">{formatWallClock(msg.wallTime, msg.timestamp)}</span>
                 <span className="font-semibold text-[#B8953F]">{msg.name}</span>
                 <span className="text-neutral-600 ml-1">{msg.message}</span>
               </>
             )}
           </div>
         ))}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
