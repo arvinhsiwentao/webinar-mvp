@@ -39,7 +39,7 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           webinarId,
-          sessionId: selectedSession,
+          sessionId: selectedSession || undefined,
           name: name.trim(),
           email: email.trim(),
           phone: phone.trim() || undefined,

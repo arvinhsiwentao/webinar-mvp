@@ -174,7 +174,7 @@ export interface CreateWebinarRequest {
 
 export interface RegisterRequest {
   webinarId: string;
-  sessionId: string;
+  sessionId?: string;
   assignedSlot?: string;
   name: string;
   email: string;
