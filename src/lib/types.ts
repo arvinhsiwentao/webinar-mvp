@@ -71,6 +71,8 @@ export interface Webinar {
   status: 'draft' | 'published' | 'ended';
   viewerBaseCount: number;
   viewerMultiplier: number;
+  viewerPeakTarget?: number;    // Peak viewer count target (replaces base+multiplier formula)
+  viewerRampMinutes?: number;   // Minutes to reach peak from video start
   webhookUrl?: string;
 
   // Landing page hero
@@ -145,6 +147,8 @@ export interface CreateWebinarRequest {
   subtitleLanguage?: string;
   viewerBaseCount?: number;
   viewerMultiplier?: number;
+  viewerPeakTarget?: number;
+  viewerRampMinutes?: number;
   webhookUrl?: string;
   status?: 'draft' | 'published' | 'ended';
   heroImageUrl?: string;
