@@ -17,6 +17,7 @@ import { Badge, Button } from '@/components/ui';
 import { track } from '@/lib/tracking';
 import { formatElapsedTime } from '@/lib/utils';
 import { calculateLateJoinPosition } from '@/lib/evergreen';
+import { useViewerSimulator } from '@/lib/viewer-simulator';
 import type Player from 'video.js/dist/types/player';
 
 // Dynamically import VideoPlayer to avoid SSR issues with video.js
@@ -58,18 +59,24 @@ export default function LiveRoomPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Viewer count (simulated)
-  const [realViewerCount, setRealViewerCount] = useState(1);
+  // Extract unique auto-chat sender names for viewer sync
+  const autoChatNames = useMemo(() => {
+    if (!webinar?.autoChat) return [];
+    return [...new Set(webinar.autoChat.map(m => m.name))];
+  }, [webinar]);
 
-  // Computed viewer count using configurable formula
-  const viewerCount = useMemo(() => {
-    const base = webinar?.viewerBaseCount ?? 100;
-    const multiplier = webinar?.viewerMultiplier ?? 3;
-    const calculated = (realViewerCount * multiplier) + base;
-    const variance = calculated * 0.05; // ±5%
-    const random = (Math.random() * 2 - 1) * variance;
-    return Math.round(calculated + random);
-  }, [realViewerCount, webinar]);
+  // Simulated viewer list (replaces old formula)
+  const { viewers, viewerCount } = useViewerSimulator({
+    peakTarget: webinar?.viewerPeakTarget ?? webinar?.viewerBaseCount ?? 60,
+    rampMinutes: webinar?.viewerRampMinutes ?? 15,
+    videoDurationSec: (webinar?.duration ?? 60) * 60,
+    currentTimeSec: currentTime,
+    isPlaying,
+    autoChatNames,
+    hostName: webinar?.speakerName,
+    userName,
+    initialTimeSec: lateJoinSeconds,
+  });
 
   // Tracking milestones
   const trackedMilestones = useRef<Set<number>>(new Set());
@@ -184,20 +191,6 @@ export default function LiveRoomPage() {
   useEffect(() => {
     track('webinar_join', { webinarId });
   }, [webinarId]);
-
-  // Simulate viewer count fluctuation
-  useEffect(() => {
-    if (!isPlaying) return;
-
-    let timerId: ReturnType<typeof setTimeout>;
-    const tick = () => {
-      setRealViewerCount(prev => Math.max(1, prev + Math.floor(Math.random() * 3) - 1));
-      timerId = setTimeout(tick, 3000 + Math.random() * 5000);
-    };
-    timerId = setTimeout(tick, 3000 + Math.random() * 5000);
-
-    return () => clearTimeout(timerId);
-  }, [isPlaying]);
 
   // Handle video playback events
   const handlePlaybackEvent = useCallback(
@@ -502,7 +495,7 @@ export default function LiveRoomPage() {
                   label: '观众',
                   content: (
                     <ViewersTab
-                      viewerCount={viewerCount}
+                      viewers={viewers}
                       hostName={webinar.speakerName}
                       hostAvatar={webinar.speakerAvatar || webinar.speakerImage}
                       userName={userName}

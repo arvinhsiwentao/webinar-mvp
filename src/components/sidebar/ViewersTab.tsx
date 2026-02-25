@@ -1,39 +1,21 @@
 'use client';
 
-import { useMemo } from 'react';
-
-// Pool of common Chinese names for simulated viewers
-const NAME_POOL = [
-  '小美', '阿明', 'David', 'Emma', 'Kevin', '小芳', 'Jason', 'Linda',
-  'Alex', '小雨', 'Tom', '阿华', 'Jenny', '小李', 'Michael', '小张',
-  '王强', 'Amy', '陈伟', 'Sarah', '刘洋', 'Peter', '黄丽', 'Bob',
-  '赵敏', '周杰', 'Lucy', '吴涛', '孙燕', 'Jack', '李明', '张伟',
-  'Nicole', '陈静', 'Ryan', '王芳', 'Helen', '刘强', '杨磊', 'Grace',
-  '赵鑫', '周芳', 'Brian', '郭靖', '许可', '钱伟', 'Chris', '蒋勇',
-];
-
 interface ViewersTabProps {
-  viewerCount: number;
+  viewers: string[];       // Active viewer names from simulator
   hostName: string;
   hostAvatar?: string;
   userName?: string;
 }
 
-export default function ViewersTab({ viewerCount, hostName, hostAvatar, userName }: ViewersTabProps) {
-  // Generate simulated viewer list based on count, excluding userName to avoid duplicates
-  const viewers = useMemo(() => {
-    const pool = userName ? NAME_POOL.filter(n => n !== userName) : NAME_POOL;
-    const count = Math.min(viewerCount, pool.length);
-    const shuffled = [...pool].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count);
-  }, [viewerCount, userName]);
-
+export default function ViewersTab({ viewers, hostName, hostAvatar, userName }: ViewersTabProps) {
   return (
     <div className="h-full overflow-y-auto p-4 text-[#1A1A1A]">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-sm font-semibold text-[#1A1A1A]">在线观众</span>
-        <span className="text-xs text-[#6B6B6B] bg-[#FAFAF7] px-2 py-0.5 rounded-full">{viewerCount.toLocaleString()} 人</span>
+        <span className="text-xs text-[#6B6B6B] bg-[#FAFAF7] px-2 py-0.5 rounded-full">
+          {viewers.length.toLocaleString()} 人
+        </span>
       </div>
 
       {/* Host */}
