@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
       status: body.status || 'draft',
       viewerBaseCount: body.viewerBaseCount ?? 100,
       viewerMultiplier: body.viewerMultiplier ?? 1.5,
+      viewerPeakTarget: body.viewerPeakTarget ?? 60,
+      viewerRampMinutes: body.viewerRampMinutes ?? 15,
     });
 
     return NextResponse.json({ webinar }, { status: 201 });

@@ -427,6 +427,8 @@
     "status": "published",
     "viewerBaseCount": 100,
     "viewerMultiplier": 3,
+    "viewerPeakTarget": 60,
+    "viewerRampMinutes": 15,
     "webhookUrl": "",
     "heroImageUrl": "/images/hero-bg.jpg",
     "heroEyebrowText": "限时公开 · 免费席位有限",

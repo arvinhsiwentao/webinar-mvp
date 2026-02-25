@@ -239,6 +239,8 @@ export function initializeSampleData(): void {
     subtitleLastGeneratedAt: new Date().toISOString(),
     viewerBaseCount: 100,
     viewerMultiplier: 3,
+    viewerPeakTarget: 60,
+    viewerRampMinutes: 15,
     status: 'published',
     heroImageUrl: '/images/mike-speaker.jpg',
     heroEyebrowText: '限时公开 · 免费席位有限',

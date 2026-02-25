@@ -38,8 +38,8 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
     prerollVideoUrl: webinar?.prerollVideoUrl || '',
     duration: webinar?.duration || 60,
     highlights: webinar?.highlights?.join('\n') || '',
-    viewerBaseCount: webinar?.viewerBaseCount || 100,
-    viewerMultiplier: webinar?.viewerMultiplier || 3,
+    viewerPeakTarget: webinar?.viewerPeakTarget ?? webinar?.viewerBaseCount ?? 60,
+    viewerRampMinutes: webinar?.viewerRampMinutes ?? 15,
     webhookUrl: webinar?.webhookUrl || '',
     heroImageUrl: webinar?.heroImageUrl || '',
     heroEyebrowText: webinar?.heroEyebrowText || '',
@@ -594,23 +594,28 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
         <h2 className="text-lg font-semibold mb-4">观看人数设置</h2>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-neutral-500 mb-2">基础观看人数</label>
+            <label className="block text-sm text-neutral-500 mb-2">高峰观看人数</label>
             <input
               type="number"
-              value={formData.viewerBaseCount}
-              onChange={(e) => setFormData({ ...formData, viewerBaseCount: parseInt(e.target.value) || 100 })}
+              value={formData.viewerPeakTarget}
+              onChange={(e) => setFormData({ ...formData, viewerPeakTarget: parseInt(e.target.value) || 60 })}
+              min={5}
+              max={500}
               className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />
+            <p className="text-neutral-400 text-xs mt-1">观众列表中显示的最大人数 (建议 30-100)</p>
           </div>
           <div>
-            <label className="block text-sm text-neutral-500 mb-2">观看人数倍率</label>
+            <label className="block text-sm text-neutral-500 mb-2">升温时间 (分钟)</label>
             <input
               type="number"
-              step="0.1"
-              value={formData.viewerMultiplier}
-              onChange={(e) => setFormData({ ...formData, viewerMultiplier: parseFloat(e.target.value) || 1.5 })}
+              value={formData.viewerRampMinutes}
+              onChange={(e) => setFormData({ ...formData, viewerRampMinutes: parseInt(e.target.value) || 15 })}
+              min={1}
+              max={60}
               className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />
+            <p className="text-neutral-400 text-xs mt-1">从开播到高峰人数的过渡时间</p>
           </div>
         </div>
       </section>
