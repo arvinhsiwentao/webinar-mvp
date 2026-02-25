@@ -138,7 +138,13 @@ export default function VideoPlayer({
       onPlayerReady?.(player);
     });
     player.on('play', () => emitEvent('play', player));
-    player.on('pause', () => emitEvent('pause', player));
+    player.on('pause', () => {
+      // In livestream mode, auto-resume if somehow paused (e.g., YouTube API edge case)
+      if (livestreamMode && !player.ended()) {
+        player.play();
+      }
+      emitEvent('pause', player);
+    });
     player.on('ended', () => emitEvent('ended', player));
 
     player.on('timeupdate', () => {
@@ -163,6 +169,14 @@ export default function VideoPlayer({
       onContextMenu={livestreamMode ? (e) => e.preventDefault() : undefined}
     >
       <div ref={videoRef} data-vjs-player />
+      {/* Transparent shield: blocks all mouse interaction with the iframe
+          so YouTube branding never appears on hover and clicks can't pause */}
+      {livestreamMode && (
+        <div
+          className="video-click-shield"
+          aria-hidden="true"
+        />
+      )}
       <style jsx>{`
         .video-player-wrapper {
           position: relative;
@@ -191,6 +205,12 @@ export default function VideoPlayer({
         }
         .video-player-wrapper.livestream-mode :global(.vjs-control-bar) {
           display: none !important;
+        }
+        .video-click-shield {
+          position: absolute;
+          inset: 0;
+          z-index: 10;
+          cursor: default;
         }
       `}</style>
     </div>
