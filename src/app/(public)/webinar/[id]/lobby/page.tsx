@@ -222,15 +222,15 @@ export default function LobbyPage() {
 
         {/* Speaker / Promo Image (both phases) */}
         {(webinar.promoImageUrl || webinar.speakerAvatar || webinar.speakerImage) && (
-          <div className="relative w-full max-w-lg mx-auto mb-6 rounded-lg overflow-hidden border border-[#E8E5DE]">
+          <div className="relative w-full max-w-lg mx-auto mb-6">
             {webinar.promoImageUrl ? (
               <img
                 src={webinar.promoImageUrl}
                 alt={webinar.title}
-                className="w-full h-auto"
+                className="w-full h-auto rounded-lg"
               />
             ) : (
-              <div className="flex items-center justify-center py-8 bg-white/80">
+              <div className="flex items-center justify-center">
                 <img
                   src={webinar.speakerAvatar || webinar.speakerImage}
                   alt={webinar.speakerName}
