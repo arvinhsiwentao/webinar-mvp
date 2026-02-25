@@ -7,15 +7,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { searchParams } = new URL(request.url);
-  const sessionId = searchParams.get('sessionId');
-
-  if (!sessionId) {
-    return NextResponse.json(
-      { error: 'sessionId is required' },
-      { status: 400 }
-    );
-  }
 
   const webinar = getWebinarById(id);
   if (!webinar) {
@@ -25,7 +16,7 @@ export async function GET(
     );
   }
 
-  const messages = getChatMessages(id, sessionId);
+  const messages = getChatMessages(id);
   return NextResponse.json({ messages });
 }
 
@@ -37,11 +28,11 @@ export async function POST(
     const { id } = await params;
     const body = await request.json();
 
-    const { sessionId, name, message, timestamp } = body;
+    const { name, message, timestamp } = body;
 
-    if (!sessionId || !name || !message) {
+    if (!name || !message) {
       return NextResponse.json(
-        { error: 'Missing required fields: sessionId, name, message' },
+        { error: 'Missing required fields: name, message' },
         { status: 400 }
       );
     }
@@ -56,7 +47,6 @@ export async function POST(
 
     const newMessage = addChatMessage({
       webinarId: id,
-      sessionId,
       name,
       message,
       timestamp: timestamp || 0,

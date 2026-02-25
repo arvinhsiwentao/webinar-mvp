@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Webinar, Session } from '@/lib/types';
+import { Webinar } from '@/lib/types';
 import PersistentCountdown from '@/components/countdown/PersistentCountdown';
 import { useRegistrationForm } from '@/components/registration/useRegistrationForm';
 import RegistrationModal from '@/components/registration/RegistrationModal';
@@ -19,13 +19,12 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [evergreenSlots, setEvergreenSlots] = useState<Array<{ slotTime: string; type: string }>>([]);
-  const [isEvergreen, setIsEvergreen] = useState(false);
   const [selectedSlotTime, setSelectedSlotTime] = useState('');
 
   const form = useRegistrationForm({
     webinarId: DEFAULT_WEBINAR_ID,
     assignedSlot: selectedSlotTime || evergreenSlots[0]?.slotTime,
-    onSuccess: (sessionId, name) => {
+    onSuccess: (name) => {
       // Update sticky session as registered
       const sticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
       if (sticky) {
@@ -38,7 +37,7 @@ export default function HomePage() {
 
       const slotTime = selectedSlotTime || evergreenSlots[0]?.slotTime;
       const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
-      router.push(`/webinar/${DEFAULT_WEBINAR_ID}/lobby?session=${sessionId}&name=${encodeURIComponent(name)}${slotParam}`);
+      router.push(`/webinar/${DEFAULT_WEBINAR_ID}/lobby?name=${encodeURIComponent(name)}${slotParam}`);
     },
   });
 
@@ -105,18 +104,9 @@ export default function HomePage() {
         const data = await res.json();
         setWebinar(data.webinar);
 
-        // Fetch evergreen slots if enabled
+        // Fetch evergreen slots
         if (data.webinar.evergreen?.enabled) {
-          setIsEvergreen(true);
           await refreshEvergreenSlots();
-        }
-
-        if (!data.webinar.evergreen?.enabled && data.webinar.sessions.length > 0) {
-          const now = new Date();
-          const futureSession = data.webinar.sessions.find(
-            (s: Session) => new Date(s.startTime) > now
-          );
-          form.setSelectedSession(futureSession?.id || data.webinar.sessions[0].id);
         }
       } catch {
         setError('找不到此研讨会');
@@ -151,16 +141,11 @@ export default function HomePage() {
 
   const openModal = async () => {
     // Re-fetch fresh evergreen slots so the displayed time is current
-    if (isEvergreen) {
+    if (webinar?.evergreen?.enabled) {
       await refreshEvergreenSlots();
     }
     setIsModalOpen(true);
   };
-
-  // Sort sessions chronologically for date display
-  const sortedSessions = [...(webinar.sessions || [])].sort(
-    (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
-  );
 
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-neutral-900">
@@ -259,8 +244,8 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto flex flex-col items-center">
           {/* Date Schedule */}
           <div className="space-y-6 md:space-y-8 mb-14 w-full max-w-xl">
-            {(isEvergreen ? evergreenSlots : sortedSessions).map((item, idx) => {
-              const dateStr = 'slotTime' in item ? (item as { slotTime: string }).slotTime : (item as Session).startTime;
+            {evergreenSlots.map((item, idx) => {
+              const dateStr = item.slotTime;
               const date = new Date(dateStr);
               const month = date.getMonth() + 1;
               const day = date.getDate();
@@ -299,7 +284,6 @@ export default function HomePage() {
 
           {/* Countdown Timer */}
           <PersistentCountdown
-            sessions={webinar.sessions}
             targetTime={evergreenSlots[0]?.slotTime}
           />
         </div>
@@ -375,9 +359,6 @@ export default function HomePage() {
       <RegistrationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        sessions={webinar.sessions}
-        selectedSession={form.selectedSession}
-        onSessionChange={form.setSelectedSession}
         name={form.name}
         onNameChange={form.setName}
         email={form.email}
@@ -387,7 +368,6 @@ export default function HomePage() {
         onSubmit={form.handleSubmit}
         submitting={form.submitting}
         formError={form.formError}
-        isEvergreen={isEvergreen}
         evergreenSlots={evergreenSlots}
         selectedSlotTime={selectedSlotTime}
         onSlotTimeChange={setSelectedSlotTime}

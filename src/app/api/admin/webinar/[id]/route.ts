@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getWebinarById, updateWebinar, deleteWebinar, generateId, getRegistrationsByWebinar } from '@/lib/db';
-import { Session, AutoChatMessage, CTAEvent } from '@/lib/types';
+import { AutoChatMessage, CTAEvent } from '@/lib/types';
 
 export async function GET(
   request: NextRequest,
@@ -28,14 +28,7 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    // Ensure sessions, autoChat, and ctaEvents have IDs (like POST does)
-    if (body.sessions) {
-      body.sessions = body.sessions.map((s: Partial<Session>) => ({
-        ...s,
-        id: s.id || generateId(),
-        status: s.status || 'scheduled',
-      }));
-    }
+    // Ensure autoChat and ctaEvents have IDs (like POST does)
     if (body.autoChat) {
       body.autoChat = body.autoChat.map((m: Partial<AutoChatMessage>) => ({
         ...m,

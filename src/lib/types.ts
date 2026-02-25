@@ -31,12 +31,6 @@ export interface WebinarSubtitleCue {
   cpl?: number;
 }
 
-export interface Session {
-  id: string;
-  startTime: string; // ISO datetime
-  status: 'scheduled' | 'live' | 'ended';
-}
-
 export interface EvergreenConfig {
   enabled: boolean;
   dailySchedule: Array<{ time: string }>;  // HH:mm 24hr format, e.g. ["08:00", "21:00"]
@@ -69,7 +63,6 @@ export interface Webinar {
   thumbnailUrl?: string;
   duration: number; // minutes
   highlights: string[];
-  sessions: Session[];
   autoChat: AutoChatMessage[];
   ctaEvents: CTAEvent[];
   subtitleCues?: WebinarSubtitleCue[];
@@ -115,8 +108,6 @@ export interface Webinar {
 export interface Registration {
   id: string;
   webinarId: string;
-  sessionId: string;
-  // Evergreen: computed slot time (replaces static sessionId when evergreen enabled)
   assignedSlot?: string;       // ISO datetime
   slotExpiresAt?: string;      // assignedSlot + videoDuration
   reassignedFrom?: string;     // previous slot if missed
@@ -129,7 +120,6 @@ export interface Registration {
 export interface ChatMessageData {
   id: string;
   webinarId: string;
-  sessionId: string;
   name: string;
   message: string;
   timestamp: number;
@@ -149,7 +139,6 @@ export interface CreateWebinarRequest {
   thumbnailUrl?: string;
   duration: number;
   highlights?: string[];
-  sessions?: Omit<Session, 'id' | 'status'>[];
   autoChat?: Omit<AutoChatMessage, 'id'>[];
   ctaEvents?: Omit<CTAEvent, 'id'>[];
   subtitleCues?: WebinarSubtitleCue[];
@@ -174,7 +163,6 @@ export interface CreateWebinarRequest {
 
 export interface RegisterRequest {
   webinarId: string;
-  sessionId?: string;
   assignedSlot?: string;
   name: string;
   email: string;

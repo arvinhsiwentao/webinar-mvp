@@ -1,15 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Session } from '@/lib/types';
 import { formatDate, formatTime } from '@/lib/utils';
 
 interface RegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  sessions: Session[];
-  selectedSession: string;
-  onSessionChange: (sessionId: string) => void;
   name: string;
   onNameChange: (value: string) => void;
   email: string;
@@ -19,7 +15,6 @@ interface RegistrationModalProps {
   onSubmit: (e: React.FormEvent) => void;
   submitting: boolean;
   formError: string;
-  isEvergreen?: boolean;
   evergreenSlots?: Array<{ slotTime: string; type: string }>;
   selectedSlotTime?: string;
   onSlotTimeChange?: (slotTime: string) => void;
@@ -28,9 +23,6 @@ interface RegistrationModalProps {
 export default function RegistrationModal({
   isOpen,
   onClose,
-  sessions,
-  selectedSession,
-  onSessionChange,
   name,
   onNameChange,
   email,
@@ -40,7 +32,6 @@ export default function RegistrationModal({
   onSubmit,
   submitting,
   formError,
-  isEvergreen,
   evergreenSlots,
   selectedSlotTime,
   onSlotTimeChange,
@@ -135,8 +126,8 @@ export default function RegistrationModal({
               </span>
             </div>
 
-            {/* Session selector */}
-            {isEvergreen ? (
+            {/* Slot selector */}
+            {evergreenSlots && evergreenSlots.length > 0 && (
               <div>
                 <label className="block text-sm font-semibold text-neutral-700 mb-2">
                   选择一个时间
@@ -147,31 +138,9 @@ export default function RegistrationModal({
                     onChange={(e) => onSlotTimeChange?.(e.target.value)}
                     className="w-full h-[50px] px-4 pr-10 text-base bg-white border border-[#E8E5DE] rounded focus:border-[#B8953F] focus:outline-none appearance-none transition-colors"
                   >
-                    {(evergreenSlots || []).map((slot) => (
+                    {evergreenSlots.map((slot) => (
                       <option key={slot.slotTime} value={slot.slotTime}>
                         {formatDate(slot.slotTime)} - {formatTime(slot.slotTime)}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none">
-                    ▼
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-2">
-                  选择一个时间
-                </label>
-                <div className="relative">
-                  <select
-                    value={selectedSession}
-                    onChange={(e) => onSessionChange(e.target.value)}
-                    className="w-full h-[50px] px-4 pr-10 text-base bg-white border border-[#E8E5DE] rounded focus:border-[#B8953F] focus:outline-none appearance-none transition-colors"
-                  >
-                    {sessions.map((session) => (
-                      <option key={session.id} value={session.id}>
-                        {formatDate(session.startTime)} - {formatTime(session.startTime)}
                       </option>
                     ))}
                   </select>

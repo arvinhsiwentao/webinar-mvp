@@ -32,8 +32,6 @@ export interface ChatRoomProps {
   onSendMessage?: (message: ChatMessage) => void;
   /** Webinar ID for real-time SSE chat subscription */
   webinarId?: string;
-  /** Session ID for the current viewer session */
-  sessionId?: string;
   /** For late join — backfill messages up to this time */
   initialTime?: number;
   /** ISO start time of the session — used to compute wall-clock display times */
@@ -52,7 +50,6 @@ export default function ChatRoom({
   userName = '匿名用户',
   onSendMessage,
   webinarId,
-  sessionId,
   initialTime,
   sessionStartTime,
 }: ChatRoomProps) {
@@ -163,8 +160,6 @@ export default function ChatRoom({
         const data = JSON.parse(event.data);
         if (data.type === 'message') {
           const msg = data.message;
-          // Skip messages from own session — already added locally via optimistic update
-          if (sessionId && msg.sessionId === sessionId) return;
           setMessages(prev => {
             // Deduplicate by id
             if (prev.some(m => m.id === msg.id)) return prev;
@@ -183,7 +178,7 @@ export default function ChatRoom({
     };
 
     return () => eventSource.close();
-  }, [webinarId, sessionId]);
+  }, [webinarId]);
 
   // Simulate viewer join notifications
   useEffect(() => {

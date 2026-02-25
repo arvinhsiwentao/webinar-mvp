@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 A "pseudo-live" webinar platform MVP — plays pre-recorded video with real-time interactive features (auto-chat, CTA overlays, viewer count simulation) to create a live-stream experience. Built for the 北美華人 (North American Chinese) market; UI text is Simplified Chinese (zh-CN).
-
+All of your functionality should be designed specific for users to think this is an actual livestream instead of a fake on. Relentlessly analyse your design for this goal and reiterate your design if you spot anything that hinters this criteria. 
 Reference platform: JoinLive (live.yongmingu.com)
 
 ## Workflow Rules
@@ -65,7 +65,7 @@ The root `/` is the only landing page, hardcoded for webinar ID `1` ("Mike是麥
 All under `src/app/api/`:
 - `webinar/route.ts` — GET (list) / POST (create)
 - `webinar/[id]/route.ts` — GET / PUT / DELETE
-- `webinar/[id]/chat/route.ts` — GET (requires `sessionId` query param) / POST
+- `webinar/[id]/chat/route.ts` — GET / POST (by webinar ID)
 - `register/route.ts` — POST (checks duplicate email per webinar)
 
 ### Database Layer (`src/lib/db.ts`)
@@ -81,9 +81,9 @@ The live room ties together three time-synced systems driven by video playback p
 
 ### Data Models
 
-All types are in `src/lib/types.ts`. Key interfaces: `Webinar`, `Session`, `AutoChatMessage`, `CTAEvent`, `Registration`, `ChatMessageData`.
+All types are in `src/lib/types.ts`. Key interfaces: `Webinar`, `EvergreenConfig`, `AutoChatMessage`, `CTAEvent`, `Registration`, `ChatMessageData`.
 
-A `Webinar` contains embedded arrays of `sessions`, `autoChat`, and `ctaEvents` — these are stored inline, not as separate collections.
+A `Webinar` contains embedded arrays of `autoChat` and `ctaEvents` — stored inline, not as separate collections. Scheduling uses the evergreen system exclusively (no static sessions).
 
 ## Design System
 

@@ -9,8 +9,11 @@ export async function GET() {
   for (const webinar of webinars) {
     if (webinar.status !== 'published') continue;
 
-    for (const session of webinar.sessions) {
-      const startTime = new Date(session.startTime).getTime();
+    const registrations = getRegistrationsByWebinar(webinar.id);
+    for (const reg of registrations) {
+      if (!reg.assignedSlot) continue;
+
+      const startTime = new Date(reg.assignedSlot).getTime();
       const now = Date.now();
       const hoursUntil = (startTime - now) / (1000 * 60 * 60);
 
@@ -20,14 +23,10 @@ export async function GET() {
 
       if (!type) continue;
 
-      const registrations = getRegistrationsByWebinar(webinar.id);
-      for (const reg of registrations) {
-        if (reg.sessionId !== session.id) continue;
-        const liveUrl = `/webinar/${webinar.id}/lobby?session=${session.id}&name=${encodeURIComponent(reg.name)}`;
-        const emailData = reminderEmail(reg.email, type, reg.name, webinar.title, liveUrl);
-        await sendEmail(emailData);
-        sent++;
-      }
+      const liveUrl = `/webinar/${webinar.id}/lobby?name=${encodeURIComponent(reg.name)}&slot=${encodeURIComponent(reg.assignedSlot)}`;
+      const emailData = reminderEmail(reg.email, type, reg.name, webinar.title, liveUrl);
+      await sendEmail(emailData);
+      sent++;
     }
   }
 

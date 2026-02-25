@@ -39,20 +39,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const isEvergreen = webinar.evergreen?.enabled;
-
-    // Validate session (skip for evergreen — sessions are computed, not stored)
-    let session = null;
-    if (!isEvergreen) {
-      session = webinar.sessions.find((s) => s.id === body.sessionId);
-      if (!session) {
-        return NextResponse.json(
-          { error: 'Session not found' },
-          { status: 404 }
-        );
-      }
-    }
-
     // Check if already registered
     const existingReg = getRegistrationByEmail(body.webinarId, body.email);
     if (existingReg) {
@@ -65,18 +51,17 @@ export async function POST(request: NextRequest) {
     // Create registration
     const registrationData: Record<string, unknown> = {
       webinarId: body.webinarId,
-      sessionId: body.sessionId || '',
       name: body.name,
       email: body.email,
       phone: body.phone,
     };
 
     // Add evergreen slot info
-    if (isEvergreen && body.assignedSlot) {
+    if (body.assignedSlot && webinar.evergreen) {
       registrationData.assignedSlot = body.assignedSlot;
       registrationData.slotExpiresAt = getSlotExpiresAt(
         body.assignedSlot,
-        webinar.evergreen!.videoDurationMinutes
+        webinar.evergreen.videoDurationMinutes
       );
     }
 
@@ -84,8 +69,8 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email (fire and forget)
     const origin = request.nextUrl.origin;
-    const liveUrl = `${origin}/webinar/${body.webinarId}/lobby?session=${body.sessionId}&name=${encodeURIComponent(body.name)}`;
-    const sessionStartTime = isEvergreen ? body.assignedSlot : session?.startTime;
+    const liveUrl = `${origin}/webinar/${body.webinarId}/lobby?name=${encodeURIComponent(body.name)}`;
+    const sessionStartTime = body.assignedSlot;
     if (sessionStartTime) {
       const emailData = confirmationEmail(body.email, body.name, webinar.title, sessionStartTime, liveUrl);
       sendEmail(emailData);
@@ -103,7 +88,6 @@ export async function POST(request: NextRequest) {
             name: body.name,
             email: body.email,
             phone: body.phone,
-            sessionId: body.sessionId,
             registeredAt: new Date().toISOString(),
           },
         }),

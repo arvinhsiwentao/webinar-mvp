@@ -1,6 +1,6 @@
 'use client';
 
-import { Webinar, Session } from '@/lib/types';
+import { Webinar } from '@/lib/types';
 import { formatDateTime } from '@/lib/utils';
 
 interface WebinarListProps {
@@ -56,18 +56,6 @@ export default function WebinarList({
               <p className="text-neutral-500 text-sm mb-3">
                 讲者: {webinar.speakerName} | 时长: {webinar.duration} 分钟
               </p>
-
-              {/* Sessions */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                {webinar.sessions.map((session: Session, idx: number) => (
-                  <span
-                    key={idx}
-                    className="bg-neutral-100 text-neutral-600 text-xs px-2 py-1 rounded"
-                  >
-                    {formatDateTime(session.startTime)}
-                  </span>
-                ))}
-              </div>
 
               {/* Quick Stats */}
               <div className="flex gap-4 text-xs text-neutral-400">

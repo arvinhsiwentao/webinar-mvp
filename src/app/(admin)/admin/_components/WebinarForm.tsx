@@ -4,10 +4,6 @@ import { useState } from 'react';
 import { Webinar } from '@/lib/types';
 import ArrayFieldEditor from './ArrayFieldEditor';
 
-interface SessionField {
-  startTime: string;
-}
-
 interface AutoChatField {
   timeSec: string;
   name: string;
@@ -58,10 +54,6 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
     status: webinar?.status || 'draft',
   });
 
-  const [sessions, setSessions] = useState<SessionField[]>(
-    webinar?.sessions.map(s => ({ startTime: s.startTime.slice(0, 16) })) || [{ startTime: '' }]
-  );
-
   const [autoChat, setAutoChat] = useState<AutoChatField[]>(
     webinar?.autoChat.map(m => ({
       timeSec: String(m.timeSec),
@@ -81,7 +73,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
     })) || []
   );
 
-  const [evergreenEnabled, setEvergreenEnabled] = useState(webinar?.evergreen?.enabled || false);
+  const [evergreenEnabled] = useState(true);
   const [dailySchedule, setDailySchedule] = useState<string[]>(
     webinar?.evergreen?.dailySchedule.map(s => s.time) || ['08:00', '21:00']
   );
@@ -116,9 +108,6 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
       const payload = {
         ...formData,
         highlights: formData.highlights.split('\n').filter(h => h.trim()),
-        sessions: sessions.filter(s => s.startTime).map(s => ({
-          startTime: new Date(s.startTime).toISOString(),
-        })),
         autoChat: autoChat.filter(m => m.message).map(m => ({
           timeSec: parseInt(m.timeSec) || 0,
           name: m.name,
@@ -334,62 +323,9 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
         </div>
       </section>
 
-      {/* Sessions (hidden when evergreen is enabled) */}
-      {!evergreenEnabled && (
-      <section className="bg-white rounded-lg p-6 border border-neutral-200">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">场次设置</h2>
-          <button
-            type="button"
-            onClick={() => setSessions([...sessions, { startTime: '' }])}
-            className="text-[#B8953F] text-sm hover:text-[#A07A2F]"
-          >
-            + 添加场次
-          </button>
-        </div>
-        <div className="space-y-3">
-          <ArrayFieldEditor<SessionField>
-            items={sessions}
-            onChange={setSessions}
-            renderItem={(session, idx, update, remove) => (
-              <div className="flex items-center gap-3">
-                <span className="text-neutral-400 text-sm w-16">场次 {idx + 1}</span>
-                <input
-                  type="datetime-local"
-                  value={session.startTime}
-                  onChange={(e) => update('startTime', e.target.value)}
-                  className="flex-1 bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
-                />
-                {sessions.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={remove}
-                    className="text-red-400 hover:text-red-300"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            )}
-          />
-        </div>
-      </section>
-      )}
-
       {/* Evergreen Schedule */}
       <section className="bg-white rounded-lg p-6 border border-neutral-200">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">自动循环排程 (Evergreen)</h2>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={evergreenEnabled}
-              onChange={(e) => setEvergreenEnabled(e.target.checked)}
-              className="rounded accent-[#B8953F]"
-            />
-            启用
-          </label>
-        </div>
+        <h2 className="text-lg font-semibold mb-4">自动循环排程 (Evergreen)</h2>
 
         {evergreenEnabled && (
           <div className="space-y-6">

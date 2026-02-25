@@ -12,9 +12,9 @@ function escapeCSVField(field: string): string {
 }
 
 function exportCSV(registrations: Registration[], webinarTitle: string) {
-  const headers = ['姓名', 'Email', '电话', '场次', '报名时间'];
+  const headers = ['姓名', 'Email', '电话', '场次时间', '报名时间'];
   const rows = registrations.map(r => [
-    r.name, r.email, r.phone || '', r.sessionId, r.registeredAt
+    r.name, r.email, r.phone || '', r.assignedSlot || '', r.registeredAt
   ]);
   const csv = [headers, ...rows].map(row => row.map(escapeCSVField).join(',')).join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -103,7 +103,7 @@ export default function RegistrationList({ webinars }: RegistrationListProps) {
                     <th className="text-left py-2 pr-4">姓名</th>
                     <th className="text-left py-2 pr-4">Email</th>
                     <th className="text-left py-2 pr-4">电话</th>
-                    <th className="text-left py-2 pr-4">场次</th>
+                    <th className="text-left py-2 pr-4">场次时间</th>
                     <th className="text-left py-2">报名时间</th>
                   </tr>
                 </thead>
@@ -113,7 +113,7 @@ export default function RegistrationList({ webinars }: RegistrationListProps) {
                       <td className="py-2 pr-4">{r.name}</td>
                       <td className="py-2 pr-4">{r.email}</td>
                       <td className="py-2 pr-4">{r.phone || '-'}</td>
-                      <td className="py-2 pr-4">{r.sessionId}</td>
+                      <td className="py-2 pr-4">{r.assignedSlot ? formatDateTime(r.assignedSlot) : '-'}</td>
                       <td className="py-2">{formatDateTime(r.registeredAt)}</td>
                     </tr>
                   ))}

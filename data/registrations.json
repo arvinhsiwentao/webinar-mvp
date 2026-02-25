@@ -1,7 +1,7 @@
 [
   {
     "webinarId": "1770712845552-z9fdts5",
-    "sessionId": "session-1",
+
     "name": "Test User",
     "email": "test@example.com",
     "id": "1770712990829-z2560so",
@@ -9,7 +9,7 @@
   },
   {
     "webinarId": "1770712845552-z9fdts5",
-    "sessionId": "session-1",
+
     "name": "測試用戶",
     "email": "test@test.com",
     "phone": "0912345678",
@@ -18,10 +18,90 @@
   },
   {
     "webinarId": "1",
-    "sessionId": "session-1",
+
     "name": "a",
     "email": "arvin_tao@cmoney.com.tw",
     "id": "1770774833326-h4qjib6",
     "registeredAt": "2026-02-11T01:53:53.326Z"
+  },
+  {
+    "webinarId": "1",
+
+    "name": "test3",
+    "email": "test3@gmail.com",
+    "assignedSlot": "2026-02-24T07:15:00.000Z",
+    "slotExpiresAt": "2026-02-24T08:45:00.000Z",
+    "id": "1771916825134-07zkcr3",
+    "registeredAt": "2026-02-24T07:07:05.134Z"
+  },
+  {
+    "webinarId": "1",
+
+    "name": "test5",
+    "email": "test5@gmail.com",
+    "assignedSlot": "2026-02-24T07:45:00.000Z",
+    "slotExpiresAt": "2026-02-24T09:15:00.000Z",
+    "id": "1771918061151-1pit8q3",
+    "registeredAt": "2026-02-24T07:27:41.151Z"
+  },
+  {
+    "webinarId": "1",
+
+    "name": "test 6",
+    "email": "test6@gmail.com",
+    "assignedSlot": "2026-02-24T10:15:00.000Z",
+    "slotExpiresAt": "2026-02-24T11:45:00.000Z",
+    "id": "1771927548430-sdfyg8m",
+    "registeredAt": "2026-02-24T10:05:48.435Z"
+  },
+  {
+    "webinarId": "1",
+
+    "name": "TestUser",
+    "email": "test_verify_1771927713024@example.com",
+    "assignedSlot": "2026-02-24T11:08:33.024Z",
+    "slotExpiresAt": "2026-02-24T12:38:33.024Z",
+    "id": "1771927713198-1nfngyc",
+    "registeredAt": "2026-02-24T10:08:33.198Z"
+  },
+  {
+    "webinarId": "1",
+
+    "name": "test6",
+    "email": "test7@gmail.com",
+    "assignedSlot": "2026-02-25T04:00:00.000Z",
+    "slotExpiresAt": "2026-02-25T05:30:00.000Z",
+    "id": "1771991848132-oexqnnz",
+    "registeredAt": "2026-02-25T03:57:28.132Z"
+  },
+  {
+    "webinarId": "1",
+
+    "name": "test 8",
+    "email": "test8@gmail.com",
+    "assignedSlot": "2026-02-25T05:45:00.000Z",
+    "slotExpiresAt": "2026-02-25T07:15:00.000Z",
+    "id": "1771997993605-lqeh9xd",
+    "registeredAt": "2026-02-25T05:39:53.605Z"
+  },
+  {
+    "webinarId": "1",
+
+    "name": "test 11",
+    "email": "test11@gmail.com",
+    "assignedSlot": "2026-02-25T06:00:00.000Z",
+    "slotExpiresAt": "2026-02-25T07:30:00.000Z",
+    "id": "1771998913895-sc9t2ia",
+    "registeredAt": "2026-02-25T05:55:13.895Z"
+  },
+  {
+    "webinarId": "1",
+
+    "name": "test 12",
+    "email": "test12@gmail.com",
+    "assignedSlot": "2026-02-25T06:30:00.000Z",
+    "slotExpiresAt": "2026-02-25T08:00:00.000Z",
+    "id": "1772000373851-1qsq54o",
+    "registeredAt": "2026-02-25T06:19:33.851Z"
   }
 ]

@@ -5,7 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
 import MissedSessionPrompt from '@/components/evergreen/MissedSessionPrompt';
 import { Button, Badge, Card } from '@/components/ui';
-import { Webinar, Session } from '@/lib/types';
+import { Webinar } from '@/lib/types';
 import { getEvergreenState, getSlotExpiresAt } from '@/lib/evergreen';
 import { generateICSContent } from '@/lib/utils';
 
@@ -14,19 +14,17 @@ export default function LobbyPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const webinarId = params.id as string;
-  const sessionId = searchParams.get('session') || '';
   const userName = searchParams.get('name') || '观众';
   const slotTime = searchParams.get('slot');
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [canEnter, setCanEnter] = useState(false);
   const [evergreenState, setEvergreenState] = useState<string | null>(null);
   const [nextSlotTime, setNextSlotTime] = useState<string>('');
   const [registrationCount, setRegistrationCount] = useState(0);
 
-  const countdownTarget = slotTime || session?.startTime || '';
+  const countdownTarget = slotTime || '';
 
   // Fetch webinar data
   useEffect(() => {
@@ -38,9 +36,6 @@ export default function LobbyPage() {
         setWebinar(data.webinar);
         setRegistrationCount(data.registrationCount || 0);
 
-        const foundSession = data.webinar.sessions.find((s: Session) => s.id === sessionId);
-        setSession(foundSession || data.webinar.sessions[0]);
-
         // Check evergreen state
         if (slotTime && data.webinar.evergreen?.enabled) {
           const expiresAt = getSlotExpiresAt(slotTime, data.webinar.evergreen.videoDurationMinutes);
@@ -49,7 +44,7 @@ export default function LobbyPage() {
 
           if (state === 'LIVE') {
             const slotParam = `&slot=${encodeURIComponent(slotTime)}`;
-            router.push(`/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}${slotParam}`);
+            router.push(`/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}`);
             return;
           }
 
@@ -72,7 +67,7 @@ export default function LobbyPage() {
       }
     }
     fetchWebinar();
-  }, [webinarId, sessionId, slotTime, router, userName]);
+  }, [webinarId, slotTime, router, userName]);
 
   // Check if user can enter (30 minutes before start)
   useEffect(() => {
@@ -92,8 +87,8 @@ export default function LobbyPage() {
 
   const buildLiveUrl = useCallback(() => {
     const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
-    return `/webinar/${webinarId}/live?session=${sessionId}&name=${encodeURIComponent(userName)}${slotParam}`;
-  }, [webinarId, sessionId, userName, slotTime]);
+    return `/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}`;
+  }, [webinarId, userName, slotTime]);
 
   const handleCountdownComplete = useCallback(() => {
     router.push(buildLiveUrl());
@@ -104,13 +99,13 @@ export default function LobbyPage() {
   };
 
   function handleDownloadICS() {
-    if (!webinar || !session) return;
+    if (!webinar || !countdownTarget) return;
     const ics = generateICSContent(
       webinar.title,
-      countdownTarget || session.startTime,
+      countdownTarget,
       webinar.duration,
       `讲者: ${webinar.speakerName}`,
-      `${window.location.origin}/webinar/${webinar.id}/lobby?session=${session.id}`
+      `${window.location.origin}/webinar/${webinar.id}/lobby`
     );
     const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -122,8 +117,8 @@ export default function LobbyPage() {
   }
 
   function getGoogleCalendarUrl(): string {
-    if (!webinar || !session) return '#';
-    const start = new Date(countdownTarget || session.startTime);
+    if (!webinar || !countdownTarget) return '#';
+    const start = new Date(countdownTarget);
     const end = new Date(start.getTime() + webinar.duration * 60 * 1000);
     const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(webinar.title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(`讲者: ${webinar.speakerName}`)}`;
@@ -139,7 +134,7 @@ export default function LobbyPage() {
   }
 
   // Not found
-  if (!webinar || !session) {
+  if (!webinar) {
     return (
       <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center text-neutral-900">
         <div className="text-center">
@@ -170,7 +165,7 @@ export default function LobbyPage() {
             parsed.expiresAt = expiresAt;
             localStorage.setItem(`webinar-${webinarId}-evergreen`, JSON.stringify(parsed));
           }
-          router.push(`/webinar/${webinarId}/lobby?session=${sessionId}&name=${encodeURIComponent(userName)}&slot=${encodeURIComponent(newSlot)}`);
+          router.push(`/webinar/${webinarId}/lobby?name=${encodeURIComponent(userName)}&slot=${encodeURIComponent(newSlot)}`);
         }}
       />
     );

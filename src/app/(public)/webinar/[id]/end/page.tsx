@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Button, Badge, Card } from '@/components/ui';
+import { Button, Card } from '@/components/ui';
 import { Webinar } from '@/lib/types';
 
 export default function EndPage() {
@@ -11,7 +11,6 @@ export default function EndPage() {
   const searchParams = useSearchParams();
   const webinarId = params.id as string;
   const userName = searchParams.get('name') || '观众';
-  const sessionId = searchParams.get('session') || '';
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,25 +68,15 @@ export default function EndPage() {
       </div>
 
       <div className="relative z-10 max-w-lg w-full text-center py-16">
-        {/* Hero section with speaker image */}
-        <div className="relative w-full max-w-lg mx-auto aspect-video mb-8 rounded-lg overflow-hidden border border-[#E8E5DE]">
-          {(webinar.speakerAvatar || webinar.speakerImage) ? (
-            <img
-              src={webinar.speakerImage || webinar.speakerAvatar}
-              alt={webinar.speakerName}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-[#F5F5F0]" />
-          )}
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <p className="text-white text-2xl md:text-3xl font-bold text-center px-4">
-              本次讲座已结束
-            </p>
+        {/* Hero status badge */}
+        <div className="mb-8">
+          <div className="inline-flex items-center gap-3 px-8 py-4 rounded-full border border-[#B8953F]/30 bg-[#B8953F]/5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#B8953F]/60" />
+            <span className="text-[#B8953F] text-xl md:text-2xl font-semibold tracking-wide">
+              讲座结束
+            </span>
           </div>
         </div>
-
-        <Badge variant="gold" className="mb-6">讲座结束</Badge>
 
         {/* Thank you header */}
         <h1 className="text-2xl md:text-3xl font-bold mb-3">

@@ -5,7 +5,7 @@ import { validateEmail } from '@/lib/utils';
 
 interface UseRegistrationFormOptions {
   webinarId: string;
-  onSuccess: (sessionId: string, name: string) => void;
+  onSuccess: (name: string) => void;
   onFormSubmit?: () => void;
   emailErrorMessage?: string;
   assignedSlot?: string;  // evergreen slot time
@@ -15,7 +15,6 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [selectedSession, setSelectedSession] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -39,7 +38,6 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           webinarId,
-          sessionId: selectedSession || undefined,
           name: name.trim(),
           email: email.trim(),
           phone: phone.trim() || undefined,
@@ -51,7 +49,7 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
       if (!res.ok) throw new Error(data.error || 'Registration failed');
 
       onFormSubmit?.();
-      onSuccess(selectedSession, name);
+      onSuccess(name);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : '报名失败，请稍后再试');
     } finally {
@@ -63,7 +61,6 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
     name, setName,
     email, setEmail,
     phone, setPhone,
-    selectedSession, setSelectedSession,
     submitting,
     formError,
     handleSubmit,

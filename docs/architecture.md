@@ -1,6 +1,6 @@
 # Architecture
 
-> Last verified: 2026-02-24
+> Last verified: 2026-02-25
 
 Living document. Hooks remind Claude to keep this current when structural changes are made.
 
@@ -41,14 +41,13 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 
 | Interface | Key Fields | Notes |
 |-----------|-----------|-------|
-| `Webinar` | `id`, `title`, `videoUrl`, `duration`, `sessions[]`, `autoChat[]`, `ctaEvents[]`, `status`, `evergreen?`, `heroImageUrl?`, `promoImageUrl?`, `disclaimerText?`, `endPageSalesCopy?`, `endPageCtaText?`, `endPageCtaUrl?`, `endPageCtaColor?`, `sidebarDescription?` | Top-level entity. Embeds sessions, auto-chat, and CTA arrays inline. Extended with landing/end/sidebar fields. Optional `evergreen` config for dynamic scheduling. |
-| `Session` | `id`, `startTime`, `status` | Scheduled broadcast slot within a webinar. Used for static scheduling; ignored when evergreen is enabled. |
-| `EvergreenConfig` | `enabled`, `dailySchedule[]`, `immediateSlot{}`, `videoDurationMinutes`, `timezone`, `displaySlotCount` | Configures dynamic session generation. Daily anchor times + immediate slot injection for perpetual urgency. |
+| `Webinar` | `id`, `title`, `videoUrl`, `duration`, `autoChat[]`, `ctaEvents[]`, `status`, `evergreen?`, `heroImageUrl?`, `promoImageUrl?`, `disclaimerText?`, `endPageSalesCopy?`, `endPageCtaText?`, `endPageCtaUrl?`, `endPageCtaColor?`, `sidebarDescription?` | Top-level entity. Embeds auto-chat and CTA arrays inline. Extended with landing/end/sidebar fields. Uses `evergreen` config for dynamic scheduling. |
+| `EvergreenConfig` | `enabled`, `dailySchedule[]`, `immediateSlot{}`, `videoDurationMinutes`, `timezone`, `displaySlotCount` | Configures dynamic slot generation. Daily anchor times + immediate slot injection for perpetual urgency. |
 | `EvergreenSlot` | `slotTime`, `type` | Computed session slot — either `'anchor'` (daily recurring) or `'immediate'` (dynamically injected). |
 | `AutoChatMessage` | `id`, `timeSec`, `name`, `message` | Bot message triggered at video timestamp. |
 | `CTAEvent` | `id`, `showAtSec`, `hideAtSec`, `buttonText`, `url`, `showCountdown`, `position?`, `color?`, `secondaryText?` | Promotional overlay with optional countdown. Supports on-video or below-video positioning. |
-| `Registration` | `id`, `webinarId`, `sessionId`, `name`, `email`, `phone?`, `assignedSlot?`, `slotExpiresAt?`, `reassignedFrom?` | One per email per webinar (duplicate check). Evergreen fields store computed slot times. |
-| `ChatMessageData` | `id`, `webinarId`, `sessionId`, `name`, `message`, `timestamp`, `createdAt` | Real user chat message. |
+| `Registration` | `id`, `webinarId`, `name`, `email`, `phone?`, `assignedSlot?`, `slotExpiresAt?`, `reassignedFrom?` | One per email per webinar (duplicate check). Evergreen fields store computed slot times. |
+| `ChatMessageData` | `id`, `webinarId`, `name`, `message`, `timestamp`, `createdAt` | Real user chat message. |
 
 ### Storage Layer (`src/lib/db.ts`)
 
@@ -74,7 +73,7 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 |----------|---------|-------------|-------|
 | `/api/webinar` | GET | `src/app/api/webinar/route.ts` | List all webinars |
 | `/api/webinar/[id]` | GET | `src/app/api/webinar/[id]/route.ts` | Single webinar + `registrationCount` |
-| `/api/webinar/[id]/chat` | GET, POST | `src/app/api/webinar/[id]/chat/route.ts` | GET requires `sessionId` query param |
+| `/api/webinar/[id]/chat` | GET, POST | `src/app/api/webinar/[id]/chat/route.ts` | GET/POST by webinar ID |
 | `/api/register` | POST | `src/app/api/register/route.ts` | Checks duplicate email per webinar. Evergreen-aware: accepts `assignedSlot`, computes `slotExpiresAt`. |
 | `/api/webinar/[id]/next-slot` | GET | `src/app/api/webinar/[id]/next-slot/route.ts` | Computes upcoming evergreen slots from config. Returns `slots[]`, `countdownTarget`, `expiresAt`. |
 | `/api/webinar/[id]/reassign` | POST | `src/app/api/webinar/[id]/reassign/route.ts` | Reassigns a registered user to the next available slot (for missed sessions). |
@@ -129,7 +128,6 @@ The `replay=true` query parameter bypasses all gates (used by the end page repla
 | `CTAOverlay` | `src/components/cta/CTAOverlay.tsx` | Promotional overlay with `position` support (`on_video`/`below_video`), configurable `color`, and `secondaryText`. |
 | `CountdownTimer` | `src/components/countdown/CountdownTimer.tsx` | Countdown to session start time with `onComplete` callback. |
 | `RegistrationModal` | `src/components/registration/RegistrationModal.tsx` | Full-screen modal overlay for registration. Triggered by landing page CTAs. |
-| `DateCards` | `src/components/registration/DateCards.tsx` | Calendar-style date cards showing available session dates (display-only). |
 | `SidebarTabs` | `src/components/sidebar/SidebarTabs.tsx` | 4-tab container (Info/Viewers/Chat/Offers) for live room sidebar. Dark theme. |
 | `InfoTab` | `src/components/sidebar/InfoTab.tsx` | Webinar info tab: promo image, speaker info, description. |
 | `ViewersTab` | `src/components/sidebar/ViewersTab.tsx` | Simulated viewer list with host badge and randomized names. |
@@ -202,7 +200,7 @@ When a user enters after their slot started but before it expired (slot + video 
 
 ### Admin Configuration
 
-The admin panel (`WebinarForm.tsx`) exposes evergreen settings: daily anchor times, immediate slot interval/buffer/trigger threshold, timezone, and display slot count. When evergreen is enabled, the static sessions section is hidden.
+The admin panel (`WebinarForm.tsx`) exposes evergreen settings: daily anchor times, immediate slot interval/buffer/trigger threshold, timezone, and display slot count. Evergreen is always enabled (the `Session` type was removed).
 
 ## Key Constraints
 

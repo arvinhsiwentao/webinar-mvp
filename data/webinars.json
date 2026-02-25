@@ -18,88 +18,391 @@
       "独家公开 Mike 的美股持仓清单与选股逻辑",
       "认识【MIKE是麥克】APP 的核心功能与实战应用"
     ],
-    "sessions": [
-      {
-        "id": "session-1",
-        "startTime": "2026-02-10T11:55:00.000Z",
-        "status": "ended"
-      },
-      {
-        "id": "session-2",
-        "startTime": "2026-02-11T11:55:00.000Z",
-        "status": "ended"
-      },
-      {
-        "id": "session-3",
-        "startTime": "2026-02-12T11:55:00.000Z",
-        "status": "scheduled"
-      }
-    ],
     "autoChat": [
-      { "timeSec": 3, "name": "David", "message": "终于等到 Mike 的直播了！🎉" },
-      { "timeSec": 6, "name": "小美", "message": "1" },
-      { "timeSec": 10, "name": "Alex", "message": "Hello 大家好！从纽约来的" },
-      { "timeSec": 14, "name": "阿明", "message": "Mike 老师好！" },
-      { "timeSec": 18, "name": "Emma", "message": "洛杉矶签到 ✋" },
-      { "timeSec": 23, "name": "Kevin", "message": "1" },
-      { "timeSec": 28, "name": "小芳", "message": "旧金山来的，期待好久了" },
-      { "timeSec": 35, "name": "Jason", "message": "准备好笔记了 📝" },
-      { "timeSec": 42, "name": "Linda", "message": "1" },
-      { "timeSec": 50, "name": "Tom", "message": "温哥华签到！" },
-      { "timeSec": 65, "name": "小雨", "message": "终于有空来看直播了" },
-      { "timeSec": 80, "name": "Ryan", "message": "Mike 老师的 YouTube 每集都看" },
-      { "timeSec": 120, "name": "Nicole", "message": "芝加哥来的 🙋‍♀️" },
-      { "timeSec": 160, "name": "陈静", "message": "好多人啊，太热闹了" },
-      { "timeSec": 900, "name": "王强", "message": "如果你也想学美股，打个 1" },
-      { "timeSec": 908, "name": "Amy", "message": "1" },
-      { "timeSec": 915, "name": "刘洋", "message": "1" },
-      { "timeSec": 922, "name": "Peter", "message": "想学！🙋" },
-      { "timeSec": 930, "name": "黄丽", "message": "1" },
-      { "timeSec": 940, "name": "Bob", "message": "1" },
-      { "timeSec": 955, "name": "赵敏", "message": "很想开始投资" },
-      { "timeSec": 970, "name": "周杰", "message": "1 一直想开始但不知道怎么做" },
-      { "timeSec": 1500, "name": "Lucy", "message": "有投资过美股的打 1，没有的打 0" },
-      { "timeSec": 1510, "name": "吴涛", "message": "0" },
-      { "timeSec": 1518, "name": "孙燕", "message": "1" },
-      { "timeSec": 1525, "name": "Jack", "message": "0 完全新手" },
-      { "timeSec": 1535, "name": "李明", "message": "0 但很想学" },
-      { "timeSec": 1550, "name": "张伟", "message": "1 买过一点 ETF" },
-      { "timeSec": 2400, "name": "Grace", "message": "这个观点太棒了 👏" },
-      { "timeSec": 2420, "name": "赵鑫", "message": "第一次听到这种分析方法" },
-      { "timeSec": 2450, "name": "周芳", "message": "涨知识了！" },
-      { "timeSec": 2480, "name": "Brian", "message": "笔记都记满了" },
-      { "timeSec": 2510, "name": "郭靖", "message": "Mike 解释得好清楚" },
-      { "timeSec": 2550, "name": "许可", "message": "这比看书容易理解多了" },
-      { "timeSec": 3000, "name": "钱伟", "message": "APP 看起来好用！" },
-      { "timeSec": 3030, "name": "Chris", "message": "灯号系统很直觉" },
-      { "timeSec": 3060, "name": "蒋勇", "message": "在哪里可以下载？" },
-      { "timeSec": 3100, "name": "David", "message": "我已经在用了，真的很实用" },
-      { "timeSec": 3130, "name": "小美", "message": "抄底提醒功能太实用了" },
-      { "timeSec": 3600, "name": "Alex", "message": "888" },
-      { "timeSec": 3610, "name": "阿明", "message": "加入！" },
-      { "timeSec": 3620, "name": "Emma", "message": "888" },
-      { "timeSec": 3635, "name": "Kevin", "message": "已下单 ✅" },
-      { "timeSec": 3650, "name": "小芳", "message": "888" },
-      { "timeSec": 3670, "name": "Jason", "message": "刚刚加入了 🎉" },
-      { "timeSec": 3700, "name": "Linda", "message": "买了！感觉很值" },
-      { "timeSec": 3730, "name": "Tom", "message": "888 冲了" },
-      { "timeSec": 4200, "name": "小雨", "message": "请问新手也能用吗？" },
-      { "timeSec": 4230, "name": "Ryan", "message": "我没有很多钱可以开始吗？" },
-      { "timeSec": 4260, "name": "Nicole", "message": "Mike 说 $100 就可以开始了！" },
-      { "timeSec": 4300, "name": "陈静", "message": "是美金账户吗？台湾可以用吗？" },
-      { "timeSec": 4350, "name": "王强", "message": "美股开户很简单的" },
-      { "timeSec": 4400, "name": "Amy", "message": "我刚加入，界面很好用" },
-      { "timeSec": 4450, "name": "刘洋", "message": "推荐给我朋友了" },
-      { "timeSec": 4500, "name": "Peter", "message": "客服回复很快 👍" },
-      { "timeSec": 4560, "name": "黄丽", "message": "这个价格真的很划算" },
-      { "timeSec": 4630, "name": "Bob", "message": "比其他课程便宜很多" },
-      { "timeSec": 4700, "name": "赵敏", "message": "还有退款保证，放心" },
-      { "timeSec": 4800, "name": "周杰", "message": "谢谢 Mike！学到很多" },
-      { "timeSec": 4900, "name": "Lucy", "message": "太感谢了 🙏" },
-      { "timeSec": 5000, "name": "吴涛", "message": "期待下次直播！" },
-      { "timeSec": 5100, "name": "孙燕", "message": "Mike 是真的用心在教" },
-      { "timeSec": 5200, "name": "Jack", "message": "值得推荐给朋友 👏" },
-      { "timeSec": 5300, "name": "李明", "message": "感谢分享！我们下次见" }
+      {
+        "timeSec": 3,
+        "name": "David",
+        "message": "终于等到 Mike 的直播了！🎉",
+        "id": "1772001033515-fv3x1ez"
+      },
+      {
+        "timeSec": 6,
+        "name": "小美",
+        "message": "1",
+        "id": "1772001033515-0u9whdl"
+      },
+      {
+        "timeSec": 10,
+        "name": "Alex",
+        "message": "Hello 大家好！从纽约来的",
+        "id": "1772001033515-yz81r4g"
+      },
+      {
+        "timeSec": 14,
+        "name": "阿明",
+        "message": "Mike 老师好！",
+        "id": "1772001033515-u6n4lz3"
+      },
+      {
+        "timeSec": 18,
+        "name": "Emma",
+        "message": "洛杉矶签到 ✋",
+        "id": "1772001033515-1gon1eb"
+      },
+      {
+        "timeSec": 23,
+        "name": "Kevin",
+        "message": "1",
+        "id": "1772001033515-3bwxfwb"
+      },
+      {
+        "timeSec": 28,
+        "name": "小芳",
+        "message": "旧金山来的，期待好久了",
+        "id": "1772001033515-7ovt5uq"
+      },
+      {
+        "timeSec": 35,
+        "name": "Jason",
+        "message": "准备好笔记了 📝",
+        "id": "1772001033515-dahxc0h"
+      },
+      {
+        "timeSec": 42,
+        "name": "Linda",
+        "message": "1",
+        "id": "1772001033515-xa8k79h"
+      },
+      {
+        "timeSec": 50,
+        "name": "Tom",
+        "message": "温哥华签到！",
+        "id": "1772001033515-s9zvqb8"
+      },
+      {
+        "timeSec": 65,
+        "name": "小雨",
+        "message": "终于有空来看直播了",
+        "id": "1772001033515-ukpgqdk"
+      },
+      {
+        "timeSec": 80,
+        "name": "Ryan",
+        "message": "Mike 老师的 YouTube 每集都看",
+        "id": "1772001033515-10g4p17"
+      },
+      {
+        "timeSec": 120,
+        "name": "Nicole",
+        "message": "芝加哥来的 🙋‍♀️",
+        "id": "1772001033515-t73hfjq"
+      },
+      {
+        "timeSec": 160,
+        "name": "陈静",
+        "message": "好多人啊，太热闹了",
+        "id": "1772001033515-7ar2guu"
+      },
+      {
+        "timeSec": 900,
+        "name": "王强",
+        "message": "如果你也想学美股，打个 1",
+        "id": "1772001033515-z2m7ena"
+      },
+      {
+        "timeSec": 908,
+        "name": "Amy",
+        "message": "1",
+        "id": "1772001033515-ujie79h"
+      },
+      {
+        "timeSec": 915,
+        "name": "刘洋",
+        "message": "1",
+        "id": "1772001033515-46972x0"
+      },
+      {
+        "timeSec": 922,
+        "name": "Peter",
+        "message": "想学！🙋",
+        "id": "1772001033515-h58ql7m"
+      },
+      {
+        "timeSec": 930,
+        "name": "黄丽",
+        "message": "1",
+        "id": "1772001033515-3x4bdmr"
+      },
+      {
+        "timeSec": 940,
+        "name": "Bob",
+        "message": "1",
+        "id": "1772001033515-ywyr28x"
+      },
+      {
+        "timeSec": 955,
+        "name": "赵敏",
+        "message": "很想开始投资",
+        "id": "1772001033515-9zfxjao"
+      },
+      {
+        "timeSec": 970,
+        "name": "周杰",
+        "message": "1 一直想开始但不知道怎么做",
+        "id": "1772001033515-006als3"
+      },
+      {
+        "timeSec": 1500,
+        "name": "Lucy",
+        "message": "有投资过美股的打 1，没有的打 0",
+        "id": "1772001033515-gquy1yr"
+      },
+      {
+        "timeSec": 1510,
+        "name": "吴涛",
+        "message": "0",
+        "id": "1772001033515-p0wo8jx"
+      },
+      {
+        "timeSec": 1518,
+        "name": "孙燕",
+        "message": "1",
+        "id": "1772001033515-v9dqf63"
+      },
+      {
+        "timeSec": 1525,
+        "name": "Jack",
+        "message": "0 完全新手",
+        "id": "1772001033515-l39p8oo"
+      },
+      {
+        "timeSec": 1535,
+        "name": "李明",
+        "message": "0 但很想学",
+        "id": "1772001033515-5hao2uh"
+      },
+      {
+        "timeSec": 1550,
+        "name": "张伟",
+        "message": "1 买过一点 ETF",
+        "id": "1772001033515-cr6ikwb"
+      },
+      {
+        "timeSec": 2400,
+        "name": "Grace",
+        "message": "这个观点太棒了 👏",
+        "id": "1772001033515-fm64jzh"
+      },
+      {
+        "timeSec": 2420,
+        "name": "赵鑫",
+        "message": "第一次听到这种分析方法",
+        "id": "1772001033515-mcccnxv"
+      },
+      {
+        "timeSec": 2450,
+        "name": "周芳",
+        "message": "涨知识了！",
+        "id": "1772001033515-uyoosxj"
+      },
+      {
+        "timeSec": 2480,
+        "name": "Brian",
+        "message": "笔记都记满了",
+        "id": "1772001033515-5tt4yv7"
+      },
+      {
+        "timeSec": 2510,
+        "name": "郭靖",
+        "message": "Mike 解释得好清楚",
+        "id": "1772001033515-jkjr5oc"
+      },
+      {
+        "timeSec": 2550,
+        "name": "许可",
+        "message": "这比看书容易理解多了",
+        "id": "1772001033515-dgvbqvn"
+      },
+      {
+        "timeSec": 3000,
+        "name": "钱伟",
+        "message": "APP 看起来好用！",
+        "id": "1772001033515-f0k93r3"
+      },
+      {
+        "timeSec": 3030,
+        "name": "Chris",
+        "message": "灯号系统很直觉",
+        "id": "1772001033515-5q93piq"
+      },
+      {
+        "timeSec": 3060,
+        "name": "蒋勇",
+        "message": "在哪里可以下载？",
+        "id": "1772001033515-16hnd7s"
+      },
+      {
+        "timeSec": 3100,
+        "name": "David",
+        "message": "我已经在用了，真的很实用",
+        "id": "1772001033515-utj1nk1"
+      },
+      {
+        "timeSec": 3130,
+        "name": "小美",
+        "message": "抄底提醒功能太实用了",
+        "id": "1772001033515-jrwj74z"
+      },
+      {
+        "timeSec": 3600,
+        "name": "Alex",
+        "message": "888",
+        "id": "1772001033515-o1hqb9g"
+      },
+      {
+        "timeSec": 3610,
+        "name": "阿明",
+        "message": "加入！",
+        "id": "1772001033515-gz58ehs"
+      },
+      {
+        "timeSec": 3620,
+        "name": "Emma",
+        "message": "888",
+        "id": "1772001033515-gl036pl"
+      },
+      {
+        "timeSec": 3635,
+        "name": "Kevin",
+        "message": "已下单 ✅",
+        "id": "1772001033515-up2eh47"
+      },
+      {
+        "timeSec": 3650,
+        "name": "小芳",
+        "message": "888",
+        "id": "1772001033515-4ak9v8m"
+      },
+      {
+        "timeSec": 3670,
+        "name": "Jason",
+        "message": "刚刚加入了 🎉",
+        "id": "1772001033515-oorfm1t"
+      },
+      {
+        "timeSec": 3700,
+        "name": "Linda",
+        "message": "买了！感觉很值",
+        "id": "1772001033515-1y3w0y9"
+      },
+      {
+        "timeSec": 3730,
+        "name": "Tom",
+        "message": "888 冲了",
+        "id": "1772001033515-f6pnwio"
+      },
+      {
+        "timeSec": 4200,
+        "name": "小雨",
+        "message": "请问新手也能用吗？",
+        "id": "1772001033515-naatiqp"
+      },
+      {
+        "timeSec": 4230,
+        "name": "Ryan",
+        "message": "我没有很多钱可以开始吗？",
+        "id": "1772001033515-c4cc4t2"
+      },
+      {
+        "timeSec": 4260,
+        "name": "Nicole",
+        "message": "Mike 说 $100 就可以开始了！",
+        "id": "1772001033515-nao3rvk"
+      },
+      {
+        "timeSec": 4300,
+        "name": "陈静",
+        "message": "是美金账户吗？台湾可以用吗？",
+        "id": "1772001033515-884p0pw"
+      },
+      {
+        "timeSec": 4350,
+        "name": "王强",
+        "message": "美股开户很简单的",
+        "id": "1772001033515-nxxzkis"
+      },
+      {
+        "timeSec": 4400,
+        "name": "Amy",
+        "message": "我刚加入，界面很好用",
+        "id": "1772001033515-3a7avwj"
+      },
+      {
+        "timeSec": 4450,
+        "name": "刘洋",
+        "message": "推荐给我朋友了",
+        "id": "1772001033515-mb3pjo6"
+      },
+      {
+        "timeSec": 4500,
+        "name": "Peter",
+        "message": "客服回复很快 👍",
+        "id": "1772001033515-bheo23p"
+      },
+      {
+        "timeSec": 4560,
+        "name": "黄丽",
+        "message": "这个价格真的很划算",
+        "id": "1772001033515-p92jb7m"
+      },
+      {
+        "timeSec": 4630,
+        "name": "Bob",
+        "message": "比其他课程便宜很多",
+        "id": "1772001033515-5oaue2r"
+      },
+      {
+        "timeSec": 4700,
+        "name": "赵敏",
+        "message": "还有退款保证，放心",
+        "id": "1772001033515-fmryf1g"
+      },
+      {
+        "timeSec": 4800,
+        "name": "周杰",
+        "message": "谢谢 Mike！学到很多",
+        "id": "1772001033515-z3vjzrc"
+      },
+      {
+        "timeSec": 4900,
+        "name": "Lucy",
+        "message": "太感谢了 🙏",
+        "id": "1772001033515-a91y13k"
+      },
+      {
+        "timeSec": 5000,
+        "name": "吴涛",
+        "message": "期待下次直播！",
+        "id": "1772001033515-3qmgin0"
+      },
+      {
+        "timeSec": 5100,
+        "name": "孙燕",
+        "message": "Mike 是真的用心在教",
+        "id": "1772001033515-xrc0exa"
+      },
+      {
+        "timeSec": 5200,
+        "name": "Jack",
+        "message": "值得推荐给朋友 👏",
+        "id": "1772001033515-xqku6sg"
+      },
+      {
+        "timeSec": 5300,
+        "name": "李明",
+        "message": "感谢分享！我们下次见",
+        "id": "1772001033515-zac92ko"
+      }
     ],
     "ctaEvents": [
       {
@@ -109,9 +412,7 @@
         "url": "https://www.cmoney.tw/app/itemcontent.aspx?id=6643",
         "promoText": "🔥 限時優惠！原價 NT$32,000 → 直播限定 NT$17,250",
         "showCountdown": true,
-        "position": "on_video",
-        "color": "#16a34a",
-        "secondaryText": "前 20 名加入的学员，免费获赠一对一专属指导"
+        "id": "1772001033515-4j52ibv"
       },
       {
         "showAtSec": 180,
@@ -120,9 +421,7 @@
         "url": "https://www.cmoney.tw/app/itemcontent.aspx?id=6643",
         "promoText": "限時免費體驗，享有軟體完整權限！",
         "showCountdown": true,
-        "position": "on_video",
-        "color": "#dc2626",
-        "secondaryText": "限时免费体验，享有软件完整权限！"
+        "id": "1772001033515-wg0o68i"
       }
     ],
     "status": "published",
@@ -142,8 +441,12 @@
     "evergreen": {
       "enabled": true,
       "dailySchedule": [
-        { "time": "08:00" },
-        { "time": "21:00" }
+        {
+          "time": "08:00"
+        },
+        {
+          "time": "22:00"
+        }
       ],
       "immediateSlot": {
         "enabled": true,
@@ -156,6 +459,6 @@
       "displaySlotCount": 4
     },
     "prerollVideoUrl": "",
-    "updatedAt": "2026-02-11T06:32:44.418Z"
+    "updatedAt": "2026-02-25T06:30:33.516Z"
   }
 ]

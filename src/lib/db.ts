@@ -137,9 +137,9 @@ export function updateRegistration(id: string, updates: Partial<Registration>): 
 }
 
 // Chat operations
-export function getChatMessages(webinarId: string, sessionId: string): ChatMessageData[] {
+export function getChatMessages(webinarId: string): ChatMessageData[] {
   const allMessages = readJsonFile<ChatMessageData[]>('chat-messages.json', []);
-  return allMessages.filter(m => m.webinarId === webinarId && m.sessionId === sessionId);
+  return allMessages.filter(m => m.webinarId === webinarId);
 }
 
 export function addChatMessage(message: Omit<ChatMessageData, 'id' | 'createdAt'>): ChatMessageData {
@@ -187,18 +187,6 @@ export function initializeSampleData(): void {
       '学习 AI 产业的核心投资逻辑',
       '掌握数字资产配置的黃金比例',
       '获取限时优惠的独家课程折扣',
-    ],
-    sessions: [
-      {
-        id: 'session-1',
-        startTime: new Date(Date.now() + 2 * 60 * 1000).toISOString(), // 2 minutes from now for testing
-        status: 'scheduled',
-      },
-      {
-        id: 'session-2',
-        startTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
-        status: 'scheduled',
-      },
     ],
     autoChat: [
       { id: 'ac1', timeSec: 3, name: 'Alex', message: '开始了！🎉' },

@@ -12,7 +12,7 @@ import ViewersTab from '@/components/sidebar/ViewersTab';
 import OffersTab from '@/components/sidebar/OffersTab';
 import UnmuteOverlay from '@/components/video/UnmuteOverlay';
 import PreShowOverlay from '@/components/video/PreShowOverlay';
-import { Webinar, Session, CTAEvent } from '@/lib/types';
+import { Webinar, CTAEvent } from '@/lib/types';
 import { Badge, Button } from '@/components/ui';
 import { track } from '@/lib/tracking';
 import { formatElapsedTime } from '@/lib/utils';
@@ -37,7 +37,6 @@ export default function LiveRoomPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const webinarId = params.id as string;
-  const sessionId = searchParams.get('session');
   const userName = searchParams.get('name') || '观众';
   const slotTime = searchParams.get('slot');
   const isReplay = searchParams.get('replay') === 'true';
@@ -49,7 +48,6 @@ export default function LiveRoomPage() {
   );
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [eventPhase, setEventPhase] = useState<'loading' | 'pre_event' | 'pre_show' | 'live' | 'ended'>('loading');
   const [isMuted, setIsMuted] = useState(true);
@@ -84,14 +82,11 @@ export default function LiveRoomPage() {
         const data = await res.json();
         setWebinar(data.webinar);
 
-        const foundSession = data.webinar.sessions.find((s: Session) => s.id === sessionId);
-        setSession(foundSession || data.webinar.sessions[0]);
-
         // Compute event phase
         if (isReplay) {
           setEventPhase('live');
         } else {
-          const startTimeStr = slotTime || foundSession?.startTime || data.webinar.sessions[0]?.startTime;
+          const startTimeStr = slotTime;
           if (startTimeStr) {
             const startMs = new Date(startTimeStr).getTime();
             const now = Date.now();
@@ -100,7 +95,7 @@ export default function LiveRoomPage() {
             if (minutesUntil > 30) {
               // Too early — redirect to lobby
               const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
-              router.replace(`/webinar/${webinarId}/lobby?session=${sessionId}&name=${encodeURIComponent(userName)}${slotParam}`);
+              router.replace(`/webinar/${webinarId}/lobby?name=${encodeURIComponent(userName)}${slotParam}`);
               return;
             } else if (minutesUntil > 0) {
               setEventPhase('pre_show');
@@ -119,17 +114,16 @@ export default function LiveRoomPage() {
     }
     fetchWebinar();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [webinarId, sessionId]);
+  }, [webinarId]);
 
   // Auto-transition from pre_show to live when start time arrives
   useEffect(() => {
     if (eventPhase !== 'pre_show') return;
-    const startTimeStr = slotTime || session?.startTime;
-    if (!startTimeStr) return;
+    if (!slotTime) return;
 
     const checkPhase = () => {
       const now = Date.now();
-      const startMs = new Date(startTimeStr).getTime();
+      const startMs = new Date(slotTime).getTime();
       if (now >= startMs) {
         setEventPhase('live');
       }
@@ -137,7 +131,7 @@ export default function LiveRoomPage() {
 
     const interval = setInterval(checkPhase, 1000);
     return () => clearInterval(interval);
-  }, [eventPhase, slotTime, session?.startTime]);
+  }, [eventPhase, slotTime]);
 
   useEffect(() => {
     track('webinar_join', { webinarId });
@@ -183,23 +177,21 @@ export default function LiveRoomPage() {
         track('webinar_leave', { webinarId, reason: 'ended' });
         // Redirect to end page after short delay
         setTimeout(() => {
-          router.push(`/webinar/${webinarId}/end?session=${session?.id}&name=${encodeURIComponent(userName)}`);
+          router.push(`/webinar/${webinarId}/end?name=${encodeURIComponent(userName)}`);
         }, 2000);
       }
     },
-    [webinarId, router, session, userName]
+    [webinarId, router, userName]
   );
 
   // Handle user chat messages
   const handleSendMessage = useCallback(
     async (msg: ChatMessage) => {
-      if (!session) return;
       try {
         await fetch(`/api/webinar/${webinarId}/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            sessionId: session.id,
             name: msg.name,
             message: msg.message,
             timestamp: msg.timestamp,
@@ -209,7 +201,7 @@ export default function LiveRoomPage() {
         console.error('Failed to send message:', err);
       }
     },
-    [webinarId, session]
+    [webinarId]
   );
 
   // Handle unmute from overlay
@@ -256,7 +248,7 @@ export default function LiveRoomPage() {
     );
   }
 
-  if (!webinar || !session) {
+  if (!webinar) {
     return (
       <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
         <div className="text-center text-neutral-900">
@@ -306,7 +298,7 @@ export default function LiveRoomPage() {
             <div className="relative rounded-lg overflow-hidden border border-neutral-200 bg-white">
               {eventPhase === 'pre_show' ? (
                 <PreShowOverlay
-                  targetTime={slotTime || session.startTime}
+                  targetTime={slotTime || ''}
                   title={webinar.title}
                   speakerName={webinar.speakerName}
                   promoImage={webinar.promoImageUrl}
@@ -470,10 +462,9 @@ export default function LiveRoomPage() {
                       timeVariance={3}
                       userName={userName}
                       webinarId={webinarId}
-                      sessionId={session?.id}
                       onSendMessage={handleSendMessage}
                       initialTime={lateJoinSeconds}
-                      sessionStartTime={slotTime || session?.startTime}
+                      sessionStartTime={slotTime || undefined}
                     />
                   ),
                 },

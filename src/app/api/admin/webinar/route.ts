@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllWebinars, createWebinar, generateId } from '@/lib/db';
-import { CreateWebinarRequest, Session, AutoChatMessage, CTAEvent } from '@/lib/types';
+import { CreateWebinarRequest, AutoChatMessage, CTAEvent } from '@/lib/types';
 
 export async function GET() {
   const webinars = getAllWebinars();
@@ -19,13 +19,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Process sessions with IDs
-    const sessions: Session[] = (body.sessions || []).map((s) => ({
-      ...s,
-      id: generateId(),
-      status: 'scheduled' as const,
-    }));
-
     // Process auto chat messages with IDs
     const autoChat: AutoChatMessage[] = (body.autoChat || []).map((m) => ({
       ...m,
@@ -40,7 +33,6 @@ export async function POST(request: NextRequest) {
 
     const webinar = createWebinar({
       ...body,
-      sessions,
       autoChat,
       ctaEvents,
       duration: body.duration || 60,
