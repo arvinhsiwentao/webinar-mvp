@@ -149,6 +149,31 @@ export default function ChatRoom({
     }
   }, [messages]);
 
+  // Load persisted user messages on mount (survives page refresh)
+  useEffect(() => {
+    if (!webinarId) return;
+
+    fetch(`/api/webinar/${webinarId}/chat`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!data?.messages?.length) return;
+        setMessages(prev => {
+          const existingIds = new Set(prev.map(m => m.id));
+          const newMsgs: ChatMessage[] = data.messages
+            .filter((m: { id: string }) => !existingIds.has(m.id))
+            .map((m: { id: string; name: string; message: string; timestamp: number; createdAt: string }) => ({
+              id: m.id,
+              name: m.name,
+              message: m.message,
+              timestamp: m.timestamp,
+              wallTime: new Date(m.createdAt).getTime(),
+            }));
+          return [...prev, ...newMsgs];
+        });
+      })
+      .catch(err => console.warn('[ChatRoom] Failed to load history:', err));
+  }, [webinarId]);
+
   // Subscribe to real-time chat messages via SSE
   useEffect(() => {
     if (!webinarId) return;
@@ -219,7 +244,8 @@ export default function ChatRoom({
       timestamp: currentTime,
       wallTime: Date.now(),
     };
-    setMessages((prev) => [...prev, msg]);
+    // Don't add to local state — let the message arrive via SSE echo
+    // to avoid duplication (client ID ≠ server ID).
     onSendMessage?.(msg);
     setInput('');
   }, [input, userName, currentTime, onSendMessage]);
