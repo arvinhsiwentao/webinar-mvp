@@ -60,7 +60,7 @@ export default function OffersTab({ ctaEvents, currentTime, onOfferClick }: Offe
       {/* Upcoming offers teaser */}
       {upcomingOffers.length > 0 && activeOffers.length === 0 && (
         <div className="text-center py-8 border border-dashed border-[#E8E5DE] rounded-lg bg-[#FAFAF7]">
-          <p className="text-[#6B6B6B] text-sm">🎁 限时优惠即将公布</p>
+          <p className="text-[#6B6B6B] text-sm">限时优惠即将公布</p>
           <p className="text-[#9CA3AF] text-xs mt-1">请继续观看讲座</p>
         </div>
       )}

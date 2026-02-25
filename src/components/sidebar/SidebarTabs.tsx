@@ -26,15 +26,19 @@ export default function SidebarTabs({ tabs, defaultTab }: SidebarTabsProps) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm transition-colors relative ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm transition-all duration-200 relative ${
               activeTab === tab.id
-                ? 'text-[#B8953F] border-b-2 border-[#B8953F] bg-white'
-                : 'text-[#6B6B6B] hover:text-[#1A1A1A]'
+                ? 'text-[#B8953F] bg-white font-medium'
+                : 'text-[#9CA3AF] hover:text-[#6B6B6B]'
             }`}
             title={tab.label}
           >
             {tab.icon}
-            <span className="hidden sm:inline text-xs">{tab.label}</span>
+            <span className="hidden sm:inline text-xs tracking-wide">{tab.label}</span>
+            {/* Active indicator — thin gold line */}
+            {activeTab === tab.id && (
+              <span className="absolute bottom-0 left-3 right-3 h-[1.5px] bg-[#B8953F]" />
+            )}
             {tab.badge && tab.badge > 0 && (
               <span className="absolute top-1.5 right-2 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
                 {tab.badge > 99 ? '99+' : tab.badge}
