@@ -36,6 +36,8 @@ export interface ChatRoomProps {
   initialTime?: number;
   /** ISO start time of the session — used to compute wall-clock display times */
   sessionStartTime?: string;
+  /** Live viewer names from useViewerSimulator — drives join messages */
+  viewers?: string[];
 }
 
 let msgIdCounter = 0;
@@ -52,6 +54,7 @@ export default function ChatRoom({
   webinarId,
   initialTime,
   sessionStartTime,
+  viewers = [],
 }: ChatRoomProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -149,30 +152,10 @@ export default function ChatRoom({
     }
   }, [messages]);
 
-  // Load persisted user messages on mount (survives page refresh)
-  useEffect(() => {
-    if (!webinarId) return;
-
-    fetch(`/api/webinar/${webinarId}/chat`)
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (!data?.messages?.length) return;
-        setMessages(prev => {
-          const existingIds = new Set(prev.map(m => m.id));
-          const newMsgs: ChatMessage[] = data.messages
-            .filter((m: { id: string }) => !existingIds.has(m.id))
-            .map((m: { id: string; name: string; message: string; timestamp: number; createdAt: string }) => ({
-              id: m.id,
-              name: m.name,
-              message: m.message,
-              timestamp: m.timestamp,
-              wallTime: new Date(m.createdAt).getTime(),
-            }));
-          return [...prev, ...newMsgs];
-        });
-      })
-      .catch(err => console.warn('[ChatRoom] Failed to load history:', err));
-  }, [webinarId]);
+  // NOTE: We intentionally do NOT load persisted chat history on mount.
+  // This is a pseudo-live/evergreen webinar — each viewer session should
+  // feel like a fresh live event. Old user messages from previous sessions
+  // must not leak in. Real-time messages arrive via SSE below.
 
   // Subscribe to real-time chat messages via SSE
   useEffect(() => {
@@ -188,6 +171,15 @@ export default function ChatRoom({
           setMessages(prev => {
             // Deduplicate by id
             if (prev.some(m => m.id === msg.id)) return prev;
+            // Deduplicate SSE echo of own message (optimistic update used
+            // a local id, server echo has a different id). Match by
+            // name + content within a 10-second window.
+            const now = Date.now();
+            if (prev.some(m =>
+              m.name === msg.name &&
+              m.message === msg.message &&
+              m.wallTime && (now - m.wallTime) < 10000
+            )) return prev;
             return [...prev, {
               id: msg.id,
               name: msg.name,
@@ -227,34 +219,32 @@ export default function ChatRoom({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Simulate viewer join notifications
+  // Generate join messages when viewer simulator adds new names
+  const prevViewersRef = useRef<Set<string>>(new Set());
   useEffect(() => {
-    if (!sessionStartTime) return;
+    if (viewers.length === 0) return;
 
-    const joinNames = [
-      '小美', '阿明', 'David', 'Emma', 'Kevin', '小芳', 'Jason', 'Linda',
-      'Alex', '小雨', 'Tom', '阿华', 'Jenny', '小李', 'Michael', '小张',
-    ];
-    let timerId: ReturnType<typeof setTimeout>;
-    const scheduleNext = () => {
-      const delay = 15000 + Math.random() * 30000; // 15-45 seconds
-      timerId = setTimeout(() => {
-        const name = joinNames[Math.floor(Math.random() * joinNames.length)];
-        setMessages(prev => [...prev, {
+    const prevSet = prevViewersRef.current;
+    const newNames = viewers.filter(name => !prevSet.has(name));
+
+    if (newNames.length > 0) {
+      // Limit to 3 join messages per tick to avoid chat spam
+      const toShow = newNames.slice(0, 3);
+      setMessages(prev => [
+        ...prev,
+        ...toShow.map(name => ({
           id: nextId(),
           name: '',
           message: `${name} 加入了直播`,
           timestamp: currentTimeRef.current,
           wallTime: Date.now(),
           isSystem: true,
-        }]);
-        scheduleNext();
-      }, delay);
-    };
+        })),
+      ]);
+    }
 
-    scheduleNext();
-    return () => clearTimeout(timerId);
-  }, [sessionStartTime]);
+    prevViewersRef.current = new Set(viewers);
+  }, [viewers]);
 
   const handleSend = useCallback(() => {
     const text = input.trim();
@@ -266,8 +256,9 @@ export default function ChatRoom({
       timestamp: currentTime,
       wallTime: Date.now(),
     };
-    // Don't add to local state — let the message arrive via SSE echo
-    // to avoid duplication (client ID ≠ server ID).
+    // Optimistic local update — show message immediately.
+    // SSE echo (if it arrives) is deduplicated below by name+content.
+    setMessages(prev => [...prev, msg]);
     onSendMessage?.(msg);
     setInput('');
   }, [input, userName, currentTime, onSendMessage]);
