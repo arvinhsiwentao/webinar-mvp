@@ -54,6 +54,12 @@ Merged the Confirmation Page (`/confirm`) and Waiting Room (`/waiting`) into a s
 
 **Why:** Sessions were dead code — all user flows ran through evergreen. The static session dates (Feb 9-11) were in the past, and disabling evergreen broke registration, lobby, and live. Two components (`SessionSelector.tsx`, `DateCards.tsx`) had zero imports. Removing ~200 lines of unused branching simplifies every page and API route.
 
+### 2026-02-25: Viewer count redesign — list-driven simulation
+
+**Decision:** Replaced the independent viewer count formula (`base + real × multiplier ± 5%`) with a list-driven simulation where `viewerCount = viewers.length`. The 觀眾 tab shows the actual simulated viewer list, and the header count reflects it exactly.
+
+**Why:** The old formula produced counts (e.g., 105) completely disconnected from the ~40-name pool in the 觀眾 tab, breaking immersion. The new design ensures the count always matches visible evidence. Admin configures `viewerPeakTarget` and `viewerRampMinutes` instead of `viewerBaseCount` and `viewerMultiplier`. Name pool expanded to 200+ names. 3-phase attendance curve (ramp-up, plateau, decline) with auto-chat name sync and late-join fast-forward.
+
 ### 2026-02-24: Access Control and Muted Autoplay for Fake Live
 
 Added client-side access gate to `/live` route with event state machine (PRE_EVENT/PRE_SHOW/LIVE/ENDED). Video auto-plays muted with click-to-unmute overlay to comply with browser autoplay policies while maintaining livestream illusion. Chose client-side gate over middleware since MVP has no auth and video URLs are already public — the goal is preventing accidental illusion-breaking, not security. `replay=true` query param provides bypass for end-page replay links.

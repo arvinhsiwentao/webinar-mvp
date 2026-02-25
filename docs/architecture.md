@@ -41,7 +41,7 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 
 | Interface | Key Fields | Notes |
 |-----------|-----------|-------|
-| `Webinar` | `id`, `title`, `videoUrl`, `duration`, `autoChat[]`, `ctaEvents[]`, `status`, `evergreen?`, `heroImageUrl?`, `promoImageUrl?`, `disclaimerText?`, `endPageSalesCopy?`, `endPageCtaText?`, `endPageCtaUrl?`, `endPageCtaColor?`, `sidebarDescription?` | Top-level entity. Embeds auto-chat and CTA arrays inline. Extended with landing/end/sidebar fields. Uses `evergreen` config for dynamic scheduling. |
+| `Webinar` | `id`, `title`, `videoUrl`, `duration`, `autoChat[]`, `ctaEvents[]`, `status`, `evergreen?`, `viewerPeakTarget?`, `viewerRampMinutes?`, `heroImageUrl?`, `promoImageUrl?`, `disclaimerText?`, `endPageSalesCopy?`, `endPageCtaText?`, `endPageCtaUrl?`, `endPageCtaColor?`, `sidebarDescription?` | Top-level entity. Embeds auto-chat and CTA arrays inline. Extended with landing/end/sidebar fields. Uses `evergreen` config for dynamic scheduling. Viewer simulation configured via `viewerPeakTarget` and `viewerRampMinutes`. |
 | `EvergreenConfig` | `enabled`, `dailySchedule[]`, `immediateSlot{}`, `videoDurationMinutes`, `timezone`, `displaySlotCount` | Configures dynamic slot generation. Daily anchor times + immediate slot injection for perpetual urgency. |
 | `EvergreenSlot` | `slotTime`, `type` | Computed session slot — either `'anchor'` (daily recurring) or `'immediate'` (dynamically injected). |
 | `AutoChatMessage` | `id`, `timeSec`, `name`, `message` | Bot message triggered at video timestamp. |
@@ -104,8 +104,26 @@ The live room (`src/app/webinar/[id]/live/page.tsx`) orchestrates three systems 
 ```
 VideoPlayer.onTimeUpdate(currentTime)
     ├── ChatRoom — triggers autoChat at configured timeSec
-    └── CTAOverlay — shows/hides between showAtSec and hideAtSec
+    ├── CTAOverlay — shows/hides between showAtSec and hideAtSec
+    └── ViewerSimulator — grows/shrinks viewer list following 3-phase attendance curve
 ```
+
+### Viewer Count System (`src/lib/viewer-simulator.ts`)
+
+The viewer count is **list-driven** — the displayed number equals the length of the simulated viewer list. No independent formula.
+
+The `useViewerSimulator` hook manages a stateful name list following a 3-phase attendance curve tied to video playback time:
+
+1. **Ramp-up** (0 → `rampMinutes`): easeOutQuad growth from 0 to `peakTarget`
+2. **Plateau** (`rampMinutes` → 80% of duration): stable at peak with churn swaps
+3. **Decline** (80% → 100%): linear drop to 60% of peak
+
+Key behaviors:
+- **Late join fast-forward:** When `initialTimeSec > 0`, computes snapshot at that point (no replay)
+- **Auto-chat sync:** Names from auto-chat messages are prioritized for joining and protected from removal
+- **Stable list:** Joins append to end, leaves remove from middle — no reshuffling
+- **Cooldown:** Removed names wait 120s (video time) before becoming available again
+- **Admin config:** `viewerPeakTarget` (peak count) and `viewerRampMinutes` (ramp time) per webinar
 
 ### Live Room Access Gate
 
@@ -130,7 +148,7 @@ The `replay=true` query parameter bypasses all gates (used by the end page repla
 | `RegistrationModal` | `src/components/registration/RegistrationModal.tsx` | Full-screen modal overlay for registration. Triggered by landing page CTAs. |
 | `SidebarTabs` | `src/components/sidebar/SidebarTabs.tsx` | 4-tab container (Info/Viewers/Chat/Offers) for live room sidebar. Dark theme. |
 | `InfoTab` | `src/components/sidebar/InfoTab.tsx` | Webinar info tab: promo image, speaker info, description. |
-| `ViewersTab` | `src/components/sidebar/ViewersTab.tsx` | Simulated viewer list with host badge and randomized names. |
+| `ViewersTab` | `src/components/sidebar/ViewersTab.tsx` | Renders the simulated viewer list from `useViewerSimulator` hook. Shows host badge, current user, and active viewers. |
 | `OffersTab` | `src/components/sidebar/OffersTab.tsx` | Time-based offer cards that activate with CTA events. |
 | `UnmuteOverlay` | `src/components/video/UnmuteOverlay.tsx` | Click-to-unmute overlay for muted autoplay compliance. Shows over video when audio is muted. |
 | `PreShowOverlay` | `src/components/video/PreShowOverlay.tsx` | Pre-event countdown shown in the video area for users who enter the live room before the event starts (within 30 min gate). |
