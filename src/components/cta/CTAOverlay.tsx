@@ -101,10 +101,11 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => onCTAClick?.(activeCTA)}
-          className="block w-full text-center text-white font-bold text-lg py-3 px-6 rounded-lg hover:opacity-90 transition-opacity shadow-md"
-          style={{ backgroundColor: bgColor }}
+          className="group relative block w-full text-center text-white font-bold text-lg py-3.5 px-6 rounded-lg shadow-lg transition-all duration-200 overflow-hidden hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
+          style={{ backgroundColor: '#1A1A1A' }}
         >
-          {activeCTA.buttonText}
+          <span className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-200" />
+          <span className="relative">{activeCTA.buttonText}</span>
         </a>
       </div>
     </div>
