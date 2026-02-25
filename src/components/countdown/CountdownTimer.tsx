@@ -76,10 +76,10 @@ export default function CountdownTimer({
   const getVariantClasses = () => {
     if (variant === 'urgent' || isUrgent) {
       return {
-        container: 'bg-gradient-to-r from-red-600 to-orange-500 shadow-lg shadow-red-500/20',
-        number: 'bg-white/20 text-white',
-        label: 'text-red-100',
-        separator: 'text-white',
+        container: 'bg-[#B8953F]/5 border border-[#B8953F]/20',
+        number: 'bg-[#B8953F]/10 text-[#B8953F]',
+        label: 'text-[#B8953F]/70',
+        separator: 'text-[#B8953F]/50',
       };
     }
     if (variant === 'minimal') {
@@ -129,13 +129,16 @@ export default function CountdownTimer({
   );
 
   return (
-    <div className={`rounded-lg p-4 ${classes.container} ${isUrgent ? 'animate-pulse' : ''}`}>
+    <div className={`rounded-lg p-4 ${classes.container}`}>
       {/* Urgent badge */}
       {isUrgent && (
         <div className="text-center mb-3">
-          <span className="inline-flex items-center gap-1 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-bounce">
-            <span className="w-2 h-2 bg-white rounded-full animate-ping" />
-            即将开始！
+          <span className="inline-flex items-center gap-1.5 bg-[#B8953F]/10 text-[#B8953F] text-xs font-semibold px-3 py-1 rounded-full border border-[#B8953F]/20">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B8953F] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#B8953F]" />
+            </span>
+            即将开始
           </span>
         </div>
       )}

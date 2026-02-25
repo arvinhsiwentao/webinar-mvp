@@ -24,6 +24,7 @@ export default function LobbyPage() {
   const [canEnter, setCanEnter] = useState(false);
   const [evergreenState, setEvergreenState] = useState<string | null>(null);
   const [nextSlotTime, setNextSlotTime] = useState<string>('');
+  const [registrationCount, setRegistrationCount] = useState(0);
 
   const countdownTarget = slotTime || session?.startTime || '';
 
@@ -35,6 +36,7 @@ export default function LobbyPage() {
         if (!res.ok) throw new Error('Webinar not found');
         const data = await res.json();
         setWebinar(data.webinar);
+        setRegistrationCount(data.registrationCount || 0);
 
         const foundSession = data.webinar.sessions.find((s: Session) => s.id === sessionId);
         setSession(foundSession || data.webinar.sessions[0]);
@@ -174,164 +176,228 @@ export default function LobbyPage() {
     );
   }
 
+  // Progress step index: 0=registered, 1=waiting/ready, 2=live
+  const progressStep = canEnter ? 1 : 0;
+
   // ========== MAIN LOBBY RENDER ==========
   return (
-    <div className="min-h-screen bg-[#FAFAF7] text-neutral-900 flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#FAFAF7] text-neutral-900 flex items-center justify-center px-6 py-12">
       {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {canEnter ? (
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#B8953F]/8 rounded-full blur-3xl" />
-        ) : (
-          <>
-            <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-green-50 rounded-full blur-3xl" />
-            <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#B8953F]/8 rounded-full blur-3xl" />
-          </>
-        )}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#B8953F]/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-2xl w-full text-center">
-        {/* Phase A: Celebration (>30 min) */}
+      <div className="relative z-10 max-w-2xl w-full">
+
+        {/* Progress Bar */}
+        <div className="flex items-center justify-center gap-0 mb-10">
+          <ProgressStep label="已注册" step={0} current={progressStep} />
+          <ProgressConnector active={progressStep >= 1} />
+          <ProgressStep label={canEnter ? '已开放' : '等待中'} step={1} current={progressStep} />
+          <ProgressConnector active={false} />
+          <ProgressStep label="观看直播" step={2} current={progressStep} />
+        </div>
+
+        {/* Success Banner (Phase A only) */}
         {!canEnter && (
-          <>
-            <div className="relative mb-6">
-              <div className="text-6xl mb-2">🎉</div>
-              <div className="absolute -top-2 left-1/4 text-2xl animate-bounce" style={{ animationDelay: '0.1s' }}>🎊</div>
-              <div className="absolute -top-1 right-1/4 text-2xl animate-bounce" style={{ animationDelay: '0.3s' }}>✨</div>
+          <div className="flex items-center gap-3 p-4 mb-8 bg-green-50 border border-green-200 rounded-lg max-w-md mx-auto">
+            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
             </div>
-
-            <Badge variant="success" className="mb-6">报名成功</Badge>
-
-            <h1 className="text-2xl font-bold mb-4">
-              {userName}，你已成功报名！
-            </h1>
-
-            <p className="text-neutral-500 mb-8 leading-relaxed">
-              我们已将直播信息发送到你的邮箱。<br />
-              直播开始前 30 分钟可进入直播间。
-            </p>
-          </>
+            <div className="text-left">
+              <p className="font-medium text-green-800 text-sm">报名成功</p>
+              <p className="text-green-600 text-xs">确认邮件已发送至你的邮箱</p>
+            </div>
+          </div>
         )}
 
-        {/* Phase B: Ready to Enter (<=30 min) */}
+        {/* "即将开始" Badge (Phase B only) */}
         {canEnter && (
-          <>
-            {/* Speaker/Promo Image */}
-            <div className="relative w-full max-w-lg mx-auto mb-8 rounded-lg overflow-hidden border border-[#E8E5DE]">
-              {webinar.promoImageUrl ? (
-                <img
-                  src={webinar.promoImageUrl}
-                  alt={webinar.title}
-                  className="w-full h-auto"
-                />
-              ) : (webinar.speakerAvatar || webinar.speakerImage) ? (
-                <div className="flex items-center justify-center py-8 bg-white/80">
-                  <img
-                    src={webinar.speakerAvatar || webinar.speakerImage}
-                    alt={webinar.speakerName}
-                    className="w-32 h-32 rounded-full object-cover border-2 border-[#B8953F]/30"
-                  />
-                </div>
-              ) : null}
-            </div>
-
-            <Badge variant="gold" className="mb-6">即将开始</Badge>
-
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">
-              {webinar.title}
-            </h1>
-
-            <p className="text-neutral-500 text-lg mb-2">
-              讲者：{webinar.speakerName}
-            </p>
-
-            <p className="text-neutral-400 mb-8">
-              欢迎，{userName}！直播即将开始
-            </p>
-          </>
+          <div className="text-center mb-6">
+            <Badge variant="gold" pulse>即将开始</Badge>
+          </div>
         )}
 
-        {/* Countdown Timer (both phases) */}
-        <Card className={`p-8 mb-8 ${canEnter ? 'border-[#B8953F]/25' : 'border-green-500/20'}`}>
-          <p className="text-neutral-500 mb-4">
-            {canEnter ? '距离下一场讲座开始' : '距离直播还有'}
+        {/* Speaker / Promo Image (both phases) */}
+        {(webinar.promoImageUrl || webinar.speakerAvatar || webinar.speakerImage) && (
+          <div className="relative w-full max-w-lg mx-auto mb-6 rounded-lg overflow-hidden border border-[#E8E5DE]">
+            {webinar.promoImageUrl ? (
+              <img
+                src={webinar.promoImageUrl}
+                alt={webinar.title}
+                className="w-full h-auto"
+              />
+            ) : (
+              <div className="flex items-center justify-center py-8 bg-white/80">
+                <img
+                  src={webinar.speakerAvatar || webinar.speakerImage}
+                  alt={webinar.speakerName}
+                  className="w-28 h-28 rounded-full object-cover border-2 border-[#B8953F]/30"
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Webinar Title + Speaker (both phases) */}
+        <div className="text-center mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2 leading-tight">
+            {webinar.title}
+          </h1>
+          <p className="text-neutral-500">
+            讲者：{webinar.speakerName}
+            {webinar.speakerTitle && (
+              <span className="text-neutral-400"> · {webinar.speakerTitle}</span>
+            )}
+          </p>
+        </div>
+
+        {/* Welcome + Social Proof */}
+        <div className="text-center mb-8">
+          <p className="text-neutral-600 mb-1">
+            欢迎，{userName}
+          </p>
+          {registrationCount > 0 && (
+            <p className="text-sm text-neutral-400">
+              已有 <span className="font-semibold text-[#B8953F]">{registrationCount}</span> 人报名
+            </p>
+          )}
+        </div>
+
+        {/* Enter Live Room Button (Phase B — ABOVE countdown for prominence) */}
+        {canEnter && (
+          <div className="text-center mb-8">
+            <Button
+              variant="gold"
+              size="lg"
+              className="w-full max-w-md mx-auto animate-[pulse_3s_ease-in-out_infinite]"
+              onClick={handleEnterLive}
+            >
+              进入直播间
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Button>
+            <p className="text-sm text-neutral-400 mt-3">直播间已开放，点击立即进入</p>
+          </div>
+        )}
+
+        {/* Countdown Timer (both phases — smaller in Phase B) */}
+        <div className={`max-w-md mx-auto mb-8 ${canEnter ? 'opacity-80' : ''}`}>
+          <p className="text-center text-neutral-500 text-sm mb-3">
+            {canEnter ? '距离直播开始' : '距离直播还有'}
           </p>
           <CountdownTimer
             targetTime={countdownTarget}
-            size={canEnter ? 'lg' : 'md'}
+            size={canEnter ? 'md' : 'lg'}
             showDays={true}
             showLabels={true}
             onComplete={handleCountdownComplete}
           />
+        </div>
+
+        {/* Calendar Card (both phases — elevated in Phase A) */}
+        <Card glow={!canEnter} className={`max-w-md mx-auto mb-8 ${!canEnter ? 'border-[#B8953F]/20' : ''}`}>
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-[#B8953F]/10 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-[#B8953F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-neutral-900 text-sm mb-1">添加到日历</p>
+              <p className="text-xs text-neutral-400 mb-3">设置提醒，确保不会错过直播</p>
+              <div className="flex gap-2">
+                <a
+                  href={getGoogleCalendarUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-[#F5F5F0] hover:bg-[#EEEEE8] border border-[#E8E5DE] rounded-md px-3 py-2 text-center text-xs font-medium transition-colors"
+                >
+                  Google 日历
+                </a>
+                <button
+                  onClick={handleDownloadICS}
+                  className="flex-1 bg-[#F5F5F0] hover:bg-[#EEEEE8] border border-[#E8E5DE] rounded-md px-3 py-2 text-center text-xs font-medium transition-colors"
+                >
+                  iCal 下载
+                </button>
+              </div>
+            </div>
+          </div>
         </Card>
 
-        {/* Phase A: Promo image (shown below countdown in Phase A) */}
-        {!canEnter && webinar.promoImageUrl && (
-          <div className="mb-8 rounded-lg overflow-hidden border border-[#E8E5DE]">
-            <img
-              src={webinar.promoImageUrl}
-              alt={webinar.title}
-              className="w-full h-auto"
-            />
+        {/* Webinar Highlights (both phases) */}
+        {webinar.highlights && webinar.highlights.length > 0 && (
+          <div className="max-w-md mx-auto mb-8">
+            <p className="text-sm font-semibold text-neutral-700 mb-4 text-center">讲座中你将学到</p>
+            <div className="space-y-3">
+              {webinar.highlights.map((highlight, i) => (
+                <div key={i} className="flex items-start gap-3 text-left">
+                  <div className="w-5 h-5 rounded-full bg-[#B8953F]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-[#B8953F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-sm text-neutral-600 leading-relaxed">{highlight}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Enter Live Room Button (Phase B only) */}
-        {canEnter && (
-          <Button
-            variant="gold"
-            size="lg"
-            className="w-full max-w-md mx-auto mb-8"
-            onClick={handleEnterLive}
-          >
-            🎬 进入直播间
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </Button>
-        )}
-
-        {/* Calendar buttons (both phases) */}
-        <div className="flex gap-3 max-w-md mx-auto mb-8">
-          <a href={getGoogleCalendarUrl()} target="_blank" rel="noopener noreferrer"
-             className="flex-1 bg-white/80 hover:bg-white border border-[#E8E5DE] rounded-lg p-3 text-center text-sm transition-colors">
-            📅 Google 日历
-          </a>
-          <button onClick={handleDownloadICS}
-            className="flex-1 bg-white/80 hover:bg-white border border-[#E8E5DE] rounded-lg p-3 text-center text-sm transition-colors">
-            📅 iCal 下载
-          </button>
-        </div>
-
-        {/* Email confirmation card (Phase A only) */}
+        {/* Subtle info line (Phase A only — replaces old email card) */}
         {!canEnter && (
-          <div className="flex items-center gap-4 p-4 bg-white/80 rounded-lg border border-[#E8E5DE] text-left max-w-md mx-auto mb-8">
-            <div className="w-10 h-10 rounded-full bg-[#B8953F]/10 flex items-center justify-center flex-shrink-0">
-              <span>📧</span>
-            </div>
-            <div>
-              <p className="text-sm text-neutral-500">确认邮件</p>
-              <p className="font-medium">检查你的收件箱</p>
-            </div>
-          </div>
+          <p className="text-center text-xs text-neutral-400 mt-4">
+            直播开始前 30 分钟可进入直播间
+          </p>
         )}
-
-        {/* Preparation tips (both phases) */}
-        <div className="mt-8 grid md:grid-cols-3 gap-4">
-          <Tip icon="🔔" title="开启通知" desc="确保不会错过直播" />
-          <Tip icon="🎧" title="准备耳机" desc="获得最佳音效体验" />
-          <Tip icon="📝" title="准备笔记" desc="记录重要内容" />
-        </div>
       </div>
     </div>
   );
 }
 
-function Tip({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+/* ========== Progress Bar Sub-components ========== */
+
+function ProgressStep({ label, step, current }: { label: string; step: number; current: number }) {
+  const isCompleted = step < current || (step === 0); // Step 0 (registered) is always completed
+  const isCurrent = step === current && step !== 0;
+
   return (
-    <div className="bg-white/80 border border-neutral-200 rounded-lg p-4 text-left">
-      <span className="text-2xl mb-2 block">{icon}</span>
-      <p className="font-medium text-neutral-900 text-sm">{title}</p>
-      <p className="text-neutral-400 text-xs">{desc}</p>
+    <div className="flex flex-col items-center gap-1.5">
+      <div className={`
+        w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors
+        ${isCompleted
+          ? 'bg-[#B8953F]/10 text-[#B8953F] border border-[#B8953F]/30'
+          : isCurrent
+            ? 'bg-[#B8953F] text-white border border-[#B8953F]'
+            : 'bg-[#F5F5F0] text-neutral-400 border border-[#E8E5DE]'
+        }
+      `}>
+        {isCompleted ? (
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
+        ) : isCurrent ? (
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+          </span>
+        ) : (
+          <span>{step + 1}</span>
+        )}
+      </div>
+      <span className={`text-[11px] ${isCompleted || isCurrent ? 'text-neutral-700 font-medium' : 'text-neutral-400'}`}>
+        {label}
+      </span>
     </div>
+  );
+}
+
+function ProgressConnector({ active }: { active: boolean }) {
+  return (
+    <div className={`w-12 md:w-16 h-px mx-1 mb-5 ${active ? 'bg-[#B8953F]/30' : 'bg-[#E8E5DE]'}`} />
   );
 }

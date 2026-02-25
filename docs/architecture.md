@@ -28,7 +28,7 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 |-------|-------------|---------|
 | `/` | `src/app/(public)/page.tsx` | Single landing page for webinar ID `1` ("Mike是麥克"). Modal registration. Sections: Hero → Credibility → Problem → Benefits → Urgency. |
 | `/demo` | `src/app/(public)/demo/page.tsx` | Demo/preview page |
-| `/webinar/[id]/lobby` | `src/app/(public)/webinar/[id]/lobby/page.tsx` | Event lobby: two-phase pre-show (confirmation celebration → urgency countdown). Auto-redirects to live at T=0. |
+| `/webinar/[id]/lobby` | `src/app/(public)/webinar/[id]/lobby/page.tsx` | Event lobby: unified layout with progress bar, webinar info, social proof (registration count), highlights, calendar card. Phase A (>30min): success banner, calendar emphasis. Phase B (≤30min): gold "即将开始" badge, prominent CTA button above countdown. Auto-redirects to live at T=0. |
 | `/webinar/[id]/confirm` | Redirect stub → `/lobby` | Backward compatibility |
 | `/webinar/[id]/waiting` | Redirect stub → `/lobby` | Backward compatibility |
 | `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + 4-tab sidebar (Info/Viewers/Chat/Offers) + on-video CTA |
@@ -73,7 +73,7 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | Endpoint | Methods | Source File | Notes |
 |----------|---------|-------------|-------|
 | `/api/webinar` | GET | `src/app/api/webinar/route.ts` | List all webinars |
-| `/api/webinar/[id]` | GET | `src/app/api/webinar/[id]/route.ts` | Single webinar (no registrations) |
+| `/api/webinar/[id]` | GET | `src/app/api/webinar/[id]/route.ts` | Single webinar + `registrationCount` |
 | `/api/webinar/[id]/chat` | GET, POST | `src/app/api/webinar/[id]/chat/route.ts` | GET requires `sessionId` query param |
 | `/api/register` | POST | `src/app/api/register/route.ts` | Checks duplicate email per webinar. Evergreen-aware: accepts `assignedSlot`, computes `slotExpiresAt`. |
 | `/api/webinar/[id]/next-slot` | GET | `src/app/api/webinar/[id]/next-slot/route.ts` | Computes upcoming evergreen slots from config. Returns `slots[]`, `countdownTarget`, `expiresAt`. |

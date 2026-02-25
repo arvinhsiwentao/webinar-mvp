@@ -107,6 +107,10 @@ export function getRegistrationsByWebinar(webinarId: string): Registration[] {
   return getAllRegistrations().filter(r => r.webinarId === webinarId);
 }
 
+export function getRegistrationCount(webinarId: string): number {
+  return getRegistrationsByWebinar(webinarId).length;
+}
+
 export function getRegistrationByEmail(webinarId: string, email: string): Registration | null {
   return getAllRegistrations().find(r => r.webinarId === webinarId && r.email === email) || null;
 }

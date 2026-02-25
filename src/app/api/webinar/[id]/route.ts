@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getWebinarById } from '@/lib/db';
+import { getWebinarById, getRegistrationCount } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
@@ -15,5 +15,7 @@ export async function GET(
     );
   }
 
-  return NextResponse.json({ webinar });
+  const registrationCount = getRegistrationCount(id);
+
+  return NextResponse.json({ webinar, registrationCount });
 }
