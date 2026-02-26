@@ -151,35 +151,45 @@ export default function LiveRoomPage() {
         const startMs = new Date(slotTime).getTime();
         if (now >= startMs) {
           setEventPhase('live');
-          return;
+          // Don't return — fall through so we can also attempt play once player mounts
         }
       }
 
       // If live but video is paused, try to resume playback
-      if (eventPhase === 'live') {
+      if (eventPhase === 'live' || (eventPhase === 'pre_show' && slotTime && Date.now() >= new Date(slotTime).getTime())) {
         const player = playerInstanceRef.current;
         if (!player || player.isDisposed() || !player.paused()) return;
 
-        // Try unmuted play first (user just switched to tab = user gesture context)
-        player.muted(false);
-        const playPromise = player.play();
-        if (playPromise && typeof playPromise.then === 'function') {
-          playPromise.then(() => {
-            setIsMuted(false);
-            setAutoplayBlocked(false);
-          }).catch(() => {
-            // Unmuted play blocked — fall back to muted
-            player.muted(true);
-            setIsMuted(true);
-            const mutedPromise = player.play();
-            if (mutedPromise && typeof mutedPromise.then === 'function') {
-              mutedPromise.then(() => {
-                setAutoplayBlocked(false);
-              }).catch(() => {
-                setAutoplayBlocked(true);
-              });
-            }
-          });
+        const attemptPlay = () => {
+          if (player.isDisposed()) return;
+          // Try unmuted play first (user just switched to tab = user gesture context)
+          player.muted(false);
+          const playPromise = player.play();
+          if (playPromise && typeof playPromise.then === 'function') {
+            playPromise.then(() => {
+              setIsMuted(false);
+              setAutoplayBlocked(false);
+            }).catch(() => {
+              // Unmuted play blocked — fall back to muted
+              player.muted(true);
+              setIsMuted(true);
+              const mutedPromise = player.play();
+              if (mutedPromise && typeof mutedPromise.then === 'function') {
+                mutedPromise.then(() => {
+                  setAutoplayBlocked(false);
+                }).catch(() => {
+                  setAutoplayBlocked(true);
+                });
+              }
+            });
+          }
+        };
+
+        // If media hasn't loaded yet (background tabs defer loading), wait for it
+        if (player.readyState() < 3) {
+          player.one('canplay', attemptPlay);
+        } else {
+          attemptPlay();
         }
       }
     };
@@ -267,15 +277,35 @@ export default function LiveRoomPage() {
       };
       player.on('playing', onPlaying);
 
-      // Detect total autoplay failure — if video hasn't started playing within 3 seconds
-      const timeout = setTimeout(() => {
-        if (player.paused()) {
-          setAutoplayBlocked(true);
-        }
-      }, 3000);
+      // Detect total autoplay failure — only when tab is visible.
+      // Background tabs always block autoplay, so checking there gives false positives.
+      // The visibilitychange handler handles recovery when the user returns.
+      const scheduleAutoplayCheck = () => {
+        setTimeout(() => {
+          if (!player.isDisposed() && player.paused()) {
+            setAutoplayBlocked(true);
+          }
+        }, 3000);
+      };
+
+      if (document.visibilityState === 'visible') {
+        scheduleAutoplayCheck();
+      } else {
+        // Tab is hidden — defer the check until tab becomes visible
+        const onVisible = () => {
+          if (document.visibilityState !== 'visible') return;
+          document.removeEventListener('visibilitychange', onVisible);
+          // Give the visibilitychange play handler time to attempt playback first
+          setTimeout(() => {
+            if (!player.isDisposed() && player.paused()) {
+              scheduleAutoplayCheck();
+            }
+          }, 500);
+        };
+        document.addEventListener('visibilitychange', onVisible);
+      }
 
       player.on('play', () => {
-        clearTimeout(timeout);
         setAutoplayBlocked(false);
       });
     }

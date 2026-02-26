@@ -69,3 +69,9 @@ Merged the Confirmation Page (`/confirm`) and Waiting Room (`/waiting`) into a s
 ### 2026-02-24: Access Control and Muted Autoplay for Fake Live
 
 Added client-side access gate to `/live` route with event state machine (PRE_EVENT/PRE_SHOW/LIVE/ENDED). Video auto-plays muted with click-to-unmute overlay to comply with browser autoplay policies while maintaining livestream illusion. Chose client-side gate over middleware since MVP has no auth and video URLs are already public — the goal is preventing accidental illusion-breaking, not security. `replay=true` query param provides bypass for end-page replay links.
+
+### 2026-02-26: Background-tab autoplay recovery
+
+**Decision:** Visibility handler now waits for `canplay` (readyState ≥ 3) before attempting play on tab return. The `autoplayBlocked` detection timeout is deferred to when the tab is actually visible — background tabs always block autoplay, so checking there was a false positive.
+
+**Why:** Browsers defer media loading for background tabs. If the user backgrounded during countdown, the live page loaded with no video data buffered, causing both unmuted and muted play() to fail on tab return. The premature timeout also showed a manual play button before giving the recovery handler a chance.
