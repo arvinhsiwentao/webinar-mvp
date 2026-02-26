@@ -55,33 +55,35 @@ export const NAME_POOL: string[] = [
 /**
  * Calculate target viewer count at a given video timestamp.
  *
- * Phase 1 (Ramp-up):   0 → rampSec        → 0 → peakTarget (easeOutQuad)
+ * Phase 1 (Ramp-up):   0 → rampSec        → baseCount → peakTarget (easeOutQuad)
  * Phase 2 (Plateau):    rampSec → 80% dur   → peakTarget (stable)
- * Phase 3 (Decline):    80% dur → 100% dur  → peakTarget → 60% of peak (linear)
+ * Phase 3 (Decline):    80% dur → 100% dur  → peakTarget → 60% of peak (floored at 30%)
  */
 export function getTargetCount(
   timeSec: number,
   peakTarget: number,
   rampSec: number,
   durationSec: number,
+  baseCount: number = 0,
 ): number {
   const t = Math.max(0, Math.min(timeSec, durationSec));
 
   if (t <= rampSec) {
-    // Phase 1 — Ramp-up with easeOutQuad
+    // Phase 1 — Ramp-up with easeOutQuad from baseCount → peakTarget
     const progress = rampSec > 0 ? t / rampSec : 1;
     const eased = progress * (2 - progress); // easeOutQuad
-    return Math.round(peakTarget * eased);
+    return Math.round(baseCount + (peakTarget - baseCount) * eased);
   } else if (t <= durationSec * 0.8) {
     // Phase 2 — Plateau at peak
     return peakTarget;
   } else {
-    // Phase 3 — Linear decline to 60 % of peak
+    // Phase 3 — Linear decline to 60 % of peak (floored at 30%)
     const declineStart = durationSec * 0.8;
     const declineDuration = durationSec * 0.2;
     const progress =
       declineDuration > 0 ? (t - declineStart) / declineDuration : 1;
-    return Math.round(peakTarget * (1 - 0.4 * Math.min(progress, 1)));
+    const declined = Math.round(peakTarget * (1 - 0.4 * Math.min(progress, 1)));
+    return Math.max(Math.round(peakTarget * 0.3), declined);
   }
 }
 
@@ -164,6 +166,8 @@ export function useViewerSimulator(
   }, [hostName, userName]);
 
   // ── Initialization (on mount) ─────────────────────────────────────
+  const baseCountRef = useRef(0);
+
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
@@ -171,45 +175,54 @@ export function useViewerSimulator(
     const pool = buildPool();
     const initTime = initialTimeSec ?? 0;
 
+    // Compute base count: ~35% of peak (30-40% with random variance)
+    const base = Math.max(
+      Math.round(peakTarget * (0.30 + Math.random() * 0.10)),
+      1,
+    );
+    baseCountRef.current = base;
+
+    const acNames = autoChatNamesSet.current;
+    // Auto-chat names from the pool, in original order (earliest-firing first)
+    const acInPool = pool.filter((n) => acNames.has(n));
+    // Non-auto-chat names from the pool
+    const nonAC = pool.filter((n) => !acNames.has(n));
+    // Shuffle non-AC for random selection
+    const shuffledNonAC = [...nonAC].sort(() => Math.random() - 0.5);
+
     if (initTime > 0) {
-      // Late joiner — fast-forward to target count
-      const target = getTargetCount(
-        initTime,
-        peakTarget,
-        rampSec,
-        videoDurationSec,
+      // Late joiner — fast-forward to target count, floored at base
+      const target = Math.max(
+        base,
+        getTargetCount(initTime, peakTarget, rampSec, videoDurationSec, base),
       );
 
-      const acNames = autoChatNamesSet.current;
-      // Auto-chat names whose messages would have already fired
-      const eligibleAC = pool.filter(
-        (n) => acNames.has(n),
-      );
-      // Remaining non-auto-chat names
-      const nonAC = pool.filter((n) => !acNames.has(n));
-
-      // Shuffle non-AC for random selection
-      const shuffledNonAC = [...nonAC].sort(() => Math.random() - 0.5);
-
-      // Build initial viewers: auto-chat first, then fill from shuffled pool
+      // Build initial viewers: auto-chat first (capped at target), then fill
       const initial: string[] = [];
-      const acToAdd = eligibleAC.slice(0, target);
-      initial.push(...acToAdd);
+      initial.push(...acInPool.slice(0, target));
       const remaining = target - initial.length;
       if (remaining > 0) {
         initial.push(...shuffledNonAC.slice(0, remaining));
       }
 
-      // Set up available pool (names not in initial viewers)
       const initialSet = new Set(initial);
       availableRef.current = pool.filter((n) => !initialSet.has(n));
       viewersRef.current = initial;
       setViewers(initial);
     } else {
-      // Fresh start — empty viewers, full pool
-      availableRef.current = [...pool];
-      viewersRef.current = [];
-      setViewers([]);
+      // Fresh start — pre-load base viewers immediately (hot start)
+      const initial: string[] = [];
+      // Cap auto-chat names at base to keep curve correct
+      initial.push(...acInPool.slice(0, base));
+      const remaining = base - initial.length;
+      if (remaining > 0) {
+        initial.push(...shuffledNonAC.slice(0, remaining));
+      }
+
+      const initialSet = new Set(initial);
+      availableRef.current = pool.filter((n) => !initialSet.has(n));
+      viewersRef.current = initial;
+      setViewers(initial);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -246,8 +259,20 @@ export function useViewerSimulator(
         }
       }
 
-      // ── Compute target and delta ───────────────────────────────
-      const target = getTargetCount(now, peak, ramp, duration);
+      // ── Compute target with base offset and jitter ───────────
+      const base = baseCountRef.current;
+      const rawTarget = getTargetCount(now, peak, ramp, duration, base);
+
+      // Apply organic jitter (±8% of peak)
+      const jitterRange = Math.max(1, Math.round(peak * 0.08));
+      let jitterDelta = Math.floor(Math.random() * (jitterRange * 2 + 1)) - jitterRange;
+
+      // During ramp, bias jitter upward to avoid stalling near base
+      if (now <= ramp && jitterDelta < 0) {
+        jitterDelta = Math.random() > 0.5 ? 0 : Math.abs(jitterDelta);
+      }
+
+      const target = Math.max(base, rawTarget + jitterDelta);
       const currentViewers = viewersRef.current;
       const delta = target - currentViewers.length;
 

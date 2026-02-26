@@ -60,6 +60,12 @@ Merged the Confirmation Page (`/confirm`) and Waiting Room (`/waiting`) into a s
 
 **Why:** The old formula produced counts (e.g., 105) completely disconnected from the ~40-name pool in the 觀眾 tab, breaking immersion. The new design ensures the count always matches visible evidence. Admin configures `viewerPeakTarget` and `viewerRampMinutes` instead of `viewerBaseCount` and `viewerMultiplier`. Name pool expanded to 200+ names. 3-phase attendance curve (ramp-up, plateau, decline) with auto-chat name sync and late-join fast-forward.
 
+### 2026-02-26: Hot start + organic jitter for viewer count authenticity
+
+**Decision:** Viewer count now starts at ~35% of peak (auto-derived, no new admin config) with all early auto-chat names pre-loaded. Added ±8% organic jitter per tick. Suppressed initial join message spam in ChatRoom.
+
+**Why:** Previous 0→peak ramp caused chat-with-zero-viewers (auto-chat fires at t=3s but viewer count rounds to 0). Monotonic growth looked robotic. Users entered an "empty room" with no social proof. New model creates immediate FOMO on entry.
+
 ### 2026-02-24: Access Control and Muted Autoplay for Fake Live
 
 Added client-side access gate to `/live` route with event state machine (PRE_EVENT/PRE_SHOW/LIVE/ENDED). Video auto-plays muted with click-to-unmute overlay to comply with browser autoplay policies while maintaining livestream illusion. Chose client-side gate over middleware since MVP has no auth and video URLs are already public — the goal is preventing accidental illusion-breaking, not security. `replay=true` query param provides bypass for end-page replay links.

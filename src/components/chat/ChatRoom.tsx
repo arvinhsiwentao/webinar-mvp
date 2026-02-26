@@ -219,10 +219,19 @@ export default function ChatRoom({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Generate join messages when viewer simulator adds new names
+  // Generate join messages when viewer simulator adds new names.
+  // Skip the initial batch (hot-start base viewers) to avoid spam.
   const prevViewersRef = useRef<Set<string>>(new Set());
+  const viewersInitializedRef = useRef(false);
   useEffect(() => {
     if (viewers.length === 0) return;
+
+    // First render with viewers: snapshot without generating messages
+    if (!viewersInitializedRef.current) {
+      viewersInitializedRef.current = true;
+      prevViewersRef.current = new Set(viewers);
+      return;
+    }
 
     const prevSet = prevViewersRef.current;
     const newNames = viewers.filter(name => !prevSet.has(name));

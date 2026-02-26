@@ -1,6 +1,6 @@
 # Architecture
 
-> Last verified: 2026-02-25
+> Last verified: 2026-02-26
 
 Living document. Hooks remind Claude to keep this current when structural changes are made.
 
@@ -114,13 +114,17 @@ The viewer count is **list-driven** — the displayed number equals the length o
 
 The `useViewerSimulator` hook manages a stateful name list following a 3-phase attendance curve tied to video playback time:
 
-1. **Ramp-up** (0 → `rampMinutes`): easeOutQuad growth from 0 to `peakTarget`
-2. **Plateau** (`rampMinutes` → 80% of duration): stable at peak with churn swaps
-3. **Decline** (80% → 100%): linear drop to 60% of peak
+1. **Hot start** (t=0): Instantly loads ~35% of `peakTarget` viewers (30-40% with random variance). Auto-chat sender names are prioritized in the initial pool. No join messages generated for this initial batch.
+2. **Ramp-up** (0 → `rampMinutes`): easeOutQuad growth from base (~35% of peak) to `peakTarget`, with ±8% organic jitter per tick (biased upward during ramp to avoid stalling)
+3. **Plateau** (`rampMinutes` → 80% of duration): stable at peak with churn swaps and ±8% jitter for natural fluctuation
+4. **Decline** (80% → 100%): linear drop to 60% of peak (floored at 30% of peak)
 
 Key behaviors:
-- **Late join fast-forward:** When `initialTimeSec > 0`, computes snapshot at that point (no replay)
-- **Auto-chat sync:** Names from auto-chat messages are prioritized for joining and protected from removal
+- **Hot start:** Users never enter an "empty room" — base viewers and auto-chat names are pre-loaded instantly
+- **Organic jitter:** ±8% of peak per tick creates natural fluctuation (e.g., 58→62→57→63 instead of flat 60)
+- **Chat-viewer sync:** Auto-chat sender names are always in the viewer list before their first message fires
+- **Late join fast-forward:** When `initialTimeSec > 0`, computes snapshot at that point (floored at base count)
+- **Auto-chat protection:** Names from auto-chat messages are protected from removal during ramp and plateau
 - **Stable list:** Joins append to end, leaves remove from middle — no reshuffling
 - **Cooldown:** Removed names wait 120s (video time) before becoming available again
 - **Admin config:** `viewerPeakTarget` (peak count) and `viewerRampMinutes` (ramp time) per webinar
