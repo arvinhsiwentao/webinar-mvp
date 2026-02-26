@@ -265,7 +265,7 @@ export default function HomePage() {
                   key={idx}
                   className="flex items-center gap-5 md:gap-7 justify-center"
                 >
-                  <div className="flex-shrink-0 w-16 md:w-20 text-center">
+                  <div className="flex-shrink-0 w-16 md:w-20 text-center rounded-md border border-[#D8CFB6] bg-white/85 py-1.5 shadow-[0_2px_8px_rgba(15,23,42,0.08)]">
                     <div className="bg-[#B8953F] text-white text-xs md:text-sm font-medium px-2.5 py-1 rounded-sm mb-1">
                       {month}月
                     </div>
