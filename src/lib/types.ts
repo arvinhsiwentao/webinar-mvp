@@ -128,6 +128,25 @@ export interface ChatMessageData {
   createdAt: string;
 }
 
+export type OrderStatus = 'pending' | 'paid' | 'fulfilled' | 'refunded' | 'expired';
+
+export interface Order {
+  id: string;
+  webinarId: string;
+  email: string;
+  name: string;
+  stripeSessionId: string;
+  stripePaymentIntentId?: string;
+  activationCode?: string;
+  status: OrderStatus;
+  amount: number;
+  currency: string;
+  metadata?: Record<string, string>;
+  createdAt: string;
+  paidAt?: string;
+  fulfilledAt?: string;
+}
+
 // API Request/Response types
 export interface CreateWebinarRequest {
   title: string;

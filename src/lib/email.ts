@@ -91,3 +91,31 @@ export function followUpEmail(to: string, name: string, title: string, replayUrl
     `,
   };
 }
+
+export function purchaseConfirmationEmail(
+  to: string,
+  name: string,
+  activationCode: string,
+): EmailParams {
+  return {
+    to,
+    subject: '恭喜你成功购买！你的课程激活码',
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1A1A1A;">
+        <h2>Hi ${name}，恭喜你成功购买！</h2>
+        <p>你的课程激活码：</p>
+        <div style="background: #FAFAF7; border: 2px solid #B8953F; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+          <span style="font-size: 28px; font-weight: bold; letter-spacing: 4px; color: #B8953F;">${activationCode}</span>
+        </div>
+        <h3>兑换步骤：</h3>
+        <ol style="line-height: 2;">
+          <li>前往 CMoney 平台</li>
+          <li>登入/注册帐号</li>
+          <li>输入激活码完成兑换</li>
+          <li>开始学习课程</li>
+        </ol>
+        <p style="color: #6B6B6B; margin-top: 24px;">如有问题请联系客服</p>
+      </div>
+    `,
+  };
+}
