@@ -1,0 +1,74 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { stripe } from '@/lib/stripe';
+import { getWebinarById, getOrdersByEmail, createOrder } from '@/lib/db';
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { webinarId, email, name, source } = body;
+
+    if (!webinarId || !email) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Check for existing purchase
+    const existingOrders = getOrdersByEmail(email, webinarId);
+    const alreadyPurchased = existingOrders.find(
+      o => o.status === 'paid' || o.status === 'fulfilled'
+    );
+    if (alreadyPurchased) {
+      return NextResponse.json(
+        { error: 'already_purchased', message: '你已购买过此课程' },
+        { status: 409 }
+      );
+    }
+
+    // Verify webinar exists
+    const webinar = getWebinarById(webinarId);
+    if (!webinar) {
+      return NextResponse.json({ error: 'Webinar not found' }, { status: 404 });
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+    // Create Stripe Checkout Session in embedded mode
+    const session = await stripe.checkout.sessions.create({
+      ui_mode: 'embedded',
+      line_items: [
+        {
+          price: process.env.STRIPE_PRICE_ID,
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      return_url: `${baseUrl}/checkout/${webinarId}/return?session_id={CHECKOUT_SESSION_ID}`,
+      customer_email: email,
+      metadata: {
+        webinarId,
+        email,
+        name: name || '',
+        source: source || 'direct',
+      },
+    });
+
+    // Create pending order
+    createOrder({
+      webinarId,
+      email,
+      name: name || '',
+      stripeSessionId: session.id,
+      status: 'pending',
+      amount: session.amount_total || 0,
+      currency: session.currency || 'usd',
+      metadata: { source: source || 'direct' },
+    });
+
+    return NextResponse.json({ clientSecret: session.client_secret });
+  } catch (err) {
+    console.error('[Checkout] Session creation failed:', err);
+    return NextResponse.json(
+      { error: 'Failed to create checkout session' },
+      { status: 500 }
+    );
+  }
+}
