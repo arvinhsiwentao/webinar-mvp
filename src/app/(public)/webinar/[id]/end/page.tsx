@@ -5,6 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card } from '@/components/ui';
 import { Webinar } from '@/lib/types';
+import { trackGA4 } from '@/lib/analytics';
 
 export default function EndPage() {
   const params = useParams();
@@ -28,6 +29,9 @@ export default function EndPage() {
         if (!res.ok) throw new Error('Not found');
         const data = await res.json();
         setWebinar(data.webinar);
+        trackGA4('c_webinar_complete', {
+          webinar_id: String(webinarId),
+        });
       } catch {
         console.error('Failed to fetch webinar');
       } finally {
