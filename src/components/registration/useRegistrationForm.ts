@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { validateEmail } from '@/lib/utils';
+import { trackGA4 } from '@/lib/analytics';
 
 interface UseRegistrationFormOptions {
   webinarId: string;
@@ -49,6 +50,10 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
       if (!res.ok) throw new Error(data.error || 'Registration failed');
 
       onFormSubmit?.();
+      trackGA4('sign_up', {
+        method: 'webinar_registration',
+        webinar_id: String(webinarId),
+      });
       onSuccess(name);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : '报名失败，请稍后再试');
