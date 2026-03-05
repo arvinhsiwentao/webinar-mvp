@@ -1,6 +1,6 @@
 # Architecture
 
-> Last verified: 2026-02-26
+> Last verified: 2026-03-05
 
 Living document. Hooks remind Claude to keep this current when structural changes are made.
 
@@ -173,6 +173,27 @@ Shared primitives:
 - `Badge.tsx` — status/tag badges
 - `Input.tsx` — form input
 - `Card.tsx` — content card container
+
+## Analytics (GA4)
+
+GA4 is integrated via `@next/third-parties/google` with the `GoogleAnalytics` component in the root layout, gated on `NEXT_PUBLIC_GA_ID` env var.
+
+**Dual-fire tracking:** The existing `track()` function in `src/lib/tracking.ts` sends events to both `/api/track` (server-side JSON storage) and GA4 (client-side gtag). Internal event names are mapped to GA4 recommended event names where possible.
+
+**Event mapping:**
+| Internal Event | GA4 Event | Trigger |
+|---|---|---|
+| (automatic) | `page_view` | Every route change |
+| registration submit | `sign_up` | `useRegistrationForm.ts` |
+| `webinar_join` | `join_group` | Live page mount |
+| `cta_click` | `c_cta_click` | CTA overlay click |
+| `video_progress` | `c_video_progress` | 25/50/75/100% marks |
+| checkout success | `purchase` | Checkout return page |
+| end page mount | `c_webinar_complete` | End page |
+
+**gclid preservation:** `GclidPreserver` component stores gclid/UTM params in sessionStorage on first page load so Google Ads attribution survives client-side navigation.
+
+**Files:** `src/lib/analytics.ts` (typed GA4 helper), `src/lib/tracking.ts` (dual-fire), `src/components/analytics/GclidPreserver.tsx`
 
 ## Design System
 
