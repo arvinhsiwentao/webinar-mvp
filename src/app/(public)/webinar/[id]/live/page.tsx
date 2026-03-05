@@ -313,9 +313,36 @@ export default function LiveRoomPage() {
 
   // Handle CTA clicks
   const handleCTAClick = useCallback((cta: CTAEvent) => {
-    console.log('CTA clicked:', cta.buttonText);
     track('cta_click', { webinarId, buttonText: cta.buttonText, url: cta.url });
-  }, [webinarId]);
+
+    // Read email from localStorage sticky
+    let email = '';
+    let userName = '';
+    try {
+      const sticky = localStorage.getItem(`webinar-${webinarId}-evergreen`);
+      if (sticky) {
+        const parsed = JSON.parse(sticky);
+        email = parsed.email || '';
+      }
+    } catch { /* ignore */ }
+
+    // Get name from URL search params
+    userName = searchParams.get('name') || '';
+
+    const params = new URLSearchParams();
+    if (email) params.set('email', email);
+    if (userName) params.set('name', userName);
+    params.set('source', 'live');
+
+    // Pass remaining countdown time if CTA has countdown
+    if (cta.showCountdown && cta.hideAtSec) {
+      const remaining = Math.max(0, Math.round(cta.hideAtSec - currentTime));
+      if (remaining > 0) params.set('t', remaining.toString());
+    }
+
+    // Open checkout in new tab (preserves livestream)
+    window.open(`/checkout/${webinarId}?${params.toString()}`, '_blank');
+  }, [webinarId, searchParams, currentTime]);
 
   if (loading) {
     return (
