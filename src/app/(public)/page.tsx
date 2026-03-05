@@ -31,6 +31,7 @@ export default function HomePage() {
         try {
           const parsed = JSON.parse(sticky);
           parsed.registered = true;
+          parsed.email = form.email;
           localStorage.setItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`, JSON.stringify(parsed));
         } catch { /* ignore */ }
       }
