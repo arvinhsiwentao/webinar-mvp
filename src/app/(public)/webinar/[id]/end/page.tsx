@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card } from '@/components/ui';
 import { Webinar } from '@/lib/types';
@@ -15,6 +15,7 @@ export default function EndPage() {
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentUrl, setCurrentUrl] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     setCurrentUrl(window.location.href);
@@ -89,15 +90,31 @@ export default function EndPage() {
         {/* CTA section */}
         {(webinar.endPageCtaText || firstCTA) && (
           <div className="mb-10">
-            <a
-              href={webinar.endPageCtaUrl || firstCTA?.url || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Button
+              variant="gold"
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                // Read email from localStorage
+                let email = '';
+                try {
+                  const sticky = localStorage.getItem(`webinar-${webinarId}-evergreen`);
+                  if (sticky) {
+                    const parsed = JSON.parse(sticky);
+                    email = parsed.email || '';
+                  }
+                } catch { /* ignore */ }
+
+                const params = new URLSearchParams();
+                if (email) params.set('email', email);
+                if (userName !== '观众') params.set('name', userName);
+                params.set('source', 'end');
+
+                router.push(`/checkout/${webinarId}?${params.toString()}`);
+              }}
             >
-              <Button variant="gold" size="lg" className="w-full">
-                {webinar.endPageCtaText || firstCTA?.buttonText || '了解更多'}
-              </Button>
-            </a>
+              {webinar.endPageCtaText || firstCTA?.buttonText || '了解更多'}
+            </Button>
           </div>
         )}
 
