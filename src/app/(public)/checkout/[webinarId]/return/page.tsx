@@ -54,7 +54,7 @@ export default function CheckoutReturnPage() {
     }
 
     checkStatus();
-  }, [sessionId]);
+  }, [sessionId, webinarId]);
 
   if (status === 'loading') {
     return (
