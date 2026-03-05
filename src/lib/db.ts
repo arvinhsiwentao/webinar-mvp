@@ -1,7 +1,7 @@
 // JSON-based database for MVP
 import fs from 'fs';
 import path from 'path';
-import { Webinar, Registration, ChatMessageData } from './types';
+import { Webinar, Registration, ChatMessageData, Order } from './types';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 
@@ -159,6 +159,44 @@ export function appendEvent(event: unknown): void {
   const events = readJsonFile<unknown[]>('events.json', []);
   events.push(event);
   writeJsonFile('events.json', events);
+}
+
+// Order operations
+export function getAllOrders(): Order[] {
+  return readJsonFile<Order[]>('orders.json', []);
+}
+
+export function getOrderBySessionId(stripeSessionId: string): Order | null {
+  return getAllOrders().find(o => o.stripeSessionId === stripeSessionId) || null;
+}
+
+export function getOrdersByEmail(email: string, webinarId: string): Order[] {
+  return getAllOrders().filter(o => o.email === email && o.webinarId === webinarId);
+}
+
+export function createOrder(order: Omit<Order, 'id' | 'createdAt'>): Order {
+  const orders = getAllOrders();
+  const newOrder: Order = {
+    ...order,
+    id: generateId(),
+    createdAt: new Date().toISOString(),
+  };
+  orders.push(newOrder);
+  writeJsonFile('orders.json', orders);
+  return newOrder;
+}
+
+export function updateOrder(id: string, updates: Partial<Order>): Order | null {
+  const orders = getAllOrders();
+  const idx = orders.findIndex(o => o.id === id);
+  if (idx === -1) return null;
+  orders[idx] = { ...orders[idx], ...updates };
+  writeJsonFile('orders.json', orders);
+  return orders[idx];
+}
+
+export function getOrderByActivationCode(code: string): Order | null {
+  return getAllOrders().find(o => o.activationCode === code) || null;
 }
 
 // Initialize with sample data if empty
