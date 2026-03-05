@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { GclidPreserver } from "@/components/analytics/GclidPreserver";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,6 +30,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Suspense fallback={null}>
+          <GclidPreserver />
+        </Suspense>
         {children}
       </body>
       {process.env.NEXT_PUBLIC_GA_ID && (
