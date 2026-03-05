@@ -1,11 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useParams } from 'next/navigation';
+import { trackGA4 } from '@/lib/analytics';
 
 export default function CheckoutReturnPage() {
   const searchParams = useSearchParams();
+  const params = useParams();
   const sessionId = searchParams.get('session_id');
+  const webinarId = params.webinarId as string;
+  const purchaseTracked = useRef(false);
 
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [customerEmail, setCustomerEmail] = useState('');
@@ -27,6 +31,20 @@ export default function CheckoutReturnPage() {
         if (data.status === 'complete') {
           setStatus('success');
           setCustomerEmail(data.customerEmail || '');
+          if (!purchaseTracked.current) {
+            purchaseTracked.current = true;
+            trackGA4('purchase', {
+              transaction_id: sessionId || `session_${Date.now()}`,
+              value: 997.00,
+              currency: 'USD',
+              items: [{
+                item_id: `webinar_${webinarId}`,
+                item_name: 'Webinar Course',
+                price: 997.00,
+                quantity: 1,
+              }],
+            });
+          }
         } else {
           setStatus('error');
         }
