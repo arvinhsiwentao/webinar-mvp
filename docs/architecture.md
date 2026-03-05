@@ -33,6 +33,8 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 | `/webinar/[id]/waiting` | Redirect stub → `/lobby` | Backward compatibility |
 | `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + 4-tab sidebar (Info/Viewers/Chat/Offers) + on-video CTA |
 | `/webinar/[id]/end` | `src/app/(public)/webinar/[id]/end/page.tsx` | Dark sales page with purple CTA, social sharing, replay link |
+| `/checkout/[webinarId]` | `src/app/(public)/checkout/[webinarId]/page.tsx` | Two-column checkout: marketing copy + Stripe Embedded Checkout form. Reads email/name/source/t from query params. |
+| `/checkout/[webinarId]/return` | `src/app/(public)/checkout/[webinarId]/return/page.tsx` | Post-payment return page. Polls session status, shows success or error. |
 | `/admin` | `src/app/(admin)/admin/page.tsx` | Admin panel (no auth in MVP) |
 
 ## Data Architecture
@@ -48,6 +50,7 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 | `CTAEvent` | `id`, `showAtSec`, `hideAtSec`, `buttonText`, `url`, `showCountdown`, `position?`, `color?`, `secondaryText?` | Promotional overlay with optional countdown. Supports on-video or below-video positioning. |
 | `Registration` | `id`, `webinarId`, `name`, `email`, `phone?`, `assignedSlot?`, `slotExpiresAt?`, `reassignedFrom?` | One per email per webinar (duplicate check). Evergreen fields store computed slot times. |
 | `ChatMessageData` | `id`, `webinarId`, `name`, `message`, `timestamp`, `createdAt` | Real user chat message. |
+| `Order` | `id`, `webinarId`, `email`, `name`, `stripeSessionId`, `stripePaymentIntentId?`, `activationCode?`, `status`, `amount`, `currency`, `metadata?`, `createdAt`, `paidAt?`, `fulfilledAt?` | Stripe checkout order. Status: `pending` → `paid` → `fulfilled`. Activation code generated on fulfillment. |
 
 ### Storage Layer (`src/lib/db.ts`)
 
@@ -56,6 +59,7 @@ JSON file-based. Files live in `/data` at project root:
 - `data/webinars.json` — all webinar records
 - `data/registrations.json` — all registrations
 - `data/chat-messages.json` — real user chat messages
+- `data/orders.json` — Stripe checkout orders
 
 Key functions:
 - `readJsonFile<T>(filename, default)` / `writeJsonFile<T>(filename, data)` — generic JSON I/O with `fs.readFileSync`/`writeFileSync`
@@ -77,6 +81,9 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/register` | POST | `src/app/api/register/route.ts` | Checks duplicate email per webinar. Evergreen-aware: accepts `assignedSlot`, computes `slotExpiresAt`. |
 | `/api/webinar/[id]/next-slot` | GET | `src/app/api/webinar/[id]/next-slot/route.ts` | Computes upcoming evergreen slots from config. Returns `slots[]`, `countdownTarget`, `expiresAt`. |
 | `/api/webinar/[id]/reassign` | POST | `src/app/api/webinar/[id]/reassign/route.ts` | Reassigns a registered user to the next available slot (for missed sessions). |
+| `/api/checkout/create-session` | POST | `src/app/api/checkout/create-session/route.ts` | Creates Stripe Embedded Checkout session. Checks duplicate purchase, creates pending Order. Returns `clientSecret`. |
+| `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Checks Stripe session status. Backup fulfillment: generates activation code + sends email if webhook missed. |
+| `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Primary fulfillment on `checkout.session.completed`: generates activation code, updates order, sends email. Idempotent. |
 
 #### Admin Routes (`src/app/api/admin/`)
 

@@ -75,3 +75,7 @@ Added client-side access gate to `/live` route with event state machine (PRE_EVE
 **Decision:** Visibility handler now waits for `canplay` (readyState ≥ 3) before attempting play on tab return. The `autoplayBlocked` detection timeout is deferred to when the tab is actually visible — background tabs always block autoplay, so checking there was a false positive.
 
 **Why:** Browsers defer media loading for background tabs. If the user backgrounded during countdown, the live page loaded with no video data buffered, causing both unmuted and muted play() to fail on tab return. The premature timeout also showed a manual play button before giving the recovery handler a chance.
+
+### 2026-03-05 — Stripe Embedded Checkout over Hosted/Custom
+
+Chose Stripe Embedded Checkout (`ui_mode: 'embedded'`) over hosted redirect (loses user context) and custom Payment Element (more PCI scope). Embedded mode keeps users on our domain while Stripe handles PCI compliance. Activation codes generated server-side via webhook, delivered by email — return page only confirms payment, doesn't show codes.
