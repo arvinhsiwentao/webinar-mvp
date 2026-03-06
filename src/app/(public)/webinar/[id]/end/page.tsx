@@ -156,14 +156,6 @@ export default function EndPage() {
           </a>
         </div>
 
-        {/* Replay link — delayed to maintain livestream illusion */}
-        <div className="mb-10">
-          <p className="text-neutral-400 text-sm mb-2">回放将在讲座结束后通过邮件发送</p>
-          <Button variant="secondary" disabled className="opacity-50 cursor-not-allowed">
-            回放准备中...
-          </Button>
-        </div>
-
         {/* Footer */}
         <footer className="border-t border-[#E8E5DE] pt-6 mt-8">
           <div className="flex items-center justify-center gap-2 text-xs text-neutral-400 mb-2 flex-wrap">
