@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (body.persistToWebinar && body.webinarId) {
-      const webinar = updateWebinar(body.webinarId, {
+      const webinar = await updateWebinar(body.webinarId, {
         subtitleCues: result.cues,
         subtitleLanguage: transcriptForGeneration.language ?? 'unknown',
         subtitleLastGeneratedAt: new Date().toISOString(),

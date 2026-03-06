@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if webinar exists
-    const webinar = getWebinarById(body.webinarId);
+    const webinar = await getWebinarById(body.webinarId);
     if (!webinar) {
       return NextResponse.json(
         { error: 'Webinar not found' },
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already registered
-    const existingReg = getRegistrationByEmail(body.webinarId, body.email);
+    const existingReg = await getRegistrationByEmail(body.webinarId, body.email);
     if (existingReg) {
       return NextResponse.json(
         { error: 'This email is already registered for this webinar', registration: existingReg },
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const registration = createRegistration(registrationData as Parameters<typeof createRegistration>[0]);
+    const registration = await createRegistration(registrationData as Parameters<typeof createRegistration>[0]);
 
     // Send confirmation email (fire and forget)
     const origin = request.nextUrl.origin;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getWebinarById, updateWebinar, deleteWebinar, generateId, getRegistrationsByWebinar } from '@/lib/db';
+import { getWebinarById, updateWebinar, deleteWebinar, getRegistrationsByWebinar } from '@/lib/db';
 import { AutoChatMessage, CTAEvent } from '@/lib/types';
 
 export async function GET(
@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const webinar = getWebinarById(id);
+  const webinar = await getWebinarById(id);
 
   if (!webinar) {
     return NextResponse.json(
@@ -16,7 +16,7 @@ export async function GET(
     );
   }
 
-  const registrations = getRegistrationsByWebinar(id);
+  const registrations = await getRegistrationsByWebinar(id);
   return NextResponse.json({ webinar, registrations });
 }
 
@@ -32,17 +32,17 @@ export async function PUT(
     if (body.autoChat) {
       body.autoChat = body.autoChat.map((m: Partial<AutoChatMessage>) => ({
         ...m,
-        id: m.id || generateId(),
+        id: m.id || crypto.randomUUID(),
       }));
     }
     if (body.ctaEvents) {
       body.ctaEvents = body.ctaEvents.map((c: Partial<CTAEvent>) => ({
         ...c,
-        id: c.id || generateId(),
+        id: c.id || crypto.randomUUID(),
       }));
     }
 
-    const webinar = updateWebinar(id, body);
+    const webinar = await updateWebinar(id, body);
 
     if (!webinar) {
       return NextResponse.json(
@@ -66,7 +66,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const deleted = deleteWebinar(id);
+  const deleted = await deleteWebinar(id);
 
   if (!deleted) {
     return NextResponse.json(

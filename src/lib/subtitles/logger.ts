@@ -1,4 +1,6 @@
-import { generateId } from '@/lib/db';
+function generateId(): string {
+  return crypto.randomUUID();
+}
 import { appendSubtitleLog, appendSubtitleLogBatch, type SubtitleLogRecord } from './log-store';
 import type { SubtitleGenerationLogEvent } from './types';
 

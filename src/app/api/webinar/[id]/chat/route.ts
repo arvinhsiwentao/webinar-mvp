@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const webinar = getWebinarById(id);
+  const webinar = await getWebinarById(id);
   if (!webinar) {
     return NextResponse.json(
       { error: 'Webinar not found' },
@@ -16,7 +16,7 @@ export async function GET(
     );
   }
 
-  const messages = getChatMessages(id);
+  const messages = await getChatMessages(id);
   return NextResponse.json({ messages });
 }
 
@@ -37,7 +37,7 @@ export async function POST(
       );
     }
 
-    const webinar = getWebinarById(id);
+    const webinar = await getWebinarById(id);
     if (!webinar) {
       return NextResponse.json(
         { error: 'Webinar not found' },
@@ -45,7 +45,7 @@ export async function POST(
       );
     }
 
-    const newMessage = addChatMessage({
+    const newMessage = await addChatMessage({
       webinarId: id,
       name,
       message,

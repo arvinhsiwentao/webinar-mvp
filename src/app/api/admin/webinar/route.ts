@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllWebinars, createWebinar, generateId } from '@/lib/db';
+import { getAllWebinars, createWebinar } from '@/lib/db';
 import { CreateWebinarRequest, AutoChatMessage, CTAEvent } from '@/lib/types';
 
 export async function GET() {
-  const webinars = getAllWebinars();
+  const webinars = await getAllWebinars();
   return NextResponse.json({ webinars });
 }
 
@@ -22,24 +22,22 @@ export async function POST(request: NextRequest) {
     // Process auto chat messages with IDs
     const autoChat: AutoChatMessage[] = (body.autoChat || []).map((m) => ({
       ...m,
-      id: generateId(),
+      id: crypto.randomUUID(),
     }));
 
     // Process CTA events with IDs
     const ctaEvents: CTAEvent[] = (body.ctaEvents || []).map((c) => ({
       ...c,
-      id: generateId(),
+      id: crypto.randomUUID(),
     }));
 
-    const webinar = createWebinar({
+    const webinar = await createWebinar({
       ...body,
       autoChat,
       ctaEvents,
       duration: body.duration || 60,
       highlights: body.highlights || [],
       status: body.status || 'draft',
-      viewerBaseCount: body.viewerBaseCount ?? 100,
-      viewerMultiplier: body.viewerMultiplier ?? 1.5,
       viewerPeakTarget: body.viewerPeakTarget ?? 60,
       viewerRampMinutes: body.viewerRampMinutes ?? 15,
     });

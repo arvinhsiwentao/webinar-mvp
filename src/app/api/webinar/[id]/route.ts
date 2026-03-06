@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const webinar = getWebinarById(id);
+  const webinar = await getWebinarById(id);
 
   if (!webinar) {
     return NextResponse.json(
@@ -15,7 +15,7 @@ export async function GET(
     );
   }
 
-  const registrationCount = getRegistrationCount(id);
+  const registrationCount = await getRegistrationCount(id);
 
   return NextResponse.json({ webinar, registrationCount });
 }

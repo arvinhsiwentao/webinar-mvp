@@ -15,16 +15,16 @@ export async function GET(request: NextRequest) {
 
     // If payment completed, ensure fulfillment as backup (webhook is primary)
     if (session.status === 'complete') {
-      const order = getOrderBySessionId(sessionId);
+      const order = await getOrderBySessionId(sessionId);
       if (order && order.status !== 'fulfilled') {
         // Generate unique activation code
         let code = generateActivationCode();
-        while (getOrderByActivationCode(code)) {
+        while (await getOrderByActivationCode(code)) {
           code = generateActivationCode();
         }
 
         const now = new Date().toISOString();
-        updateOrder(order.id, {
+        await updateOrder(order.id, {
           status: 'fulfilled',
           activationCode: code,
           stripePaymentIntentId: session.payment_intent as string,

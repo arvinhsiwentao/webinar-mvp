@@ -68,7 +68,7 @@ export default function LiveRoomPage() {
 
   // Simulated viewer list (replaces old formula)
   const { viewers, viewerCount } = useViewerSimulator({
-    peakTarget: webinar?.viewerPeakTarget ?? webinar?.viewerBaseCount ?? 60,
+    peakTarget: webinar?.viewerPeakTarget ?? 60,
     rampMinutes: webinar?.viewerRampMinutes ?? 15,
     videoDurationSec: (webinar?.duration ?? 60) * 60,
     currentTimeSec: currentTime,

@@ -2551,5 +2551,513 @@
       "reason": "ended"
     },
     "timestamp": "2026-02-25T09:56:23.600Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T01:49:34.979Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T01:49:34.981Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T01:49:57.444Z"
+  },
+  {
+    "event": "cta_view",
+    "properties": {
+      "webinarId": "1",
+      "buttonText": "🚀 立即下載 MIKE是麥克 APP"
+    },
+    "timestamp": "2026-02-26T02:05:16.865Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 25
+    },
+    "timestamp": "2026-02-26T02:06:47.847Z"
+  },
+  {
+    "event": "cta_view",
+    "properties": {
+      "webinarId": "1",
+      "buttonText": "📱 免費體驗 APP 完整功能"
+    },
+    "timestamp": "2026-02-26T02:07:16.870Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 50
+    },
+    "timestamp": "2026-02-26T02:09:19.103Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 75
+    },
+    "timestamp": "2026-02-26T02:11:50.103Z"
+  },
+  {
+    "event": "webinar_leave",
+    "properties": {
+      "webinarId": "1",
+      "reason": "ended"
+    },
+    "timestamp": "2026-02-26T02:14:21.019Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:03:19.311Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:03:19.313Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 25
+    },
+    "timestamp": "2026-02-26T04:03:20.474Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 50
+    },
+    "timestamp": "2026-02-26T04:03:20.474Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 75
+    },
+    "timestamp": "2026-02-26T04:03:20.474Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 100
+    },
+    "timestamp": "2026-02-26T04:03:20.474Z"
+  },
+  {
+    "event": "webinar_leave",
+    "properties": {
+      "webinarId": "1",
+      "reason": "ended"
+    },
+    "timestamp": "2026-02-26T04:03:23.790Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:03:27.637Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:03:27.638Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 25
+    },
+    "timestamp": "2026-02-26T04:03:28.176Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 50
+    },
+    "timestamp": "2026-02-26T04:03:28.176Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 75
+    },
+    "timestamp": "2026-02-26T04:03:28.177Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 100
+    },
+    "timestamp": "2026-02-26T04:03:28.177Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:03:28.804Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:03:28.804Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 25
+    },
+    "timestamp": "2026-02-26T04:03:29.319Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 50
+    },
+    "timestamp": "2026-02-26T04:03:29.319Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 75
+    },
+    "timestamp": "2026-02-26T04:03:29.319Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 100
+    },
+    "timestamp": "2026-02-26T04:03:29.320Z"
+  },
+  {
+    "event": "webinar_leave",
+    "properties": {
+      "webinarId": "1",
+      "reason": "ended"
+    },
+    "timestamp": "2026-02-26T04:03:32.903Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:03:38.379Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:03:38.380Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 25
+    },
+    "timestamp": "2026-02-26T04:03:38.915Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 50
+    },
+    "timestamp": "2026-02-26T04:03:38.915Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 75
+    },
+    "timestamp": "2026-02-26T04:03:38.915Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 100
+    },
+    "timestamp": "2026-02-26T04:03:38.915Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:03:40.733Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:03:40.734Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 25
+    },
+    "timestamp": "2026-02-26T04:03:41.662Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 50
+    },
+    "timestamp": "2026-02-26T04:03:41.663Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 75
+    },
+    "timestamp": "2026-02-26T04:03:41.663Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 100
+    },
+    "timestamp": "2026-02-26T04:03:41.663Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:04:37.431Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:04:37.432Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T04:05:15.803Z"
+  },
+  {
+    "event": "cta_view",
+    "properties": {
+      "webinarId": "1",
+      "buttonText": "🚀 立即下載 MIKE是麥克 APP"
+    },
+    "timestamp": "2026-02-26T05:23:07.804Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 25
+    },
+    "timestamp": "2026-02-26T05:24:39.031Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T06:11:15.503Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T06:11:15.504Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T06:11:42.924Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T06:12:23.925Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T06:13:59.746Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T06:15:05.775Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-02-26T06:15:05.777Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-03-05T09:04:15.282Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-03-05T09:04:15.286Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-03-05T09:06:48.528Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-03-05T09:07:03.444Z"
+  },
+  {
+    "event": "cta_view",
+    "properties": {
+      "webinarId": "1",
+      "buttonText": "🚀 立即下載 MIKE是麥克 APP"
+    },
+    "timestamp": "2026-03-05T09:16:07.785Z"
+  },
+  {
+    "event": "cta_click",
+    "properties": {
+      "webinarId": "1",
+      "buttonText": "🚀 立即下載 MIKE是麥克 APP",
+      "url": "https://www.cmoney.tw/app/itemcontent.aspx?id=6643"
+    },
+    "timestamp": "2026-03-05T09:16:19.500Z"
+  },
+  {
+    "event": "cta_click",
+    "properties": {
+      "webinarId": "1",
+      "buttonText": "🚀 立即下載 MIKE是麥克 APP",
+      "url": "https://www.cmoney.tw/app/itemcontent.aspx?id=6643"
+    },
+    "timestamp": "2026-03-05T09:17:01.381Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-03-06T01:29:42.048Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-03-06T01:29:42.050Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-03-06T01:30:55.581Z"
+  },
+  {
+    "event": "cta_view",
+    "properties": {
+      "webinarId": "1",
+      "buttonText": "🚀 立即下載 MIKE是麥克 APP"
+    },
+    "timestamp": "2026-03-06T01:31:04.116Z"
+  },
+  {
+    "event": "cta_click",
+    "properties": {
+      "webinarId": "1",
+      "buttonText": "🚀 立即下載 MIKE是麥克 APP",
+      "url": "https://www.cmoney.tw/app/itemcontent.aspx?id=6643"
+    },
+    "timestamp": "2026-03-06T01:31:05.966Z"
+  },
+  {
+    "event": "video_progress",
+    "properties": {
+      "webinarId": "1",
+      "percent": 25
+    },
+    "timestamp": "2026-03-06T01:32:35.354Z"
+  },
+  {
+    "event": "webinar_join",
+    "properties": {
+      "webinarId": "1"
+    },
+    "timestamp": "2026-03-06T10:00:16.016Z"
   }
 ]

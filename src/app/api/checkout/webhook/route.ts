@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    const order = getOrderBySessionId(session.id);
+    const order = await getOrderBySessionId(session.id);
 
     if (!order) {
       console.error('[Webhook] No order found for session:', session.id);
@@ -44,12 +44,12 @@ export async function POST(request: NextRequest) {
 
     // Generate unique activation code
     let code = generateActivationCode();
-    while (getOrderByActivationCode(code)) {
+    while (await getOrderByActivationCode(code)) {
       code = generateActivationCode();
     }
 
     const now = new Date().toISOString();
-    updateOrder(order.id, {
+    await updateOrder(order.id, {
       status: 'fulfilled',
       activationCode: code,
       stripePaymentIntentId: session.payment_intent as string,

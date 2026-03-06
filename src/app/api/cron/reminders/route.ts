@@ -3,13 +3,13 @@ import { getAllWebinars, getRegistrationsByWebinar } from '@/lib/db';
 import { sendEmail, reminderEmail } from '@/lib/email';
 
 export async function GET() {
-  const webinars = getAllWebinars();
+  const webinars = await getAllWebinars();
   let sent = 0;
 
   for (const webinar of webinars) {
     if (webinar.status !== 'published') continue;
 
-    const registrations = getRegistrationsByWebinar(webinar.id);
+    const registrations = await getRegistrationsByWebinar(webinar.id);
     for (const reg of registrations) {
       if (!reg.assignedSlot) continue;
 

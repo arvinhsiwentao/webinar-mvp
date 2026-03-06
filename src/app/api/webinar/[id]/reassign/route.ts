@@ -14,7 +14,7 @@ export async function POST(
     return NextResponse.json({ error: 'Missing registrationId' }, { status: 400 });
   }
 
-  const webinar = getWebinarById(id);
+  const webinar = await getWebinarById(id);
   if (!webinar || !webinar.evergreen?.enabled) {
     return NextResponse.json({ error: 'Webinar not found or evergreen not enabled' }, { status: 404 });
   }
@@ -27,7 +27,7 @@ export async function POST(
   const newSlot = slots[0].slotTime;
   const expiresAt = getSlotExpiresAt(newSlot, webinar.evergreen.videoDurationMinutes);
 
-  const updated = updateRegistration(registrationId, {
+  const updated = await updateRegistration(registrationId, {
     assignedSlot: newSlot,
     slotExpiresAt: expiresAt,
     reassignedFrom: body.previousSlot || undefined,

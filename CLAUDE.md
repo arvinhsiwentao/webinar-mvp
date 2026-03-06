@@ -16,7 +16,6 @@ Reference platform: JoinLive (live.yongmingu.com)
 5. **Maintain `docs/architecture.md`** — the living architecture document. When you make structural changes (new routes, components, data model changes, API changes), update the relevant section before finishing. Hooks will remind and enforce this.
 6. **Never treat existing documentation or code definitions as proof of runtime behavior.** Verify by checking call sites and imports, not just definitions. Grep for actual usage.
 7. Explain things in a beginner-friendly manner.
-8. **IMPORTANT: All UI text must be internationalized.** Use translation keys, never hardcoded strings. See the `i18n` skill for details.
 9. **Record non-obvious decisions** in `docs/decisions.md`. When choosing between alternatives, append: date, decision, and why. Keep entries to 3-5 lines.
 To prevent inaccuracies caused by outdated training data, you are required to use web search tools when writing code for specific models. Always cross-reference parameters and implementation details with the most recent official documentation to accommodate the ever-changing nature of AI APIs.
 

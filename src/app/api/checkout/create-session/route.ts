@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for existing purchase
-    const existingOrders = getOrdersByEmail(email, webinarId);
+    const existingOrders = await getOrdersByEmail(email, webinarId);
     const alreadyPurchased = existingOrders.find(
       o => o.status === 'paid' || o.status === 'fulfilled'
     );
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify webinar exists
-    const webinar = getWebinarById(webinarId);
+    const webinar = await getWebinarById(webinarId);
     if (!webinar) {
       return NextResponse.json({ error: 'Webinar not found' }, { status: 404 });
     }
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Create pending order
-    createOrder({
+    await createOrder({
       webinarId,
       email,
       name: name || '',
