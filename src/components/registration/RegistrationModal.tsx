@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { formatDate, formatTime } from '@/lib/utils';
+import CountryCodeSelect from './CountryCodeSelect';
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -37,6 +38,7 @@ export default function RegistrationModal({
   onSlotTimeChange,
 }: RegistrationModalProps) {
   const [showPhone, setShowPhone] = useState(false);
+  const [countryCode, setCountryCode] = useState('+1');
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -161,7 +163,7 @@ export default function RegistrationModal({
                   className="mt-1 w-4 h-4 rounded border-[#E8E5DE] accent-[#B8953F]"
                 />
                 <span className="text-sm text-neutral-600 leading-snug">
-                  我想要在讲座开始前收到短信提醒
+                  输入手机号码获得专属优惠
                   <span className="text-neutral-400 ml-1">(可选，但强烈建议使用)</span>
                 </span>
               </label>
@@ -169,16 +171,19 @@ export default function RegistrationModal({
               {/* Phone field (conditional) */}
               {showPhone && (
                 <div className="mt-3 animate-in slide-in-from-top-2 duration-200">
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => onPhoneChange(e.target.value)}
-                    placeholder="1 (xxx) xxx-xxxx"
-                    className="w-full h-[50px] px-4 text-base bg-white border border-[#E8E5DE] rounded focus:border-[#B8953F] focus:outline-none transition-colors"
-                  />
-                  <p className="text-xs text-neutral-400 mt-1">
-                    输入你的手机号码，我们将在讲座开始前发送短信提醒给你
-                  </p>
+                  <div className="flex">
+                    <CountryCodeSelect
+                      value={countryCode}
+                      onChange={setCountryCode}
+                    />
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => onPhoneChange(e.target.value)}
+                      placeholder="手机号码"
+                      className="flex-1 h-[50px] px-4 text-base bg-white border border-[#E8E5DE] rounded-r focus:border-[#B8953F] focus:outline-none transition-colors"
+                    />
+                  </div>
                 </div>
               )}
             </div>
