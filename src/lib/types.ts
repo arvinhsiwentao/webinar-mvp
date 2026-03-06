@@ -11,7 +11,6 @@ export interface CTAEvent {
   position?: 'on_video' | 'below_video';
   color?: string;
   secondaryText?: string;
-  icon?: string;
 }
 
 export interface AutoChatMessage {
@@ -53,14 +52,11 @@ export interface EvergreenSlot {
 export interface Webinar {
   id: string;
   title: string;
-  subtitle?: string;
   speakerName: string;
   speakerTitle?: string;
-  speakerBio?: string;
   speakerImage?: string;
   speakerAvatar?: string;
   videoUrl: string;
-  thumbnailUrl?: string;
   duration: number; // minutes
   highlights: string[];
   autoChat: AutoChatMessage[];
@@ -69,15 +65,12 @@ export interface Webinar {
   subtitleLanguage?: string;
   subtitleLastGeneratedAt?: string;
   status: 'draft' | 'published' | 'ended';
-  viewerBaseCount: number;
-  viewerMultiplier: number;
   viewerPeakTarget?: number;    // Peak viewer count target (replaces base+multiplier formula)
   viewerRampMinutes?: number;   // Minutes to reach peak from video start
   webhookUrl?: string;
 
   // Landing page hero
   heroImageUrl?: string;
-  heroEyebrowText?: string;
 
   // Promotional image (confirm/waiting/info tab)
   promoImageUrl?: string;
@@ -88,20 +81,12 @@ export interface Webinar {
   // End page
   endPageSalesCopy?: string;
   endPageCtaText?: string;
-  endPageCtaUrl?: string;
-  endPageCtaColor?: string;
 
   // Sidebar content
   sidebarDescription?: string;
 
-  // Missed webinar redirect
-  missedWebinarUrl?: string;
-
   // Evergreen countdown config
   evergreen?: EvergreenConfig;
-
-  // Preroll video
-  prerollVideoUrl?: string;
 
   createdAt: string;
   updatedAt: string;
@@ -150,38 +135,28 @@ export interface Order {
 // API Request/Response types
 export interface CreateWebinarRequest {
   title: string;
-  subtitle?: string;
   speakerName: string;
   speakerTitle?: string;
-  speakerBio?: string;
   speakerImage?: string;
   speakerAvatar?: string;
   videoUrl: string;
-  thumbnailUrl?: string;
   duration: number;
   highlights?: string[];
   autoChat?: Omit<AutoChatMessage, 'id'>[];
   ctaEvents?: Omit<CTAEvent, 'id'>[];
   subtitleCues?: WebinarSubtitleCue[];
   subtitleLanguage?: string;
-  viewerBaseCount?: number;
-  viewerMultiplier?: number;
   viewerPeakTarget?: number;
   viewerRampMinutes?: number;
   webhookUrl?: string;
   status?: 'draft' | 'published' | 'ended';
   heroImageUrl?: string;
-  heroEyebrowText?: string;
   promoImageUrl?: string;
   disclaimerText?: string;
   endPageSalesCopy?: string;
   endPageCtaText?: string;
-  endPageCtaUrl?: string;
-  endPageCtaColor?: string;
   sidebarDescription?: string;
-  missedWebinarUrl?: string;
   evergreen?: EvergreenConfig;
-  prerollVideoUrl?: string;
 }
 
 export interface RegisterRequest {
