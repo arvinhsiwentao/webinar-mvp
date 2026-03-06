@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
-import MissedSessionPrompt from '@/components/evergreen/MissedSessionPrompt';
 import { Button, Badge, Card } from '@/components/ui';
 import { Webinar } from '@/lib/types';
 import { getEvergreenState, getSlotExpiresAt } from '@/lib/evergreen';
@@ -22,7 +21,6 @@ export default function LobbyPage() {
   const [loading, setLoading] = useState(true);
   const [canEnter, setCanEnter] = useState(false);
   const [evergreenState, setEvergreenState] = useState<string | null>(null);
-  const [nextSlotTime, setNextSlotTime] = useState<string>('');
   const [registrationCount, setRegistrationCount] = useState(0);
 
   const countdownTarget = slotTime || '';
@@ -49,17 +47,6 @@ export default function LobbyPage() {
             return;
           }
 
-          if (state === 'MISSED') {
-            try {
-              const slotRes = await fetch(`/api/webinar/${webinarId}/next-slot`);
-              if (slotRes.ok) {
-                const slotData = await slotRes.json();
-                if (slotData.countdownTarget) {
-                  setNextSlotTime(slotData.countdownTarget);
-                }
-              }
-            } catch { /* use empty nextSlotTime */ }
-          }
         }
       } catch {
         console.error('Failed to fetch webinar');
@@ -166,27 +153,13 @@ export default function LobbyPage() {
     );
   }
 
-  // Missed session (evergreen)
-  if (evergreenState === 'MISSED' && nextSlotTime) {
-    const sticky = typeof window !== 'undefined' ? localStorage.getItem(`webinar-${webinarId}-evergreen`) : null;
-    const registrationId = sticky ? JSON.parse(sticky).registrationId : '';
-
+  // Missed session (evergreen) — redirect to end page with purchase CTA
+  if (evergreenState === 'MISSED') {
+    router.replace(`/webinar/${webinarId}/end?name=${encodeURIComponent(userName)}`);
     return (
-      <MissedSessionPrompt
-        missedSlotTime={slotTime!}
-        nextSlotTime={nextSlotTime}
-        webinarId={webinarId}
-        registrationId={registrationId || ''}
-        onReassigned={(newSlot, expiresAt) => {
-          if (sticky) {
-            const parsed = JSON.parse(sticky);
-            parsed.assignedSlot = newSlot;
-            parsed.expiresAt = expiresAt;
-            localStorage.setItem(`webinar-${webinarId}-evergreen`, JSON.stringify(parsed));
-          }
-          router.push(`/webinar/${webinarId}/lobby?name=${encodeURIComponent(userName)}&slot=${encodeURIComponent(newSlot)}`);
-        }}
-      />
+      <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
+        <div className="w-12 h-12 border-2 border-[#B8953F] border-t-transparent rounded-full animate-spin" />
+      </div>
     );
   }
 
