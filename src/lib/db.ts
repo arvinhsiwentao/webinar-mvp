@@ -1,297 +1,304 @@
-// JSON-based database for MVP
-import fs from 'fs';
-import path from 'path';
+import { supabase } from './supabase';
 import { Webinar, Registration, ChatMessageData, Order } from './types';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
+// --- Column name mapping ---
+// Supabase uses snake_case, TypeScript uses camelCase
 
-// Ensure data directory exists
-function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+function snakeToCamelKey(key: string): string {
+  return key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+}
+
+function camelToSnakeKey(key: string): string {
+  return key.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+}
+
+function snakeToCamel<T>(row: Record<string, unknown>): T {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(row)) {
+    result[snakeToCamelKey(key)] = value;
   }
+  return result as T;
 }
 
-// Generic read/write functions
-function readJsonFile<T>(filename: string, defaultValue: T): T {
-  ensureDataDir();
-  const filepath = path.join(DATA_DIR, filename);
-  if (!fs.existsSync(filepath)) {
-    return defaultValue;
+function camelToSnake(obj: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    result[camelToSnakeKey(key)] = value;
   }
-  try {
-    const content = fs.readFileSync(filepath, 'utf-8');
-    return JSON.parse(content);
-  } catch {
-    return defaultValue;
-  }
+  return result;
 }
 
-function writeJsonFile<T>(filename: string, data: T): void {
-  ensureDataDir();
-  const filepath = path.join(DATA_DIR, filename);
-  fs.writeFileSync(filepath, JSON.stringify(data, null, 2), 'utf-8');
+// --- Webinar operations ---
+
+export async function getAllWebinars(): Promise<Webinar[]> {
+  const { data, error } = await supabase
+    .from('webinars')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return (data || []).map(row => snakeToCamel<Webinar>(row));
 }
 
-// Generate unique ID
-export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-}
+export async function getWebinarById(id: string): Promise<Webinar | null> {
+  // Try UUID match first
+  const { data: byId } = await supabase
+    .from('webinars')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  if (byId) return snakeToCamel<Webinar>(byId);
 
-// Webinar operations
-export function getAllWebinars(): Webinar[] {
-  initializeSampleData();
-  return readJsonFile<Webinar[]>('webinars.json', []);
-}
-
-export function getWebinarById(id: string): Webinar | null {
-  const webinars = getAllWebinars();
-  
-  // Try to find by id field first
-  const byId = webinars.find(w => w.id === id);
-  if (byId) return byId;
-  
-  // If id is numeric, try to use as array index (1-based for user-friendliness)
+  // Numeric ID fallback (1-based index for legacy URLs)
   const numericId = parseInt(id, 10);
-  if (!isNaN(numericId) && numericId >= 1 && numericId <= webinars.length) {
-    return webinars[numericId - 1];
+  if (!isNaN(numericId) && numericId >= 1) {
+    const { data } = await supabase
+      .from('webinars')
+      .select('*')
+      .order('created_at', { ascending: true })
+      .range(numericId - 1, numericId - 1)
+      .maybeSingle();
+    if (data) return snakeToCamel<Webinar>(data);
   }
-  
+
   return null;
 }
 
-export function createWebinar(webinar: Omit<Webinar, 'id' | 'createdAt' | 'updatedAt'>): Webinar {
-  const webinars = getAllWebinars();
-  const now = new Date().toISOString();
-  const newWebinar: Webinar = {
-    ...webinar,
-    id: generateId(),
-    createdAt: now,
-    updatedAt: now,
-  };
-  webinars.push(newWebinar);
-  writeJsonFile('webinars.json', webinars);
-  return newWebinar;
+export async function createWebinar(
+  webinar: Omit<Webinar, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<Webinar> {
+  const row = camelToSnake(webinar as unknown as Record<string, unknown>);
+  // Remove id/createdAt/updatedAt — DB generates these
+  delete row.id;
+  delete row.created_at;
+  delete row.updated_at;
+
+  const { data, error } = await supabase
+    .from('webinars')
+    .insert(row)
+    .select()
+    .single();
+  if (error) throw error;
+  return snakeToCamel<Webinar>(data);
 }
 
-export function updateWebinar(id: string, updates: Partial<Webinar>): Webinar | null {
-  const webinars = getAllWebinars();
-  const index = webinars.findIndex(w => w.id === id);
-  if (index === -1) return null;
-  
-  webinars[index] = {
-    ...webinars[index],
-    ...updates,
-    updatedAt: new Date().toISOString(),
-  };
-  writeJsonFile('webinars.json', webinars);
-  return webinars[index];
+export async function updateWebinar(
+  id: string, updates: Partial<Webinar>
+): Promise<Webinar | null> {
+  const row = camelToSnake(updates as unknown as Record<string, unknown>);
+  // Don't overwrite server-managed fields
+  delete row.id;
+  delete row.created_at;
+  delete row.updated_at;
+
+  const { data, error } = await supabase
+    .from('webinars')
+    .update(row)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return null; // not found
+    throw error;
+  }
+  return snakeToCamel<Webinar>(data);
 }
 
-export function deleteWebinar(id: string): boolean {
-  const webinars = getAllWebinars();
-  const index = webinars.findIndex(w => w.id === id);
-  if (index === -1) return false;
-  
-  webinars.splice(index, 1);
-  writeJsonFile('webinars.json', webinars);
-  return true;
+export async function deleteWebinar(id: string): Promise<boolean> {
+  const { error, count } = await supabase
+    .from('webinars')
+    .delete({ count: 'exact' })
+    .eq('id', id);
+  if (error) throw error;
+  return (count ?? 0) > 0;
 }
 
-// Registration operations
-export function getAllRegistrations(): Registration[] {
-  return readJsonFile<Registration[]>('registrations.json', []);
+// --- Registration operations ---
+
+export async function getAllRegistrations(): Promise<Registration[]> {
+  const { data, error } = await supabase
+    .from('registrations')
+    .select('*')
+    .order('registered_at', { ascending: true });
+  if (error) throw error;
+  return (data || []).map(row => snakeToCamel<Registration>(row));
 }
 
-export function getRegistrationsByWebinar(webinarId: string): Registration[] {
-  return getAllRegistrations().filter(r => r.webinarId === webinarId);
+export async function getRegistrationsByWebinar(webinarId: string): Promise<Registration[]> {
+  const { data, error } = await supabase
+    .from('registrations')
+    .select('*')
+    .eq('webinar_id', webinarId)
+    .order('registered_at', { ascending: true });
+  if (error) throw error;
+  return (data || []).map(row => snakeToCamel<Registration>(row));
 }
 
-export function getRegistrationCount(webinarId: string): number {
-  return getRegistrationsByWebinar(webinarId).length;
+export async function getRegistrationCount(webinarId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from('registrations')
+    .select('*', { count: 'exact', head: true })
+    .eq('webinar_id', webinarId);
+  if (error) throw error;
+  return count ?? 0;
 }
 
-export function getRegistrationByEmail(webinarId: string, email: string): Registration | null {
-  return getAllRegistrations().find(r => r.webinarId === webinarId && r.email === email) || null;
+export async function getRegistrationByEmail(
+  webinarId: string, email: string
+): Promise<Registration | null> {
+  const { data, error } = await supabase
+    .from('registrations')
+    .select('*')
+    .eq('webinar_id', webinarId)
+    .eq('email', email)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? snakeToCamel<Registration>(data) : null;
 }
 
-export function createRegistration(registration: Omit<Registration, 'id' | 'registeredAt'>): Registration {
-  const registrations = getAllRegistrations();
-  const newReg: Registration = {
-    ...registration,
-    id: generateId(),
-    registeredAt: new Date().toISOString(),
-  };
-  registrations.push(newReg);
-  writeJsonFile('registrations.json', registrations);
-  return newReg;
+export async function createRegistration(
+  registration: Omit<Registration, 'id' | 'registeredAt'>
+): Promise<Registration> {
+  const row = camelToSnake(registration as unknown as Record<string, unknown>);
+  delete row.id;
+  delete row.registered_at;
+
+  const { data, error } = await supabase
+    .from('registrations')
+    .insert(row)
+    .select()
+    .single();
+  if (error) throw error;
+  return snakeToCamel<Registration>(data);
 }
 
-export function updateRegistration(id: string, updates: Partial<Registration>): Registration | null {
-  const registrations = readJsonFile<Registration[]>('registrations.json', []);
-  const idx = registrations.findIndex(r => r.id === id);
-  if (idx === -1) return null;
-  registrations[idx] = { ...registrations[idx], ...updates };
-  writeJsonFile('registrations.json', registrations);
-  return registrations[idx];
+export async function updateRegistration(
+  id: string, updates: Partial<Registration>
+): Promise<Registration | null> {
+  const row = camelToSnake(updates as unknown as Record<string, unknown>);
+  delete row.id;
+
+  const { data, error } = await supabase
+    .from('registrations')
+    .update(row)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw error;
+  }
+  return snakeToCamel<Registration>(data);
 }
 
-// Chat operations
-export function getChatMessages(webinarId: string): ChatMessageData[] {
-  const allMessages = readJsonFile<ChatMessageData[]>('chat-messages.json', []);
-  return allMessages.filter(m => m.webinarId === webinarId);
+// --- Chat operations ---
+
+export async function getChatMessages(webinarId: string): Promise<ChatMessageData[]> {
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .select('*')
+    .eq('webinar_id', webinarId)
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return (data || []).map(row => snakeToCamel<ChatMessageData>(row));
 }
 
-export function addChatMessage(message: Omit<ChatMessageData, 'id' | 'createdAt'>): ChatMessageData {
-  const allMessages = readJsonFile<ChatMessageData[]>('chat-messages.json', []);
-  const newMessage: ChatMessageData = {
-    ...message,
-    id: generateId(),
-    createdAt: new Date().toISOString(),
-  };
-  allMessages.push(newMessage);
-  writeJsonFile('chat-messages.json', allMessages);
-  return newMessage;
+export async function addChatMessage(
+  message: Omit<ChatMessageData, 'id' | 'createdAt'>
+): Promise<ChatMessageData> {
+  const row = camelToSnake(message as unknown as Record<string, unknown>);
+  delete row.id;
+  delete row.created_at;
+
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .insert(row)
+    .select()
+    .single();
+  if (error) throw error;
+  return snakeToCamel<ChatMessageData>(data);
 }
 
-// Tracking events
-export function appendEvent(event: unknown): void {
-  const events = readJsonFile<unknown[]>('events.json', []);
-  events.push(event);
-  writeJsonFile('events.json', events);
+// --- Tracking events ---
+
+export async function appendEvent(event: unknown): Promise<void> {
+  const { error } = await supabase
+    .from('events')
+    .insert({ data: event });
+  if (error) throw error;
 }
 
-// Order operations
-export function getAllOrders(): Order[] {
-  return readJsonFile<Order[]>('orders.json', []);
+// --- Order operations ---
+
+export async function getAllOrders(): Promise<Order[]> {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return (data || []).map(row => snakeToCamel<Order>(row));
 }
 
-export function getOrderBySessionId(stripeSessionId: string): Order | null {
-  return getAllOrders().find(o => o.stripeSessionId === stripeSessionId) || null;
+export async function getOrderBySessionId(stripeSessionId: string): Promise<Order | null> {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('stripe_session_id', stripeSessionId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? snakeToCamel<Order>(data) : null;
 }
 
-export function getOrdersByEmail(email: string, webinarId: string): Order[] {
-  return getAllOrders().filter(o => o.email === email && o.webinarId === webinarId);
+export async function getOrdersByEmail(email: string, webinarId: string): Promise<Order[]> {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('email', email)
+    .eq('webinar_id', webinarId);
+  if (error) throw error;
+  return (data || []).map(row => snakeToCamel<Order>(row));
 }
 
-export function createOrder(order: Omit<Order, 'id' | 'createdAt'>): Order {
-  const orders = getAllOrders();
-  const newOrder: Order = {
-    ...order,
-    id: generateId(),
-    createdAt: new Date().toISOString(),
-  };
-  orders.push(newOrder);
-  writeJsonFile('orders.json', orders);
-  return newOrder;
+export async function createOrder(
+  order: Omit<Order, 'id' | 'createdAt'>
+): Promise<Order> {
+  const row = camelToSnake(order as unknown as Record<string, unknown>);
+  delete row.id;
+  delete row.created_at;
+
+  const { data, error } = await supabase
+    .from('orders')
+    .insert(row)
+    .select()
+    .single();
+  if (error) throw error;
+  return snakeToCamel<Order>(data);
 }
 
-export function updateOrder(id: string, updates: Partial<Order>): Order | null {
-  const orders = getAllOrders();
-  const idx = orders.findIndex(o => o.id === id);
-  if (idx === -1) return null;
-  orders[idx] = { ...orders[idx], ...updates };
-  writeJsonFile('orders.json', orders);
-  return orders[idx];
+export async function updateOrder(
+  id: string, updates: Partial<Order>
+): Promise<Order | null> {
+  const row = camelToSnake(updates as unknown as Record<string, unknown>);
+  delete row.id;
+
+  const { data, error } = await supabase
+    .from('orders')
+    .update(row)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw error;
+  }
+  return snakeToCamel<Order>(data);
 }
 
-export function getOrderByActivationCode(code: string): Order | null {
-  return getAllOrders().find(o => o.activationCode === code) || null;
-}
-
-// Initialize with sample data if empty
-let _sampleDataInitialized = false;
-
-export function initializeSampleData(): void {
-  if (_sampleDataInitialized) return;
-  _sampleDataInitialized = true;
-
-  const webinars = readJsonFile<Webinar[]>('webinars.json', []);
-  if (webinars.length > 0) return;
-
-  const sampleWebinar: Omit<Webinar, 'id' | 'createdAt' | 'updatedAt'> = {
-    title: 'AIC 双风口机遇讲座',
-    subtitle: '2026年最新趋势分析 - 掌握 AI 与加密货币的投资机会',
-    speakerName: '王大明',
-    speakerTitle: '资深投资顾问',
-    speakerBio: '拥有15年金融市场经验，曾任职于多家知名投资机构。专注于新兴科技与数字资产投资研究，已帮助超过10,000名学员建立正确的投资观念。',
-    speakerImage: '/images/mike-speaker.jpg',
-    speakerAvatar: '/images/mike-avatar.jpg',
-    videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop',
-    duration: 90,
-    highlights: [
-      '了解 2026 年最具潜力的投资趋势',
-      '学习 AI 产业的核心投资逻辑',
-      '掌握数字资产配置的黃金比例',
-      '获取限时优惠的独家课程折扣',
-    ],
-    autoChat: [
-      { id: 'ac1', timeSec: 3, name: 'Alex', message: '开始了！🎉' },
-      { id: 'ac2', timeSec: 8, name: '小美', message: '期待这堂课很久了' },
-      { id: 'ac3', timeSec: 15, name: 'David', message: '笔记中 📝' },
-      { id: 'ac4', timeSec: 22, name: '阿明', message: '畫面很清楚！' },
-      { id: 'ac5', timeSec: 30, name: 'Emma', message: '+1 这观点很棒' },
-      { id: 'ac6', timeSec: 40, name: 'Kevin', message: '讲得太好了 👏' },
-      { id: 'ac7', timeSec: 50, name: '小芳', message: '这个概念很新颖' },
-      { id: 'ac8', timeSec: 60, name: 'Jason', message: '终于等到这堂课了' },
-      { id: 'ac9', timeSec: 75, name: 'Linda', message: '想问哪里可以购买？' },
-      { id: 'ac10', timeSec: 90, name: 'Mike', message: '优惠链接出來了！' },
-      { id: 'ac11', timeSec: 100, name: '小雨', message: '已购买 ✅' },
-    ],
-    ctaEvents: [
-      {
-        id: 'cta1',
-        showAtSec: 80,
-        hideAtSec: 180,
-        buttonText: '🔥 立即购买限时优惠',
-        url: 'https://example.com/checkout',
-        promoText: '原价 $9,900 → 直播限定 $4,900 (50% OFF)',
-        showCountdown: true,
-        position: 'on_video' as const,
-        color: '#16a34a',
-        secondaryText: '前 20 名加入的学员，免费获赠一对一专属指导',
-      },
-    ],
-    subtitleCues: [
-      {
-        id: 'sub-1',
-        start: 4,
-        end: 7.2,
-        text: '欢迎来到今天的直播课程。',
-        lines: ['欢迎来到今天的直播课程。'],
-        cps: 3.8,
-        cpl: 12,
-      },
-      {
-        id: 'sub-2',
-        start: 8,
-        end: 12.4,
-        text: '我们会用真实案例讲解 AI 与投资策略。',
-        lines: ['我们会用真实案例讲解', 'AI 与投资策略。'],
-        cps: 4.6,
-        cpl: 12,
-      },
-    ],
-    subtitleLanguage: 'zh',
-    subtitleLastGeneratedAt: new Date().toISOString(),
-    viewerBaseCount: 100,
-    viewerMultiplier: 3,
-    viewerPeakTarget: 60,
-    viewerRampMinutes: 15,
-    status: 'published',
-    heroImageUrl: '/images/mike-speaker.jpg',
-    heroEyebrowText: '限时公开 · 免费席位有限',
-    promoImageUrl: '',
-    disclaimerText: '本次讲座内容仅为知识分享与经验探讨，不构成任何形式的投资建议、理财推荐或收益保证。',
-    endPageSalesCopy: '',
-    endPageCtaText: '限时特惠购买课程',
-    endPageCtaUrl: 'https://example.com/checkout',
-    endPageCtaColor: '#7C3AED',
-    sidebarDescription: '90分钟精彩讲座，专家分享投资策略与见解。',
-    missedWebinarUrl: '',
-    prerollVideoUrl: '',
-  };
-
-  createWebinar(sampleWebinar);
+export async function getOrderByActivationCode(code: string): Promise<Order | null> {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('activation_code', code)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? snakeToCamel<Order>(data) : null;
 }
