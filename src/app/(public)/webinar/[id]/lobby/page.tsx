@@ -8,6 +8,7 @@ import { Button, Badge, Card } from '@/components/ui';
 import { Webinar } from '@/lib/types';
 import { getEvergreenState, getSlotExpiresAt } from '@/lib/evergreen';
 import { generateICSContent } from '@/lib/utils';
+import { trackGA4 } from '@/lib/analytics';
 
 export default function LobbyPage() {
   const params = useParams();
@@ -116,6 +117,7 @@ export default function LobbyPage() {
   }, [countdownTarget, router, buildLiveUrl]);
 
   function handleDownloadICS() {
+    trackGA4('c_add_to_calendar', { method: 'ical', webinar_id: webinarId });
     if (!webinar || !countdownTarget) return;
     const ics = generateICSContent(
       webinar.title,
@@ -326,6 +328,7 @@ export default function LobbyPage() {
                   href={getGoogleCalendarUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackGA4('c_add_to_calendar', { method: 'google', webinar_id: webinarId })}
                   className="flex-1 bg-[#F5F5F0] hover:bg-[#EEEEE8] border border-[#E8E5DE] rounded-md px-3 py-2 text-center text-xs font-medium transition-colors"
                 >
                   Google 日历
