@@ -432,6 +432,7 @@ export default function LiveRoomPage() {
                     onPlaybackEvent={handlePlaybackEvent}
                     onPlayerReady={handlePlayerReady}
                     initialTime={lateJoinSeconds}
+                    slotTime={isReplay ? undefined : (slotTime || undefined)}
                   />
                   {/* Unmute overlay (only in livestream mode, not replay) */}
                   {!isReplay && (
