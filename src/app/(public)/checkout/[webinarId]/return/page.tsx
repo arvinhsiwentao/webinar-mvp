@@ -33,14 +33,16 @@ export default function CheckoutReturnPage() {
           setCustomerEmail(data.customerEmail || '');
           if (!purchaseTracked.current) {
             purchaseTracked.current = true;
+            const purchaseValue = data.amountTotal ? data.amountTotal / 100 : 997;
+            const purchaseCurrency = (data.currency || 'usd').toUpperCase();
             trackGA4('purchase', {
               transaction_id: sessionId || `session_${Date.now()}`,
-              value: 997.00,
-              currency: 'USD',
+              value: purchaseValue,
+              currency: purchaseCurrency,
               items: [{
                 item_id: `webinar_${webinarId}`,
-                item_name: 'Webinar Course',
-                price: 997.00,
+                item_name: data.productName || 'Webinar Course',
+                price: purchaseValue,
                 quantity: 1,
               }],
             });

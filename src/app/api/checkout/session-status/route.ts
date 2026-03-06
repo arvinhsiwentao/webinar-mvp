@@ -45,6 +45,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       status: session.status,
       customerEmail: session.customer_details?.email || session.customer_email,
+      amountTotal: session.amount_total,
+      currency: session.currency,
+      productName: session.metadata?.webinar_title || 'Webinar Course',
     });
   } catch (err) {
     console.error('[Checkout] Session status check failed:', err);
