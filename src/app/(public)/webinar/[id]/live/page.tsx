@@ -238,6 +238,7 @@ export default function LiveRoomPage() {
   // Handle user chat messages
   const handleSendMessage = useCallback(
     async (msg: ChatMessage) => {
+      track('chat_message', { webinarId });
       try {
         await fetch(`/api/webinar/${webinarId}/chat`, {
           method: 'POST',
