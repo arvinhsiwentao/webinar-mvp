@@ -80,6 +80,7 @@ export default function LiveRoomPage() {
 
   // Tracking milestones
   const trackedMilestones = useRef<Set<number>>(new Set());
+  const joinTracked = useRef(false);
 
   useEffect(() => {
     async function fetchWebinar() {
@@ -199,7 +200,10 @@ export default function LiveRoomPage() {
   }, [eventPhase, slotTime]);
 
   useEffect(() => {
-    track('webinar_join', { webinarId });
+    if (!joinTracked.current) {
+      joinTracked.current = true;
+      track('webinar_join', { webinarId });
+    }
   }, [webinarId]);
 
   // Handle video playback events
