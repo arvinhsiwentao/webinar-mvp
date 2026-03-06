@@ -122,6 +122,24 @@ export default function HomePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Scroll depth tracking
+  useEffect(() => {
+    const milestones = new Set<number>();
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollHeight <= 0) return;
+      const scrollPct = Math.round((window.scrollY / scrollHeight) * 100);
+      [25, 50, 75, 100].forEach(m => {
+        if (scrollPct >= m && !milestones.has(m)) {
+          milestones.add(m);
+          trackGA4('c_scroll_depth', { percent: m, page: 'landing' });
+        }
+      });
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
