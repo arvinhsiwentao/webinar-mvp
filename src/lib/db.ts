@@ -40,13 +40,16 @@ export async function getAllWebinars(): Promise<Webinar[]> {
 }
 
 export async function getWebinarById(id: string): Promise<Webinar | null> {
-  // Try UUID match first
-  const { data: byId } = await supabase
-    .from('webinars')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
-  if (byId) return snakeToCamel<Webinar>(byId);
+  // Check if id looks like a UUID before querying by id column
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidPattern.test(id)) {
+    const { data: byId } = await supabase
+      .from('webinars')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    if (byId) return snakeToCamel<Webinar>(byId);
+  }
 
   // Numeric ID fallback (1-based index for legacy URLs)
   const numericId = parseInt(id, 10);

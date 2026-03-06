@@ -15,7 +15,7 @@ export async function GET(
     );
   }
 
-  const registrationCount = await getRegistrationCount(id);
+  const registrationCount = await getRegistrationCount(webinar.id);
 
   return NextResponse.json({ webinar, registrationCount });
 }
