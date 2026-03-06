@@ -10,9 +10,10 @@ interface UseRegistrationFormOptions {
   onFormSubmit?: () => void;
   emailErrorMessage?: string;
   assignedSlot?: string;  // evergreen slot time
+  source?: string;
 }
 
-export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailErrorMessage = '请输入有效的邮箱地址', assignedSlot }: UseRegistrationFormOptions) {
+export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailErrorMessage = '请输入有效的邮箱地址', assignedSlot, source }: UseRegistrationFormOptions) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -51,7 +52,7 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
 
       onFormSubmit?.();
       trackGA4('sign_up', {
-        method: 'webinar_registration',
+        method: source ? `webinar_registration_${source}` : 'webinar_registration',
         webinar_id: String(webinarId),
       });
       onSuccess(name);

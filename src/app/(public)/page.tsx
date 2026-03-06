@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Webinar } from '@/lib/types';
+import { trackGA4 } from '@/lib/analytics';
 import PersistentCountdown from '@/components/countdown/PersistentCountdown';
 import { useRegistrationForm } from '@/components/registration/useRegistrationForm';
 import RegistrationModal from '@/components/registration/RegistrationModal';
@@ -20,10 +21,12 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const [evergreenSlots, setEvergreenSlots] = useState<Array<{ slotTime: string; type: string }>>([]);
   const [selectedSlotTime, setSelectedSlotTime] = useState('');
+  const [modalSource, setModalSource] = useState<string>('');
 
   const form = useRegistrationForm({
     webinarId: DEFAULT_WEBINAR_ID,
     assignedSlot: selectedSlotTime || evergreenSlots[0]?.slotTime,
+    source: modalSource,
     onSuccess: (name) => {
       // Update sticky session as registered
       const sticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
@@ -140,11 +143,13 @@ export default function HomePage() {
     );
   }
 
-  const openModal = async () => {
+  const openModal = async (source: string) => {
     // Re-fetch fresh evergreen slots so the displayed time is current
     if (webinar?.evergreen?.enabled) {
       await refreshEvergreenSlots();
     }
+    trackGA4('c_signup_button_click', { button_position: source, webinar_id: DEFAULT_WEBINAR_ID });
+    setModalSource(source);
     setIsModalOpen(true);
   };
 
@@ -192,7 +197,7 @@ export default function HomePage() {
           {/* Primary CTA */}
           <div className="animate-[heroFadeIn_0.8s_ease-out_0.45s_both]">
             <button
-              onClick={openModal}
+              onClick={() => openModal('hero')}
               className="group inline-flex items-center gap-2 bg-[#B8953F] text-white px-12 py-4 text-lg font-semibold tracking-wide hover:bg-[#A6842F] hover:shadow-[0_0_50px_rgba(184,149,63,0.4)] transition-all duration-300"
             >
               观看讲座
@@ -334,7 +339,7 @@ export default function HomePage() {
             {webinar.disclaimerText || '本次讲座内容仅为知识分享与经验探讨，不构成任何形式的投资建议、理财推荐或收益保证。所有提及的策略、工具及案例均为 Mike 个人投资经验分享。'}
           </p>
           <button
-            onClick={openModal}
+            onClick={() => openModal('footer')}
             className="inline-block bg-[#B8953F] text-white px-10 py-4 text-lg font-semibold tracking-wide hover:bg-[#A6842F] hover:shadow-[0_0_40px_rgba(184,149,63,0.3)] transition-all"
           >
             锁定名额，观看讲座
