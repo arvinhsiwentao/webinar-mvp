@@ -1,12 +1,12 @@
 # Architecture
 
-> Last verified: 2026-03-05
+> Last verified: 2026-03-06
 
 Living document. Hooks remind Claude to keep this current when structural changes are made.
 
 ## System Overview
 
-Simulive (simulated-live) webinar platform. A pre-recorded video plays on a schedule while interactive features — auto-chat, CTA overlays, viewer count — create the feel of a live broadcast. Built for the 北美華人 (North American Chinese) market (Simplified Chinese, zh-CN locale). The MVP uses JSON file storage and polling; production targets PostgreSQL and WebSocket.
+Simulive (simulated-live) webinar platform. A pre-recorded video plays on a schedule while interactive features — auto-chat, CTA overlays, viewer count — create the feel of a live broadcast. Built for the 北美華人 (North American Chinese) market (Simplified Chinese, zh-CN locale). Data stored in Supabase (hosted Postgres). Chat uses polling; WebSocket planned for production.
 
 ## Page Flow & Routing
 
@@ -35,7 +35,8 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 | `/webinar/[id]/end` | `src/app/(public)/webinar/[id]/end/page.tsx` | Dark sales page with purple CTA, social sharing, replay link |
 | `/checkout/[webinarId]` | `src/app/(public)/checkout/[webinarId]/page.tsx` | Two-column checkout: marketing copy + Stripe Embedded Checkout form. Reads email/name/source/t from query params. |
 | `/checkout/[webinarId]/return` | `src/app/(public)/checkout/[webinarId]/return/page.tsx` | Post-payment return page. Polls session status, shows success or error. |
-| `/admin` | `src/app/(admin)/admin/page.tsx` | Admin panel (no auth in MVP) |
+| `/admin/login` | `src/app/(admin)/admin/login/page.tsx` | Admin login page (`ADMIN_PASSWORD` env var) |
+| `/admin` | `src/app/(admin)/admin/page.tsx` | Admin panel (password-protected) |
 
 ## Data Architecture
 
@@ -52,24 +53,22 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 | `ChatMessageData` | `id`, `webinarId`, `name`, `message`, `timestamp`, `createdAt` | Real user chat message. |
 | `Order` | `id`, `webinarId`, `email`, `name`, `stripeSessionId`, `stripePaymentIntentId?`, `activationCode?`, `status`, `amount`, `currency`, `metadata?`, `createdAt`, `paidAt?`, `fulfilledAt?` | Stripe checkout order. Status: `pending` → `paid` → `fulfilled`. Activation code generated on fulfillment. |
 
-### Storage Layer (`src/lib/db.ts`)
+### Storage Layer (Supabase)
 
-JSON file-based. Files live in `/data` at project root:
+Supabase (hosted Postgres) replaces the previous JSON file storage. Server-side only — no client SDK.
 
-- `data/webinars.json` — all webinar records
-- `data/registrations.json` — all registrations
-- `data/chat-messages.json` — real user chat messages
-- `data/orders.json` — Stripe checkout orders
+- `src/lib/supabase.ts` — Supabase client initialized with service role key (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` env vars)
+- `src/lib/db.ts` — Async CRUD functions with automatic snake_case (DB) ↔ camelCase (TypeScript) mapping
+- `scripts/supabase-schema.sql` — Full schema definition (tables, indexes, RLS policies)
+- `scripts/migrate-to-supabase.ts` — One-time data migration from JSON files
 
-Key functions:
-- `readJsonFile<T>(filename, default)` / `writeJsonFile<T>(filename, data)` — generic JSON I/O with `fs.readFileSync`/`writeFileSync`
-- `generateId()` — `Date.now()-randomString` format
-- `initializeSampleData()` — seeds a demo webinar if `webinars.json` is empty
-- `getWebinarById(id)` — tries exact `id` match first, then treats numeric IDs as 1-based array index
+**Tables:** `webinars`, `registrations`, `chat_messages`, `orders`, `events`
+
+**JSONB columns:** Nested arrays that are always read/written with the parent webinar are stored as JSONB columns rather than separate tables: `auto_chat`, `cta_events`, `highlights`, `subtitle_cues`, `evergreen`.
 
 ### API Routes
 
-Routes are split into **public** (read-only + user actions) and **admin** (write operations) namespaces. This enables future auth middleware via a single matcher on `/api/admin/:path*`.
+Routes are split into **public** (read-only + user actions) and **admin** (write operations) namespaces. Admin routes are protected by password auth middleware (`src/middleware.ts`) matching `/admin/*` and `/api/admin/*`.
 
 #### Public Routes (`src/app/api/`)
 
@@ -256,7 +255,7 @@ The admin panel (`WebinarForm.tsx`) exposes evergreen settings: daily anchor tim
 
 1. **No video seeking** — Business requirement. VideoPlayer blocks scrubbing, keyboard seeks, and programmatic seeking. Not a bug.
 2. **No WebSocket** — Chat uses auto-chat messages + API polling. Socket.io planned for production.
-3. **No authentication** — Admin panel is open. Auth planned for production.
+3. **Admin password auth** — `ADMIN_PASSWORD` env var + HMAC-signed cookie session (24h expiry). Middleware at `src/middleware.ts` protects `/admin/*` and `/api/admin/*`. Login page at `/admin/login`.
 4. **North American Chinese locale** — Phone validation: US/Canada 10-digit format. Date formatting: `zh-CN` locale.
 5. **i18n required** — All UI text must use translation keys, never hardcoded strings.
 6. **Unsplash images** — `next.config.ts` allows remote images from `*.unsplash.com`.

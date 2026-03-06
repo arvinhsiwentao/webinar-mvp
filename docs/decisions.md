@@ -79,3 +79,15 @@ Added client-side access gate to `/live` route with event state machine (PRE_EVE
 ### 2026-03-05 — Stripe Embedded Checkout over Hosted/Custom
 
 Chose Stripe Embedded Checkout (`ui_mode: 'embedded'`) over hosted redirect (loses user context) and custom Payment Element (more PCI scope). Embedded mode keeps users on our domain while Stripe handles PCI compliance. Activation codes generated server-side via webhook, delivered by email — return page only confirms payment, doesn't show codes.
+
+### 2026-03-06: Supabase over JSON files for data storage
+
+Migrated from JSON file storage (`data/*.json` with `fs.readFileSync/writeFileSync`) to Supabase (hosted Postgres). JSON files couldn't handle concurrent writes — two registrations at the same time would clobber each other. Supabase solves this with real database transactions. Nested arrays (autoChat, ctaEvents, subtitleCues, evergreen) stored as JSONB columns since they're always read/written with the parent webinar. Service role key used server-side only.
+
+### 2026-03-06: Simple password auth over Supabase Auth for admin
+
+Added env-var-based password (`ADMIN_PASSWORD`) with HMAC-signed cookie session instead of full Supabase Auth. Only one admin user needed for MVP. Next.js middleware protects `/admin` and `/api/admin/*` routes. Login page at `/admin/login`. 24-hour session expiry.
+
+### 2026-03-06: Admin panel field cleanup — 11 dead fields removed
+
+Removed fields from Webinar type and admin form that were never consumed by any public page: subtitle, speakerBio, thumbnailUrl, prerollVideoUrl, heroEyebrowText, missedWebinarUrl, endPageCtaUrl, endPageCtaColor, viewerBaseCount, viewerMultiplier, CTAEvent.icon. Added 3 missing CTA fields (position, color, secondaryText) that runtime reads but the form never exposed.
