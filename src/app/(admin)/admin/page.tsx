@@ -60,9 +60,20 @@ export default function AdminPage() {
       <header className="bg-white border-b border-neutral-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold">研讨会管理后台</h1>
-          <Link href="/" className="text-neutral-500 hover:text-neutral-900 text-sm">
-            ← 返回首页
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-neutral-500 hover:text-neutral-900 text-sm">
+              ← 返回首页
+            </Link>
+            <button
+              onClick={async () => {
+                await fetch('/api/admin/logout', { method: 'POST' });
+                window.location.href = '/admin/login';
+              }}
+              className="text-neutral-500 hover:text-neutral-900 text-sm"
+            >
+              退出登录
+            </button>
+          </div>
         </div>
       </header>
 
