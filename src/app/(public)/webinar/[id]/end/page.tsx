@@ -99,6 +99,17 @@ export default function EndPage() {
               size="lg"
               className="w-full"
               onClick={() => {
+                const buttonText = webinar.endPageCtaText || firstCTA?.buttonText || '了解更多';
+                trackGA4('c_end_page_cta_click', {
+                  webinar_id: String(webinarId),
+                  button_text: buttonText,
+                });
+                trackGA4('begin_checkout', {
+                  currency: 'USD',
+                  value: 997,
+                  items: [{ item_id: `webinar_${webinarId}`, item_name: webinar.title, price: 997, quantity: 1 }],
+                });
+
                 // Read email from localStorage
                 let email = '';
                 try {

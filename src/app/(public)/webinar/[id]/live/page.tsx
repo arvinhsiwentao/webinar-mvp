@@ -15,6 +15,7 @@ import PreShowOverlay from '@/components/video/PreShowOverlay';
 import { Webinar, CTAEvent } from '@/lib/types';
 import { Badge, Button } from '@/components/ui';
 import { track } from '@/lib/tracking';
+import { trackGA4 } from '@/lib/analytics';
 import { formatElapsedTime } from '@/lib/utils';
 import { calculateLateJoinPosition } from '@/lib/evergreen';
 import { useViewerSimulator } from '@/lib/viewer-simulator';
@@ -319,6 +320,11 @@ export default function LiveRoomPage() {
   // Handle CTA clicks
   const handleCTAClick = useCallback((cta: CTAEvent) => {
     track('cta_click', { webinarId, buttonText: cta.buttonText, url: cta.url, ctaId: cta.id, videoTime: currentTime });
+    trackGA4('begin_checkout', {
+      currency: 'USD',
+      value: 997,
+      items: [{ item_id: `webinar_${webinarId}`, item_name: cta.buttonText, price: 997, quantity: 1 }],
+    });
 
     // Read email from localStorage sticky
     let email = '';
