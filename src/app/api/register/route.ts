@@ -39,8 +39,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Use the resolved UUID from the database, not the raw input (which may be a numeric alias)
+    const resolvedWebinarId = webinar.id;
+
     // Check if already registered
-    const existingReg = await getRegistrationByEmail(body.webinarId, body.email);
+    const existingReg = await getRegistrationByEmail(resolvedWebinarId, body.email);
     if (existingReg) {
       return NextResponse.json(
         { error: 'This email is already registered for this webinar', registration: existingReg },
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     // Create registration
     const registrationData: Record<string, unknown> = {
-      webinarId: body.webinarId,
+      webinarId: resolvedWebinarId,
       name: body.name,
       email: body.email,
       phone: body.phone,
@@ -70,7 +73,7 @@ export async function POST(request: NextRequest) {
     // Send confirmation email (fire and forget)
     const origin = request.nextUrl.origin;
     const slotParam = body.assignedSlot ? `&slot=${encodeURIComponent(body.assignedSlot)}` : '';
-    const liveUrl = `${origin}/webinar/${body.webinarId}/lobby?name=${encodeURIComponent(body.name)}${slotParam}`;
+    const liveUrl = `${origin}/webinar/${resolvedWebinarId}/lobby?name=${encodeURIComponent(body.name)}${slotParam}`;
     const sessionStartTime = body.assignedSlot;
     if (sessionStartTime) {
       const emailData = confirmationEmail(body.email, body.name, webinar.title, sessionStartTime, liveUrl);
