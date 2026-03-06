@@ -114,7 +114,10 @@ async function migrate() {
   for (const m of chatMessages) {
     const oldWebinarId = m.webinarId as string;
     const newWebinarId = idMap.get(oldWebinarId);
-    if (!newWebinarId) continue;
+    if (!newWebinarId) {
+      console.warn(`Skipping chat message — no webinar mapping for ${oldWebinarId}`);
+      continue;
+    }
 
     delete m.id;
     m.webinarId = newWebinarId;
@@ -130,7 +133,10 @@ async function migrate() {
   for (const o of orders) {
     const oldWebinarId = o.webinarId as string;
     const newWebinarId = idMap.get(oldWebinarId);
-    if (!newWebinarId) continue;
+    if (!newWebinarId) {
+      console.warn(`Skipping order — no webinar mapping for ${oldWebinarId}`);
+      continue;
+    }
 
     delete o.id;
     o.webinarId = newWebinarId;
