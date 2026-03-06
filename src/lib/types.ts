@@ -36,7 +36,7 @@ export interface EvergreenConfig {
   dailySchedule: Array<{ time: string }>;  // HH:mm 24hr format, e.g. ["08:00", "21:00"]
   immediateSlot: {
     enabled: boolean;
-    intervalMinutes: number;      // 15 → snaps to :00/:15/:30/:45
+    intervalMinutes: number;      // 5 → snaps to :00/:05/:10/…; also supports 15/30/60
     bufferMinutes: number;        // 3 → min gap before slot
     maxWaitMinutes: number;       // 30 → only inject if next anchor > 30 min
   };

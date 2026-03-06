@@ -81,10 +81,10 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
     webinar?.evergreen?.immediateSlot?.enabled ?? true
   );
   const [intervalMinutes, setIntervalMinutes] = useState(
-    webinar?.evergreen?.immediateSlot?.intervalMinutes ?? 15
+    webinar?.evergreen?.immediateSlot?.intervalMinutes ?? 5
   );
   const [bufferMinutes, setBufferMinutes] = useState(
-    webinar?.evergreen?.immediateSlot?.bufferMinutes ?? 3
+    webinar?.evergreen?.immediateSlot?.bufferMinutes ?? 0
   );
   const [maxWaitMinutes, setMaxWaitMinutes] = useState(
     webinar?.evergreen?.immediateSlot?.maxWaitMinutes ?? 30
@@ -386,6 +386,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
                       onChange={(e) => setIntervalMinutes(Number(e.target.value))}
                       className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
                     >
+                      <option value={5}>5</option>
                       <option value={15}>15</option>
                       <option value={30}>30</option>
                       <option value={60}>60</option>
@@ -393,14 +394,19 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
                   </div>
                   <div>
                     <label className="block text-xs text-neutral-400 mb-1">缓冲 (分钟)</label>
-                    <input
-                      type="number"
+                    <select
                       value={bufferMinutes}
                       onChange={(e) => setBufferMinutes(Number(e.target.value))}
-                      min={1}
-                      max={15}
                       className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
-                    />
+                    >
+                      <option value={0}>0 (无缓冲)</option>
+                      <option value={1}>1</option>
+                      <option value={2}>2</option>
+                      <option value={3}>3</option>
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={15}>15</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs text-neutral-400 mb-1">触发阈值 (分钟)</label>
