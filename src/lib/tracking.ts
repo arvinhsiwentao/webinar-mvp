@@ -2,12 +2,21 @@ import { trackGA4 } from './analytics'
 
 // Map internal event names to GA4 events
 const GA4_EVENT_MAP: Record<string, (props: Record<string, unknown>) => void> = {
-  webinar_join: (p) => trackGA4('join_group', { group_id: String(p.webinarId || '') }),
+  webinar_join: (p) => trackGA4('join_group', {
+    group_id: String(p.webinarId || ''),
+    webinar_id: String(p.webinarId || ''),
+  }),
   cta_click: (p) => trackGA4('c_cta_click', {
     webinar_id: String(p.webinarId || ''),
-    cta_type: String(p.buttonText || ''),
+    cta_type: String(p.buttonText || '').slice(0, 100),
     cta_url: String(p.url || ''),
+    cta_id: p.ctaId ? String(p.ctaId) : undefined,
     video_time_sec: typeof p.videoTime === 'number' ? p.videoTime : undefined,
+  }),
+  cta_view: (p) => trackGA4('c_cta_view', {
+    webinar_id: String(p.webinarId || ''),
+    cta_type: String(p.buttonText || '').slice(0, 100),
+    cta_id: p.ctaId ? String(p.ctaId) : undefined,
   }),
   video_progress: (p) => trackGA4('c_video_progress', {
     webinar_id: String(p.webinarId || ''),
@@ -15,6 +24,10 @@ const GA4_EVENT_MAP: Record<string, (props: Record<string, unknown>) => void> = 
   }),
   chat_message: (p) => trackGA4('c_chat_message', {
     webinar_id: String(p.webinarId || ''),
+  }),
+  webinar_leave: (p) => trackGA4('c_webinar_complete', {
+    webinar_id: String(p.webinarId || ''),
+    watch_duration_sec: typeof p.watchDurationSec === 'number' ? p.watchDurationSec : undefined,
   }),
 }
 
@@ -26,7 +39,9 @@ export function track(event: string, properties?: Record<string, unknown>) {
   }
 
   if (typeof window !== 'undefined') {
-    console.log('[Track]', event, properties)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[Track]', event, properties)
+    }
 
     // Fire to server-side tracking
     fetch('/api/track', {
