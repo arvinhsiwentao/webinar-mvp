@@ -225,7 +225,7 @@ export default function LiveRoomPage() {
       }
       if (event.type === 'ended') {
         setIsPlaying(false);
-        track('webinar_leave', { webinarId, reason: 'ended' });
+        track('webinar_leave', { webinarId, reason: 'ended', watchDurationSec: Math.round(event.currentTime) });
         // Redirect to end page after short delay
         setTimeout(() => {
           router.push(`/webinar/${webinarId}/end?name=${encodeURIComponent(userName)}`);
@@ -314,7 +314,7 @@ export default function LiveRoomPage() {
 
   // Handle CTA clicks
   const handleCTAClick = useCallback((cta: CTAEvent) => {
-    track('cta_click', { webinarId, buttonText: cta.buttonText, url: cta.url });
+    track('cta_click', { webinarId, buttonText: cta.buttonText, url: cta.url, ctaId: cta.id, videoTime: currentTime });
 
     // Read email from localStorage sticky
     let email = '';
@@ -458,7 +458,7 @@ export default function LiveRoomPage() {
                 currentTime={currentTime}
                 ctaEvents={(webinar.ctaEvents || []).filter(c => c.position === 'on_video')}
                 onCTAClick={handleCTAClick}
-                onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText })}
+                onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText, ctaId: cta.id })}
                 position="on_video"
               />
             </div>
@@ -468,7 +468,7 @@ export default function LiveRoomPage() {
               currentTime={currentTime}
               ctaEvents={(webinar.ctaEvents || []).filter(c => c.position !== 'on_video')}
               onCTAClick={handleCTAClick}
-              onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText })}
+              onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText, ctaId: cta.id })}
               position="below_video"
             />
 
