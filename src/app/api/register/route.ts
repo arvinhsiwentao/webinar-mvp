@@ -69,7 +69,8 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email (fire and forget)
     const origin = request.nextUrl.origin;
-    const liveUrl = `${origin}/webinar/${body.webinarId}/lobby?name=${encodeURIComponent(body.name)}`;
+    const slotParam = body.assignedSlot ? `&slot=${encodeURIComponent(body.assignedSlot)}` : '';
+    const liveUrl = `${origin}/webinar/${body.webinarId}/lobby?name=${encodeURIComponent(body.name)}${slotParam}`;
     const sessionStartTime = body.assignedSlot;
     if (sessionStartTime) {
       const emailData = confirmationEmail(body.email, body.name, webinar.title, sessionStartTime, liveUrl);
