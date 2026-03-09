@@ -11,8 +11,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Check for existing purchase
-    const existingOrders = await getOrdersByEmail(email, webinarId);
+    // Resolve webinar first (handles numeric ID → UUID conversion)
+    const webinar = await getWebinarById(webinarId);
+    if (!webinar) {
+      return NextResponse.json({ error: 'Webinar not found' }, { status: 404 });
+    }
+
+    const resolvedId = webinar.id;
+
+    // Check for existing purchase (using resolved UUID)
+    const existingOrders = await getOrdersByEmail(email, resolvedId);
     const alreadyPurchased = existingOrders.find(
       o => o.status === 'paid' || o.status === 'fulfilled'
     );
@@ -21,12 +29,6 @@ export async function POST(request: NextRequest) {
         { error: 'already_purchased', message: '你已购买过此课程' },
         { status: 409 }
       );
-    }
-
-    // Verify webinar exists
-    const webinar = await getWebinarById(webinarId);
-    if (!webinar) {
-      return NextResponse.json({ error: 'Webinar not found' }, { status: 404 });
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
@@ -41,10 +43,10 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: 'payment',
-      return_url: `${baseUrl}/checkout/${webinarId}/return?session_id={CHECKOUT_SESSION_ID}`,
+      return_url: `${baseUrl}/checkout/${resolvedId}/return?session_id={CHECKOUT_SESSION_ID}`,
       customer_email: email,
       metadata: {
-        webinarId,
+        webinarId: resolvedId,
         email,
         name: name || '',
         source: source || 'direct',
@@ -53,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     // Create pending order
     await createOrder({
-      webinarId,
+      webinarId: resolvedId,
       email,
       name: name || '',
       stripeSessionId: session.id,
