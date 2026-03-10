@@ -1,5 +1,3 @@
-import { sendGAEvent } from '@next/third-parties/google'
-
 type GA4Item = { item_id: string; item_name: string; price: number; quantity: number }
 
 type GA4EventMap = {
@@ -29,8 +27,9 @@ export function trackGA4<T extends GA4EventName>(
 ) {
   if (typeof window === 'undefined') return
   try {
-    sendGAEvent('event', eventName, params)
+    window.dataLayer = window.dataLayer || []
+    window.dataLayer.push({ event: eventName, ...params })
   } catch {
-    // GA4 not loaded (no measurement ID) — silently ignore
+    // GTM not loaded — silently ignore
   }
 }
