@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
         email,
         name: name || '',
         source: source || 'direct',
+        order_source: 'mike_webinar',
       },
     });
 
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
       status: 'pending',
       amount: session.amount_total || 0,
       currency: session.currency || 'usd',
-      metadata: { source: source || 'direct' },
+      metadata: { source: source || 'direct', order_source: 'mike_webinar' },
     });
 
     return NextResponse.json({ clientSecret: session.client_secret });
