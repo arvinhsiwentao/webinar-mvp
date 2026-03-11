@@ -29,7 +29,7 @@ export async function uploadVideo(
     throw new Error(err.error || 'Failed to initialize upload');
   }
 
-  const { videoFile, signedUrl, token } = await initRes.json();
+  const { videoFile, signedUrl } = await initRes.json();
 
   // Step 2: Upload file to Supabase using XMLHttpRequest for progress tracking
   await new Promise<void>((resolve, reject) => {
@@ -56,9 +56,8 @@ export async function uploadVideo(
     xhr.addEventListener('error', () => reject(new Error('Upload network error')));
     xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
 
-    // Supabase signed upload uses PUT with the token
+    // Supabase signed URL already contains the auth token as a query parameter
     xhr.open('PUT', signedUrl);
-    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
     xhr.send(file);
   });
