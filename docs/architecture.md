@@ -250,6 +250,21 @@ When a user enters after their slot started but before it expired (slot + video 
 
 The admin panel (`WebinarForm.tsx`) exposes evergreen settings: daily anchor times, immediate slot interval/buffer/trigger threshold, timezone, and display slot count. Evergreen is always enabled (the `Session` type was removed).
 
+## Video Storage
+
+Video files are hosted in Supabase Storage (bucket: `webinar-videos`). Metadata is tracked in a `video_files` Supabase table.
+
+**Upload flow:** Admin uploads via signed URL → file stored in Supabase Storage → public CDN URL saved to the webinar's `videoUrl` field.
+
+**Admin API routes:**
+
+| Endpoint | Methods | Purpose |
+|----------|---------|---------|
+| `/api/admin/videos` | GET, POST | List video library / initiate upload (returns signed URL) |
+| `/api/admin/videos/[id]` | PATCH, DELETE | Update metadata / delete video file |
+
+**Admin UI:** The `VideoManager` component replaces the old URL text field in the webinar form, providing drag-and-drop upload with a video library picker. YouTube support has been removed; only MP4 and HLS sources are supported.
+
 ## Key Constraints
 
 1. **No video seeking** — Business requirement. VideoPlayer blocks scrubbing, keyboard seeks, and programmatic seeking. Not a bug.

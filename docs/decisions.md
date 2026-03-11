@@ -91,3 +91,10 @@ Added env-var-based password (`ADMIN_PASSWORD`) with HMAC-signed cookie session 
 ### 2026-03-06: Admin panel field cleanup — 11 dead fields removed
 
 Removed fields from Webinar type and admin form that were never consumed by any public page: subtitle, speakerBio, thumbnailUrl, prerollVideoUrl, heroEyebrowText, missedWebinarUrl, endPageCtaUrl, endPageCtaColor, viewerBaseCount, viewerMultiplier, CTAEvent.icon. Added 3 missing CTA fields (position, color, secondaryText) that runtime reads but the form never exposed.
+
+### 2026-03-11: Supabase Storage for video hosting
+
+**Decision:** Use Supabase Storage instead of YouTube embeds for video delivery.
+**Why:** YouTube branding (logo, watermark, suggested videos) breaks the pseudo-live illusion.
+Supabase is already in the stack, supports resumable uploads for large files (up to 5GB), and serves via CDN.
+Admin panel gets drag-and-drop upload with a video library for easy switching.
