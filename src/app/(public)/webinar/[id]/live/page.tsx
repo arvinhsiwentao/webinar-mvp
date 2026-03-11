@@ -157,13 +157,35 @@ export default function LiveRoomPage() {
         }
       }
 
-      // If live but video is paused, try to resume playback
+      // If live, catch up to real-time and resume if paused
       if (eventPhase === 'live' || (eventPhase === 'pre_show' && slotTime && Date.now() >= new Date(slotTime).getTime())) {
         const player = playerInstanceRef.current;
-        if (!player || player.isDisposed() || !player.paused()) return;
+        if (!player || player.isDisposed()) return;
+
+        // Seek to live wall position so video catches up to real-time
+        const seekToLiveWall = () => {
+          if (player.isDisposed() || !slotTime) return;
+          const elapsed = (Date.now() - new Date(slotTime).getTime()) / 1000;
+          const duration = player.duration() || 0;
+          if (duration > 0 && elapsed > 0) {
+            const liveWall = Math.min(elapsed, duration);
+            const currentPos = player.currentTime() || 0;
+            // Only seek if more than 2 seconds behind live
+            if (liveWall - currentPos > 2) {
+              player.currentTime(liveWall);
+            }
+          }
+        };
+
+        // If already playing, just catch up position and return
+        if (!player.paused()) {
+          seekToLiveWall();
+          return;
+        }
 
         const attemptPlay = () => {
           if (player.isDisposed()) return;
+          seekToLiveWall();
           // Try unmuted play first (user just switched to tab = user gesture context)
           player.muted(false);
           const playPromise = player.play();
@@ -319,7 +341,7 @@ export default function LiveRoomPage() {
 
   // Handle CTA clicks
   const handleCTAClick = useCallback((cta: CTAEvent) => {
-    track('cta_click', { webinarId, buttonText: cta.buttonText, url: cta.url, ctaId: cta.id, videoTime: currentTime });
+    track('cta_click', { webinarId, buttonText: cta.buttonText, ctaId: cta.id, videoTime: currentTime });
     trackGA4('begin_checkout', {
       currency: 'USD',
       value: 997,
