@@ -252,15 +252,17 @@ The admin panel (`WebinarForm.tsx`) exposes evergreen settings: daily anchor tim
 
 ## Video Storage
 
-Video files are hosted in Supabase Storage (bucket: `webinar-videos`). Metadata is tracked in a `video_files` Supabase table.
+Video files are hosted in Cloudflare R2 (bucket: `webinar-videos`), which replaced Supabase Storage due to its 50MB upload limit. Metadata is tracked in the Supabase `video_files` table.
 
-**Upload flow:** Admin uploads via signed URL → file stored in Supabase Storage → public CDN URL saved to the webinar's `videoUrl` field.
+**Upload flow:** Admin initiates upload → server generates presigned PUT URL via `@aws-sdk/client-s3` → browser uploads directly to R2 → public URL from R2 `r2.dev` subdomain saved to the webinar's `videoUrl` field. Custom domain planned for production.
+
+**Fallback:** Admin can paste any external MP4/HLS URL directly, bypassing the upload flow.
 
 **Admin API routes:**
 
 | Endpoint | Methods | Purpose |
 |----------|---------|---------|
-| `/api/admin/videos` | GET, POST | List video library / initiate upload (returns signed URL) |
+| `/api/admin/videos` | GET, POST | List video library / initiate upload (returns R2 presigned PUT URL) |
 | `/api/admin/videos/[id]` | PATCH, DELETE | Update metadata / delete video file |
 
 **Admin UI:** The `VideoManager` component replaces the old URL text field in the webinar form, providing drag-and-drop upload with a video library picker. YouTube support has been removed; only MP4 and HLS sources are supported.

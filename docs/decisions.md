@@ -98,3 +98,7 @@ Removed fields from Webinar type and admin form that were never consumed by any 
 **Why:** YouTube branding (logo, watermark, suggested videos) breaks the pseudo-live illusion.
 Supabase is already in the stack, supports resumable uploads for large files (up to 5GB), and serves via CDN.
 Admin panel gets drag-and-drop upload with a video library for easy switching.
+
+## 2026-03-11: Migrate video storage from Supabase to Cloudflare R2
+
+Supabase free tier has 50MB file upload limit (hard cap, no workaround). Cloudflare R2 free tier: 10GB storage, zero egress fees, 5GB per single upload. Video metadata stays in Supabase DB. Added paste-URL fallback for flexibility. Uses `@aws-sdk/client-s3` with presigned PUT URLs for browser-direct uploads.
