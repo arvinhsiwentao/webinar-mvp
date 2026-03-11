@@ -1,9 +1,71 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Webinar } from '@/lib/types';
 import ArrayFieldEditor from './ArrayFieldEditor';
 import VideoManager from './VideoManager';
+
+function CTAPreview({ cta }: { cta: CTAField }) {
+  const buttonColor = cta.color || '#B8953F';
+  const isOnVideo = cta.position === 'on_video';
+
+  return (
+    <div
+      className="rounded-lg overflow-hidden"
+      style={{
+        backgroundColor: isOnVideo ? 'rgba(0,0,0,0.75)' : '#F5F3EE',
+        padding: '16px 20px',
+        maxWidth: 320,
+      }}
+    >
+      {cta.promoText && (
+        <p style={{
+          color: isOnVideo ? '#FFFFFF' : '#1A1A1A',
+          fontWeight: 700,
+          fontSize: 15,
+          marginBottom: 4,
+          lineHeight: 1.3,
+        }}>
+          {cta.promoText}
+        </p>
+      )}
+      {cta.secondaryText && (
+        <p style={{
+          color: isOnVideo ? 'rgba(255,255,255,0.8)' : '#6B6B6B',
+          fontSize: 12,
+          marginBottom: 8,
+        }}>
+          {cta.secondaryText}
+        </p>
+      )}
+      {cta.showCountdown && (
+        <p style={{
+          color: isOnVideo ? '#FFD700' : '#B8953F',
+          fontSize: 13,
+          fontWeight: 600,
+          marginBottom: 8,
+          fontVariantNumeric: 'tabular-nums',
+        }}>
+          限时优惠 02:00
+        </p>
+      )}
+      <div
+        style={{
+          backgroundColor: buttonColor,
+          color: '#FFFFFF',
+          fontWeight: 600,
+          fontSize: 14,
+          padding: '8px 16px',
+          borderRadius: 6,
+          textAlign: 'center',
+          cursor: 'default',
+        }}
+      >
+        {cta.buttonText || '按钮文字'}
+      </div>
+    </div>
+  );
+}
 
 interface AutoChatField {
   timeSec: string;
@@ -97,6 +159,10 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [ctaPreviewOpen, setCtaPreviewOpen] = useState<Record<number, boolean>>({});
+  const toggleCtaPreview = useCallback((idx: number) => {
+    setCtaPreviewOpen(prev => ({ ...prev, [idx]: !prev[idx] }));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -479,9 +545,9 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
             onChange={setCtaEvents}
             emptyLabel="尚未设置 CTA"
             renderItem={(cta, idx, update, remove) => (
-              <div className="bg-[#F5F5F0] p-4 rounded space-y-3">
+              <div className="bg-[#F5F5F0] p-4 rounded space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-neutral-500">CTA #{idx + 1}</span>
+                  <span className="text-sm font-medium text-[#1A1A1A]">CTA #{idx + 1}</span>
                   <button
                     type="button"
                     onClick={remove}
@@ -490,90 +556,160 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
                     删除
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="number"
-                    value={cta.showAtSec}
-                    onChange={(e) => update('showAtSec', e.target.value)}
-                    placeholder="显示时间 (秒)"
-                    className="bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
-                  />
-                  <input
-                    type="number"
-                    value={cta.hideAtSec}
-                    onChange={(e) => update('hideAtSec', e.target.value)}
-                    placeholder="隐藏时间 (秒)"
-                    className="bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
-                  />
-                </div>
-                <input
-                  type="text"
-                  value={cta.buttonText}
-                  onChange={(e) => update('buttonText', e.target.value)}
-                  placeholder="按钮文字"
-                  className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
-                />
-                <input
-                  type="text"
-                  value={cta.url}
-                  onChange={(e) => update('url', e.target.value)}
-                  placeholder="链接 URL"
-                  className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
-                />
-                <input
-                  type="text"
-                  value={cta.promoText}
-                  onChange={(e) => update('promoText', e.target.value)}
-                  placeholder="优惠文案 (选填)"
-                  className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
-                />
-                <label className="flex items-center gap-2 text-sm text-neutral-500">
-                  <input
-                    type="checkbox"
-                    checked={cta.showCountdown}
-                    onChange={(e) => update('showCountdown', e.target.checked as CTAField[keyof CTAField])}
-                    className="rounded"
-                  />
-                  显示倒计时
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-neutral-400 mb-1">位置</label>
-                    <select
-                      value={cta.position}
-                      onChange={(e) => update('position', e.target.value as CTAField[keyof CTAField])}
-                      className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
-                    >
-                      <option value="below_video">视频下方</option>
-                      <option value="on_video">视频上方 (浮层)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-neutral-400 mb-1">按钮颜色</label>
-                    <div className="flex items-center gap-2">
+
+                {/* 时间设置 */}
+                <div>
+                  <h4 className="text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide mb-2">时间设置</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A1A1A]">显示时间</label>
+                      <p className="text-xs text-[#999] mt-0.5 mb-1">CTA 出现的视频播放秒数</p>
                       <input
-                        type="text"
-                        value={cta.color}
-                        onChange={(e) => update('color', e.target.value as CTAField[keyof CTAField])}
-                        placeholder="#B8953F"
-                        className="flex-1 bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
+                        type="number"
+                        value={cta.showAtSec}
+                        onChange={(e) => update('showAtSec', e.target.value)}
+                        placeholder="例: 300"
+                        className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-[#E8E5DE] text-sm focus:border-[#B8953F] focus:outline-none"
                       />
-                      {cta.color && (
-                        <div
-                          className="w-8 h-8 rounded border border-neutral-300 shrink-0"
-                          style={{ backgroundColor: cta.color }}
-                        />
-                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A1A1A]">隐藏时间</label>
+                      <p className="text-xs text-[#999] mt-0.5 mb-1">CTA 消失的视频播放秒数</p>
+                      <input
+                        type="number"
+                        value={cta.hideAtSec}
+                        onChange={(e) => update('hideAtSec', e.target.value)}
+                        placeholder="例: 600"
+                        className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-[#E8E5DE] text-sm focus:border-[#B8953F] focus:outline-none"
+                      />
                     </div>
                   </div>
                 </div>
-                <input
-                  type="text"
-                  value={cta.secondaryText}
-                  onChange={(e) => update('secondaryText', e.target.value as CTAField[keyof CTAField])}
-                  placeholder="副标题文字 (选填)"
-                  className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-neutral-300 text-sm"
-                />
+
+                <hr className="border-[#E8E5DE]" />
+
+                {/* 内容设置 */}
+                <div>
+                  <h4 className="text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide mb-2">内容设置</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A1A1A]">促销文案</label>
+                      <p className="text-xs text-[#999] mt-0.5 mb-1">按钮上方的大字促销信息，如「限时优惠 原价 &rarr; 特价」</p>
+                      <input
+                        type="text"
+                        value={cta.promoText}
+                        onChange={(e) => update('promoText', e.target.value)}
+                        placeholder="限时优惠 $199 → $99"
+                        className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-[#E8E5DE] text-sm focus:border-[#B8953F] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A1A1A]">副标题</label>
+                      <p className="text-xs text-[#999] mt-0.5 mb-1">按钮上方的小字补充说明</p>
+                      <input
+                        type="text"
+                        value={cta.secondaryText}
+                        onChange={(e) => update('secondaryText', e.target.value as CTAField[keyof CTAField])}
+                        placeholder="仅限本次直播观众"
+                        className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-[#E8E5DE] text-sm focus:border-[#B8953F] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A1A1A]">按钮文字</label>
+                      <p className="text-xs text-[#999] mt-0.5 mb-1">CTA 按钮上显示的文字</p>
+                      <input
+                        type="text"
+                        value={cta.buttonText}
+                        onChange={(e) => update('buttonText', e.target.value)}
+                        placeholder="立即抢购"
+                        className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-[#E8E5DE] text-sm focus:border-[#B8953F] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A1A1A]">链接地址</label>
+                      <p className="text-xs text-[#999] mt-0.5 mb-1">点击按钮后跳转的网址</p>
+                      <input
+                        type="text"
+                        value={cta.url}
+                        onChange={(e) => update('url', e.target.value)}
+                        placeholder="https://example.com/checkout"
+                        className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-[#E8E5DE] text-sm focus:border-[#B8953F] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <hr className="border-[#E8E5DE]" />
+
+                {/* 样式设置 */}
+                <div>
+                  <h4 className="text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide mb-2">样式设置</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A1A1A]">显示位置</label>
+                      <p className="text-xs text-[#999] mt-0.5 mb-1">选择 CTA 出现在视频上方浮层还是视频下方独立区域</p>
+                      <select
+                        value={cta.position}
+                        onChange={(e) => update('position', e.target.value as CTAField[keyof CTAField])}
+                        className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-[#E8E5DE] text-sm focus:border-[#B8953F] focus:outline-none"
+                      >
+                        <option value="below_video">视频下方</option>
+                        <option value="on_video">视频上方 (浮层)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A1A1A]">按钮颜色</label>
+                      <p className="text-xs text-[#999] mt-0.5 mb-1">CTA 按钮的背景颜色，默认为金色 #B8953F</p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={cta.color}
+                          onChange={(e) => update('color', e.target.value as CTAField[keyof CTAField])}
+                          placeholder="#B8953F"
+                          className="flex-1 bg-white text-neutral-900 px-3 py-2 rounded border border-[#E8E5DE] text-sm focus:border-[#B8953F] focus:outline-none"
+                        />
+                        {cta.color && (
+                          <div
+                            className="w-8 h-8 rounded border border-[#E8E5DE] shrink-0"
+                            style={{ backgroundColor: cta.color }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                    <label className="flex items-center gap-2 text-sm text-neutral-500">
+                      <input
+                        type="checkbox"
+                        checked={cta.showCountdown}
+                        onChange={(e) => update('showCountdown', e.target.checked as CTAField[keyof CTAField])}
+                        className="rounded accent-[#B8953F]"
+                      />
+                      显示倒计时
+                    </label>
+                  </div>
+                </div>
+
+                <hr className="border-[#E8E5DE]" />
+
+                {/* 预览效果 */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => toggleCtaPreview(idx)}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide hover:text-[#1A1A1A] transition-colors"
+                  >
+                    <span style={{
+                      display: 'inline-block',
+                      transform: ctaPreviewOpen[idx] ? 'rotate(90deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.15s',
+                    }}>&#9654;</span>
+                    预览效果
+                  </button>
+                  {ctaPreviewOpen[idx] && (
+                    <div className="mt-3 p-4 bg-[#E8E5DE] rounded-lg flex justify-center">
+                      <CTAPreview cta={cta} />
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           />

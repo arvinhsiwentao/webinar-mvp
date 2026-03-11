@@ -50,7 +50,7 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
   if (!activeCTA) return null;
 
   const remainingSec = activeCTA.hideAtSec - currentTime;
-  const bgColor = activeCTA.color || '#B8953F';
+  const buttonColor = activeCTA.color || '#B8953F';
   const isOnVideo = position === 'on_video';
 
   return (
@@ -69,18 +69,18 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
             : 'p-5 max-w-lg mx-auto'
           }
         `}
-        style={!isOnVideo ? { backgroundColor: bgColor } : undefined}
+        style={!isOnVideo ? { backgroundColor: '#F5F3EE' } : undefined}
       >
         {/* Promo text */}
         {activeCTA.promoText && (
-          <p className="text-white text-center text-sm mb-3 font-medium">
+          <p className={`text-center text-sm mb-3 font-medium ${isOnVideo ? 'text-white' : 'text-[#1A1A1A]'}`}>
             {activeCTA.promoText}
           </p>
         )}
 
         {/* Secondary text */}
         {activeCTA.secondaryText && (
-          <p className="text-white/80 text-center text-xs mb-3">
+          <p className={`text-center text-xs mb-3 ${isOnVideo ? 'text-white/80' : 'text-[#6B6B6B]'}`}>
             {activeCTA.secondaryText}
           </p>
         )}
@@ -88,8 +88,8 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
         {/* Countdown */}
         {activeCTA.showCountdown && remainingSec > 0 && (
           <div className="flex items-center justify-center gap-2 mb-3">
-            <span className="text-white/70 text-xs">限时优惠</span>
-            <span className="bg-black/30 text-white font-mono text-lg px-3 py-1 rounded-md">
+            <span className={`text-xs ${isOnVideo ? 'text-white/70' : 'text-[#6B6B6B]'}`}>限时优惠</span>
+            <span className={`font-mono text-lg px-3 py-1 rounded-md ${isOnVideo ? 'bg-black/30 text-white' : 'bg-black/10 text-[#1A1A1A]'}`}>
               {formatCountdownMMSS(remainingSec)}
             </span>
           </div>
@@ -102,7 +102,7 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
           rel="noopener noreferrer"
           onClick={() => onCTAClick?.(activeCTA)}
           className="group relative block w-full text-center text-white font-bold text-lg py-3.5 px-6 rounded-lg shadow-lg transition-all duration-200 overflow-hidden hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
-          style={{ backgroundColor: '#1A1A1A' }}
+          style={{ backgroundColor: buttonColor }}
         >
           <span className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-200" />
           <span className="relative">{activeCTA.buttonText}</span>
