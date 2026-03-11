@@ -98,8 +98,7 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 - `generateICSContent` — calendar file generation
 - `validateEmail`, `validatePhone` — phone accepts North American 10-digit format (with optional +1)
 - `cn(...classes)` — className join helper (like `clsx`)
-- `isYouTubeUrl(url)` — detects YouTube video URLs (youtube.com, youtu.be, embed)
-- `getVideoSourceType(url)` — returns Video.js MIME type (`video/youtube`, `application/x-mpegURL`, or `video/mp4`)
+- `getVideoSourceType(url)` — returns Video.js MIME type (`application/x-mpegURL` or `video/mp4`)
 
 ## Component Architecture
 
@@ -150,7 +149,7 @@ The `replay=true` query parameter bypasses all gates (used by the end page repla
 
 | Component | Source | Role |
 |-----------|--------|------|
-| `VideoPlayer` | `src/components/video/VideoPlayer.tsx` | Video.js + HLS.js player. **YouTube support** via `videojs-youtube` plugin. Dynamically imported (no SSR). **Seeking disabled** — blocks scrubbing, arrow keys, Home/End. Emits `onTimeUpdate`. Supports `initialTime` prop for late-join video seeking. `livestreamMode` prop hides controls and enables muted autoplay. |
+| `VideoPlayer` | `src/components/video/VideoPlayer.tsx` | Video.js + HLS.js player. Supports MP4 and HLS sources. Dynamically imported (no SSR). **Seeking disabled** — blocks scrubbing, arrow keys, Home/End. Emits `onTimeUpdate`. Supports `initialTime` prop for late-join video seeking. `livestreamMode` prop hides controls and enables muted autoplay. |
 | `ChatRoom` | `src/components/chat/ChatRoom.tsx` | Displays auto-chat messages at configured timestamps (with randomized variance). Accepts real user messages via API polling. Supports `initialTime` prop for late-join chat backfill. |
 | `MissedSessionPrompt` | `src/components/evergreen/MissedSessionPrompt.tsx` | Shows missed session message with countdown to next slot and reassignment button. |
 | `CTAOverlay` | `src/components/cta/CTAOverlay.tsx` | Promotional overlay with `position` support (`on_video`/`below_video`), configurable `color`, and `secondaryText`. |

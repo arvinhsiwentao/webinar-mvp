@@ -4,8 +4,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import videojs from 'video.js';
 import type Player from 'video.js/dist/types/player';
 import 'video.js/dist/video-js.css';
-import 'videojs-youtube';
-import { isYouTubeUrl, getVideoSourceType } from '@/lib/utils';
+import { getVideoSourceType } from '@/lib/utils';
 
 const TIMEUPDATE_EMIT_INTERVAL_SEC = 0.1;
 
@@ -56,7 +55,6 @@ export default function VideoPlayer({
     videoElement.classList.add('vjs-big-play-centered', 'vjs-fluid');
     videoRef.current.appendChild(videoElement);
 
-    const isYT = isYouTubeUrl(src);
     const sourceType = getVideoSourceType(src);
 
     const playerOptions: Record<string, unknown> = {
@@ -72,17 +70,6 @@ export default function VideoPlayer({
       },
       sources: [{ src, type: sourceType }],
     };
-
-    if (isYT) {
-      playerOptions.techOrder = ['youtube'];
-      playerOptions.youtube = {
-        ytControls: 0,
-        rel: 0,
-        modestbranding: 1,
-        iv_load_policy: 3,
-        disablekb: 1,
-      };
-    }
 
     const player = videojs(videoElement, playerOptions);
     playerRef.current = player;
