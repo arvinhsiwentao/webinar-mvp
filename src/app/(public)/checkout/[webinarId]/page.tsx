@@ -155,10 +155,10 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-lg border border-[#E8E5DE] p-6">
               <h3 className="font-semibold text-neutral-900 mb-4">课程套餐内容</h3>
               <ul className="space-y-3">
-                <ValueItem text="美股抄底实战课程 (价值 NT$16,000)" />
-                <ValueItem text="存股被动收入课程 (价值 NT$16,000)" />
-                <ValueItem text="MIKE是麥克 APP 完整权限 (年费价值 NT$12,000)" />
-                <ValueItem text="2,000+ 人美股操作社群 (价值 NT$6,000)" />
+                <ValueItem text="震盪行情的美股期權操作解析 (价值 USD $312)" />
+                <ValueItem text="ETF 進階資產放大術 (价值 USD $384)" />
+                <ValueItem text="MIKE是麥克 APP 完整权限 (年费价值 USD $1,000)" />
+                <ValueItem text="2,000+ 人美股操作社群 (独家福利)" />
                 <ValueItem text="Mike 亲自录制选股逻辑教学 (独家内容)" />
               </ul>
             </div>
@@ -166,11 +166,11 @@ export default function CheckoutPage() {
             {/* Price display */}
             <div className="bg-white rounded-lg border border-[#E8E5DE] p-6">
               <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-neutral-400 line-through text-lg">NT$32,000</span>
-                <span className="text-3xl font-bold text-neutral-900">NT$17,250</span>
+                <span className="text-neutral-400 line-through text-lg">USD $1,696</span>
+                <span className="text-3xl font-bold text-neutral-900">USD $599</span>
               </div>
               <div className="inline-block bg-[rgba(184,149,63,0.08)] text-[#B8953F] text-sm font-medium px-3 py-1 rounded-md">
-                立省 NT$14,750 (46% OFF)
+                立省 USD $1,097 (65% OFF)
               </div>
             </div>
 
