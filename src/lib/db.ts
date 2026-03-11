@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Webinar, Registration, ChatMessageData, Order } from './types';
+import { Webinar, Registration, ChatMessageData, Order, VideoFile } from './types';
 
 // --- Column name mapping ---
 // Supabase uses snake_case, TypeScript uses camelCase
@@ -304,4 +304,69 @@ export async function getOrderByActivationCode(code: string): Promise<Order | nu
     .maybeSingle();
   if (error) throw error;
   return data ? snakeToCamel<Order>(data) : null;
+}
+
+// --- Video File operations ---
+
+export async function getVideoFiles(): Promise<VideoFile[]> {
+  const { data, error } = await supabase
+    .from('video_files')
+    .select('*')
+    .order('uploaded_at', { ascending: false });
+  if (error) throw error;
+  return (data || []).map(row => snakeToCamel<VideoFile>(row));
+}
+
+export async function getVideoFileById(id: string): Promise<VideoFile | null> {
+  const { data, error } = await supabase
+    .from('video_files')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? snakeToCamel<VideoFile>(data) : null;
+}
+
+export async function createVideoFile(
+  videoFile: Omit<VideoFile, 'id' | 'uploadedAt'>
+): Promise<VideoFile> {
+  const row = camelToSnake(videoFile as unknown as Record<string, unknown>);
+  delete row.id;
+  delete row.uploaded_at;
+
+  const { data, error } = await supabase
+    .from('video_files')
+    .insert(row)
+    .select()
+    .single();
+  if (error) throw error;
+  return snakeToCamel<VideoFile>(data);
+}
+
+export async function updateVideoFile(
+  id: string, updates: Partial<VideoFile>
+): Promise<VideoFile | null> {
+  const row = camelToSnake(updates as unknown as Record<string, unknown>);
+  delete row.id;
+
+  const { data, error } = await supabase
+    .from('video_files')
+    .update(row)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw error;
+  }
+  return snakeToCamel<VideoFile>(data);
+}
+
+export async function deleteVideoFile(id: string): Promise<boolean> {
+  const { error, count } = await supabase
+    .from('video_files')
+    .delete({ count: 'exact' })
+    .eq('id', id);
+  if (error) throw error;
+  return (count ?? 0) > 0;
 }

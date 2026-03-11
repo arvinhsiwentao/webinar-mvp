@@ -132,6 +132,17 @@ export interface Order {
   fulfilledAt?: string;
 }
 
+export interface VideoFile {
+  id: string;
+  filename: string;        // original upload filename
+  storagePath: string;     // path in Supabase Storage bucket
+  publicUrl: string;       // CDN URL for playback
+  fileSize: number;        // bytes
+  durationSec?: number;    // seconds (optional, set client-side)
+  status: 'uploading' | 'ready' | 'error';
+  uploadedAt: string;      // ISO date
+}
+
 // API Request/Response types
 export interface CreateWebinarRequest {
   title: string;
