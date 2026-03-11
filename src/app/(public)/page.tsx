@@ -308,7 +308,7 @@ export default function HomePage() {
 
           {/* Countdown Timer */}
           <PersistentCountdown
-            targetTime={evergreenSlots[0]?.slotTime}
+            slots={evergreenSlots}
           />
         </div>
       </section>
