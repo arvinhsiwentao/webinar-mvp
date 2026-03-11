@@ -18,6 +18,7 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [externalUrl, setExternalUrl] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchVideos = useCallback(async () => {
@@ -178,6 +179,31 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
           </button>
         )}
 
+        {/* External URL input */}
+        <div className="mt-3 pt-3 border-t border-gray-200">
+          <div className="flex gap-2">
+            <input
+              type="url"
+              value={externalUrl}
+              onChange={(e) => setExternalUrl(e.target.value)}
+              placeholder="或粘贴视频 URL (MP4/M3U8)"
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#B8953F]"
+            />
+            <button
+              onClick={() => {
+                if (externalUrl.trim()) {
+                  onChange(externalUrl.trim());
+                  setExternalUrl('');
+                }
+              }}
+              disabled={!externalUrl.trim()}
+              className="px-3 py-1.5 text-sm bg-[#B8953F] text-white rounded-md hover:bg-[#A07E35] disabled:opacity-50"
+            >
+              使用
+            </button>
+          </div>
+        </div>
+
         {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
       </div>
     );
@@ -292,6 +318,31 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
           ))}
         </div>
       )}
+
+      {/* External URL input */}
+      <div className="mt-3 pt-3 border-t border-gray-200">
+        <div className="flex gap-2">
+          <input
+            type="url"
+            value={externalUrl}
+            onChange={(e) => setExternalUrl(e.target.value)}
+            placeholder="或粘贴视频 URL (MP4/M3U8)"
+            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#B8953F]"
+          />
+          <button
+            onClick={() => {
+              if (externalUrl.trim()) {
+                onChange(externalUrl.trim());
+                setExternalUrl('');
+              }
+            }}
+            disabled={!externalUrl.trim()}
+            className="px-3 py-1.5 text-sm bg-[#B8953F] text-white rounded-md hover:bg-[#A07E35] disabled:opacity-50"
+          >
+            使用
+          </button>
+        </div>
+      </div>
 
       {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
     </div>
