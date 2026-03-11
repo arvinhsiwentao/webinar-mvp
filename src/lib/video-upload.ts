@@ -56,10 +56,16 @@ export async function uploadVideo(
     xhr.addEventListener('error', () => reject(new Error('Upload network error')));
     xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
 
-    // Supabase signed URL already contains the auth token as a query parameter
+    // Supabase expects FormData with the file appended (not raw binary body)
+    // This matches how @supabase/storage-js uploadToSignedUrl handles Blob/File
+    const formData = new FormData();
+    formData.append('cacheControl', '3600');
+    formData.append('', file);
+
     xhr.open('PUT', signedUrl);
-    xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
-    xhr.send(file);
+    xhr.setRequestHeader('x-upsert', 'false');
+    // Do NOT set Content-Type — browser sets multipart/form-data with boundary automatically
+    xhr.send(formData);
   });
 
   // Step 3: Mark upload as ready
