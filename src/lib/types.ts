@@ -5,7 +5,6 @@ export interface CTAEvent {
   showAtSec: number;
   hideAtSec: number;
   buttonText: string;
-  url: string;
   promoText?: string;
   showCountdown: boolean;
   position?: 'on_video' | 'below_video';

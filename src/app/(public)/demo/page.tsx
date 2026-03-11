@@ -90,7 +90,7 @@ export default function DemoPage() {
   // Handle CTA clicks
   const handleCTAClick = useCallback((cta: CTAEvent) => {
     console.log('CTA clicked:', cta.buttonText);
-    window.open(cta.url, '_blank');
+    window.open(`/checkout/demo`, '_blank');
   }, []);
 
   if (loading) {

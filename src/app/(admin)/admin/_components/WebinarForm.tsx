@@ -77,7 +77,6 @@ interface CTAField {
   showAtSec: string;
   hideAtSec: string;
   buttonText: string;
-  url: string;
   promoText: string;
   showCountdown: boolean;
   position: string;
@@ -125,7 +124,6 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
       showAtSec: String(c.showAtSec),
       hideAtSec: String(c.hideAtSec),
       buttonText: c.buttonText,
-      url: c.url,
       promoText: c.promoText || '',
       showCountdown: c.showCountdown,
       position: c.position || 'below_video',
@@ -178,11 +176,10 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
           name: m.name,
           message: m.message,
         })),
-        ctaEvents: ctaEvents.filter(c => c.buttonText && c.url).map(c => ({
+        ctaEvents: ctaEvents.filter(c => c.buttonText).map(c => ({
           showAtSec: parseInt(c.showAtSec) || 0,
           hideAtSec: parseInt(c.hideAtSec) || 0,
           buttonText: c.buttonText,
-          url: c.url,
           promoText: c.promoText || undefined,
           showCountdown: c.showCountdown,
           position: c.position || 'below_video',
@@ -527,7 +524,6 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               showAtSec: '',
               hideAtSec: '',
               buttonText: '',
-              url: '',
               promoText: '',
               showCountdown: true,
               position: 'below_video',
@@ -622,17 +618,6 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
                         value={cta.buttonText}
                         onChange={(e) => update('buttonText', e.target.value)}
                         placeholder="立即抢购"
-                        className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-[#E8E5DE] text-sm focus:border-[#B8953F] focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#1A1A1A]">链接地址</label>
-                      <p className="text-xs text-[#999] mt-0.5 mb-1">点击按钮后跳转的网址</p>
-                      <input
-                        type="text"
-                        value={cta.url}
-                        onChange={(e) => update('url', e.target.value)}
-                        placeholder="https://example.com/checkout"
                         className="w-full bg-white text-neutral-900 px-3 py-2 rounded border border-[#E8E5DE] text-sm focus:border-[#B8953F] focus:outline-none"
                       />
                     </div>

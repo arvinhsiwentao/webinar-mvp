@@ -43,16 +43,14 @@ export default function OffersTab({ ctaEvents, currentTime, onOfferClick }: Offe
             {cta.secondaryText && (
               <p className="text-xs text-[#6B6B6B]">{cta.secondaryText}</p>
             )}
-            <a
-              href={cta.url}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
               onClick={() => onOfferClick?.(cta)}
-              className="block w-full text-center py-2.5 rounded-md text-sm font-semibold transition-colors shadow-sm"
+              className="block w-full text-center py-2.5 rounded-md text-sm font-semibold transition-colors shadow-sm cursor-pointer"
               style={{ backgroundColor: cta.color || '#B8953F', color: 'white' }}
             >
               {cta.buttonText}
-            </a>
+            </button>
           </div>
         </div>
       ))}

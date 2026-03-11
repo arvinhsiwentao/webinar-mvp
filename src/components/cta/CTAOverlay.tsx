@@ -96,17 +96,15 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
         )}
 
         {/* CTA button */}
-        <a
-          href={activeCTA.url}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
           onClick={() => onCTAClick?.(activeCTA)}
-          className="group relative block w-full text-center text-white font-bold text-lg py-3.5 px-6 rounded-lg shadow-lg transition-all duration-200 overflow-hidden hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
+          className="group relative block w-full text-center text-white font-bold text-lg py-3.5 px-6 rounded-lg shadow-lg transition-all duration-200 overflow-hidden hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] cursor-pointer"
           style={{ backgroundColor: buttonColor }}
         >
           <span className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-200" />
           <span className="relative">{activeCTA.buttonText}</span>
-        </a>
+        </button>
       </div>
     </div>
   );
