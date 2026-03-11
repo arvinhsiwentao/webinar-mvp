@@ -14,7 +14,7 @@ export async function uploadVideo(
   file: File,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<UploadResult> {
-  // Step 1: Get signed upload URL from our API
+  // Step 1: Get presigned URL from our API
   const initRes = await fetch('/api/admin/videos', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -29,9 +29,9 @@ export async function uploadVideo(
     throw new Error(err.error || 'Failed to initialize upload');
   }
 
-  const { videoFile, signedUrl } = await initRes.json();
+  const { videoFile, presignedUrl } = await initRes.json();
 
-  // Step 2: Upload file to Supabase using XMLHttpRequest for progress tracking
+  // Step 2: Upload file directly to R2 via presigned PUT URL
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
@@ -49,23 +49,18 @@ export async function uploadVideo(
       if (xhr.status >= 200 && xhr.status < 300) {
         resolve();
       } else {
-        reject(new Error(`Upload failed with status ${xhr.status}`));
+        reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.responseText}`));
       }
     });
 
     xhr.addEventListener('error', () => reject(new Error('Upload network error')));
     xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
 
-    // Supabase expects FormData with the file appended (not raw binary body)
-    // This matches how @supabase/storage-js uploadToSignedUrl handles Blob/File
-    const formData = new FormData();
-    formData.append('cacheControl', '3600');
-    formData.append('', file);
-
-    xhr.open('PUT', signedUrl);
-    xhr.setRequestHeader('x-upsert', 'false');
-    // Do NOT set Content-Type — browser sets multipart/form-data with boundary automatically
-    xhr.send(formData);
+    // R2 presigned URL: simple PUT with raw file body
+    // Auth is embedded in the URL query params (no headers needed)
+    xhr.open('PUT', presignedUrl);
+    xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
+    xhr.send(file);
   });
 
   // Step 3: Mark upload as ready
