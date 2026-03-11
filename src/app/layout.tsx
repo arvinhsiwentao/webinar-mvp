@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Webinar MVP - 在线直播研讨会平台",
-  description: "让创作者能以「伪直播」方式，通过预录内容 + 实时互动，达成高转化的销售/教学目标。",
+  title: "Mike是麥克 - 在线直播",
+  description: "Mike是麥克的专属直播间，分享北美华人生活与创业干货。",
 };
 
 export default function RootLayout({
