@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getVideoFileById, updateVideoFile, deleteVideoFile, getAllWebinars } from '@/lib/db';
-import { supabase } from '@/lib/supabase';
-
-const BUCKET = 'webinar-videos';
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { getR2Client, getR2BucketName } from '@/lib/r2';
 
 // PATCH /api/admin/videos/[id] — update status to 'ready'
 export async function PATCH(
@@ -47,12 +46,14 @@ export async function DELETE(
     }
   }
 
-  // Delete from Supabase Storage
-  const { error: storageError } = await supabase.storage
-    .from(BUCKET)
-    .remove([videoFile.storagePath]);
-
-  if (storageError) {
+  // Delete from R2 Storage
+  try {
+    const r2 = getR2Client();
+    await r2.send(new DeleteObjectCommand({
+      Bucket: getR2BucketName(),
+      Key: videoFile.storagePath,
+    }));
+  } catch (storageError) {
     console.error('Storage delete error:', storageError);
   }
 
