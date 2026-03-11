@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Webinar } from '@/lib/types';
 import ArrayFieldEditor from './ArrayFieldEditor';
+import VideoManager from './VideoManager';
 
 interface AutoChatField {
   timeSec: string;
@@ -175,19 +176,11 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               required
             />
           </div>
-          <div>
-            <label className="block text-sm text-neutral-500 mb-2">视频 URL *</label>
-            <input
-              type="url"
+          <div className="md:col-span-2">
+            <VideoManager
               value={formData.videoUrl}
-              onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-              placeholder="https://example.com/video.mp4、.m3u8 或 YouTube 链接"
-              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
-              required
+              onChange={(url) => setFormData({ ...formData, videoUrl: url })}
             />
-            <p className="text-xs text-neutral-400 mt-1">
-              支持格式：MP4 直链、M3U8 (HLS) 流媒体、YouTube 视频链接
-            </p>
           </div>
           <div>
             <label className="block text-sm text-neutral-500 mb-2">时长 (分钟)</label>
