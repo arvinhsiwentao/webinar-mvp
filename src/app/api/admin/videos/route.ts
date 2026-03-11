@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getVideoFiles, createVideoFile } from '@/lib/db';
-import { supabase } from '@/lib/supabase';
+import { getR2Client, getR2BucketName, getR2PublicUrl } from '@/lib/r2';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const BUCKET = 'webinar-videos';
 
@@ -10,7 +12,7 @@ export async function GET() {
   return NextResponse.json(files);
 }
 
-// POST /api/admin/videos — create metadata + return signed upload URL
+// POST /api/admin/videos — create metadata + return R2 presigned upload URL
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { filename, fileSize } = body;
@@ -23,10 +25,8 @@ export async function POST(request: NextRequest) {
   const ext = filename.split('.').pop() || 'mp4';
   const storagePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-  // Get public URL
-  const { data: { publicUrl } } = supabase.storage
-    .from(BUCKET)
-    .getPublicUrl(storagePath);
+  // Get public URL from R2
+  const publicUrl = getR2PublicUrl(storagePath);
 
   // Create metadata record with status 'uploading'
   const videoFile = await createVideoFile({
@@ -37,19 +37,17 @@ export async function POST(request: NextRequest) {
     status: 'uploading',
   });
 
-  // Create signed upload URL for client-side upload
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from(BUCKET)
-    .createSignedUploadUrl(storagePath);
-
-  if (uploadError) {
-    return NextResponse.json({ error: uploadError.message }, { status: 500 });
-  }
+  // Generate presigned PUT URL for direct browser upload to R2
+  const r2 = getR2Client();
+  const command = new PutObjectCommand({
+    Bucket: getR2BucketName(),
+    Key: storagePath,
+    ContentType: `video/${ext === 'mp4' ? 'mp4' : ext}`,
+  });
+  const presignedUrl = await getSignedUrl(r2, command, { expiresIn: 3600 });
 
   return NextResponse.json({
     videoFile,
-    signedUrl: uploadData.signedUrl,
-    token: uploadData.token,
-    path: uploadData.path,
+    presignedUrl,
   });
 }
