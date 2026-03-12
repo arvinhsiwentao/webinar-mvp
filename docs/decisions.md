@@ -112,3 +112,15 @@ Supabase free tier has 50MB file upload limit (hard cap, no workaround). Cloudfl
 **Why:** R2's `r2.dev` subdomain has no CDN caching, causing video buffering. Mux provides automatic HLS adaptive bitrate, global CDN, and 100K free delivery minutes/month. Video.js + HLS.js already supports `.m3u8` URLs — zero player code changes needed.
 
 **Alternatives rejected:** Cloudflare Stream ($60/mo at 1K viewers vs Mux ~$0.18), Bunny Stream (viable but Mux created Video.js — best compatibility), R2 custom domain (no HLS, needs domain on Cloudflare).
+
+### 2026-03-12 — Stripe Payment Intent ID as order number
+
+**Decision:** Use the Stripe Payment Intent ID (`pi_xxx`) as the order number displayed in purchase confirmation emails, instead of generating a custom order ID.
+
+**Why:** Already captured at fulfillment (`stripePaymentIntentId`), no database migration needed. Provides a traceable link back to Stripe dashboard for customer service.
+
+### 2026-03-12 — Google Sheets for activation code inventory
+
+**Decision:** Switch activation codes from random generation (`activation-codes.ts`) to claiming pre-populated codes from a Google Sheet via the Sheets API. The old random generator remains as a fallback when `GOOGLE_SERVICE_ACCOUNT_KEY` is not set.
+
+**Why:** Business needs pre-determined activation codes (from CMoney platform). Google Sheets provides a simple, non-technical interface for the team to manage code inventory. Race condition handled by verify-after-write with max 3 retries.

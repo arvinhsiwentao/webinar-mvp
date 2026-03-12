@@ -29,6 +29,10 @@ export async function sendEmail({ to, subject, html }: EmailParams): Promise<boo
         content: [{ type: 'text/html', value: html }],
       }),
     });
+    if (!res.ok) {
+      const errorBody = await res.text();
+      console.error(`[Email] SendGrid error ${res.status}: ${errorBody}`);
+    }
     return res.ok;
   } catch (err) {
     console.error('[Email] Send failed:', err);
@@ -92,29 +96,78 @@ export function followUpEmail(to: string, name: string, title: string, replayUrl
   };
 }
 
-export function purchaseConfirmationEmail(
-  to: string,
-  name: string,
-  activationCode: string,
-): EmailParams {
+export interface PurchaseEmailData {
+  to: string;
+  name: string;
+  activationCode: string;
+  orderDate: string;
+  orderId: string;
+  email: string;
+}
+
+export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams {
+  const productName = '美股二加一实战组合包';
+  const codeExpiry = '2026/12/31';
+  const appLink = 'https://cmoneymike.onelink.me/ZEaW/kkyo4oqs';
+  const course1Link = 'https://cmy.tw/00CKIq';
+  const course2Link = 'https://cmy.tw/00ChKt';
+  const serviceEmail = 'service@cmoneyedu.com';
+  const serviceHours = '周一至周五 09:00–18:00（台北时间）';
+
   return {
-    to,
-    subject: '恭喜你成功购买！你的课程激活码',
+    to: data.to,
+    subject: `感谢您购买【${productName}】，请查收您的商品启用序号`,
     html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1A1A1A;">
-        <h2>Hi ${name}，恭喜你成功购买！</h2>
-        <p>你的课程激活码：</p>
-        <div style="background: #FAFAF7; border: 2px solid #B8953F; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
-          <span style="font-size: 28px; font-weight: bold; letter-spacing: 4px; color: #B8953F;">${activationCode}</span>
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1A1A1A; line-height: 1.8;">
+        <p style="font-size: 16px;">${data.name} 用户您好，感谢您购买【${productName}｜Mike 是麦克】，以下是您的订单资讯与商品启用序号，请妥善保存此邮件。</p>
+
+        <!-- Order Info Table -->
+        <table style="width: 100%; border-collapse: collapse; margin: 24px 0; border: 1px solid #E8E5DE; background: #FAFAF7;">
+          <tr>
+            <td style="border: 1px solid #E8E5DE; padding: 10px 14px; font-weight: bold; width: 33%;">订购日期</td>
+            <td style="border: 1px solid #E8E5DE; padding: 10px 14px; font-weight: bold; width: 34%;">订单编号</td>
+            <td style="border: 1px solid #E8E5DE; padding: 10px 14px; font-weight: bold; width: 33%;">商品名称</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #E8E5DE; padding: 10px 14px;">${data.orderDate}</td>
+            <td style="border: 1px solid #E8E5DE; padding: 10px 14px; font-size: 13px; word-break: break-all;">${data.orderId}</td>
+            <td style="border: 1px solid #E8E5DE; padding: 10px 14px;">${productName}</td>
+          </tr>
+          <tr>
+            <td colspan="3" style="border: 1px solid #E8E5DE; padding: 10px 14px;"><strong>订购人 Email：</strong>${data.email}</td>
+          </tr>
+        </table>
+
+        <!-- Activation Code Box -->
+        <div style="border: 2px solid #B8953F; border-radius: 8px; padding: 24px; text-align: center; margin: 24px 0;">
+          <p style="margin: 0 0 8px 0; font-size: 15px; color: #1A1A1A;">商品启用序号</p>
+          <p style="margin: 0 0 12px 0; font-size: 28px; font-weight: bold; letter-spacing: 4px; color: #B8953F;">${data.activationCode}</p>
+          <p style="margin: 0 0 4px 0; font-size: 13px; color: #B8953F;">※ 此序号仅限单次使用，启用后即失效，请勿分享给他人</p>
+          <p style="margin: 0; font-size: 13px; color: #B8953F;">※ 序号到期日：${codeExpiry}</p>
         </div>
-        <h3>兑换步骤：</h3>
-        <ol style="line-height: 2;">
-          <li>前往 CMoney 平台</li>
-          <li>登入/注册帐号</li>
-          <li>输入激活码完成兑换</li>
-          <li>开始学习课程</li>
+
+        <!-- Instructions -->
+        <h3 style="margin: 24px 0 12px 0; font-size: 16px;">启用步骤</h3>
+        <ol style="line-height: 2; padding-left: 20px;">
+          <li>前往理财宝官网</li>
+          <li>输入序号</li>
+          <li>点击启用</li>
+          <li>登入／注册帐号</li>
+          <li>启用成功，即可开始使用</li>
         </ol>
-        <p style="color: #6B6B6B; margin-top: 24px;">如有问题请联系客服</p>
+
+        <!-- Product Links -->
+        <h3 style="margin: 24px 0 12px 0; font-size: 16px;">商品连结</h3>
+        <ul style="line-height: 2; padding-left: 20px;">
+          <li><a href="${appLink}" style="color: #B8953F;">Mike是麦克 美股财富导航 App</a></li>
+          <li><a href="${course1Link}" style="color: #B8953F;">震荡行情的美股期权操作解析</a></li>
+          <li><a href="${course2Link}" style="color: #B8953F;">ETF 进阶资产放大术</a></li>
+        </ul>
+
+        <!-- Footer -->
+        <hr style="border: none; border-top: 1px solid #E8E5DE; margin: 32px 0 16px 0;" />
+        <p style="font-size: 13px; color: #6B6B6B;">如有任何问题，请联系理财宝客服：<a href="mailto:${serviceEmail}" style="color: #B8953F;">${serviceEmail}</a></p>
+        <p style="font-size: 13px; color: #6B6B6B;">服务时间：${serviceHours}</p>
       </div>
     `,
   };

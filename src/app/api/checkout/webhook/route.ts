@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { getOrderBySessionId, updateOrder, getOrderByActivationCode } from '@/lib/db';
-import { generateActivationCode } from '@/lib/activation-codes';
+import { getOrderBySessionId, updateOrder } from '@/lib/db';
+import { claimActivationCode } from '@/lib/google-sheets';
 import { sendEmail, purchaseConfirmationEmail } from '@/lib/email';
 import Stripe from 'stripe';
 
@@ -42,11 +42,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    // Generate unique activation code
-    let code = generateActivationCode();
-    while (await getOrderByActivationCode(code)) {
-      code = generateActivationCode();
-    }
+    const paymentIntentId = session.payment_intent as string;
+    const code = await claimActivationCode(paymentIntentId || order.id, order.email);
 
     const now = new Date().toISOString();
     await updateOrder(order.id, {
@@ -58,11 +55,15 @@ export async function POST(request: NextRequest) {
     });
 
     // Send purchase confirmation email
-    const emailParams = purchaseConfirmationEmail(
-      order.email,
-      order.name || order.email,
-      code,
-    );
+    const orderDate = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/');
+    const emailParams = purchaseConfirmationEmail({
+      to: order.email,
+      name: order.name || order.email,
+      activationCode: code,
+      orderDate,
+      orderId: (session.payment_intent as string) || session.id,
+      email: order.email,
+    });
     await sendEmail(emailParams);
 
     console.log(`[Webhook] Order fulfilled: ${order.id}, code: ${code}`);

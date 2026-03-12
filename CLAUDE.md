@@ -53,7 +53,7 @@ The root `/` is the only landing page, hardcoded for webinar ID `1` ("Mike是麥
 
 - `src/app/` — Next.js App Router pages and API routes
 - `src/components/` — Reusable components organized by feature (`video/`, `chat/`, `cta/`, `countdown/`, `ui/`, `analytics/`, `evergreen/`, `live/`, `registration/`, `sidebar/`, `subtitles/`)
-- `src/lib/` — Core utilities: `types.ts` (all TypeScript interfaces), `db.ts` (Supabase CRUD layer), `supabase.ts` (client init), `utils.ts` (date formatting, validation, `cn()`), `email.ts` (SendGrid templates), `tracking.ts` (event tracking + GA4 dual-fire), `analytics.ts` (typed GA4 helper), `chat-broker.ts` (SSE pub/sub singleton), `evergreen.ts` (slot generation), `viewer-simulator.ts` (simulated viewer list hook), `stripe.ts` (Stripe client), `r2.ts` (Cloudflare R2 client), `video-upload.ts` (client-side upload orchestration), `activation-codes.ts` (code generation)
+- `src/lib/` — Core utilities: `types.ts` (all TypeScript interfaces), `db.ts` (Supabase CRUD layer), `supabase.ts` (client init), `utils.ts` (date formatting, validation, `cn()`), `email.ts` (SendGrid templates), `tracking.ts` (event tracking + GA4 dual-fire), `analytics.ts` (typed GA4 helper), `chat-broker.ts` (SSE pub/sub singleton), `evergreen.ts` (slot generation), `viewer-simulator.ts` (simulated viewer list hook), `stripe.ts` (Stripe client), `r2.ts` (Cloudflare R2 client), `video-upload.ts` (client-side upload orchestration), `activation-codes.ts` (random code generation fallback), `google-sheets.ts` (Google Sheets activation code claiming)
 - `src/styles/` — `design-tokens.css` with CSS custom properties
 - `data/` — Legacy JSON files (pre-Supabase migration artifacts, not used at runtime)
 - `docs/` — PM specification documents (Chinese)

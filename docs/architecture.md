@@ -62,6 +62,8 @@ Supabase (hosted Postgres) replaces the previous JSON file storage. Server-side 
 - `scripts/supabase-schema.sql` — Full schema definition (tables, indexes, RLS policies)
 - `scripts/migrate-to-supabase.ts` — One-time data migration from JSON files
 
+**Activation codes:** `src/lib/google-sheets.ts` — Claims pre-populated activation codes from a Google Sheet via the Sheets API. Falls back to random generation (`src/lib/activation-codes.ts`) when `GOOGLE_SERVICE_ACCOUNT_KEY` is not configured.
+
 **Tables:** `webinars`, `registrations`, `chat_messages`, `orders`, `events`
 
 **JSONB columns:** Nested arrays that are always read/written with the parent webinar are stored as JSONB columns rather than separate tables: `auto_chat`, `cta_events`, `highlights`, `subtitle_cues`, `evergreen`.
@@ -81,8 +83,8 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/webinar/[id]/next-slot` | GET | `src/app/api/webinar/[id]/next-slot/route.ts` | Computes upcoming evergreen slots from config. Returns `slots[]`, `countdownTarget`, `expiresAt`. |
 | `/api/webinar/[id]/reassign` | POST | `src/app/api/webinar/[id]/reassign/route.ts` | Reassigns a registered user to the next available slot (for missed sessions). |
 | `/api/checkout/create-session` | POST | `src/app/api/checkout/create-session/route.ts` | Creates Stripe Embedded Checkout session. Checks duplicate purchase, creates pending Order. Returns `clientSecret`. |
-| `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Checks Stripe session status. Backup fulfillment: generates activation code + sends email if webhook missed. |
-| `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Primary fulfillment on `checkout.session.completed`: generates activation code, updates order, sends email. Idempotent. |
+| `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Checks Stripe session status. Backup fulfillment: claims activation code from Google Sheets + sends email if webhook missed. |
+| `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Primary fulfillment on `checkout.session.completed`: claims activation code from Google Sheets, updates order, sends email. Idempotent. |
 | `/api/webinar/[id]/chat/stream` | GET | `src/app/api/webinar/[id]/chat/stream/route.ts` | SSE real-time chat stream via `chat-broker.ts` |
 | `/api/track` | POST | `src/app/api/track/route.ts` | Store tracking events to `events` table |
 | `/api/subtitles/generate` | POST | `src/app/api/subtitles/generate/route.ts` | Generate subtitles for video |
