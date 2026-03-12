@@ -101,7 +101,7 @@ export default function CheckoutPage() {
           <div className="text-4xl mb-4">&#10004;</div>
           <h1 className="text-2xl font-bold text-neutral-900 mb-3">你已购买过此课程</h1>
           <p className="text-neutral-500">
-            激活码已发送至 {email}，请检查你的邮箱（包括垃圾邮件文件夹）。
+            商品启用序号已发送至 {email}，请检查你的邮箱（包括垃圾邮件文件夹）。
           </p>
         </div>
       </div>
