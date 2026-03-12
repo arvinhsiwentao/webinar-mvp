@@ -24,6 +24,34 @@ type GA4EventMap = {
 
 type GA4EventName = keyof GA4EventMap
 
+// Events that represent conversions — these get attribution params auto-attached
+const CONVERSION_EVENTS: ReadonlySet<string> = new Set([
+  'sign_up',
+  'join_group',
+  'begin_checkout',
+  'purchase',
+  'c_enter_live',
+  'c_webinar_complete',
+  'c_end_page_cta_click',
+])
+
+function getCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+/** Read attribution params from sessionStorage (fast) with cookie fallback (persistent). */
+function getAttribution(): Record<string, string> {
+  const attrs: Record<string, string> = {}
+  const keys = ['gclid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content']
+
+  for (const key of keys) {
+    const value = sessionStorage.getItem(key) || getCookie(key)
+    if (value) attrs[key] = value
+  }
+  return attrs
+}
+
 export function trackGA4<T extends GA4EventName>(
   eventName: T,
   params: GA4EventMap[T]
@@ -34,7 +62,16 @@ export function trackGA4<T extends GA4EventName>(
   }
   try {
     window.dataLayer = window.dataLayer || []
-    window.dataLayer.push({ event: eventName, ...params })
+
+    let enrichedParams: Record<string, unknown> = { ...params }
+
+    // Auto-attach gclid/utm to conversion events
+    if (CONVERSION_EVENTS.has(eventName)) {
+      const attribution = getAttribution()
+      enrichedParams = { ...enrichedParams, ...attribution }
+    }
+
+    window.dataLayer.push({ event: eventName, ...enrichedParams })
   } catch {
     // GTM not loaded — silently ignore
   }
