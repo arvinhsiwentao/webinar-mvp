@@ -247,6 +247,15 @@ export default function LiveRoomPage() {
     }
   }, [isReplay]);
 
+  // Handle CTA view/dismiss tracking
+  const handleCTAView = useCallback((cta: CTAEvent) => {
+    trackGA4('c_cta_view', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) });
+  }, [webinarId, currentTime]);
+
+  const handleCTADismiss = useCallback((cta: CTAEvent) => {
+    trackGA4('c_cta_dismiss', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) });
+  }, [webinarId, currentTime]);
+
   // Handle CTA clicks
   const handleCTAClick = useCallback((cta: CTAEvent) => {
     trackGA4('begin_checkout', {
@@ -401,8 +410,8 @@ export default function LiveRoomPage() {
                 currentTime={currentTime}
                 ctaEvents={(webinar.ctaEvents || []).filter(c => c.position === 'on_video')}
                 onCTAClick={handleCTAClick}
-                onCTAView={(cta) => trackGA4('c_cta_view', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) })}
-                onCTADismiss={(cta) => trackGA4('c_cta_dismiss', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) })}
+                onCTAView={handleCTAView}
+                onCTADismiss={handleCTADismiss}
                 position="on_video"
               />
             </div>
@@ -412,8 +421,8 @@ export default function LiveRoomPage() {
               currentTime={currentTime}
               ctaEvents={(webinar.ctaEvents || []).filter(c => c.position !== 'on_video')}
               onCTAClick={handleCTAClick}
-              onCTAView={(cta) => trackGA4('c_cta_view', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) })}
-              onCTADismiss={(cta) => trackGA4('c_cta_dismiss', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) })}
+              onCTAView={handleCTAView}
+              onCTADismiss={handleCTADismiss}
               position="below_video"
             />
 
