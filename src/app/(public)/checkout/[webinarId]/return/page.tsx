@@ -33,7 +33,12 @@ export default function CheckoutReturnPage() {
           setCustomerEmail(data.customerEmail || '');
           if (!purchaseTracked.current) {
             purchaseTracked.current = true;
-            const purchaseValue = data.amountTotal ? data.amountTotal / 100 : DEFAULT_PRODUCT_PRICE;
+            const purchaseValue = data.amountTotal
+              ? data.amountTotal / 100
+              : (() => {
+                  console.warn('[GA4] Purchase fallback: amountTotal missing from session-status', { sessionId, webinarId });
+                  return DEFAULT_PRODUCT_PRICE;
+                })();
             const purchaseCurrency = (data.currency || 'usd').toUpperCase();
             trackGA4('purchase', {
               transaction_id: sessionId || `session_${Date.now()}`,
@@ -45,6 +50,11 @@ export default function CheckoutReturnPage() {
                 price: purchaseValue,
                 quantity: 1,
               }],
+            });
+            trackGA4('c_purchase_confirmation', {
+              webinar_id: webinarId,
+              transaction_id: sessionId || `session_${Date.now()}`,
+              order_status: data.orderStatus || 'unknown',
             });
           }
         } else {
