@@ -129,12 +129,12 @@ export default function HomePage() {
       const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
       if (scrollHeight <= 0) return;
       const scrollPct = Math.round((window.scrollY / scrollHeight) * 100);
-      [25, 50, 75, 100].forEach(m => {
+      for (const m of [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]) {
         if (scrollPct >= m && !milestones.has(m)) {
           milestones.add(m);
           trackGA4('c_scroll_depth', { percent: m, page: 'landing' });
         }
-      });
+      }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
