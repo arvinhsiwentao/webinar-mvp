@@ -124,7 +124,7 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
 
       // If deleted video was selected, clear selection
       const deleted = videos.find(v => v.id === id);
-      if (deleted && value === deleted.publicUrl) {
+      if (deleted && (value === deleted.muxPlaybackUrl || value === deleted.publicUrl)) {
         onChange('');
       }
 
@@ -294,7 +294,7 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
             <div
               key={video.id}
               className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${video.status === 'processing' ? 'cursor-wait opacity-60' : 'cursor-pointer'}
-                ${value === video.publicUrl
+                ${(value === video.muxPlaybackUrl || value === video.publicUrl)
                   ? 'border-[#B8953F] bg-[#B8953F]/5'
                   : 'border-neutral-200 hover:border-neutral-300 bg-white'
                 }`}
