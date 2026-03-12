@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
-import { trackGA4 } from '@/lib/analytics';
+import { trackGA4, DEFAULT_PRODUCT_PRICE } from '@/lib/analytics';
 
 export default function CheckoutReturnPage() {
   const searchParams = useSearchParams();
@@ -33,7 +33,7 @@ export default function CheckoutReturnPage() {
           setCustomerEmail(data.customerEmail || '');
           if (!purchaseTracked.current) {
             purchaseTracked.current = true;
-            const purchaseValue = data.amountTotal ? data.amountTotal / 100 : 599;
+            const purchaseValue = data.amountTotal ? data.amountTotal / 100 : DEFAULT_PRODUCT_PRICE;
             const purchaseCurrency = (data.currency || 'usd').toUpperCase();
             trackGA4('purchase', {
               transaction_id: sessionId || `session_${Date.now()}`,

@@ -5,7 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card } from '@/components/ui';
 import { Webinar } from '@/lib/types';
-import { trackGA4 } from '@/lib/analytics';
+import { trackGA4, DEFAULT_PRODUCT_PRICE } from '@/lib/analytics';
 
 export default function EndPage() {
   const params = useParams();
@@ -112,8 +112,8 @@ export default function EndPage() {
                 });
                 trackGA4('begin_checkout', {
                   currency: 'USD',
-                  value: 599,
-                  items: [{ item_id: `webinar_${webinarId}`, item_name: webinar.title, price: 599, quantity: 1 }],
+                  value: DEFAULT_PRODUCT_PRICE,
+                  items: [{ item_id: `webinar_${webinarId}`, item_name: webinar.title, price: DEFAULT_PRODUCT_PRICE, quantity: 1 }],
                   source: 'end',
                 });
 

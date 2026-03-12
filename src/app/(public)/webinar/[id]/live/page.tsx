@@ -14,7 +14,7 @@ import UnmuteOverlay from '@/components/video/UnmuteOverlay';
 import PreShowOverlay from '@/components/video/PreShowOverlay';
 import { Webinar, CTAEvent } from '@/lib/types';
 import { Badge, Button } from '@/components/ui';
-import { trackGA4 } from '@/lib/analytics';
+import { trackGA4, DEFAULT_PRODUCT_PRICE } from '@/lib/analytics';
 import { formatElapsedTime } from '@/lib/utils';
 import { calculateLateJoinPosition } from '@/lib/evergreen';
 import { useViewerSimulator } from '@/lib/viewer-simulator';
@@ -376,8 +376,8 @@ export default function LiveRoomPage() {
   const handleCTAClick = useCallback((cta: CTAEvent) => {
     trackGA4('begin_checkout', {
       currency: 'USD',
-      value: 599,
-      items: [{ item_id: `webinar_${webinarId}`, item_name: cta.buttonText, price: 599, quantity: 1 }],
+      value: DEFAULT_PRODUCT_PRICE,
+      items: [{ item_id: `webinar_${webinarId}`, item_name: cta.buttonText, price: DEFAULT_PRODUCT_PRICE, quantity: 1 }],
       cta_id: cta.id,
       video_time_sec: Math.round(currentTime),
       source: 'live',

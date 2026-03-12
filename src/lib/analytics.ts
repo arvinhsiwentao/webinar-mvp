@@ -24,6 +24,9 @@ type GA4EventMap = {
 
 type GA4EventName = keyof GA4EventMap
 
+/** Default product price in USD. Used as begin_checkout value and purchase fallback. */
+export const DEFAULT_PRODUCT_PRICE = 599
+
 // Events that represent conversions — these get attribution params auto-attached
 const CONVERSION_EVENTS: ReadonlySet<string> = new Set([
   'sign_up',
