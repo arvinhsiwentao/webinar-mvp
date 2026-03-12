@@ -19,6 +19,9 @@ type GA4EventMap = {
   c_webinar_complete: { webinar_id: string; watch_duration_sec?: number }
   c_end_page_cta_click: { webinar_id: string; button_text: string }
   c_share_click: { webinar_id: string; platform: 'facebook' | 'twitter' }
+  c_lobby_entered: { webinar_id: string; webinar_state: string }
+  c_lobby_abandon: { webinar_id: string; duration_sec: number; minutes_until_start: number }
+  c_lobby_duration: { webinar_id: string; duration_sec: number; exit_type: 'enter_live' | 'abandon' }
 }
 
 type GA4EventName = keyof GA4EventMap

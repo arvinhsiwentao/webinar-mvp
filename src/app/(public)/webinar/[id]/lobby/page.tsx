@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import CountdownTimer from '@/components/countdown/CountdownTimer';
 import { Button, Badge, Card } from '@/components/ui';
@@ -22,6 +22,9 @@ export default function LobbyPage() {
   const [canEnter, setCanEnter] = useState(false);
   const [evergreenState, setEvergreenState] = useState<string | null>(null);
   const [registrationCount, setRegistrationCount] = useState(0);
+  const lobbyEntryTime = useRef(Date.now());
+  const lobbyTracked = useRef(false);
+  const exitTracked = useRef(false);
 
   const countdownTarget = slotTime || '';
 
@@ -34,6 +37,17 @@ export default function LobbyPage() {
         const data = await res.json();
         setWebinar(data.webinar);
         setRegistrationCount(data.registrationCount || 0);
+
+        // Track lobby entry (once)
+        if (!lobbyTracked.current) {
+          lobbyTracked.current = true;
+          trackGA4('c_lobby_entered', {
+            webinar_id: webinarId,
+            webinar_state: slotTime && data.webinar.evergreen?.enabled
+              ? getEvergreenState(slotTime, getSlotExpiresAt(slotTime, data.webinar.evergreen.videoDurationMinutes), true)
+              : 'standard',
+          });
+        }
 
         // Check evergreen state
         if (slotTime && data.webinar.evergreen?.enabled) {
@@ -80,11 +94,21 @@ export default function LobbyPage() {
   }, [webinarId, userName, slotTime]);
 
   const handleCountdownComplete = useCallback(() => {
+    if (!exitTracked.current) {
+      exitTracked.current = true;
+      const durationSec = Math.round((Date.now() - lobbyEntryTime.current) / 1000);
+      trackGA4('c_lobby_duration', { webinar_id: webinarId, duration_sec: durationSec, exit_type: 'enter_live' });
+    }
     trackGA4('c_enter_live', { webinar_id: webinarId, entry_method: 'countdown_auto' });
     router.push(buildLiveUrl());
   }, [router, buildLiveUrl, webinarId]);
 
   const handleEnterLive = () => {
+    if (!exitTracked.current) {
+      exitTracked.current = true;
+      const durationSec = Math.round((Date.now() - lobbyEntryTime.current) / 1000);
+      trackGA4('c_lobby_duration', { webinar_id: webinarId, duration_sec: durationSec, exit_type: 'enter_live' });
+    }
     trackGA4('c_enter_live', { webinar_id: webinarId, entry_method: 'button' });
     router.push(buildLiveUrl());
   };
@@ -98,6 +122,11 @@ export default function LobbyPage() {
       if (document.visibilityState !== 'visible') return;
       const startTime = new Date(countdownTarget).getTime();
       if (Date.now() >= startTime) {
+        if (!exitTracked.current) {
+          exitTracked.current = true;
+          const durationSec = Math.round((Date.now() - lobbyEntryTime.current) / 1000);
+          trackGA4('c_lobby_duration', { webinar_id: webinarId, duration_sec: durationSec, exit_type: 'enter_live' });
+        }
         trackGA4('c_enter_live', { webinar_id: webinarId, entry_method: 'countdown_auto' });
         router.push(buildLiveUrl());
       }
@@ -105,7 +134,31 @@ export default function LobbyPage() {
 
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [countdownTarget, router, buildLiveUrl]);
+  }, [countdownTarget, router, buildLiveUrl, webinarId]);
+
+  // Track lobby exit (abandon or enter_live)
+  useEffect(() => {
+    const handlePageHide = () => {
+      if (exitTracked.current) return;
+      exitTracked.current = true;
+      const durationSec = Math.round((Date.now() - lobbyEntryTime.current) / 1000);
+      const minutesUntilStart = countdownTarget
+        ? (new Date(countdownTarget).getTime() - Date.now()) / 60000
+        : 0;
+      trackGA4('c_lobby_abandon', {
+        webinar_id: webinarId,
+        duration_sec: durationSec,
+        minutes_until_start: Math.round(minutesUntilStart),
+      });
+      trackGA4('c_lobby_duration', {
+        webinar_id: webinarId,
+        duration_sec: durationSec,
+        exit_type: 'abandon',
+      });
+    };
+    window.addEventListener('pagehide', handlePageHide);
+    return () => window.removeEventListener('pagehide', handlePageHide);
+  }, [webinarId, countdownTarget]);
 
   function handleDownloadICS() {
     trackGA4('c_add_to_calendar', { method: 'ical', webinar_id: webinarId });
