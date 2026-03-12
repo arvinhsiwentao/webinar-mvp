@@ -221,15 +221,6 @@ export async function addChatMessage(
   return snakeToCamel<ChatMessageData>(data);
 }
 
-// --- Tracking events ---
-
-export async function appendEvent(event: unknown): Promise<void> {
-  const { error } = await supabase
-    .from('events')
-    .insert({ data: event });
-  if (error) throw error;
-}
-
 // --- Order operations ---
 
 export async function getAllOrders(): Promise<Order[]> {
