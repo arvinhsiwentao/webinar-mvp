@@ -15,19 +15,23 @@ export interface CTAOverlayProps {
   onCTAClick?: (cta: CTAEvent) => void;
   /** Called when a CTA becomes visible */
   onCTAView?: (cta: CTAEvent) => void;
+  /** Called when user dismisses a CTA */
+  onCTADismiss?: (cta: CTAEvent) => void;
   /** Where the CTA renders: on top of the video or below it */
   position?: 'on_video' | 'below_video';
 }
 
-export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAView, position = 'below_video' }: CTAOverlayProps) {
+export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAView, onCTADismiss, position = 'below_video' }: CTAOverlayProps) {
   const [activeCTA, setActiveCTA] = useState<CTAEvent | null>(null);
   const [visible, setVisible] = useState(false);
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
   const prevActive = useRef<CTAEvent | null>(null);
 
   // Determine which CTA (if any) should be active based on current video time
   useEffect(() => {
     let matched: CTAEvent | null = null;
     for (const cta of ctaEvents) {
+      if (dismissedIds.has(cta.id)) continue;
       if (currentTime >= cta.showAtSec && currentTime < cta.hideAtSec) {
         matched = cta;
         break;
@@ -45,7 +49,7 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
         setVisible(false);
       }
     }
-  }, [currentTime, ctaEvents, onCTAView]);
+  }, [currentTime, ctaEvents, onCTAView, dismissedIds]);
 
   if (!activeCTA) return null;
 
@@ -63,7 +67,7 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
     >
       <div
         className={`
-          rounded-xl shadow-2xl
+          relative rounded-xl shadow-2xl
           ${isOnVideo
             ? 'bg-black/70 backdrop-blur-sm p-3'
             : 'p-5 max-w-lg mx-auto'
@@ -71,6 +75,28 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
         `}
         style={!isOnVideo ? { backgroundColor: '#F5F3EE' } : undefined}
       >
+        {/* Close button */}
+        {activeCTA.dismissible && (
+          <button
+            type="button"
+            onClick={() => {
+              setDismissedIds(prev => new Set(prev).add(activeCTA.id));
+              setActiveCTA(null);
+              setVisible(false);
+              prevActive.current = null;
+              onCTADismiss?.(activeCTA);
+            }}
+            className={`absolute top-2 right-2 z-20 w-7 h-7 flex items-center justify-center rounded-full transition-colors ${
+              isOnVideo
+                ? 'text-white/60 hover:text-white hover:bg-white/20'
+                : 'text-[#999] hover:text-[#1A1A1A] hover:bg-black/10'
+            }`}
+            aria-label="关闭"
+          >
+            ✕
+          </button>
+        )}
+
         {/* Promo text */}
         {activeCTA.promoText && (
           <p className={`text-center text-sm mb-3 font-medium ${isOnVideo ? 'text-white' : 'text-[#1A1A1A]'}`}>
