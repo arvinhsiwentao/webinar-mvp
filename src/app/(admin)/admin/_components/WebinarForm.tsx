@@ -82,6 +82,7 @@ interface CTAField {
   position: string;
   color: string;
   secondaryText: string;
+  dismissible: boolean;
 }
 
 interface WebinarFormProps {
@@ -129,6 +130,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
       position: c.position || 'below_video',
       color: c.color || '',
       secondaryText: c.secondaryText || '',
+      dismissible: c.dismissible || false,
     })) || []
   );
 
@@ -185,6 +187,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
           position: c.position || 'below_video',
           color: c.color || undefined,
           secondaryText: c.secondaryText || undefined,
+          dismissible: c.dismissible || undefined,
         })),
         evergreen: evergreenEnabled ? {
           enabled: true,
@@ -529,6 +532,7 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
               position: 'below_video',
               color: '',
               secondaryText: '',
+              dismissible: false,
             }])}
             className="text-[#B8953F] text-sm hover:text-[#A07A2F]"
           >
@@ -669,6 +673,15 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
                         className="rounded accent-[#B8953F]"
                       />
                       显示倒计时
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-neutral-500">
+                      <input
+                        type="checkbox"
+                        checked={cta.dismissible}
+                        onChange={(e) => update('dismissible', e.target.checked as CTAField[keyof CTAField])}
+                        className="rounded accent-[#B8953F]"
+                      />
+                      允许用户关闭
                     </label>
                   </div>
                 </div>
