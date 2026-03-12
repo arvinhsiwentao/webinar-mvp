@@ -276,6 +276,10 @@ export default function LiveRoomPage() {
           current_time_sec: Math.round(event.currentTime),
           watch_duration_sec: Math.round(event.currentTime - lateJoinSeconds),
         });
+        // Persist watch duration for End Page
+        try {
+          sessionStorage.setItem(`webinar-${webinarId}-watch-duration`, String(Math.round(event.currentTime - lateJoinSeconds)));
+        } catch { /* ignore */ }
         // Redirect to end page after short delay
         setTimeout(() => {
           router.push(`/webinar/${webinarId}/end?name=${encodeURIComponent(userName)}`);
