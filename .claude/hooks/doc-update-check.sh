@@ -29,15 +29,15 @@ FILE_PATH=$(echo "$FILE_PATH" | tr '\\' '/')
 MATCHED=false
 
 # Match both relative (src/...) and absolute (.../src/...) paths
-if echo "$FILE_PATH" | grep -qE '(^|/)src/lib/types\.ts$'; then
-  MATCHED=true
-elif echo "$FILE_PATH" | grep -qE '(^|/)src/lib/db\.ts$'; then
+if echo "$FILE_PATH" | grep -qE '(^|/)src/lib/'; then
   MATCHED=true
 elif echo "$FILE_PATH" | grep -qE '(^|/)src/app/api/'; then
   MATCHED=true
 elif echo "$FILE_PATH" | grep -qE '(^|/)src/app/.*/page\.tsx$'; then
   MATCHED=true
 elif echo "$FILE_PATH" | grep -qE '(^|/)src/components/'; then
+  MATCHED=true
+elif echo "$FILE_PATH" | grep -qE '(^|/)src/middleware\.ts$'; then
   MATCHED=true
 elif echo "$FILE_PATH" | grep -qE '(^|/)next\.config'; then
   MATCHED=true
@@ -46,7 +46,7 @@ elif echo "$FILE_PATH" | grep -qE '(^|/)package\.json$'; then
 fi
 
 if [ "$MATCHED" = true ]; then
-  echo '{"additionalContext":"You edited a documentation-critical file. Before finishing, verify that docs/architecture.md still accurately reflects this change. Update the relevant section if needed."}'
+  echo "{\"additionalContext\":\"You edited a documentation-critical file ($FILE_PATH). Before finishing, verify that BOTH docs/architecture.md AND CLAUDE.md still accurately reflect this change. If you created a new file (route, lib module, component), add it to the relevant list in both documents.\"}"
 fi
 
 exit 0

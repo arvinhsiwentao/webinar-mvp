@@ -14,7 +14,6 @@ import UnmuteOverlay from '@/components/video/UnmuteOverlay';
 import PreShowOverlay from '@/components/video/PreShowOverlay';
 import { Webinar, CTAEvent } from '@/lib/types';
 import { Badge, Button } from '@/components/ui';
-import { track } from '@/lib/tracking';
 import { trackGA4 } from '@/lib/analytics';
 import { formatElapsedTime } from '@/lib/utils';
 import { calculateLateJoinPosition } from '@/lib/evergreen';
