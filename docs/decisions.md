@@ -124,3 +124,8 @@ Supabase free tier has 50MB file upload limit (hard cap, no workaround). Cloudfl
 **Decision:** Switch activation codes from random generation (`activation-codes.ts`) to claiming pre-populated codes from a Google Sheet via the Sheets API. The old random generator remains as a fallback when `GOOGLE_SERVICE_ACCOUNT_KEY` is not set.
 
 **Why:** Business needs pre-determined activation codes (from CMoney platform). Google Sheets provides a simple, non-technical interface for the team to manage code inventory. Race condition handled by verify-after-write with max 3 retries.
+
+### 2026-03-12: Remove R2, use Mux Direct Uploads
+**Decision:** Removed Cloudflare R2 from video upload pipeline. Browser now uploads directly to Mux via `@mux/upchunk`.
+**Why:** R2 was only a staging area for Mux to fetch from — the R2 copy was never accessed after Mux ingested it. Direct upload eliminates the double-transfer (browser→R2→Mux), reduces infra (5 env vars, 2 npm packages), and adds resumable chunked uploads.
+**Trade-off:** No local backup of raw video. Mux retains the master (downloadable via `master_access` API).

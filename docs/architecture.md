@@ -261,11 +261,9 @@ The admin panel (`WebinarForm.tsx`) exposes evergreen settings: daily anchor tim
 
 ## Video Storage & Delivery
 
-Videos are uploaded to **Cloudflare R2** (S3-compatible) as the source-of-truth backup. After upload, the server creates a **Mux** asset from the R2 public URL. Mux auto-transcodes to HLS adaptive bitrate (360p–1080p) and serves via its global CDN at `stream.mux.com`. The webinar's `videoUrl` stores the Mux HLS URL (`https://stream.mux.com/{PLAYBACK_ID}.m3u8`).
+Videos are uploaded directly to **Mux** via Mux Direct Uploads. The browser uses `@mux/upchunk` for chunked, resumable uploads — no intermediary storage. The server creates a Mux Direct Upload URL, the browser streams the file to Mux, and Mux auto-creates an asset and transcodes to HLS adaptive bitrate (360p–1080p). The client polls a status endpoint for upload completion and transcoding. Mux serves video via its global CDN at `stream.mux.com`. The webinar's `videoUrl` stores the Mux HLS URL (`https://stream.mux.com/{PLAYBACK_ID}.m3u8`).
 
-If Mux env vars are not configured, the system falls back to serving the raw MP4 directly from R2 (no HLS, no adaptive bitrate).
-
-Upload flow: Browser → R2 (presigned PUT) → Server creates Mux asset → Mux transcodes → Status polling → Ready
+Upload flow: Browser → Mux Direct Upload (`@mux/upchunk`, chunked/resumable) → Mux transcodes → Status polling → Ready
 
 **Fallback:** Admin can paste any external MP4/HLS URL directly, bypassing the upload flow.
 
@@ -273,10 +271,10 @@ Upload flow: Browser → R2 (presigned PUT) → Server creates Mux asset → Mux
 
 | Endpoint | Methods | Purpose |
 |----------|---------|---------|
-| `/api/admin/videos` | GET, POST | List video library / initiate upload (returns R2 presigned PUT URL) |
+| `/api/admin/videos` | GET, POST | List video library / initiate upload (returns Mux Direct Upload URL) |
 | `/api/admin/videos/[id]` | PATCH, DELETE | Update metadata / delete video file |
 
-**Admin UI:** The `VideoManager` component replaces the old URL text field in the webinar form, providing drag-and-drop upload with a video library picker. YouTube support has been removed; only MP4 and HLS sources are supported.
+**Admin UI:** The `VideoManager` component replaces the old URL text field in the webinar form, providing drag-and-drop upload with a video library picker. Only MP4 and HLS sources are supported.
 
 ## Key Constraints
 
