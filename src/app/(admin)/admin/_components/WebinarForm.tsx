@@ -386,7 +386,10 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
         </div>
       </section>
 
-      <PromoSection formData={formData} setFormData={setFormData} />
+      <PromoSection
+        formData={formData}
+        onFieldChange={(field, value) => setFormData({ ...formData, [field]: value })}
+      />
 
       {/* Status */}
       <section className="bg-white rounded-lg p-6 border border-neutral-200">

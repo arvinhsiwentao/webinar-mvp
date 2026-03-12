@@ -10,11 +10,10 @@ interface PromoFormFields {
 
 interface PromoSectionProps {
   formData: PromoFormFields;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setFormData: (v: any) => void;
+  onFieldChange: (field: keyof PromoFormFields, value: string) => void;
 }
 
-export default function PromoSection({ formData, setFormData }: PromoSectionProps) {
+export default function PromoSection({ formData, onFieldChange }: PromoSectionProps) {
   return (
     <>
       {/* Promotional Content */}
@@ -26,7 +25,7 @@ export default function PromoSection({ formData, setFormData }: PromoSectionProp
             <input
               type="text"
               value={formData.promoImageUrl}
-              onChange={(e) => setFormData({ ...formData, promoImageUrl: e.target.value })}
+              onChange={(e) => onFieldChange('promoImageUrl', e.target.value)}
               placeholder="https://example.com/promo.jpg"
               className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />
@@ -35,7 +34,7 @@ export default function PromoSection({ formData, setFormData }: PromoSectionProp
             <label className="block text-sm text-neutral-500 mb-2">免责声明</label>
             <textarea
               value={formData.disclaimerText}
-              onChange={(e) => setFormData({ ...formData, disclaimerText: e.target.value })}
+              onChange={(e) => onFieldChange('disclaimerText', e.target.value)}
               rows={3}
               placeholder="投资有风险，入市需谨慎..."
               className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
@@ -45,7 +44,7 @@ export default function PromoSection({ formData, setFormData }: PromoSectionProp
             <label className="block text-sm text-neutral-500 mb-2">侧边栏描述</label>
             <textarea
               value={formData.sidebarDescription}
-              onChange={(e) => setFormData({ ...formData, sidebarDescription: e.target.value })}
+              onChange={(e) => onFieldChange('sidebarDescription', e.target.value)}
               rows={3}
               placeholder="关于此次直播的详细描述..."
               className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
@@ -62,7 +61,7 @@ export default function PromoSection({ formData, setFormData }: PromoSectionProp
             <label className="block text-sm text-neutral-500 mb-2">销售文案</label>
             <textarea
               value={formData.endPageSalesCopy}
-              onChange={(e) => setFormData({ ...formData, endPageSalesCopy: e.target.value })}
+              onChange={(e) => onFieldChange('endPageSalesCopy', e.target.value)}
               rows={4}
               placeholder="限时优惠，立即行动..."
               className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
@@ -73,7 +72,7 @@ export default function PromoSection({ formData, setFormData }: PromoSectionProp
             <input
               type="text"
               value={formData.endPageCtaText}
-              onChange={(e) => setFormData({ ...formData, endPageCtaText: e.target.value })}
+              onChange={(e) => onFieldChange('endPageCtaText', e.target.value)}
               placeholder="立即报名"
               className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />

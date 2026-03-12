@@ -129,3 +129,8 @@ Supabase free tier has 50MB file upload limit (hard cap, no workaround). Cloudfl
 **Decision:** Removed Cloudflare R2 from video upload pipeline. Browser now uploads directly to Mux via `@mux/upchunk`.
 **Why:** R2 was only a staging area for Mux to fetch from — the R2 copy was never accessed after Mux ingested it. Direct upload eliminates the double-transfer (browser→R2→Mux), reduces infra (5 env vars, 2 npm packages), and adds resumable chunked uploads.
 **Trade-off:** No local backup of raw video. Mux retains the master (downloadable via `master_access` API).
+
+### 2026-03-12: GA4 tracking audit fixes
+**Decision:** Removed `join_group` event. Added lobby instrumentation (`c_lobby_entered`, `c_lobby_duration`, `c_lobby_abandon`). Added `c_purchase_confirmation` backup event. Added purchase fallback logging.
+**Why:** `join_group` was redundant with `c_enter_live` (which fires at the decision point with entry_method context) and double-counted conversions. Lobby was a funnel blind spot. Purchase event is client-dependent (may not fire if browser closes after payment).
+**Trade-off:** 3 more custom events to maintain. `c_purchase_confirmation` is not in CONVERSION_EVENTS (no attribution auto-attach) since the `purchase` event handles that.

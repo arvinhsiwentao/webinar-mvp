@@ -184,7 +184,7 @@ Shared primitives:
 
 All tracking goes through **GTM** via `@next/third-parties/google` (`GoogleTagManager` component in root layout, gated on `NEXT_PUBLIC_GTM_ID` env var). Every event uses `trackGA4()` → `window.dataLayer.push()` → GTM → GA4. No server-side event storage.
 
-**Event inventory (16 events):**
+**Event inventory (19 events):**
 
 | GA4 Event | Type | Page | Trigger |
 |---|---|---|---|
@@ -192,8 +192,10 @@ All tracking goes through **GTM** via `@next/third-parties/google` (`GoogleTagMa
 | `c_signup_button_click` | Custom | Landing | CTA button click |
 | `sign_up` | Recommended | Registration | Form submit success |
 | `c_add_to_calendar` | Custom | Lobby | Google/iCal click |
+| `c_lobby_entered` | Custom | Lobby | Page load (measures reg→lobby conversion) |
+| `c_lobby_duration` | Custom | Lobby | Page exit (duration_sec + exit_type: enter_live/abandon) |
+| `c_lobby_abandon` | Custom | Lobby | pagehide before entering live (duration + minutes_until_start) |
 | `c_enter_live` | Custom | Lobby | Enter live room (button/countdown/redirect) |
-| `join_group` | Recommended | Live Room | Page mount (once) |
 | `c_video_heartbeat` | Custom | Live Room | Every 60s while playing (uses ref to avoid interval reset) |
 | `c_video_progress` | Custom | Live Room | 5% milestone intervals |
 | `c_chat_message` | Custom | Live Room | User sends message |
@@ -204,6 +206,7 @@ All tracking goes through **GTM** via `@next/third-parties/google` (`GoogleTagMa
 | `c_end_page_cta_click` | Custom | End Page | CTA button click |
 | `c_share_click` | Custom | End Page | Facebook/Twitter share |
 | `purchase` | Recommended | Checkout Return | Stripe session confirmed complete |
+| `c_purchase_confirmation` | Custom | Checkout Return | Backup event alongside purchase (cross-check vs DB orders) |
 
 **gclid preservation:** `GclidPreserver` component stores gclid/UTM params in sessionStorage on first page load so Google Ads attribution survives client-side navigation.
 
