@@ -19,8 +19,8 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Review this session. Did Claude make structural changes (new/renamed routes, changed data models in types.ts, added/modified API endpoints, created new components, changed db.ts, modified config)? If yes AND docs/architecture.md was NOT updated, respond {\"decision\": \"block\", \"reason\": \"Structural changes detected but docs/architecture.md was not updated. Please update the relevant section.\"}. If changes were cosmetic/internal or docs were already updated, respond {\"decision\": \"allow\"}. If stop_hook_active appears in context, always respond {\"decision\": \"allow\"} to prevent loops.",
-            "timeout": 30
+            "prompt": "RESPOND WITH EXACTLY ONE LINE OF JSON. NO OTHER TEXT.\n\nRules:\n1. If stop_hook_active is true: {\"decision\":\"allow\"}\n2. If no files were created/deleted/renamed in src/lib/, src/app/api/, src/components/, or page.tsx routes: {\"decision\":\"allow\"}\n3. If structural files changed AND docs/architecture.md was also edited: {\"decision\":\"allow\"}\n4. If structural files changed AND docs/architecture.md was NOT edited: {\"decision\":\"block\",\"reason\":\"Update docs/architecture.md to reflect structural changes.\"}\n\nYour entire response must be parseable by JSON.parse(). No prose. No markdown. Just JSON.",
+            "timeout": 60
           }
         ]
       }
