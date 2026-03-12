@@ -18,6 +18,12 @@ const GA4_EVENT_MAP: Record<string, (props: Record<string, unknown>) => void> = 
     cta_type: String(p.buttonText || '').slice(0, 100),
     cta_id: p.ctaId ? String(p.ctaId) : undefined,
   }),
+  cta_dismiss: (p) => trackGA4('c_cta_dismiss', {
+    webinar_id: String(p.webinarId || ''),
+    cta_type: String(p.buttonText || '').slice(0, 100),
+    cta_id: p.ctaId ? String(p.ctaId) : undefined,
+    video_time_sec: typeof p.videoTime === 'number' ? p.videoTime : undefined,
+  }),
   video_progress: (p) => trackGA4('c_video_progress', {
     webinar_id: String(p.webinarId || ''),
     percent: typeof p.percent === 'number' ? p.percent : 0,

@@ -10,6 +10,7 @@ type GA4EventMap = {
   // Custom events (c_ prefix)
   c_cta_click: { webinar_id: string; cta_type: string; cta_url: string; cta_id?: string; video_time_sec?: number }
   c_cta_view: { webinar_id: string; cta_type: string; cta_id?: string }
+  c_cta_dismiss: { webinar_id: string; cta_type: string; cta_id?: string; video_time_sec?: number }
   c_webinar_complete: { webinar_id: string; watch_duration_sec?: number }
   c_chat_message: { webinar_id: string }
   c_video_progress: { webinar_id: string; percent: number }
