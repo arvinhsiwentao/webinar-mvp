@@ -153,6 +153,20 @@ export default function VideoPlayer({
       emitEvent('ready', player);
       onPlayerReady?.(player);
 
+      // Disable Picture-in-Picture in livestream mode — browser PiP shows
+      // native controls (progress bar + total duration) that expose pre-recorded video
+      if (livestreamMode) {
+        const videoEl = player.tech({ IWillNotUseThisInPlugins: true })?.el() as HTMLVideoElement | undefined;
+        if (videoEl) {
+          videoEl.disablePictureInPicture = true;
+        }
+        // Hide Video.js PiP button if present
+        const pipButton = (player as any).controlBar?.getChild('pictureInPictureToggle');
+        if (pipButton) {
+          pipButton.hide();
+        }
+      }
+
       // Inject red LIVE pill into control bar (livestream mode only)
       if (livestreamMode) {
         const controlBar = (player as any).controlBar;
