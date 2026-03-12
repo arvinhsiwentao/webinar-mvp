@@ -174,12 +174,63 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Testimonial */}
-            <div className="border-l-4 border-[#B8953F] bg-white rounded-r-lg p-5">
-              <p className="text-sm text-neutral-600 italic mb-2">
-                "跟着 Mike 学了三个月，现在每个月被动收入已经超过生活费了。课程内容非常实用！"
-              </p>
-              <p className="text-xs text-neutral-400">— 学员 Jason T.</p>
+            {/* Testimonials */}
+            <div className="space-y-4">
+              <div className="border-l-4 border-[#B8953F] bg-white rounded-r-lg p-5">
+                <p className="text-sm text-neutral-600 italic mb-2">
+                  "跟着 Mike 学了三个月，现在每个月被动收入已经超过生活费了。课程内容非常实用！"
+                </p>
+                <p className="text-xs text-neutral-400">— 学员 Jason T.</p>
+              </div>
+
+              <div className="border-l-4 border-[#B8953F] bg-white rounded-r-lg p-5">
+                <p className="text-sm text-neutral-600 italic mb-2">
+                  "以前只会定期定额买 VOO，跌了就慌、涨了又不敢加。上完 ETF 课才知道原来可以用结构性主题去选不同类型的 ETF 做攻守配置；再上期权课学会 Sell Put，现在大跌反而是我收保费＋低接的机会。"
+                </p>
+                <p className="text-xs text-neutral-400">— 学员 Kevin L.</p>
+              </div>
+
+              <div className="border-l-4 border-[#B8953F] bg-white rounded-r-lg p-5">
+                <p className="text-sm text-neutral-600 italic mb-2">
+                  "说实话我之前买了 ETF 课但一直没有行动，后来加了期权课学了资金配置 SOP，又在 App 社团里看到 Mike 即时发的长短线配置思路，课堂学的理论，配上 Mike 每天在社团的实战判断，逻辑清晰了不少。"
+                </p>
+                <p className="text-xs text-neutral-400">— 学员 Wendy C.</p>
+              </div>
+
+              <div className="border-l-4 border-[#B8953F] bg-white rounded-r-lg p-5">
+                <p className="text-sm text-neutral-600 italic mb-2">
+                  "我是上班族，没时间整天研究，平常就靠 App 语音直播通勤时听 Mike 的盘势分析，有什么变动社团也会即时更新，还挺方便。"
+                </p>
+                <p className="text-xs text-neutral-400">— 学员 David W.</p>
+              </div>
+
+              <div className="border-l-4 border-[#B8953F] bg-white rounded-r-lg p-5">
+                <p className="text-sm text-neutral-600 italic mb-2">
+                  "课程教的是框架，但市场每天在变，光靠课程你还是会犹豫。App 里 Mike 社团即时发的配置逻辑，算是有帮我把课堂的框架套到当下的盘势上，记得上週他在社团就有提短线帐户某板块的 Sell Put 逻辑。"
+                </p>
+                <p className="text-xs text-neutral-400">— 学员 Eric H.</p>
+              </div>
+
+              <div className="border-l-4 border-[#B8953F] bg-white rounded-r-lg p-5">
+                <p className="text-sm text-neutral-600 italic mb-2">
+                  "我先生之前炒个股亏了不少，两个人因为投资的事吵过好几次，后来一起看 Mike 的视频才渐渐培养起投资观。"
+                </p>
+                <p className="text-xs text-neutral-400">— 学员 Amy Z.</p>
+              </div>
+
+              <div className="border-l-4 border-[#B8953F] bg-white rounded-r-lg p-5">
+                <p className="text-sm text-neutral-600 italic mb-2">
+                  "App VIP 聊天室能直接问 Mike 问题，有一次我问 Sell Put 的履约价怎么选，Mike 隔天语音直播还专门讲了这个。"
+                </p>
+                <p className="text-xs text-neutral-400">— 学员 Linda Y.</p>
+              </div>
+
+              <div className="border-l-4 border-[#B8953F] bg-white rounded-r-lg p-5">
+                <p className="text-sm text-neutral-600 italic mb-2">
+                  "老实说以前对 Mike 的印象还停留在看准 Tesla 的眼光，上了课才懂...原来背后靠的是一套扎实的 ETF 的策略，帮助心态更稳。自己现在遇到市场震荡，也能相对冷静了。"
+                </p>
+                <p className="text-xs text-neutral-400">— 学员 Steven K.</p>
+              </div>
             </div>
 
             {/* Guarantee */}
