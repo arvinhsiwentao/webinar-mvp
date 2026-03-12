@@ -1,6 +1,6 @@
 # Architecture
 
-> Last verified: 2026-03-06
+> Last verified: 2026-03-12
 
 Living document. Hooks remind Claude to keep this current when structural changes are made.
 
@@ -58,7 +58,7 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 Supabase (hosted Postgres) replaces the previous JSON file storage. Server-side only — no client SDK.
 
 - `src/lib/supabase.ts` — Supabase client initialized with service role key (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` env vars)
-- `src/lib/db.ts` — Async CRUD functions with automatic snake_case (DB) ↔ camelCase (TypeScript) mapping
+- `src/lib/db.ts` — Async CRUD functions with automatic snake_case (DB) ↔ camelCase (TypeScript) mapping. Includes `updateOrderStatus(id, fromStatus, toStatus)` for atomic status transitions (used by webhook to prevent duplicate fulfillment).
 - `scripts/supabase-schema.sql` — Full schema definition (tables, indexes, RLS policies)
 - `scripts/migrate-to-supabase.ts` — One-time data migration from JSON files
 
@@ -83,8 +83,8 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/webinar/[id]/next-slot` | GET | `src/app/api/webinar/[id]/next-slot/route.ts` | Computes upcoming evergreen slots from config. Returns `slots[]`, `countdownTarget`, `expiresAt`. |
 | `/api/webinar/[id]/reassign` | POST | `src/app/api/webinar/[id]/reassign/route.ts` | Reassigns a registered user to the next available slot (for missed sessions). |
 | `/api/checkout/create-session` | POST | `src/app/api/checkout/create-session/route.ts` | Creates Stripe Embedded Checkout session. Checks duplicate purchase, creates pending Order. Returns `clientSecret`. |
-| `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Checks Stripe session status. Backup fulfillment: claims activation code from Google Sheets + sends email if webhook missed. |
-| `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Primary fulfillment on `checkout.session.completed`: claims activation code from Google Sheets, updates order, sends email. Idempotent. |
+| `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Polls Stripe session status. Read-only — returns order status and activation code if fulfilled. No fulfillment logic (webhook is sole fulfillment path). |
+| `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Sole fulfillment on `checkout.session.completed`: atomic lock (`updateOrderStatus` pending→paid), claims activation code from Google Sheets, updates order to fulfilled, sends email. Rolls back to pending on failure so Stripe retries. |
 | `/api/webinar/[id]/chat/stream` | GET | `src/app/api/webinar/[id]/chat/stream/route.ts` | SSE real-time chat stream via `chat-broker.ts` |
 | `/api/subtitles/generate` | POST | `src/app/api/subtitles/generate/route.ts` | Generate subtitles for video |
 | `/api/subtitles/logs` | GET | `src/app/api/subtitles/logs/route.ts` | Fetch subtitle generation logs |

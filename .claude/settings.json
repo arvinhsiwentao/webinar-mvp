@@ -18,9 +18,9 @@
       {
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "RESPOND WITH EXACTLY ONE LINE OF JSON. NO OTHER TEXT.\n\nRules:\n1. If stop_hook_active is true: {\"decision\":\"allow\"}\n2. If no files were created/deleted/renamed in src/lib/, src/app/api/, src/components/, or page.tsx routes: {\"decision\":\"allow\"}\n3. If structural files changed AND docs/architecture.md was also edited: {\"decision\":\"allow\"}\n4. If structural files changed AND docs/architecture.md was NOT edited: {\"decision\":\"block\",\"reason\":\"Update docs/architecture.md to reflect structural changes.\"}\n\nYour entire response must be parseable by JSON.parse(). No prose. No markdown. Just JSON.",
-            "timeout": 60
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-doc-check.sh\"",
+            "timeout": 10
           }
         ]
       }
