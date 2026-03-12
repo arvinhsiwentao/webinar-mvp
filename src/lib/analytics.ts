@@ -22,6 +22,7 @@ type GA4EventMap = {
   c_lobby_entered: { webinar_id: string; webinar_state: string }
   c_lobby_abandon: { webinar_id: string; duration_sec: number; minutes_until_start: number }
   c_lobby_duration: { webinar_id: string; duration_sec: number; exit_type: 'enter_live' | 'abandon' }
+  c_purchase_confirmation: { webinar_id: string; transaction_id: string; order_status: string }
 }
 
 type GA4EventName = keyof GA4EventMap
