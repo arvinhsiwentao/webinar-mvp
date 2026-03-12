@@ -133,16 +133,17 @@ export interface Order {
 
 export interface VideoFile {
   id: string;
-  filename: string;        // original upload filename
-  storagePath: string;     // path in R2 bucket
-  publicUrl: string;       // R2 CDN URL (backup/source)
-  fileSize: number;        // bytes
-  durationSec?: number;    // seconds (optional, set client-side or from Mux)
-  status: 'uploading' | 'processing' | 'ready' | 'error';  // added 'processing'
-  uploadedAt: string;      // ISO date
-  muxAssetId?: string;     // Mux asset ID (for management/deletion)
-  muxPlaybackId?: string;  // Mux playback ID (used to construct HLS URL)
-  muxPlaybackUrl?: string; // full HLS URL: https://stream.mux.com/{id}.m3u8
+  filename: string;           // original upload filename
+  storagePath?: string;       // legacy R2 path (not used for new uploads)
+  publicUrl?: string;         // legacy R2 URL (not used for new uploads)
+  fileSize: number;           // bytes
+  durationSec?: number;       // seconds (set from Mux after transcoding)
+  status: 'uploading' | 'processing' | 'ready' | 'error';
+  uploadedAt: string;         // ISO date
+  muxUploadId?: string;       // Mux Direct Upload ID (for tracking upload)
+  muxAssetId?: string;        // Mux asset ID (for management/deletion)
+  muxPlaybackId?: string;     // Mux playback ID (used to construct HLS URL)
+  muxPlaybackUrl?: string;    // full HLS URL: https://stream.mux.com/{id}.m3u8
 }
 
 // API Request/Response types
