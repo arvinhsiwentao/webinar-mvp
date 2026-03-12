@@ -1,3 +1,5 @@
+import { audit } from './audit';
+
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@webinar.example.com';
 const FROM_NAME = process.env.FROM_NAME || 'Webinar';
@@ -32,10 +34,14 @@ export async function sendEmail({ to, subject, html }: EmailParams): Promise<boo
     if (!res.ok) {
       const errorBody = await res.text();
       console.error(`[Email] SendGrid error ${res.status}: ${errorBody}`);
+      audit({ type: 'email_failed', to, template: subject, error: `HTTP ${res.status}` });
+    } else {
+      audit({ type: 'email_sent', to, template: subject });
     }
     return res.ok;
   } catch (err) {
     console.error('[Email] Send failed:', err);
+    audit({ type: 'email_failed', to, template: subject, error: String(err) });
     return false;
   }
 }
