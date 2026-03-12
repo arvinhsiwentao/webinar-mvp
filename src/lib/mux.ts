@@ -14,28 +14,6 @@ export function getMuxClient(): Mux {
   return _mux;
 }
 
-export async function createMuxAssetFromUrl(videoUrl: string): Promise<{
-  assetId: string;
-  playbackId: string;
-}> {
-  const mux = getMuxClient();
-  const asset = await mux.video.assets.create({
-    inputs: [{ url: videoUrl }],
-    playback_policies: ['public'],
-    video_quality: 'basic',
-  });
-
-  const playbackId = asset.playback_ids?.[0]?.id;
-  if (!playbackId) {
-    throw new Error('Mux asset created but no playback ID returned');
-  }
-
-  return {
-    assetId: asset.id,
-    playbackId,
-  };
-}
-
 export function getMuxPlaybackUrl(playbackId: string): string {
   return `https://stream.mux.com/${playbackId}.m3u8`;
 }
@@ -65,4 +43,36 @@ export async function deleteMuxAsset(assetId: string): Promise<void> {
     }
     throw err;
   }
+}
+
+export async function createMuxDirectUpload(options: {
+  corsOrigin: string;
+  passthrough?: string;
+}): Promise<{ uploadId: string; uploadUrl: string }> {
+  const mux = getMuxClient();
+  const upload = await mux.video.uploads.create({
+    cors_origin: options.corsOrigin,
+    new_asset_settings: {
+      playback_policies: ['public'],
+      video_quality: 'basic',
+    },
+    timeout: 86400, // 24 hours for large files
+  });
+
+  return {
+    uploadId: upload.id,
+    uploadUrl: upload.url,
+  };
+}
+
+export async function getMuxUploadStatus(uploadId: string): Promise<{
+  status: string;
+  assetId?: string;
+}> {
+  const mux = getMuxClient();
+  const upload = await mux.video.uploads.retrieve(uploadId);
+  return {
+    status: upload.status ?? 'waiting',
+    assetId: upload.asset_id ?? undefined,
+  };
 }
