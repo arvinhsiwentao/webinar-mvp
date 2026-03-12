@@ -63,11 +63,20 @@ export default function VideoPlayer({
       preload: 'auto',
       fluid: true,
       playbackRates: [], // no speed options
-      controlBar: {
-        progressControl: true,
-        remainingTimeDisplay: false,
-        playbackRateMenuButton: false,
-      },
+      controlBar: livestreamMode
+        ? {
+            progressControl: false,
+            remainingTimeDisplay: false,
+            playbackRateMenuButton: false,
+            durationDisplay: false,
+            timeDivider: false,
+            currentTimeDisplay: true,
+          }
+        : {
+            progressControl: true,
+            remainingTimeDisplay: false,
+            playbackRateMenuButton: false,
+          },
       sources: [{ src, type: sourceType }],
     };
 
@@ -126,43 +135,16 @@ export default function VideoPlayer({
         }
       });
 
-      // Update live-wall CSS variable
-      player.on('timeupdate', () => {
-        if (isAdjustingTime) return;
-        const duration = player.duration() ?? 0;
-        if (duration <= 0) return;
-        const liveWall = getLiveWall(duration);
-        const pct = (liveWall / duration) * 100;
-        const el = player.el();
-        if (el) {
-          (el as HTMLElement).style.setProperty('--live-wall-pct', `${pct}%`);
-        }
-      });
     }
 
     // Keyboard handling
     player.on('keydown', (e: KeyboardEvent) => {
       if (livestreamMode) {
-        const current = player.currentTime() ?? 0;
-        const duration = player.duration() ?? 0;
-        const liveWall = getLiveWall(duration);
-
-        if (e.key === 'ArrowRight') {
-          const target = current + 5;
-          if (target > liveWall) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (current < liveWall - 1) {
-              setAdjusting(true);
-              player.currentTime(liveWall);
-              isAdjustingTime = false;
-            }
-          }
-        } else if (e.key === 'Home' || e.key === 'End') {
+        // Block all seek keys — real livestreams have no rewind or fast-forward
+        if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
           e.preventDefault();
           e.stopPropagation();
         }
-        // Space and ArrowLeft are allowed (default Video.js behavior)
       }
       // Replay mode: no key blocking at all
     });
@@ -171,27 +153,20 @@ export default function VideoPlayer({
       emitEvent('ready', player);
       onPlayerReady?.(player);
 
-      // SeekBar mouse override for livestream mode
+      // Inject red LIVE pill into control bar (livestream mode only)
       if (livestreamMode) {
-        const seekBar = (player as any).controlBar?.progressControl?.seekBar;
-        if (seekBar) {
-          const originalHandleMouseMove = seekBar.handleMouseMove.bind(seekBar);
-          seekBar.handleMouseMove = function(event: MouseEvent) {
-            const duration = player.duration() ?? 0;
-            if (duration <= 0) return originalHandleMouseMove(event);
-            const liveWall = getLiveWall(duration);
-            const rect = (this.el() as HTMLElement).getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const fraction = Math.max(0, Math.min(1, x / rect.width));
-            const targetTime = fraction * duration;
-            if (targetTime > liveWall) {
-              setAdjusting(true);
-              player.currentTime(liveWall);
-              isAdjustingTime = false;
-              return;
-            }
-            return originalHandleMouseMove(event);
-          };
+        const controlBar = (player as any).controlBar;
+        if (controlBar) {
+          const livePill = document.createElement('div');
+          livePill.className = 'vjs-live-pill';
+          livePill.innerHTML = '<span class="vjs-live-dot"></span> LIVE';
+          // Insert after currentTimeDisplay
+          const currentTimeEl = controlBar.getChild('currentTimeDisplay')?.el();
+          if (currentTimeEl?.nextSibling) {
+            controlBar.el().insertBefore(livePill, currentTimeEl.nextSibling);
+          } else {
+            controlBar.el().appendChild(livePill);
+          }
         }
       }
     });
@@ -235,41 +210,48 @@ export default function VideoPlayer({
           width: 100%;
           height: 100%;
         }
-        .video-player-wrapper :global(.vjs-current-time),
-        .video-player-wrapper :global(.vjs-duration) {
+        .video-player-wrapper :global(.vjs-current-time) {
           display: block !important;
           padding: 0 4px;
         }
+        .video-player-wrapper :global(.vjs-duration),
         .video-player-wrapper :global(.vjs-time-divider) {
           display: block !important;
+          padding: 0 4px;
         }
-        /* Live wall: dark overlay beyond live wall position */
-        .video-player-wrapper.livestream-mode :global(.vjs-progress-holder)::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: var(--live-wall-pct, 100%);
-          right: 0;
-          background: rgba(0, 0, 0, 0.5);
-          pointer-events: none;
-          z-index: 1;
+        /* Livestream mode: hide duration and divider */
+        .video-player-wrapper.livestream-mode :global(.vjs-duration),
+        .video-player-wrapper.livestream-mode :global(.vjs-time-divider) {
+          display: none !important;
         }
-        /* Gold accent for played portion */
-        .video-player-wrapper.livestream-mode :global(.vjs-play-progress) {
-          background: #B8953F !important;
+        /* LIVE pill in control bar */
+        .video-player-wrapper :global(.vjs-live-pill) {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          background: #cc0000;
+          color: #fff;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          padding: 2px 8px;
+          border-radius: 4px;
+          margin-left: 8px;
+          line-height: 1;
+          align-self: center;
+          cursor: default;
+          user-select: none;
         }
-        /* Live wall marker line */
-        .video-player-wrapper.livestream-mode :global(.vjs-progress-holder)::before {
-          content: '';
-          position: absolute;
-          top: -2px;
-          bottom: -2px;
-          left: var(--live-wall-pct, 100%);
-          width: 2px;
-          background: #B8953F;
-          z-index: 2;
-          pointer-events: none;
+        .video-player-wrapper :global(.vjs-live-dot) {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #fff;
+          animation: live-pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes live-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
         }
       `}</style>
     </div>
