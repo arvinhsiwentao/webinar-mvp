@@ -300,7 +300,7 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
                 }`}
               onClick={() => {
                 if (video.status === 'processing') return;
-                onChange(video.muxPlaybackUrl || video.publicUrl);
+                onChange(video.muxPlaybackUrl || video.publicUrl || '');
                 setView('selected');
                 setError('');
               }}

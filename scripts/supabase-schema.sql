@@ -77,6 +77,23 @@ create table if not exists orders (
 );
 create index if not exists idx_orders_email_webinar on orders(email, webinar_id);
 
+-- Video files (upload metadata + Mux delivery)
+create table if not exists video_files (
+  id uuid primary key default gen_random_uuid(),
+  filename text not null,
+  storage_path text,           -- legacy R2 path (nullable, not used for new uploads)
+  public_url text,             -- legacy R2 URL (nullable, not used for new uploads)
+  file_size bigint not null,
+  duration_sec integer,
+  status text not null default 'uploading' check (status in ('uploading', 'processing', 'ready', 'error')),
+  uploaded_at timestamptz not null default now(),
+  mux_upload_id text,          -- Mux Direct Upload ID (for polling upload status)
+  mux_asset_id text,
+  mux_playback_id text,
+  mux_playback_url text
+);
+create index if not exists idx_video_files_status on video_files(status);
+
 -- Raw analytics events (append-only, unstructured)
 create table if not exists events (
   id uuid primary key default gen_random_uuid(),
