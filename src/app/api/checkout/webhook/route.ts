@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Atomic lock: set status to 'paid' only if still 'pending'
-    // This prevents the session-status backup from also fulfilling
+    // Prevents double fulfillment if Stripe retries the webhook
     const locked = await updateOrderStatus(order.id, 'pending', 'paid');
     if (!locked) {
       console.log('[Webhook] Order already being processed:', order.id);
