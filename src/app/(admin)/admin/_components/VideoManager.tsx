@@ -26,7 +26,7 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
       const res = await fetch('/api/admin/videos');
       if (res.ok) {
         const data = await res.json();
-        setVideos(data.filter((v: VideoFile) => v.status === 'ready'));
+        setVideos(data.filter((v: VideoFile) => v.status === 'ready' || v.status === 'processing'));
       }
     } catch {
       console.error('Failed to fetch videos');
@@ -38,6 +38,29 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
   useEffect(() => {
     fetchVideos();
   }, [fetchVideos]);
+
+  // Auto-refresh when videos are processing (Mux transcoding)
+  useEffect(() => {
+    const hasProcessing = videos.some(v => v.status === 'processing');
+    if (!hasProcessing) return;
+
+    const interval = setInterval(async () => {
+      for (const v of videos.filter(v => v.status === 'processing')) {
+        try {
+          const res = await fetch(`/api/admin/videos/${v.id}/status`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.status === 'ready' || data.status === 'error') {
+              await fetchVideos();
+              break;
+            }
+          }
+        } catch { /* ignore polling errors */ }
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [videos, fetchVideos]);
 
   const handleUpload = async (file: File) => {
     if (!file.type.startsWith('video/')) {
@@ -113,7 +136,7 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
     }
   };
 
-  const selectedVideo = videos.find(v => v.publicUrl === value);
+  const selectedVideo = videos.find(v => v.publicUrl === value || v.muxPlaybackUrl === value);
 
   // ---- Selected View (default) ----
   if (view === 'selected' && !uploading) {
@@ -236,7 +259,10 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
         {uploading && uploadProgress ? (
           <div>
             <p className="text-sm text-neutral-600 mb-2">
-              上传中... {uploadProgress.percent}% ({formatFileSize(uploadProgress.loaded)} / {formatFileSize(uploadProgress.total)})
+              {uploadProgress.percent === -1
+                ? '视频转码中，请稍候...'
+                : `上传中... ${uploadProgress.percent}% (${formatFileSize(uploadProgress.loaded)} / ${formatFileSize(uploadProgress.total)})`
+              }
             </p>
             <div className="w-full bg-neutral-200 rounded-full h-2">
               <div
@@ -267,13 +293,14 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
           {videos.map((video) => (
             <div
               key={video.id}
-              className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors
+              className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${video.status === 'processing' ? 'cursor-wait opacity-60' : 'cursor-pointer'}
                 ${value === video.publicUrl
                   ? 'border-[#B8953F] bg-[#B8953F]/5'
                   : 'border-neutral-200 hover:border-neutral-300 bg-white'
                 }`}
               onClick={() => {
-                onChange(video.publicUrl);
+                if (video.status === 'processing') return;
+                onChange(video.muxPlaybackUrl || video.publicUrl);
                 setView('selected');
                 setError('');
               }}
@@ -290,9 +317,14 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
                   {formatFileSize(video.fileSize)} · {new Date(video.uploadedAt).toLocaleDateString('zh-CN')}
                 </p>
               </div>
-              {value === video.publicUrl && (
+              {video.status === 'processing' ? (
+                <span className="text-amber-500 text-xs font-medium shrink-0 flex items-center gap-1">
+                  <span className="w-3 h-3 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                  转码中
+                </span>
+              ) : (value === video.publicUrl || value === video.muxPlaybackUrl) ? (
                 <span className="text-[#B8953F] text-xs font-medium shrink-0">当前</span>
-              )}
+              ) : null}
               <button
                 type="button"
                 onClick={(e) => {
