@@ -68,7 +68,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const registration = await createRegistration(registrationData as Parameters<typeof createRegistration>[0]);
+    let registration;
+    try {
+      registration = await createRegistration(registrationData as Parameters<typeof createRegistration>[0]);
+    } catch (err: unknown) {
+      // Supabase returns code '23505' for unique constraint violations
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === '23505') {
+        const existingReg = await getRegistrationByEmail(resolvedWebinarId, body.email);
+        return NextResponse.json(
+          { error: 'This email is already registered for this webinar', registration: existingReg },
+          { status: 409 }
+        );
+      }
+      throw err; // Re-throw other errors
+    }
 
     // Send confirmation email (fire and forget)
     const origin = request.nextUrl.origin;
