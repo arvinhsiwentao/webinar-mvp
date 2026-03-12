@@ -10,6 +10,7 @@ export interface CTAEvent {
   position?: 'on_video' | 'below_video';
   color?: string;
   secondaryText?: string;
+  dismissible?: boolean;
 }
 
 export interface AutoChatMessage {
