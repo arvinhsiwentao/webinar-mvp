@@ -3,7 +3,6 @@ type GA4Item = { item_id: string; item_name: string; price: number; quantity: nu
 type GA4EventMap = {
   // GA4 Recommended events
   sign_up: { method: string; webinar_id: string }
-  join_group: { group_id: string; webinar_id?: string }
   begin_checkout: { currency: string; value: number; items: GA4Item[]; cta_id?: string; video_time_sec?: number; source?: string }
   purchase: { transaction_id: string; value: number; currency: string; items: GA4Item[] }
 
@@ -30,7 +29,6 @@ export const DEFAULT_PRODUCT_PRICE = 599
 // Events that represent conversions — these get attribution params auto-attached
 const CONVERSION_EVENTS: ReadonlySet<string> = new Set([
   'sign_up',
-  'join_group',
   'begin_checkout',
   'purchase',
   'c_enter_live',

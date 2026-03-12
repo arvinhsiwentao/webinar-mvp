@@ -80,8 +80,6 @@ export default function LiveRoomPage() {
     initialTimeSec: lateJoinSeconds,
   });
 
-  const joinTracked = useRef(false);
-
   useEffect(() => {
     async function fetchWebinar() {
       try {
@@ -150,15 +148,6 @@ export default function LiveRoomPage() {
     setIsMuted,
     setAutoplayBlocked,
   });
-
-  useEffect(() => {
-    const storageKey = `join_group_fired_${webinarId}`;
-    if (!joinTracked.current && !sessionStorage.getItem(storageKey)) {
-      joinTracked.current = true;
-      try { sessionStorage.setItem(storageKey, '1'); } catch { /* ignore */ }
-      trackGA4('join_group', { group_id: webinarId, webinar_id: webinarId });
-    }
-  }, [webinarId]);
 
   // Playback tracking (milestones, heartbeat, ended redirect)
   const { handlePlaybackEvent } = usePlaybackTracking({
