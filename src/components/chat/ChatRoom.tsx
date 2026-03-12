@@ -79,6 +79,12 @@ export default function ChatRoom({
   const currentTimeRef = useRef(currentTime);
   useEffect(() => { currentTimeRef.current = currentTime; }, [currentTime]);
 
+  // Slot-anchored wall-clock base (computed once)
+  const slotStartMs = sessionStartTime ? new Date(sessionStartTime).getTime() : null;
+
+  // Gap detection: track previous video time to detect background-tab resumes
+  const prevTimeRef = useRef<number>(initialTime ?? 0);
+
   // Pre-compute randomized trigger times on first render
   const randomizedTimes = useRef<Map<number, number>>(new Map());
   useEffect(() => {
@@ -91,71 +97,95 @@ export default function ChatRoom({
   }, [autoMessages, timeVariance]);
 
   // Fire auto-chat messages based on video time.
-  // If the sender hasn't "joined" yet, inject a join notification first
-  // so that "X 加入了直播" always appears before X's first message.
+  // Includes gap detection: if currentTime jumps forward (background tab resume),
+  // bulk-insert all missed messages with slot-anchored timestamps.
   useEffect(() => {
+    const newMsgs: ChatMessage[] = [];
+
     autoMessages.forEach((msg, idx) => {
       if (firedAutoIds.current.has(idx)) return;
       const triggerTime = randomizedTimes.current.get(idx) ?? msg.timeSec;
       if (currentTime >= triggerTime) {
         firedAutoIds.current.add(idx);
-        const now = Date.now();
-        setMessages((prev) => {
-          const newMsgs: ChatMessage[] = [];
-          // Inject join message if this name hasn't joined yet
-          if (!joinedNamesRef.current.has(msg.name)) {
-            joinedNamesRef.current.add(msg.name);
-            newMsgs.push({
-              id: nextId(),
-              name: '',
-              message: `${msg.name} 加入了直播`,
-              timestamp: currentTime,
-              wallTime: now,
-              isSystem: true,
-            });
-          }
+        // Slot-anchored wallTime: deterministic from session start + video position
+        const msgWallTime = slotStartMs ? slotStartMs + msg.timeSec * 1000 : Date.now();
+        // Inject join message if this name hasn't joined yet
+        if (!joinedNamesRef.current.has(msg.name)) {
+          joinedNamesRef.current.add(msg.name);
           newMsgs.push({
             id: nextId(),
-            name: msg.name,
-            message: msg.message,
-            timestamp: currentTime,
-            wallTime: now + 1, // +1ms to ensure join sorts before chat
-            isAuto: true,
+            name: '',
+            message: `${msg.name} 进入直播`,
+            timestamp: msg.timeSec,
+            wallTime: msgWallTime,
+            isSystem: true,
           });
-          return [...prev, ...newMsgs];
+        }
+        newMsgs.push({
+          id: nextId(),
+          name: msg.name,
+          message: msg.message,
+          timestamp: msg.timeSec,
+          wallTime: msgWallTime + 1, // +1ms to ensure join sorts before chat
+          isAuto: true,
         });
       }
     });
-  }, [currentTime, autoMessages]);
+
+    if (newMsgs.length > 0) {
+      // Sort by original timeSec so bulk catch-up messages appear in correct order
+      newMsgs.sort((a, b) => a.wallTime! - b.wallTime!);
+      setMessages(prev => [...prev, ...newMsgs]);
+    }
+
+    prevTimeRef.current = currentTime;
+  }, [currentTime, autoMessages, slotStartMs]);
 
   // Backfill auto-chat messages for late join (runs once on mount)
+  // Uses slot-anchored timestamps and includes join notifications per sender
   const hasBackfilled = useRef(false);
   useEffect(() => {
     if (hasBackfilled.current || !initialTime || initialTime <= 0) return;
     hasBackfilled.current = true;
 
-    const now = Date.now();
-    const backfillMsgs: ChatMessage[] = autoMessages
-      .filter(msg => msg.timeSec <= initialTime)
-      .map((msg, idx) => ({
+    const pastMessages = autoMessages
+      .map((msg, idx) => ({ msg, idx }))
+      .filter(({ msg }) => msg.timeSec <= initialTime)
+      .sort((a, b) => a.msg.timeSec - b.msg.timeSec);
+
+    const backfillMsgs: ChatMessage[] = [];
+    const seenNames = new Set<string>();
+
+    for (const { msg, idx } of pastMessages) {
+      const msgWallTime = slotStartMs ? slotStartMs + msg.timeSec * 1000 : Date.now() - (initialTime - msg.timeSec) * 1000;
+      // Inject join notification before sender's first message
+      if (!seenNames.has(msg.name)) {
+        seenNames.add(msg.name);
+        joinedNamesRef.current.add(msg.name);
+        backfillMsgs.push({
+          id: `backfill-join-${idx}`,
+          name: '',
+          message: `${msg.name} 进入直播`,
+          timestamp: msg.timeSec,
+          wallTime: msgWallTime,
+          isSystem: true,
+        });
+      }
+      backfillMsgs.push({
         id: `backfill-${idx}`,
         name: msg.name,
         message: msg.message,
         timestamp: msg.timeSec,
-        wallTime: now - (initialTime - msg.timeSec) * 1000,
+        wallTime: msgWallTime + 1,
         isAuto: true,
-      }));
+      });
+      firedAutoIds.current.add(idx);
+    }
 
     if (backfillMsgs.length > 0) {
       setMessages(prev => [...backfillMsgs, ...prev]);
-      // Mark as fired so they don't trigger again during playback
-      autoMessages.forEach((msg, idx) => {
-        if (msg.timeSec <= initialTime) {
-          firedAutoIds.current.add(idx);
-        }
-      });
     }
-  }, [initialTime, autoMessages]);
+  }, [initialTime, autoMessages, slotStartMs]);
 
   // Auto-scroll to bottom on new messages — only if user is already near the bottom.
   // Uses scrollTop directly instead of scrollIntoView to avoid scrolling ancestor
