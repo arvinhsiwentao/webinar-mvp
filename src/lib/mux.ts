@@ -56,5 +56,13 @@ export async function getMuxAssetStatus(assetId: string): Promise<{
 
 export async function deleteMuxAsset(assetId: string): Promise<void> {
   const mux = getMuxClient();
-  await mux.video.assets.delete(assetId);
+  try {
+    await mux.video.assets.delete(assetId);
+  } catch (err: unknown) {
+    // 404 means the asset is already gone — treat as success
+    if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
+      return;
+    }
+    throw err;
+  }
 }
