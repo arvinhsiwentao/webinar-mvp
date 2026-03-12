@@ -52,6 +52,15 @@ export async function POST(request: NextRequest) {
         source: source || 'direct',
         order_source: 'mike_webinar',
       },
+      payment_intent_data: {
+        metadata: {
+          order_source: 'mike_webinar',
+          webinarId: resolvedId,
+          email,
+          name: name || '',
+          source: source || 'direct',
+        },
+      },
     });
 
     // Create pending order
