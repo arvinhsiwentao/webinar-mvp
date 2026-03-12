@@ -113,12 +113,6 @@ export default function CheckoutPage() {
       {/* Header */}
       <header className="border-b border-[#E8E5DE] bg-white">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <button
-            onClick={() => window.history.back()}
-            className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
-          >
-            &larr; 返回
-          </button>
           <div className="flex items-center gap-2 text-sm text-neutral-400">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
