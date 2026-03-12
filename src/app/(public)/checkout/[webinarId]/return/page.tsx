@@ -33,7 +33,7 @@ export default function CheckoutReturnPage() {
           setCustomerEmail(data.customerEmail || '');
           if (!purchaseTracked.current) {
             purchaseTracked.current = true;
-            const purchaseValue = data.amountTotal ? data.amountTotal / 100 : 997;
+            const purchaseValue = data.amountTotal ? data.amountTotal / 100 : 599;
             const purchaseCurrency = (data.currency || 'usd').toUpperCase();
             trackGA4('purchase', {
               transaction_id: sessionId || `session_${Date.now()}`,

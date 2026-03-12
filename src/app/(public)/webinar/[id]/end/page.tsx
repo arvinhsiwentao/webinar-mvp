@@ -112,8 +112,8 @@ export default function EndPage() {
                 });
                 trackGA4('begin_checkout', {
                   currency: 'USD',
-                  value: 997,
-                  items: [{ item_id: `webinar_${webinarId}`, item_name: webinar.title, price: 997, quantity: 1 }],
+                  value: 599,
+                  items: [{ item_id: `webinar_${webinarId}`, item_name: webinar.title, price: 599, quantity: 1 }],
                   source: 'end',
                 });
 

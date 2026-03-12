@@ -374,8 +374,8 @@ export default function LiveRoomPage() {
   const handleCTAClick = useCallback((cta: CTAEvent) => {
     trackGA4('begin_checkout', {
       currency: 'USD',
-      value: 997,
-      items: [{ item_id: `webinar_${webinarId}`, item_name: cta.buttonText, price: 997, quantity: 1 }],
+      value: 599,
+      items: [{ item_id: `webinar_${webinarId}`, item_name: cta.buttonText, price: 599, quantity: 1 }],
       cta_id: cta.id,
       video_time_sec: Math.round(currentTime),
       source: 'live',
