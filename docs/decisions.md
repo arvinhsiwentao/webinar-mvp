@@ -28,6 +28,8 @@ The simulive model requires viewers to watch linearly (no skipping ahead) to mai
 
 ### 2026-02-11: YouTube video support via videojs-youtube plugin
 
+**Superseded by 2026-03-11 decisions below.** YouTube support was removed; only MP4/HLS via Cloudflare R2 is supported.
+
 **Decision:** Use `videojs-youtube` Video.js tech plugin instead of raw iframe embed.
 
 **Why:** Preserves the unified Video.js player API so that seeking prevention, `onTimeUpdate` callbacks (for auto-chat and CTA sync), and playback event tracking all continue to work without separate YouTube-specific code paths. The alternative (raw iframe) would have required reimplementing all time-synced features.

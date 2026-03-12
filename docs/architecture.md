@@ -6,7 +6,7 @@ Living document. Hooks remind Claude to keep this current when structural change
 
 ## System Overview
 
-Simulive (simulated-live) webinar platform. A pre-recorded video plays on a schedule while interactive features — auto-chat, CTA overlays, viewer count — create the feel of a live broadcast. Built for the 北美華人 (North American Chinese) market (Simplified Chinese, zh-CN locale). Data stored in Supabase (hosted Postgres). Chat uses polling; WebSocket planned for production.
+Simulive (simulated-live) webinar platform. A pre-recorded video plays on a schedule while interactive features — auto-chat, CTA overlays, viewer count — create the feel of a live broadcast. Built for the 北美華人 (North American Chinese) market (Simplified Chinese, zh-CN locale). Data stored in Supabase (hosted Postgres). Chat uses SSE (Server-Sent Events) via in-memory pub/sub broker (`src/lib/chat-broker.ts`). WebSocket planned for production.
 
 ## Page Flow & Routing
 
@@ -83,6 +83,11 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/checkout/create-session` | POST | `src/app/api/checkout/create-session/route.ts` | Creates Stripe Embedded Checkout session. Checks duplicate purchase, creates pending Order. Returns `clientSecret`. |
 | `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Checks Stripe session status. Backup fulfillment: generates activation code + sends email if webhook missed. |
 | `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Primary fulfillment on `checkout.session.completed`: generates activation code, updates order, sends email. Idempotent. |
+| `/api/webinar/[id]/chat/stream` | GET | `src/app/api/webinar/[id]/chat/stream/route.ts` | SSE real-time chat stream via `chat-broker.ts` |
+| `/api/track` | POST | `src/app/api/track/route.ts` | Store tracking events to `events` table |
+| `/api/subtitles/generate` | POST | `src/app/api/subtitles/generate/route.ts` | Generate subtitles for video |
+| `/api/subtitles/logs` | GET | `src/app/api/subtitles/logs/route.ts` | Fetch subtitle generation logs |
+| `/api/cron/reminders` | GET | `src/app/api/cron/reminders/route.ts` | Send scheduled email reminders |
 
 #### Admin Routes (`src/app/api/admin/`)
 
@@ -90,6 +95,8 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 |----------|---------|-------------|-------|
 | `/api/admin/webinar` | GET, POST | `src/app/api/admin/webinar/route.ts` | List all / create new |
 | `/api/admin/webinar/[id]` | GET, PUT, DELETE | `src/app/api/admin/webinar/[id]/route.ts` | Full CRUD, GET includes registrations |
+| `/api/admin/login` | POST | `src/app/api/admin/login/route.ts` | Authenticate with ADMIN_PASSWORD, set session cookie |
+| `/api/admin/logout` | POST | `src/app/api/admin/logout/route.ts` | Clear session cookie |
 
 ### Utilities (`src/lib/utils.ts`)
 
@@ -270,10 +277,10 @@ Video files are hosted in Cloudflare R2 (bucket: `webinar-videos`), which replac
 ## Key Constraints
 
 1. **No video seeking** — Business requirement. VideoPlayer blocks scrubbing, keyboard seeks, and programmatic seeking. Not a bug.
-2. **No WebSocket** — Chat uses auto-chat messages + API polling. Socket.io planned for production.
+2. **No WebSocket** — Chat uses SSE (Server-Sent Events) via `chat-broker.ts` pub/sub broker + auto-chat messages. Socket.io planned for production.
 3. **Admin password auth** — `ADMIN_PASSWORD` env var + HMAC-signed cookie session (24h expiry). Middleware at `src/middleware.ts` protects `/admin/*` and `/api/admin/*`. Login page at `/admin/login`.
 4. **North American Chinese locale** — Phone validation: US/Canada 10-digit format. Date formatting: `zh-CN` locale.
-5. **i18n required** — All UI text must use translation keys, never hardcoded strings.
+5. **No i18n framework** — All UI text is hardcoded Simplified Chinese (zh-CN). i18n planned for future.
 6. **Unsplash images** — `next.config.ts` allows remote images from `*.unsplash.com`.
 7. **Dynamic video import** — Video.js imported client-side only to avoid SSR issues.
 
@@ -284,7 +291,6 @@ Modules defined in SPEC.md but **not yet implemented**:
 - **Picture-in-Picture (PiP)** — Floating mini-player when scrolling
 - **WebSocket real-time chat** — Currently simulated with polling + auto-chat
 - **Polls / Q&A** — Interactive engagement features
-- **Email reminders** — Pre-webinar notification system
 - **Advanced admin** — Full CRUD dashboard, analytics, session management
 - **Social sharing OG tags** — Share buttons added to end page, but OG meta tags not yet implemented
 - **Multi-language support** — Currently zh-CN only, no language switcher
