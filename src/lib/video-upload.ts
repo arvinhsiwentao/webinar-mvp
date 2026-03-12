@@ -1,3 +1,5 @@
+import * as UpChunk from '@mux/upchunk';
+
 export interface UploadProgress {
   loaded: number;
   total: number;
@@ -6,7 +8,7 @@ export interface UploadProgress {
 
 export interface UploadResult {
   videoFileId: string;
-  publicUrl: string;   // Mux HLS URL if available, else R2 URL
+  publicUrl: string;   // Mux HLS URL
   filename: string;
 }
 
@@ -14,7 +16,7 @@ export async function uploadVideo(
   file: File,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<UploadResult> {
-  // Step 1: Get presigned URL from our API
+  // Step 1: Get Mux Direct Upload URL from our API
   const initRes = await fetch('/api/admin/videos', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -29,78 +31,54 @@ export async function uploadVideo(
     throw new Error(err.error || 'Failed to initialize upload');
   }
 
-  const { videoFile, presignedUrl } = await initRes.json();
+  const { videoFile, uploadUrl } = await initRes.json();
 
-  // Step 2: Upload file directly to R2 via presigned PUT URL
+  // Step 2: Upload file to Mux via UpChunk (chunked, resumable)
   await new Promise<void>((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-
-    xhr.upload.addEventListener('progress', (e) => {
-      if (e.lengthComputable && onProgress) {
-        onProgress({
-          loaded: e.loaded,
-          total: e.total,
-          percent: Math.round((e.loaded / e.total) * 100),
-        });
-      }
+    const upload = UpChunk.createUpload({
+      endpoint: uploadUrl,
+      file,
+      chunkSize: 5120, // ~5MB chunks
     });
 
-    xhr.addEventListener('load', () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve();
-      } else {
-        reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.responseText}`));
-      }
+    upload.on('progress', (detail: { detail: number }) => {
+      const percent = Math.round(detail.detail);
+      onProgress?.({
+        loaded: Math.round((percent / 100) * file.size),
+        total: file.size,
+        percent,
+      });
     });
 
-    xhr.addEventListener('error', () => reject(new Error('Upload network error')));
-    xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+    upload.on('success', () => {
+      onProgress?.({ loaded: file.size, total: file.size, percent: 100 });
+      resolve();
+    });
 
-    xhr.open('PUT', presignedUrl);
-    xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
-    xhr.send(file);
+    upload.on('error', (err: { detail: { message: string } }) => {
+      reject(new Error(err.detail?.message || 'Upload failed'));
+    });
   });
 
-  // Step 3: Signal upload complete — server creates Mux asset
-  onProgress?.({ loaded: file.size, total: file.size, percent: 100 });
+  // Step 3: Poll for Mux upload completion + asset transcoding
+  const finalFile = await pollStatus(videoFile.id, onProgress);
 
-  const patchRes = await fetch(`/api/admin/videos/${videoFile.id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: 'ready' }),
-  });
-
-  if (!patchRes.ok) {
-    throw new Error('Failed to finalize upload');
-  }
-
-  const patchedFile = await patchRes.json();
-
-  // Step 4: If Mux is processing, poll for completion
-  if (patchedFile.status === 'processing' && patchedFile.muxAssetId) {
-    const finalFile = await pollMuxStatus(videoFile.id, onProgress);
-    return {
-      videoFileId: finalFile.id,
-      publicUrl: finalFile.muxPlaybackUrl || finalFile.publicUrl,
-      filename: file.name,
-    };
-  }
-
-  // No Mux — return R2 URL directly
   return {
-    videoFileId: patchedFile.id,
-    publicUrl: patchedFile.muxPlaybackUrl || patchedFile.publicUrl,
+    videoFileId: finalFile.id,
+    publicUrl: finalFile.muxPlaybackUrl,
     filename: file.name,
   };
 }
 
 /**
- * Poll the Mux status endpoint until transcoding completes.
+ * Poll the status endpoint until:
+ * 1. Mux receives the upload and creates an asset (uploading → processing)
+ * 2. Mux finishes transcoding (processing → ready)
  */
-async function pollMuxStatus(
+async function pollStatus(
   videoId: string,
   onProgress?: (progress: UploadProgress) => void,
-  maxAttempts = 120,
+  maxAttempts = 180,
   intervalMs = 3000,
 ): Promise<Record<string, string>> {
   for (let i = 0; i < maxAttempts; i++) {
@@ -111,8 +89,9 @@ async function pollMuxStatus(
 
     const data = await res.json();
 
-    if (onProgress && data.status === 'processing') {
-      onProgress({ loaded: 0, total: 0, percent: -1 });
+    if (data.status === 'processing' || data.status === 'uploading') {
+      // Show indeterminate progress for transcoding phase
+      onProgress?.({ loaded: 0, total: 0, percent: -1 });
     }
 
     if (data.status === 'ready') {
