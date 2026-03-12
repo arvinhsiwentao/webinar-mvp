@@ -287,6 +287,22 @@ export async function updateOrder(
   return snakeToCamel<Order>(data);
 }
 
+export async function updateOrderStatus(
+  id: string,
+  fromStatus: string,
+  toStatus: string
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('orders')
+    .update({ status: toStatus })
+    .eq('id', id)
+    .eq('status', fromStatus)
+    .select('id')
+    .maybeSingle();
+  if (error) throw error;
+  return data !== null;
+}
+
 export async function getOrderByActivationCode(code: string): Promise<Order | null> {
   const { data, error } = await supabase
     .from('orders')
