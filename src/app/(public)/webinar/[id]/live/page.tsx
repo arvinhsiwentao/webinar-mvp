@@ -224,9 +224,27 @@ export default function LiveRoomPage() {
   useEffect(() => {
     if (!joinTracked.current) {
       joinTracked.current = true;
-      track('webinar_join', { webinarId });
+      trackGA4('join_group', { group_id: webinarId, webinar_id: webinarId });
     }
   }, [webinarId]);
+
+  // Video heartbeat — sends watch position every 60 seconds
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const interval = setInterval(() => {
+      const watchDuration = Math.round(currentTime - lateJoinSeconds);
+      if (watchDuration > 0) {
+        trackGA4('c_video_heartbeat', {
+          webinar_id: webinarId,
+          current_time_sec: Math.round(currentTime),
+          watch_duration_sec: watchDuration,
+        });
+      }
+    }, 60_000);
+
+    return () => clearInterval(interval);
+  }, [isPlaying, webinarId, currentTime, lateJoinSeconds]);
 
   // Handle video playback events
   const handlePlaybackEvent = useCallback(
@@ -235,12 +253,13 @@ export default function LiveRoomPage() {
         setCurrentTime(event.currentTime);
         if (event.duration > 0) {
           const percent = Math.floor((event.currentTime / event.duration) * 100);
-          [25, 50, 75, 100].forEach(milestone => {
-            if (percent >= milestone && !trackedMilestones.current.has(milestone)) {
-              trackedMilestones.current.add(milestone);
-              track('video_progress', { webinarId, percent: milestone });
-            }
-          });
+        const milestones = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
+        for (const milestone of milestones) {
+          if (percent >= milestone && !trackedMilestones.current.has(milestone)) {
+            trackedMilestones.current.add(milestone);
+            trackGA4('c_video_progress', { webinar_id: webinarId, percent: milestone });
+          }
+        }
         }
       }
       if (event.type === 'play') {
@@ -251,20 +270,25 @@ export default function LiveRoomPage() {
       }
       if (event.type === 'ended') {
         setIsPlaying(false);
-        track('webinar_leave', { webinarId, reason: 'ended', watchDurationSec: Math.round(event.currentTime) });
+        // Final heartbeat with exact end position
+        trackGA4('c_video_heartbeat', {
+          webinar_id: webinarId,
+          current_time_sec: Math.round(event.currentTime),
+          watch_duration_sec: Math.round(event.currentTime - lateJoinSeconds),
+        });
         // Redirect to end page after short delay
         setTimeout(() => {
           router.push(`/webinar/${webinarId}/end?name=${encodeURIComponent(userName)}`);
         }, 2000);
       }
     },
-    [webinarId, router, userName]
+    [webinarId, router, userName, lateJoinSeconds]
   );
 
   // Handle user chat messages
   const handleSendMessage = useCallback(
     async (msg: ChatMessage) => {
-      track('chat_message', { webinarId });
+      trackGA4('c_chat_message', { webinar_id: webinarId, video_time_sec: Math.round(currentTime) });
       try {
         await fetch(`/api/webinar/${webinarId}/chat`, {
           method: 'POST',
@@ -279,7 +303,7 @@ export default function LiveRoomPage() {
         console.error('Failed to send message:', err);
       }
     },
-    [webinarId]
+    [webinarId, currentTime]
   );
 
   // Handle unmute from overlay
@@ -340,11 +364,13 @@ export default function LiveRoomPage() {
 
   // Handle CTA clicks
   const handleCTAClick = useCallback((cta: CTAEvent) => {
-    track('cta_click', { webinarId, buttonText: cta.buttonText, ctaId: cta.id, videoTime: currentTime });
     trackGA4('begin_checkout', {
       currency: 'USD',
       value: 997,
       items: [{ item_id: `webinar_${webinarId}`, item_name: cta.buttonText, price: 997, quantity: 1 }],
+      cta_id: cta.id,
+      video_time_sec: Math.round(currentTime),
+      source: 'live',
     });
 
     // Read email from localStorage sticky
@@ -490,8 +516,8 @@ export default function LiveRoomPage() {
                 currentTime={currentTime}
                 ctaEvents={(webinar.ctaEvents || []).filter(c => c.position === 'on_video')}
                 onCTAClick={handleCTAClick}
-                onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText, ctaId: cta.id })}
-                onCTADismiss={(cta) => track('cta_dismiss', { webinarId, buttonText: cta.buttonText, ctaId: cta.id, videoTime: currentTime })}
+                onCTAView={(cta) => trackGA4('c_cta_view', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) })}
+                onCTADismiss={(cta) => trackGA4('c_cta_dismiss', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) })}
                 position="on_video"
               />
             </div>
@@ -501,8 +527,8 @@ export default function LiveRoomPage() {
               currentTime={currentTime}
               ctaEvents={(webinar.ctaEvents || []).filter(c => c.position !== 'on_video')}
               onCTAClick={handleCTAClick}
-              onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText, ctaId: cta.id })}
-              onCTADismiss={(cta) => track('cta_dismiss', { webinarId, buttonText: cta.buttonText, ctaId: cta.id, videoTime: currentTime })}
+              onCTAView={(cta) => trackGA4('c_cta_view', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) })}
+              onCTADismiss={(cta) => trackGA4('c_cta_dismiss', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) })}
               position="below_video"
             />
 
