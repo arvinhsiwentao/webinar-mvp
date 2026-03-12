@@ -42,6 +42,7 @@ export default function LobbyPage() {
           setEvergreenState(state);
 
           if (state === 'LIVE') {
+            trackGA4('c_enter_live', { webinar_id: webinarId, entry_method: 'redirect_live' });
             const slotParam = `&slot=${encodeURIComponent(slotTime)}`;
             router.push(`/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}`);
             return;
@@ -79,10 +80,12 @@ export default function LobbyPage() {
   }, [webinarId, userName, slotTime]);
 
   const handleCountdownComplete = useCallback(() => {
+    trackGA4('c_enter_live', { webinar_id: webinarId, entry_method: 'countdown_auto' });
     router.push(buildLiveUrl());
-  }, [router, buildLiveUrl]);
+  }, [router, buildLiveUrl, webinarId]);
 
   const handleEnterLive = () => {
+    trackGA4('c_enter_live', { webinar_id: webinarId, entry_method: 'button' });
     router.push(buildLiveUrl());
   };
 
