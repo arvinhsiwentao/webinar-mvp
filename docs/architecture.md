@@ -64,7 +64,7 @@ Supabase (hosted Postgres) replaces the previous JSON file storage. Server-side 
 
 **Activation codes:** `src/lib/google-sheets.ts` — Claims pre-populated activation codes from a Google Sheet via the Sheets API. Falls back to random generation (`src/lib/activation-codes.ts`) when `GOOGLE_SERVICE_ACCOUNT_KEY` is not configured.
 
-**Tables:** `webinars`, `registrations`, `chat_messages`, `orders`, `events`
+**Tables:** `webinars`, `registrations`, `chat_messages`, `orders` (the `events` table exists but is no longer written to — tracking moved to GTM/GA4)
 
 **JSONB columns:** Nested arrays that are always read/written with the parent webinar are stored as JSONB columns rather than separate tables: `auto_chat`, `cta_events`, `highlights`, `subtitle_cues`, `evergreen`.
 
@@ -86,7 +86,6 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Checks Stripe session status. Backup fulfillment: claims activation code from Google Sheets + sends email if webhook missed. |
 | `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Primary fulfillment on `checkout.session.completed`: claims activation code from Google Sheets, updates order, sends email. Idempotent. |
 | `/api/webinar/[id]/chat/stream` | GET | `src/app/api/webinar/[id]/chat/stream/route.ts` | SSE real-time chat stream via `chat-broker.ts` |
-| `/api/track` | POST | `src/app/api/track/route.ts` | Store tracking events to `events` table |
 | `/api/subtitles/generate` | POST | `src/app/api/subtitles/generate/route.ts` | Generate subtitles for video |
 | `/api/subtitles/logs` | GET | `src/app/api/subtitles/logs/route.ts` | Fetch subtitle generation logs |
 | `/api/cron/reminders` | GET | `src/app/api/cron/reminders/route.ts` | Send scheduled email reminders |
@@ -181,26 +180,34 @@ Shared primitives:
 - `Input.tsx` — form input
 - `Card.tsx` — content card container
 
-## Analytics (GA4)
+## Analytics (GTM / GA4)
 
-GA4 is integrated via `@next/third-parties/google` with the `GoogleAnalytics` component in the root layout, gated on `NEXT_PUBLIC_GA_ID` env var.
+All tracking goes through **GTM** via `@next/third-parties/google` (`GoogleTagManager` component in root layout, gated on `NEXT_PUBLIC_GTM_ID` env var). Every event uses `trackGA4()` → `window.dataLayer.push()` → GTM → GA4. No server-side event storage.
 
-**Dual-fire tracking:** The existing `track()` function in `src/lib/tracking.ts` sends events to both `/api/track` (server-side JSON storage) and GA4 (client-side gtag). Internal event names are mapped to GA4 recommended event names where possible.
+**Event inventory (16 events):**
 
-**Event mapping:**
-| Internal Event | GA4 Event | Trigger |
-|---|---|---|
-| (automatic) | `page_view` | Every route change |
-| registration submit | `sign_up` | `useRegistrationForm.ts` |
-| `webinar_join` | `join_group` | Live page mount |
-| `cta_click` | `c_cta_click` | CTA overlay click |
-| `video_progress` | `c_video_progress` | 25/50/75/100% marks |
-| checkout success | `purchase` | Checkout return page |
-| end page mount | `c_webinar_complete` | End page |
+| GA4 Event | Type | Page | Trigger |
+|---|---|---|---|
+| `c_scroll_depth` | Custom | Landing | 10% scroll intervals |
+| `c_signup_button_click` | Custom | Landing | CTA button click |
+| `sign_up` | Recommended | Registration | Form submit success |
+| `c_add_to_calendar` | Custom | Lobby | Google/iCal click |
+| `c_enter_live` | Custom | Lobby | Enter live room (button/countdown/redirect) |
+| `join_group` | Recommended | Live Room | Page mount (once) |
+| `c_video_heartbeat` | Custom | Live Room | Every 60s while playing (uses ref to avoid interval reset) |
+| `c_video_progress` | Custom | Live Room | 5% milestone intervals |
+| `c_chat_message` | Custom | Live Room | User sends message |
+| `c_cta_view` | Custom | Live Room | CTA overlay appears |
+| `c_cta_dismiss` | Custom | Live Room | CTA overlay dismissed |
+| `begin_checkout` | Recommended | Live + End | CTA purchase click (includes `source`, `cta_id`) |
+| `c_webinar_complete` | Custom | End Page | Page mount (includes `watch_duration_sec` via sessionStorage) |
+| `c_end_page_cta_click` | Custom | End Page | CTA button click |
+| `c_share_click` | Custom | End Page | Facebook/Twitter share |
+| `purchase` | Recommended | Checkout Return | Stripe session confirmed complete |
 
 **gclid preservation:** `GclidPreserver` component stores gclid/UTM params in sessionStorage on first page load so Google Ads attribution survives client-side navigation.
 
-**Files:** `src/lib/analytics.ts` (typed GA4 helper), `src/lib/tracking.ts` (dual-fire), `src/components/analytics/GclidPreserver.tsx`
+**Files:** `src/lib/analytics.ts` (typed GA4 event map + `trackGA4()` function), `src/components/analytics/GclidPreserver.tsx`
 
 ## Design System
 
