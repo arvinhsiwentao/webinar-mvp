@@ -104,3 +104,11 @@ Admin panel gets drag-and-drop upload with a video library for easy switching.
 ## 2026-03-11: Migrate video storage from Supabase to Cloudflare R2
 
 Supabase free tier has 50MB file upload limit (hard cap, no workaround). Cloudflare R2 free tier: 10GB storage, zero egress fees, 5GB per single upload. Video metadata stays in Supabase DB. Added paste-URL fallback for flexibility. Uses `@aws-sdk/client-s3` with presigned PUT URLs for browser-direct uploads.
+
+### 2026-03-12 — Mux for video delivery (HLS adaptive streaming)
+
+**Decision:** Add Mux as the video delivery layer on top of R2 storage. R2 remains the upload destination and backup; Mux handles transcoding and CDN delivery.
+
+**Why:** R2's `r2.dev` subdomain has no CDN caching, causing video buffering. Mux provides automatic HLS adaptive bitrate, global CDN, and 100K free delivery minutes/month. Video.js + HLS.js already supports `.m3u8` URLs — zero player code changes needed.
+
+**Alternatives rejected:** Cloudflare Stream ($60/mo at 1K viewers vs Mux ~$0.18), Bunny Stream (viable but Mux created Video.js — best compatibility), R2 custom domain (no HLS, needs domain on Cloudflare).

@@ -257,11 +257,13 @@ When a user enters after their slot started but before it expired (slot + video 
 
 The admin panel (`WebinarForm.tsx`) exposes evergreen settings: daily anchor times, immediate slot interval/buffer/trigger threshold, timezone, and display slot count. Evergreen is always enabled (the `Session` type was removed).
 
-## Video Storage
+## Video Storage & Delivery
 
-Video files are hosted in Cloudflare R2 (bucket: `webinar-videos`), which replaced Supabase Storage due to its 50MB upload limit. Metadata is tracked in the Supabase `video_files` table.
+Videos are uploaded to **Cloudflare R2** (S3-compatible) as the source-of-truth backup. After upload, the server creates a **Mux** asset from the R2 public URL. Mux auto-transcodes to HLS adaptive bitrate (360p–1080p) and serves via its global CDN at `stream.mux.com`. The webinar's `videoUrl` stores the Mux HLS URL (`https://stream.mux.com/{PLAYBACK_ID}.m3u8`).
 
-**Upload flow:** Admin initiates upload → server generates presigned PUT URL via `@aws-sdk/client-s3` → browser uploads directly to R2 → public URL from R2 `r2.dev` subdomain saved to the webinar's `videoUrl` field. Custom domain planned for production.
+If Mux env vars are not configured, the system falls back to serving the raw MP4 directly from R2 (no HLS, no adaptive bitrate).
+
+Upload flow: Browser → R2 (presigned PUT) → Server creates Mux asset → Mux transcodes → Status polling → Ready
 
 **Fallback:** Admin can paste any external MP4/HLS URL directly, bypassing the upload flow.
 
