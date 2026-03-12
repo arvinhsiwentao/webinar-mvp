@@ -492,6 +492,7 @@ export default function LiveRoomPage() {
                 ctaEvents={(webinar.ctaEvents || []).filter(c => c.position === 'on_video')}
                 onCTAClick={handleCTAClick}
                 onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText, ctaId: cta.id })}
+                onCTADismiss={(cta) => track('cta_dismiss', { webinarId, buttonText: cta.buttonText, ctaId: cta.id, videoTime: currentTime })}
                 position="on_video"
               />
             </div>
@@ -502,6 +503,7 @@ export default function LiveRoomPage() {
               ctaEvents={(webinar.ctaEvents || []).filter(c => c.position !== 'on_video')}
               onCTAClick={handleCTAClick}
               onCTAView={(cta) => track('cta_view', { webinarId, buttonText: cta.buttonText, ctaId: cta.id })}
+              onCTADismiss={(cta) => track('cta_dismiss', { webinarId, buttonText: cta.buttonText, ctaId: cta.id, videoTime: currentTime })}
               position="below_video"
             />
 
