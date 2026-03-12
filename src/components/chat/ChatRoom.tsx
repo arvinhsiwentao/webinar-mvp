@@ -60,6 +60,8 @@ export default function ChatRoom({
   const [input, setInput] = useState('');
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const firedAutoIds = useRef<Set<number>>(new Set());
+  // Track names that have had a "加入了直播" join message shown
+  const joinedNamesRef = useRef<Set<string>>(new Set());
 
   // Format wall-clock epoch ms as HH:MM, falling back to video-time-based display
   const formatWallClock = useCallback((wallTime: number | undefined, videoSeconds: number) => {
@@ -88,24 +90,40 @@ export default function ChatRoom({
     }
   }, [autoMessages, timeVariance]);
 
-  // Fire auto-chat messages based on video time
+  // Fire auto-chat messages based on video time.
+  // If the sender hasn't "joined" yet, inject a join notification first
+  // so that "X 加入了直播" always appears before X's first message.
   useEffect(() => {
     autoMessages.forEach((msg, idx) => {
       if (firedAutoIds.current.has(idx)) return;
       const triggerTime = randomizedTimes.current.get(idx) ?? msg.timeSec;
       if (currentTime >= triggerTime) {
         firedAutoIds.current.add(idx);
-        setMessages((prev) => [
-          ...prev,
-          {
+        const now = Date.now();
+        setMessages((prev) => {
+          const newMsgs: ChatMessage[] = [];
+          // Inject join message if this name hasn't joined yet
+          if (!joinedNamesRef.current.has(msg.name)) {
+            joinedNamesRef.current.add(msg.name);
+            newMsgs.push({
+              id: nextId(),
+              name: '',
+              message: `${msg.name} 加入了直播`,
+              timestamp: currentTime,
+              wallTime: now,
+              isSystem: true,
+            });
+          }
+          newMsgs.push({
             id: nextId(),
             name: msg.name,
             message: msg.message,
             timestamp: currentTime,
-            wallTime: Date.now(),
+            wallTime: now + 1, // +1ms to ensure join sorts before chat
             isAuto: true,
-          },
-        ]);
+          });
+          return [...prev, ...newMsgs];
+        });
       }
     });
   }, [currentTime, autoMessages]);
@@ -234,11 +252,15 @@ export default function ChatRoom({
     }
 
     const prevSet = prevViewersRef.current;
-    const newNames = viewers.filter(name => !prevSet.has(name));
+    // Skip names that already have a join message (injected by auto-chat)
+    const newNames = viewers.filter(name => !prevSet.has(name) && !joinedNamesRef.current.has(name));
 
     if (newNames.length > 0) {
       // Limit to 3 join messages per tick to avoid chat spam
       const toShow = newNames.slice(0, 3);
+      for (const name of toShow) {
+        joinedNamesRef.current.add(name);
+      }
       setMessages(prev => [
         ...prev,
         ...toShow.map(name => ({
@@ -250,6 +272,13 @@ export default function ChatRoom({
           isSystem: true,
         })),
       ]);
+    }
+    // Also mark all new viewer names (even those not shown) so we don't
+    // re-show join messages if they were already handled by auto-chat
+    for (const name of viewers) {
+      if (!prevSet.has(name)) {
+        joinedNamesRef.current.add(name);
+      }
     }
 
     prevViewersRef.current = new Set(viewers);
