@@ -98,6 +98,7 @@ export default function LobbyPage() {
       if (document.visibilityState !== 'visible') return;
       const startTime = new Date(countdownTarget).getTime();
       if (Date.now() >= startTime) {
+        trackGA4('c_enter_live', { webinar_id: webinarId, entry_method: 'countdown_auto' });
         router.push(buildLiveUrl());
       }
     };

@@ -81,6 +81,7 @@ export default function LiveRoomPage() {
   // Tracking milestones
   const trackedMilestones = useRef<Set<number>>(new Set());
   const joinTracked = useRef(false);
+  const currentTimeRef = useRef(0);
 
   useEffect(() => {
     async function fetchWebinar() {
@@ -228,23 +229,26 @@ export default function LiveRoomPage() {
     }
   }, [webinarId]);
 
+  // Keep ref in sync so heartbeat reads latest value without re-creating interval
+  currentTimeRef.current = currentTime;
+
   // Video heartbeat — sends watch position every 60 seconds
   useEffect(() => {
     if (!isPlaying) return;
 
     const interval = setInterval(() => {
-      const watchDuration = Math.round(currentTime - lateJoinSeconds);
+      const watchDuration = Math.round(currentTimeRef.current - lateJoinSeconds);
       if (watchDuration > 0) {
         trackGA4('c_video_heartbeat', {
           webinar_id: webinarId,
-          current_time_sec: Math.round(currentTime),
+          current_time_sec: Math.round(currentTimeRef.current),
           watch_duration_sec: watchDuration,
         });
       }
     }, 60_000);
 
     return () => clearInterval(interval);
-  }, [isPlaying, webinarId, currentTime, lateJoinSeconds]);
+  }, [isPlaying, webinarId, lateJoinSeconds]);
 
   // Handle video playback events
   const handlePlaybackEvent = useCallback(
