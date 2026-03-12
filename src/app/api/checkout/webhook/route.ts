@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe';
 import { getOrderBySessionId, updateOrder, updateOrderStatus } from '@/lib/db';
 import { claimActivationCode } from '@/lib/google-sheets';
 import { sendEmail, purchaseConfirmationEmail } from '@/lib/email';
+import { audit } from '@/lib/audit';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -75,10 +76,12 @@ export async function POST(request: NextRequest) {
       });
       await sendEmail(emailParams);
 
+      audit({ type: 'order_fulfilled', orderId: order.id, activationCode: code });
       console.log(`[Webhook] Order fulfilled: ${order.id}, code: ${code}`);
     } catch (err) {
       // Rollback: restore to pending so it can be retried
       await updateOrder(order.id, { status: 'pending' });
+      audit({ type: 'order_fulfillment_failed', orderId: order.id, error: String(err) });
       console.error('[Webhook] Fulfillment failed, rolled back to pending:', err);
       // Return 500 so Stripe retries this webhook
       return NextResponse.json({ error: 'Fulfillment failed' }, { status: 500 });

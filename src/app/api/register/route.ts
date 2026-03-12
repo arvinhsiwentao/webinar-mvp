@@ -4,6 +4,7 @@ import { RegisterRequest } from '@/lib/types';
 import { validateEmail } from '@/lib/utils';
 import { sendEmail, confirmationEmail } from '@/lib/email';
 import { getSlotExpiresAt } from '@/lib/evergreen';
+import { audit } from '@/lib/audit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -83,6 +84,8 @@ export async function POST(request: NextRequest) {
       throw err; // Re-throw other errors
     }
 
+    audit({ type: 'registration_created', webinarId: resolvedWebinarId, email: body.email, registrationId: registration.id });
+
     // Send confirmation email (fire and forget)
     const origin = request.nextUrl.origin;
     const slotParam = body.assignedSlot ? `&slot=${encodeURIComponent(body.assignedSlot)}` : '';
@@ -108,7 +111,9 @@ export async function POST(request: NextRequest) {
             registeredAt: new Date().toISOString(),
           },
         }),
-      }).catch(() => { /* silent fail */ });
+      })
+        .then(res => audit({ type: 'webhook_sent', url: webinar.webhookUrl!, status: res.status }))
+        .catch(err => audit({ type: 'webhook_failed', url: webinar.webhookUrl!, error: String(err) }));
     }
 
     return NextResponse.json({ registration }, { status: 201 });
