@@ -18,6 +18,7 @@ import { trackGA4, DEFAULT_PRODUCT_PRICE } from '@/lib/analytics';
 import { formatElapsedTime } from '@/lib/utils';
 import { calculateLateJoinPosition } from '@/lib/evergreen';
 import { useViewerSimulator } from '@/lib/viewer-simulator';
+import { useVisibilityResume } from '@/hooks/useVisibilityResume';
 import type Player from 'video.js/dist/types/player';
 
 // Dynamically import VideoPlayer to avoid SSR issues with video.js
@@ -143,84 +144,14 @@ export default function LiveRoomPage() {
   }, [eventPhase, slotTime]);
 
   // Resume playback when tab returns to foreground (background tabs block autoplay)
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState !== 'visible') return;
-
-      // If still in pre_show but start time has passed, transition immediately
-      if (eventPhase === 'pre_show' && slotTime) {
-        const now = Date.now();
-        const startMs = new Date(slotTime).getTime();
-        if (now >= startMs) {
-          setEventPhase('live');
-          // Don't return — fall through so we can also attempt play once player mounts
-        }
-      }
-
-      // If live, catch up to real-time and resume if paused
-      if (eventPhase === 'live' || (eventPhase === 'pre_show' && slotTime && Date.now() >= new Date(slotTime).getTime())) {
-        const player = playerInstanceRef.current;
-        if (!player || player.isDisposed()) return;
-
-        // Seek to live wall position so video catches up to real-time
-        const seekToLiveWall = () => {
-          if (player.isDisposed() || !slotTime) return;
-          const elapsed = (Date.now() - new Date(slotTime).getTime()) / 1000;
-          const duration = player.duration() || 0;
-          if (duration > 0 && elapsed > 0) {
-            const liveWall = Math.min(elapsed, duration);
-            const currentPos = player.currentTime() || 0;
-            // Only seek if more than 2 seconds behind live
-            if (liveWall - currentPos > 2) {
-              player.currentTime(liveWall);
-            }
-          }
-        };
-
-        // If already playing, just catch up position and return
-        if (!player.paused()) {
-          seekToLiveWall();
-          return;
-        }
-
-        const attemptPlay = () => {
-          if (player.isDisposed()) return;
-          seekToLiveWall();
-          // Try unmuted play first (user just switched to tab = user gesture context)
-          player.muted(false);
-          const playPromise = player.play();
-          if (playPromise && typeof playPromise.then === 'function') {
-            playPromise.then(() => {
-              setIsMuted(false);
-              setAutoplayBlocked(false);
-            }).catch(() => {
-              // Unmuted play blocked — fall back to muted
-              player.muted(true);
-              setIsMuted(true);
-              const mutedPromise = player.play();
-              if (mutedPromise && typeof mutedPromise.then === 'function') {
-                mutedPromise.then(() => {
-                  setAutoplayBlocked(false);
-                }).catch(() => {
-                  setAutoplayBlocked(true);
-                });
-              }
-            });
-          }
-        };
-
-        // If media hasn't loaded yet (background tabs defer loading), wait for it
-        if (player.readyState() < 3) {
-          player.one('canplay', attemptPlay);
-        } else {
-          attemptPlay();
-        }
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [eventPhase, slotTime]);
+  useVisibilityResume({
+    eventPhase,
+    slotTime,
+    playerRef: playerInstanceRef,
+    setEventPhase,
+    setIsMuted,
+    setAutoplayBlocked,
+  });
 
   useEffect(() => {
     const storageKey = `join_group_fired_${webinarId}`;
