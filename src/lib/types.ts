@@ -134,12 +134,15 @@ export interface Order {
 export interface VideoFile {
   id: string;
   filename: string;        // original upload filename
-  storagePath: string;     // path in Supabase Storage bucket
-  publicUrl: string;       // CDN URL for playback
+  storagePath: string;     // path in R2 bucket
+  publicUrl: string;       // R2 CDN URL (backup/source)
   fileSize: number;        // bytes
-  durationSec?: number;    // seconds (optional, set client-side)
-  status: 'uploading' | 'ready' | 'error';
+  durationSec?: number;    // seconds (optional, set client-side or from Mux)
+  status: 'uploading' | 'processing' | 'ready' | 'error';  // added 'processing'
   uploadedAt: string;      // ISO date
+  muxAssetId?: string;     // Mux asset ID (for management/deletion)
+  muxPlaybackId?: string;  // Mux playback ID (used to construct HLS URL)
+  muxPlaybackUrl?: string; // full HLS URL: https://stream.mux.com/{id}.m3u8
 }
 
 // API Request/Response types
