@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getOrderBySessionId } from '@/lib/db';
+import { fulfillOrder } from '@/lib/fulfillment';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +13,21 @@ export async function GET(request: NextRequest) {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.status === 'complete') {
-      const order = await getOrderBySessionId(sessionId);
+      let order = await getOrderBySessionId(sessionId);
+
+      // Inline fulfillment fallback: if payment complete but order not yet fulfilled,
+      // attempt fulfillment directly (safe — atomic lock prevents doubles)
+      if (order && order.status === 'pending') {
+        const paymentIntentId = (session.payment_intent as string | null) ?? undefined;
+        const result = await fulfillOrder(sessionId, paymentIntentId);
+
+        if (result.status === 'fulfilled') {
+          // Re-read order to get the activation code
+          order = await getOrderBySessionId(sessionId);
+        }
+        // If failed or already_processing, return current state — next poll will retry
+      }
+
       if (order) {
         return NextResponse.json({
           status: session.status,
