@@ -160,15 +160,24 @@ export default function LobbyPage() {
     return () => window.removeEventListener('pagehide', handlePageHide);
   }, [webinarId, countdownTarget]);
 
+  function getLobbyUrlWithUtm(method: 'ical' | 'google'): string {
+    const url = new URL(`/webinar/${webinar?.id}/lobby`, window.location.origin);
+    url.searchParams.set('utm_source', 'calendar');
+    url.searchParams.set('utm_medium', method);
+    url.searchParams.set('utm_campaign', 'webinar_reminder');
+    return url.toString();
+  }
+
   function handleDownloadICS() {
     trackGA4('c_add_to_calendar', { method: 'ical', webinar_id: webinarId });
     if (!webinar || !countdownTarget) return;
+    const lobbyUrl = getLobbyUrlWithUtm('ical');
     const ics = generateICSContent(
       webinar.title,
       countdownTarget,
       webinar.duration,
-      `讲者: ${webinar.speakerName}`,
-      `${window.location.origin}/webinar/${webinar.id}/lobby`
+      `讲者: ${webinar.speakerName}\n加入直播: ${lobbyUrl}`,
+      lobbyUrl
     );
     const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -184,7 +193,9 @@ export default function LobbyPage() {
     const start = new Date(countdownTarget);
     const end = new Date(start.getTime() + webinar.duration * 60 * 1000);
     const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(webinar.title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(`讲者: ${webinar.speakerName}`)}`;
+    const lobbyUrl = getLobbyUrlWithUtm('google');
+    const details = `讲者: ${webinar.speakerName}\n加入直播: ${lobbyUrl}`;
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(webinar.title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(lobbyUrl)}`;
   }
 
   // Loading state

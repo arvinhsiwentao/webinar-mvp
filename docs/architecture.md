@@ -28,7 +28,7 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 |-------|-------------|---------|
 | `/` | `src/app/(public)/page.tsx` | Single landing page for webinar ID `1` ("Mike是麥克"). Modal registration. Sections: Hero → Credibility → Problem → Benefits → Urgency. |
 | `/demo` | `src/app/(public)/demo/page.tsx` | Demo/preview page |
-| `/webinar/[id]/lobby` | `src/app/(public)/webinar/[id]/lobby/page.tsx` | Event lobby: unified layout with progress bar, webinar info, social proof (registration count), highlights, calendar card. Phase A (>30min): success banner, calendar emphasis. Phase B (≤30min): gold "即将开始" badge, prominent CTA button above countdown. Auto-redirects to live at T=0. |
+| `/webinar/[id]/lobby` | `src/app/(public)/webinar/[id]/lobby/page.tsx` | Event lobby: unified layout with progress bar, webinar info, social proof (registration count), highlights, calendar card. Phase A (>30min): success banner, calendar emphasis. Phase B (≤30min): gold "即将开始" badge, prominent CTA button above countdown. Auto-redirects to live at T=0. Calendar invites (ICS + Google Calendar) include lobby URL with UTM params (`utm_source=calendar`, `utm_medium=ical|google`, `utm_campaign=webinar_reminder`) in both description text and URL/location fields. |
 | `/webinar/[id]/confirm` | Redirect stub → `/lobby` | Backward compatibility |
 | `/webinar/[id]/waiting` | Redirect stub → `/lobby` | Backward compatibility |
 | `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + 4-tab sidebar (Info/Viewers/Chat/Offers) + on-video CTA |
@@ -103,7 +103,8 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 
 - `formatDate`, `formatTime`, `formatDateTime` — `zh-CN` locale formatting
 - `formatCountdown`, `getTimeUntil` — countdown math
-- `generateICSContent` — calendar file generation
+- `generateICSContent` — calendar file generation (ICS `DESCRIPTION` + `URL` fields)
+- `buildEmailLink` — EDM link builder with UTM + original attribution preservation
 - `validateEmail`, `validatePhone` — phone accepts North American 10-digit format (with optional +1)
 - `cn(...classes)` — className join helper (like `clsx`)
 - `getVideoSourceType(url)` — returns Video.js MIME type (`application/x-mpegURL` or `video/mp4`)
