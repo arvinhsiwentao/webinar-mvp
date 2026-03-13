@@ -134,3 +134,9 @@ Supabase free tier has 50MB file upload limit (hard cap, no workaround). Cloudfl
 **Decision:** Removed `join_group` event. Added lobby instrumentation (`c_lobby_entered`, `c_lobby_duration`, `c_lobby_abandon`). Added `c_purchase_confirmation` backup event. Added purchase fallback logging.
 **Why:** `join_group` was redundant with `c_enter_live` (which fires at the decision point with entry_method context) and double-counted conversions. Lobby was a funnel blind spot. Purchase event is client-dependent (may not fire if browser closes after payment).
 **Trade-off:** 3 more custom events to maintain. `c_purchase_confirmation` is not in CONVERSION_EVENTS (no attribution auto-attach) since the `purchase` event handles that.
+
+### 2026-03-13: EDM links preserve original campaign attribution via orig_* params
+
+**Decision:** Store utm/gclid at registration time in DB. EDM links carry both edm-specific utm (for GA4 last-click) and orig_* params (for original campaign analysis).
+
+**Why:** Without this, users returning via EDM lose their original ad campaign attribution, making it impossible to measure which campaign drove the eventual conversion. Alternative was to not set EDM utm at all (preserving original via cookies), but that prevents measuring EDM effectiveness separately.

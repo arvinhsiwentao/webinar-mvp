@@ -212,6 +212,14 @@ All tracking goes through **GTM** via `@next/third-parties/google` (`GoogleTagMa
 
 **Files:** `src/lib/analytics.ts` (typed GA4 event map + `trackGA4()` function), `src/components/analytics/GclidPreserver.tsx`
 
+### Attribution Tracking (Cross-Session)
+
+Registration captures the user's current UTM/gclid parameters and stores them on the `registrations` table. When generating EDM links (confirmation, reminder emails), the system appends:
+- `utm_source=edm&utm_medium=email&utm_campaign={email_type}` — for GA4 to track the email touchpoint
+- `orig_source`, `orig_medium`, `orig_campaign`, `orig_content`, `orig_gclid` — original campaign attribution preserved from registration
+
+`GclidPreserver` parses both standard `utm_*` and `orig_*` params. GA4 conversion events automatically attach `original_*` custom dimensions via `getAttribution()` in `analytics.ts`.
+
 ## Design System
 
 Defined in `src/styles/design-tokens.css` as CSS custom properties.
