@@ -26,7 +26,8 @@ export default function LobbyPage() {
   const lobbyTracked = useRef(false);
   const exitTracked = useRef(false);
 
-  const countdownTarget = slotTime || '';
+  const [resolvedSlot, setResolvedSlot] = useState<string>(slotTime || '');
+  const countdownTarget = resolvedSlot;
 
   // Fetch webinar data
   useEffect(() => {
@@ -38,26 +39,71 @@ export default function LobbyPage() {
         setWebinar(data.webinar);
         setRegistrationCount(data.registrationCount || 0);
 
+        const evergreen = data.webinar.evergreen;
+        let effectiveSlot = slotTime;
+
+        // When slot param is missing (e.g. calendar link without slot),
+        // detect a currently-live slot or fetch the next upcoming one
+        if (!effectiveSlot && evergreen?.enabled) {
+          const now = new Date();
+          const durationMs = evergreen.videoDurationMinutes * 60000;
+
+          // Check if any scheduled slot is currently in progress
+          for (let dayOffset = 0; dayOffset >= -1; dayOffset--) {
+            for (const schedule of evergreen.dailySchedule) {
+              const [hours, minutes] = schedule.time.split(':').map(Number);
+              const slotStart = new Date(now);
+              slotStart.setDate(slotStart.getDate() + dayOffset);
+              slotStart.setHours(hours, minutes, 0, 0);
+
+              if (now.getTime() >= slotStart.getTime() && now.getTime() < slotStart.getTime() + durationMs) {
+                effectiveSlot = slotStart.toISOString();
+                break;
+              }
+            }
+            if (effectiveSlot) break;
+          }
+
+          // No live slot found — fetch next upcoming slot
+          if (!effectiveSlot) {
+            try {
+              const slotRes = await fetch(`/api/webinar/${webinarId}/next-slot`);
+              if (slotRes.ok) {
+                const slotData = await slotRes.json();
+                if (slotData.countdownTarget) {
+                  effectiveSlot = slotData.countdownTarget;
+                }
+              }
+            } catch {
+              // Silently fall through — countdown will remain empty
+            }
+          }
+
+          if (effectiveSlot) {
+            setResolvedSlot(effectiveSlot);
+          }
+        }
+
         // Track lobby entry (once)
         if (!lobbyTracked.current) {
           lobbyTracked.current = true;
           trackGA4('c_lobby_entered', {
             webinar_id: webinarId,
-            webinar_state: slotTime && data.webinar.evergreen?.enabled
-              ? getEvergreenState(slotTime, getSlotExpiresAt(slotTime, data.webinar.evergreen.videoDurationMinutes), true)
+            webinar_state: effectiveSlot && evergreen?.enabled
+              ? getEvergreenState(effectiveSlot, getSlotExpiresAt(effectiveSlot, evergreen.videoDurationMinutes), true)
               : 'standard',
           });
         }
 
         // Check evergreen state
-        if (slotTime && data.webinar.evergreen?.enabled) {
-          const expiresAt = getSlotExpiresAt(slotTime, data.webinar.evergreen.videoDurationMinutes);
-          const state = getEvergreenState(slotTime, expiresAt, true);
+        if (effectiveSlot && evergreen?.enabled) {
+          const expiresAt = getSlotExpiresAt(effectiveSlot, evergreen.videoDurationMinutes);
+          const state = getEvergreenState(effectiveSlot, expiresAt, true);
           setEvergreenState(state);
 
           if (state === 'LIVE') {
             trackGA4('c_enter_live', { webinar_id: webinarId, entry_method: 'redirect_live' });
-            const slotParam = `&slot=${encodeURIComponent(slotTime)}`;
+            const slotParam = `&slot=${encodeURIComponent(effectiveSlot)}`;
             router.push(`/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}`);
             return;
           }
@@ -89,9 +135,9 @@ export default function LobbyPage() {
   }, [countdownTarget]);
 
   const buildLiveUrl = useCallback(() => {
-    const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
+    const slotParam = resolvedSlot ? `&slot=${encodeURIComponent(resolvedSlot)}` : '';
     return `/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}`;
-  }, [webinarId, userName, slotTime]);
+  }, [webinarId, userName, resolvedSlot]);
 
   const handleCountdownComplete = useCallback(() => {
     if (!exitTracked.current) {
@@ -162,6 +208,8 @@ export default function LobbyPage() {
 
   function getLobbyUrlWithUtm(method: 'ical' | 'google'): string {
     const url = new URL(`/webinar/${webinar?.id}/lobby`, window.location.origin);
+    if (resolvedSlot) url.searchParams.set('slot', resolvedSlot);
+    if (userName && userName !== '观众') url.searchParams.set('name', userName);
     url.searchParams.set('utm_source', 'calendar');
     url.searchParams.set('utm_medium', method);
     url.searchParams.set('utm_campaign', 'webinar_reminder');
