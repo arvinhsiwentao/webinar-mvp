@@ -4,15 +4,23 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
 import { trackGA4, DEFAULT_PRODUCT_PRICE } from '@/lib/analytics';
 
+type PageStatus = 'loading' | 'fulfilled' | 'processing' | 'timeout' | 'error';
+
+const POLL_INTERVAL_MS = 2000;
+const POLL_TIMEOUT_MS = 30000;
+
 export default function CheckoutReturnPage() {
   const searchParams = useSearchParams();
   const params = useParams();
   const sessionId = searchParams.get('session_id');
   const webinarId = params.webinarId as string;
   const purchaseTracked = useRef(false);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollStartRef = useRef<number>(0);
 
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<PageStatus>('loading');
   const [customerEmail, setCustomerEmail] = useState('');
+  const [activationCode, setActivationCode] = useState('');
 
   useEffect(() => {
     if (!sessionId) {
@@ -20,7 +28,14 @@ export default function CheckoutReturnPage() {
       return;
     }
 
-    async function checkStatus() {
+    function stopPolling() {
+      if (pollIntervalRef.current !== null) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    }
+
+    async function poll() {
       try {
         const res = await fetch(
           `/api/checkout/session-status?session_id=${encodeURIComponent(sessionId!)}`
@@ -29,10 +44,10 @@ export default function CheckoutReturnPage() {
         const data = await res.json();
 
         if (data.status === 'complete') {
-          setStatus('success');
-          setCustomerEmail(data.customerEmail || '');
+          // Fire GA4 events on first complete (regardless of fulfillment state)
           if (!purchaseTracked.current) {
             purchaseTracked.current = true;
+            setCustomerEmail(data.customerEmail || '');
             const purchaseValue = data.amountTotal
               ? data.amountTotal / 100
               : (() => {
@@ -57,17 +72,46 @@ export default function CheckoutReturnPage() {
               order_status: data.orderStatus || 'unknown',
             });
           }
+
+          // Check if order is fulfilled with activation code
+          if (data.orderStatus === 'fulfilled' && data.activationCode) {
+            setActivationCode(data.activationCode);
+            setCustomerEmail(data.customerEmail || '');
+            setStatus('fulfilled');
+            stopPolling();
+            return;
+          }
+
+          // Payment complete but not yet fulfilled — keep polling
+          setStatus('processing');
+
+          // Check timeout
+          if (Date.now() - pollStartRef.current >= POLL_TIMEOUT_MS) {
+            setStatus('timeout');
+            stopPolling();
+          }
         } else {
+          // Payment not complete — this is an error
           setStatus('error');
+          stopPolling();
         }
       } catch {
         setStatus('error');
+        stopPolling();
       }
     }
 
-    checkStatus();
+    // Start polling
+    pollStartRef.current = Date.now();
+    poll(); // immediate first check
+    pollIntervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
+
+    return () => {
+      stopPolling();
+    };
   }, [sessionId, webinarId]);
 
+  // --- Loading ---
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
@@ -79,6 +123,19 @@ export default function CheckoutReturnPage() {
     );
   }
 
+  // --- Processing (payment complete, awaiting fulfillment) ---
+  if (status === 'processing') {
+    return (
+      <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-2 border-[#B8953F] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-neutral-500">订单处理中，请稍候...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Error ---
   if (status === 'error') {
     return (
       <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center px-4">
@@ -96,6 +153,38 @@ export default function CheckoutReturnPage() {
     );
   }
 
+  // --- Timeout (payment succeeded but fulfillment didn't complete in time) ---
+  if (status === 'timeout') {
+    return (
+      <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center px-4 py-12">
+        <div className="text-center max-w-lg w-full">
+          <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-8">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B8953F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-neutral-900 mb-4">订单正在处理中</h1>
+          <p className="text-neutral-500 leading-relaxed mb-2">
+            您的商品启用序号将通过邮件发送至
+          </p>
+          <p className="font-medium text-neutral-800 mb-6">{customerEmail}</p>
+          <p className="text-neutral-400 text-sm mb-8">
+            如 10 分钟内未收到，请联系客服
+          </p>
+          <a
+            href="mailto:CMoney_overseas@cmoney.com.tw"
+            className="inline-block bg-[#B8953F] text-white px-6 py-3 rounded-md text-sm font-medium hover:bg-[#A6842F] transition-colors"
+          >
+            联系客服：CMoney_overseas@cmoney.com.tw
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Fulfilled (activation code available) ---
   return (
     <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center px-4 py-12">
       <div className="text-center max-w-lg w-full">
@@ -109,9 +198,16 @@ export default function CheckoutReturnPage() {
         <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-4">
           恭喜你，迈出了最重要的一步！
         </h1>
-        <p className="text-neutral-500 leading-relaxed mb-6">
-          你的商品启用序号和详细设置步骤已发送至
-          <br />
+
+        {/* Activation code box */}
+        <div className="border-2 border-[#B8953F] rounded-lg p-6 text-center my-6">
+          <p className="text-sm text-neutral-500 mb-2">商品启用序号</p>
+          <p className="text-2xl font-bold tracking-[4px] text-[#B8953F]">{activationCode}</p>
+          <p className="text-xs text-[#B8953F] mt-3">※ 此序号仅限单次使用，启用后即失效，请勿分享给他人</p>
+        </div>
+
+        <p className="text-neutral-500 leading-relaxed mb-2">
+          我们也已将序号发送至{' '}
           <span className="font-medium text-neutral-800">{customerEmail}</span>
         </p>
         <p className="text-neutral-400 text-sm mb-10">
@@ -123,7 +219,7 @@ export default function CheckoutReturnPage() {
           <p className="text-sm font-semibold text-neutral-800 mb-4 tracking-wide">接下来</p>
           <div className="space-y-4">
             {[
-              { step: '1', text: '查收邮件中的商品启用序号' },
+              { step: '1', text: '复制上方的商品启用序号' },
               { step: '2', text: '前往 CMoney 平台兑换' },
               { step: '3', text: '开始学习课程' },
             ].map((item) => (
