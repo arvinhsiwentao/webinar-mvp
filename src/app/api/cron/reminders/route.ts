@@ -28,7 +28,7 @@ export async function GET() {
       const liveUrl = buildEmailLink(
         baseUrl,
         `/webinar/${webinar.id}/lobby`,
-        { name: reg.name, slot: reg.assignedSlot },
+        { name: reg.name, email: reg.email, slot: reg.assignedSlot },
         type === '24h' ? 'reminder_24h' : 'reminder_1h',
         { utmSource: reg.utmSource, utmMedium: reg.utmMedium, utmCampaign: reg.utmCampaign, utmContent: reg.utmContent, gclid: reg.gclid }
       );

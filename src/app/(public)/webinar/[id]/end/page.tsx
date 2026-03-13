@@ -12,6 +12,7 @@ export default function EndPage() {
   const searchParams = useSearchParams();
   const webinarId = params.id as string;
   const userName = searchParams.get('name') || '观众';
+  const userEmail = searchParams.get('email') || '';
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [loading, setLoading] = useState(true);
@@ -117,7 +118,7 @@ export default function EndPage() {
                   source: 'end',
                 });
 
-                // Read email from localStorage
+                // Read email: localStorage first, URL param fallback
                 let email = '';
                 try {
                   const sticky = localStorage.getItem(`webinar-${webinarId}-evergreen`);
@@ -126,6 +127,9 @@ export default function EndPage() {
                     email = parsed.email || '';
                   }
                 } catch { /* ignore */ }
+                if (!email) {
+                  email = userEmail;
+                }
 
                 const params = new URLSearchParams();
                 if (email) params.set('email', email);

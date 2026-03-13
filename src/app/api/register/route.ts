@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
       `/webinar/${resolvedWebinarId}/lobby`,
       {
         name: body.name,
+        email: body.email,
         ...(body.assignedSlot ? { slot: body.assignedSlot } : {}),
       },
       'confirmation',

@@ -28,12 +28,12 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 |-------|-------------|---------|
 | `/` | `src/app/(public)/page.tsx` | Single landing page for webinar ID `1` ("Mike是麥克"). Modal registration. Sections: Hero → Credibility → Problem → Benefits → Urgency. |
 | `/demo` | `src/app/(public)/demo/page.tsx` | Demo/preview page |
-| `/webinar/[id]/lobby` | `src/app/(public)/webinar/[id]/lobby/page.tsx` | Event lobby: unified layout with progress bar, webinar info, social proof (registration count), highlights, calendar card. Phase A (>30min): success banner, calendar emphasis. Phase B (≤30min): gold "即将开始" badge, prominent CTA button above countdown. Auto-redirects to live at T=0. **Slot resolution:** Reads `slot` from query param; when missing (e.g. old calendar links), detects currently-live slots from the evergreen daily schedule or fetches the next upcoming slot via `/api/webinar/[id]/next-slot`. Calendar invites (ICS + Google Calendar) include lobby URL with `slot`, `name`, and UTM params (`utm_source=calendar`, `utm_medium=ical|google`, `utm_campaign=webinar_reminder`) in both description text and URL/location fields. |
+| `/webinar/[id]/lobby` | `src/app/(public)/webinar/[id]/lobby/page.tsx` | Event lobby: unified layout with progress bar, webinar info, social proof (registration count), highlights, calendar card. Phase A (>30min): success banner, calendar emphasis. Phase B (≤30min): gold "即将开始" badge, prominent CTA button above countdown. Auto-redirects to live at T=0. **Slot resolution:** Reads `slot` from query param; when missing (e.g. old calendar links), detects currently-live slots from the evergreen daily schedule or fetches the next upcoming slot via `/api/webinar/[id]/next-slot`. **Email passthrough:** Reads `email` from query param (set by email/calendar links) and threads it to live/end/calendar URLs so checkout works even without localStorage. Calendar invites (ICS + Google Calendar) include lobby URL with `slot`, `name`, `email`, and UTM params (`utm_source=calendar`, `utm_medium=ical|google`, `utm_campaign=webinar_reminder`) in both description text and URL/location fields. |
 | `/webinar/[id]/confirm` | Redirect stub → `/lobby` | Backward compatibility |
 | `/webinar/[id]/waiting` | Redirect stub → `/lobby` | Backward compatibility |
 | `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + 4-tab sidebar (Info/Viewers/Chat/Offers) + on-video CTA |
 | `/webinar/[id]/end` | `src/app/(public)/webinar/[id]/end/page.tsx` | Dark sales page with purple CTA, social sharing, replay link |
-| `/checkout/[webinarId]` | `src/app/(public)/checkout/[webinarId]/page.tsx` | Two-column checkout: marketing copy + Stripe Embedded Checkout form. Reads email/name/source/t from query params. |
+| `/checkout/[webinarId]` | `src/app/(public)/checkout/[webinarId]/page.tsx` | Two-column checkout: marketing copy + Stripe Embedded Checkout form. Reads email/name/source/t from query params. **Email fallback:** If `email` param is missing (e.g. shared link), shows an inline email input form before rendering Stripe checkout. |
 | `/checkout/[webinarId]/return` | `src/app/(public)/checkout/[webinarId]/return/page.tsx` | Post-payment return page. Polls session status, displays activation code directly on screen, shows success or error. Email is a backup delivery channel. |
 | `/admin/login` | `src/app/(admin)/admin/login/page.tsx` | Admin login page (`ADMIN_PASSWORD` env var) |
 | `/admin` | `src/app/(admin)/admin/page.tsx` | Admin panel (password-protected) |
@@ -227,8 +227,10 @@ Registration captures the user's current UTM/gclid parameters and stores them on
 - Current touchpoint UTM (e.g. `utm_source=edm&utm_medium=email` or `utm_source=calendar&utm_medium=google`)
 - `orig_source`, `orig_medium`, `orig_campaign`, `orig_content`, `orig_gclid` — original campaign attribution preserved from registration
 
-**EDM links:** `buildEmailLink()` in `utils.ts` reads attribution from the registration record (server-side).
-**Calendar links:** `getLobbyUrlWithUtm()` in `lobby/page.tsx` reads attribution from sessionStorage/cookie (client-side).
+**EDM links:** `buildEmailLink()` in `utils.ts` reads attribution from the registration record (server-side). Also includes `email` param so users landing from email links have their email threaded through the page chain to checkout.
+**Calendar links:** `getLobbyUrlWithUtm()` in `lobby/page.tsx` reads attribution from sessionStorage/cookie (client-side). Also includes `email` param when available.
+
+**Email resolution priority** (at checkout): localStorage sticky session > URL `email` param > inline email input form.
 
 `GclidPreserver` parses both standard `utm_*` and `orig_*` params. GA4 conversion events automatically attach `original_*` custom dimensions via `getAttribution()` in `analytics.ts`.
 
@@ -283,7 +285,7 @@ When a user enters after their slot started but before it expired (slot + video 
 
 ### Sticky Session (Client-Side)
 
-`localStorage` key `webinar-{id}-evergreen` stores: `{ visitorId, assignedSlot, expiresAt, registered, registrationId }`. Ensures consistent countdown across page refreshes.
+`localStorage` key `webinar-{id}-evergreen` stores: `{ visitorId, assignedSlot, expiresAt, registered, registrationId, email }`. Ensures consistent countdown across page refreshes. The `email` field is set at registration time; for users entering via email/calendar links (different device/browser), `email` is threaded via URL search params instead.
 
 ### Admin Configuration
 

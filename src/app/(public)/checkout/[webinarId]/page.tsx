@@ -66,11 +66,14 @@ export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const webinarId = params.webinarId as string;
 
-  const email = searchParams.get('email') || '';
+  const urlEmail = searchParams.get('email') || '';
   const source = searchParams.get('source') || 'direct';
   const countdownSeconds = parseInt(searchParams.get('t') || '0', 10);
   const name = searchParams.get('name') || '';
 
+  const [email, setEmail] = useState(urlEmail);
+  const [emailSubmitted, setEmailSubmitted] = useState(!!urlEmail);
+  const [emailError, setEmailError] = useState('');
   const [error, setError] = useState('');
   const [alreadyPurchased, setAlreadyPurchased] = useState(false);
 
@@ -104,6 +107,58 @@ export default function CheckoutPage() {
             商品启用序号已发送至 {email}，请检查你的邮箱（包括垃圾邮件文件夹）。
           </p>
         </div>
+      </div>
+    );
+  }
+
+  // Email collection fallback — shown when email is missing from URL
+  if (!emailSubmitted) {
+    return (
+      <div className="min-h-screen bg-[#FAFAF7]">
+        <header className="border-b border-[#E8E5DE] bg-white">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-neutral-400">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              安全结账
+            </div>
+          </div>
+        </header>
+        <main className="max-w-md mx-auto px-4 py-16">
+          <div className="bg-white rounded-lg border border-[#E8E5DE] p-8 text-center">
+            <h2 className="text-xl font-bold text-neutral-900 mb-2">请输入邮箱以继续</h2>
+            <p className="text-sm text-neutral-500 mb-6">我们需要你的邮箱来处理订单和发送课程信息</p>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const trimmed = email.trim();
+              if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+                setEmailError('请输入有效的邮箱地址');
+                return;
+              }
+              setEmailError('');
+              setEmail(trimmed);
+              setEmailSubmitted(true);
+            }}>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="w-full px-4 py-3 border border-[#E8E5DE] rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#B8953F] focus:ring-1 focus:ring-[#B8953F] mb-3"
+                autoFocus
+              />
+              {emailError && <p className="text-red-500 text-sm mb-3">{emailError}</p>}
+              <button
+                type="submit"
+                className="w-full bg-[#B8953F] hover:bg-[#A6842F] text-white font-medium py-3 rounded-lg transition-colors"
+              >
+                继续结账
+              </button>
+            </form>
+          </div>
+        </main>
       </div>
     );
   }

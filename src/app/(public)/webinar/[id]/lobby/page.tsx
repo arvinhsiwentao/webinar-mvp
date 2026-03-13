@@ -16,6 +16,7 @@ export default function LobbyPage() {
   const webinarId = params.id as string;
   const userName = searchParams.get('name') || '观众';
   const slotTime = searchParams.get('slot');
+  const userEmail = searchParams.get('email') || '';
 
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [loading, setLoading] = useState(true);
@@ -104,7 +105,8 @@ export default function LobbyPage() {
           if (state === 'LIVE') {
             trackGA4('c_enter_live', { webinar_id: webinarId, entry_method: 'redirect_live' });
             const slotParam = `&slot=${encodeURIComponent(effectiveSlot)}`;
-            router.push(`/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}`);
+            const emailParam = userEmail ? `&email=${encodeURIComponent(userEmail)}` : '';
+            router.push(`/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}${emailParam}`);
             return;
           }
 
@@ -136,8 +138,9 @@ export default function LobbyPage() {
 
   const buildLiveUrl = useCallback(() => {
     const slotParam = resolvedSlot ? `&slot=${encodeURIComponent(resolvedSlot)}` : '';
-    return `/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}`;
-  }, [webinarId, userName, resolvedSlot]);
+    const emailParam = userEmail ? `&email=${encodeURIComponent(userEmail)}` : '';
+    return `/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}${emailParam}`;
+  }, [webinarId, userName, resolvedSlot, userEmail]);
 
   const handleCountdownComplete = useCallback(() => {
     if (!exitTracked.current) {
@@ -210,6 +213,7 @@ export default function LobbyPage() {
     const url = new URL(`/webinar/${webinar?.id}/lobby`, window.location.origin);
     if (resolvedSlot) url.searchParams.set('slot', resolvedSlot);
     if (userName && userName !== '观众') url.searchParams.set('name', userName);
+    if (userEmail) url.searchParams.set('email', userEmail);
     url.searchParams.set('utm_source', 'calendar');
     url.searchParams.set('utm_medium', method);
     url.searchParams.set('utm_campaign', 'webinar_reminder');
@@ -289,7 +293,8 @@ export default function LobbyPage() {
 
   // Missed session (evergreen) — redirect to end page with purchase CTA
   if (evergreenState === 'MISSED') {
-    router.replace(`/webinar/${webinarId}/end?name=${encodeURIComponent(userName)}`);
+    const endEmailParam = userEmail ? `&email=${encodeURIComponent(userEmail)}` : '';
+    router.replace(`/webinar/${webinarId}/end?name=${encodeURIComponent(userName)}${endEmailParam}`);
     return (
       <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
         <div className="w-12 h-12 border-2 border-[#B8953F] border-t-transparent rounded-full animate-spin" />

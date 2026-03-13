@@ -256,7 +256,7 @@ export default function LiveRoomPage() {
       source: 'live',
     });
 
-    // Read email from localStorage sticky
+    // Read email: localStorage first, URL param fallback
     let email = '';
     let userName = '';
     try {
@@ -266,6 +266,9 @@ export default function LiveRoomPage() {
         email = parsed.email || '';
       }
     } catch { /* ignore */ }
+    if (!email) {
+      email = searchParams.get('email') || '';
+    }
 
     // Get name from URL search params
     userName = searchParams.get('name') || '';
