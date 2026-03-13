@@ -213,6 +213,17 @@ export default function LobbyPage() {
     url.searchParams.set('utm_source', 'calendar');
     url.searchParams.set('utm_medium', method);
     url.searchParams.set('utm_campaign', 'webinar_reminder');
+
+    // Preserve original campaign attribution (same orig_* pattern as EDM buildEmailLink)
+    const getCk = (n: string) => { const m = document.cookie.match(new RegExp(`(?:^|; )${n}=([^;]*)`)); return m ? decodeURIComponent(m[1]) : ''; };
+    const getAttr = (key: string) => { try { return sessionStorage.getItem(key) || getCk(key) || ''; } catch { return ''; } };
+    const orig = { source: getAttr('utm_source'), medium: getAttr('utm_medium'), campaign: getAttr('utm_campaign'), content: getAttr('utm_content'), gclid: getAttr('gclid') };
+    if (orig.source) url.searchParams.set('orig_source', orig.source);
+    if (orig.medium) url.searchParams.set('orig_medium', orig.medium);
+    if (orig.campaign) url.searchParams.set('orig_campaign', orig.campaign);
+    if (orig.content) url.searchParams.set('orig_content', orig.content);
+    if (orig.gclid) url.searchParams.set('orig_gclid', orig.gclid);
+
     return url.toString();
   }
 

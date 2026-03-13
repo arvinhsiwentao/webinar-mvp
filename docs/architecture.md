@@ -215,9 +215,12 @@ All tracking goes through **GTM** via `@next/third-parties/google` (`GoogleTagMa
 
 ### Attribution Tracking (Cross-Session)
 
-Registration captures the user's current UTM/gclid parameters and stores them on the `registrations` table. When generating EDM links (confirmation, reminder emails), the system appends:
-- `utm_source=edm&utm_medium=email&utm_campaign={email_type}` — for GA4 to track the email touchpoint
+Registration captures the user's current UTM/gclid parameters and stores them on the `registrations` table. When generating links that cross session boundaries (EDM emails, calendar events), the system appends:
+- Current touchpoint UTM (e.g. `utm_source=edm&utm_medium=email` or `utm_source=calendar&utm_medium=google`)
 - `orig_source`, `orig_medium`, `orig_campaign`, `orig_content`, `orig_gclid` — original campaign attribution preserved from registration
+
+**EDM links:** `buildEmailLink()` in `utils.ts` reads attribution from the registration record (server-side).
+**Calendar links:** `getLobbyUrlWithUtm()` in `lobby/page.tsx` reads attribution from sessionStorage/cookie (client-side).
 
 `GclidPreserver` parses both standard `utm_*` and `orig_*` params. GA4 conversion events automatically attach `original_*` custom dimensions via `getAttribution()` in `analytics.ts`.
 
