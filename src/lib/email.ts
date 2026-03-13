@@ -117,7 +117,7 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
   const appLink = 'https://cmoneymike.onelink.me/ZEaW/kkyo4oqs';
   const course1Link = 'https://cmy.tw/00CKIq';
   const course2Link = 'https://cmy.tw/00ChKt';
-  const serviceEmail = 'service@cmoneyedu.com';
+  const serviceEmail = 'CMoney_overseas@cmoney.com.tw';
   const serviceHours = '周一至周五 09:00–18:00（台北时间）';
 
   return {
