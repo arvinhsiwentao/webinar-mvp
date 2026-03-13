@@ -12,9 +12,9 @@ interface EmailParams {
 
 export async function sendEmail({ to, subject, html }: EmailParams): Promise<boolean> {
   if (!SENDGRID_API_KEY) {
-    console.log(`[Email] Would send to ${to}: "${subject}"`);
-    console.log(`[Email] Body: ${html.substring(0, 200)}...`);
-    return true;
+    console.warn(`[Email] SENDGRID_API_KEY not set — email NOT sent to ${to}: "${subject}"`);
+    audit({ type: 'email_failed', to, template: subject, error: 'SENDGRID_API_KEY not configured' });
+    return false;
   }
 
   try {
