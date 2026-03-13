@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRegistration, getRegistrationByEmail, getWebinarById } from '@/lib/db';
 import { RegisterRequest } from '@/lib/types';
-import { validateEmail } from '@/lib/utils';
+import { validateEmail, buildEmailLink } from '@/lib/utils';
 import { sendEmail, confirmationEmail } from '@/lib/email';
 import { getSlotExpiresAt } from '@/lib/evergreen';
 import { audit } from '@/lib/audit';
@@ -93,8 +93,16 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email (fire and forget)
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin;
-    const slotParam = body.assignedSlot ? `&slot=${encodeURIComponent(body.assignedSlot)}` : '';
-    const liveUrl = `${baseUrl}/webinar/${resolvedWebinarId}/lobby?name=${encodeURIComponent(body.name)}${slotParam}`;
+    const liveUrl = buildEmailLink(
+      baseUrl,
+      `/webinar/${resolvedWebinarId}/lobby`,
+      {
+        name: body.name,
+        ...(body.assignedSlot ? { slot: body.assignedSlot } : {}),
+      },
+      'confirmation',
+      { utmSource: body.utmSource, utmMedium: body.utmMedium, utmCampaign: body.utmCampaign, utmContent: body.utmContent, gclid: body.gclid }
+    );
     const sessionStartTime = body.assignedSlot;
     if (sessionStartTime) {
       const emailData = confirmationEmail(body.email, body.name, webinar.title, sessionStartTime, liveUrl);

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAllWebinars, getRegistrationsByWebinar } from '@/lib/db';
 import { sendEmail, reminderEmail } from '@/lib/email';
+import { buildEmailLink } from '@/lib/utils';
 
 export async function GET() {
   const webinars = await getAllWebinars();
@@ -24,7 +25,13 @@ export async function GET() {
       if (!type) continue;
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-      const liveUrl = `${baseUrl}/webinar/${webinar.id}/lobby?name=${encodeURIComponent(reg.name)}&slot=${encodeURIComponent(reg.assignedSlot)}`;
+      const liveUrl = buildEmailLink(
+        baseUrl,
+        `/webinar/${webinar.id}/lobby`,
+        { name: reg.name, slot: reg.assignedSlot },
+        type === '24h' ? 'reminder_24h' : 'reminder_1h',
+        { utmSource: reg.utmSource, utmMedium: reg.utmMedium, utmCampaign: reg.utmCampaign, utmContent: reg.utmContent, gclid: reg.gclid }
+      );
       const emailData = reminderEmail(reg.email, type, reg.name, webinar.title, liveUrl);
       await sendEmail(emailData);
       sent++;

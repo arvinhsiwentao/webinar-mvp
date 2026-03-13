@@ -108,3 +108,37 @@ export function getVideoSourceType(url: string): string {
   if (url.endsWith('.m3u8')) return 'application/x-mpegURL';
   return 'video/mp4';
 }
+
+/**
+ * Build an email link URL with EDM utm params and original campaign attribution.
+ * EDM gets its own utm_source/medium/campaign so GA4 tracks the email touchpoint.
+ * Original campaign params are preserved as orig_* for cross-session attribution.
+ */
+export function buildEmailLink(
+  baseUrl: string,
+  path: string,
+  params: Record<string, string>,
+  emailType: string,
+  attribution?: { utmSource?: string; utmMedium?: string; utmCampaign?: string; utmContent?: string; gclid?: string }
+): string {
+  const url = new URL(path, baseUrl);
+
+  // Base params (name, slot, etc.)
+  for (const [key, value] of Object.entries(params)) {
+    if (value) url.searchParams.set(key, value);
+  }
+
+  // EDM-specific UTM (so GA4 attributes this session to email)
+  url.searchParams.set('utm_source', 'edm');
+  url.searchParams.set('utm_medium', 'email');
+  url.searchParams.set('utm_campaign', emailType);
+
+  // Original campaign attribution (preserved from registration)
+  if (attribution?.utmSource) url.searchParams.set('orig_source', attribution.utmSource);
+  if (attribution?.utmMedium) url.searchParams.set('orig_medium', attribution.utmMedium);
+  if (attribution?.utmCampaign) url.searchParams.set('orig_campaign', attribution.utmCampaign);
+  if (attribution?.utmContent) url.searchParams.set('orig_content', attribution.utmContent);
+  if (attribution?.gclid) url.searchParams.set('orig_gclid', attribution.gclid);
+
+  return url.toString();
+}
