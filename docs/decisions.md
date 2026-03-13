@@ -121,7 +121,7 @@ Supabase free tier has 50MB file upload limit (hard cap, no workaround). Cloudfl
 
 ### 2026-03-12 — Google Sheets for activation code inventory
 
-**Decision:** Switch activation codes from random generation (`activation-codes.ts`) to claiming pre-populated codes from a Google Sheet via the Sheets API. The old random generator remains as a fallback when `GOOGLE_SERVICE_ACCOUNT_KEY` is not set.
+**Decision:** Switch activation codes from random generation to claiming pre-populated codes from a Google Sheet via the Sheets API. *(Note: random fallback was later removed — see 2026-03-13 entry.)*
 
 **Why:** Business needs pre-determined activation codes (from CMoney platform). Google Sheets provides a simple, non-technical interface for the team to manage code inventory. Race condition handled by verify-after-write with max 3 retries.
 
@@ -140,3 +140,9 @@ Supabase free tier has 50MB file upload limit (hard cap, no workaround). Cloudfl
 **Decision:** Store utm/gclid at registration time in DB. EDM links carry both edm-specific utm (for GA4 last-click) and orig_* params (for original campaign analysis).
 
 **Why:** Without this, users returning via EDM lose their original ad campaign attribution, making it impossible to measure which campaign drove the eventual conversion. Alternative was to not set EDM utm at all (preserving original via cookies), but that prevents measuring EDM effectiveness separately.
+
+### 2026-03-13 — Remove fake activation code fallback, harden purchase fulfillment
+
+**Decision:** Removed random activation code generator (`activation-codes.ts`). Google Sheets is now the only source. If unavailable, webhook fails and Stripe retries. Decoupled email from fulfillment — email failure no longer rolls back the order. Return page now displays the activation code directly with polling, making email a backup channel. Customer service email updated to `CMoney_overseas@cmoney.com.tw`.
+
+**Why:** Fake codes can't be redeemed on CMoney — worse than an error. Silent email failure left customers with no code and no recourse. Showing the code on-screen eliminates single-point-of-failure on email delivery.

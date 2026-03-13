@@ -1,6 +1,6 @@
 # Architecture
 
-> Last verified: 2026-03-12
+> Last verified: 2026-03-13
 
 Living document. Hooks remind Claude to keep this current when structural changes are made.
 
@@ -34,7 +34,7 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 | `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + 4-tab sidebar (Info/Viewers/Chat/Offers) + on-video CTA |
 | `/webinar/[id]/end` | `src/app/(public)/webinar/[id]/end/page.tsx` | Dark sales page with purple CTA, social sharing, replay link |
 | `/checkout/[webinarId]` | `src/app/(public)/checkout/[webinarId]/page.tsx` | Two-column checkout: marketing copy + Stripe Embedded Checkout form. Reads email/name/source/t from query params. |
-| `/checkout/[webinarId]/return` | `src/app/(public)/checkout/[webinarId]/return/page.tsx` | Post-payment return page. Polls session status, shows success or error. |
+| `/checkout/[webinarId]/return` | `src/app/(public)/checkout/[webinarId]/return/page.tsx` | Post-payment return page. Polls session status, displays activation code directly on screen, shows success or error. Email is a backup delivery channel. |
 | `/admin/login` | `src/app/(admin)/admin/login/page.tsx` | Admin login page (`ADMIN_PASSWORD` env var) |
 | `/admin` | `src/app/(admin)/admin/page.tsx` | Admin panel (password-protected) |
 
@@ -62,7 +62,7 @@ Supabase (hosted Postgres) replaces the previous JSON file storage. Server-side 
 - `scripts/supabase-schema.sql` — Full schema definition (tables, indexes, RLS policies)
 - `scripts/migrate-to-supabase.ts` — One-time data migration from JSON files
 
-**Activation codes:** `src/lib/google-sheets.ts` — Claims pre-populated activation codes from a Google Sheet via the Sheets API. Falls back to random generation (`src/lib/activation-codes.ts`) when `GOOGLE_SERVICE_ACCOUNT_KEY` is not configured.
+**Activation codes:** `src/lib/google-sheets.ts` — Claims pre-populated activation codes from a Google Sheet via the Sheets API. Throws an error when `GOOGLE_SERVICE_ACCOUNT_KEY` is not configured (no fallback — Stripe retries the webhook).
 
 **Tables:** `webinars`, `registrations`, `chat_messages`, `orders` (the `events` table exists but is no longer written to — tracking moved to GTM/GA4)
 
@@ -83,8 +83,8 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/webinar/[id]/next-slot` | GET | `src/app/api/webinar/[id]/next-slot/route.ts` | Computes upcoming evergreen slots from config. Returns `slots[]`, `countdownTarget`, `expiresAt`. |
 | `/api/webinar/[id]/reassign` | POST | `src/app/api/webinar/[id]/reassign/route.ts` | Reassigns a registered user to the next available slot (for missed sessions). |
 | `/api/checkout/create-session` | POST | `src/app/api/checkout/create-session/route.ts` | Creates Stripe Embedded Checkout session. Checks duplicate purchase, creates pending Order. Returns `clientSecret`. |
-| `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Polls Stripe session status. Read-only — returns order status and activation code if fulfilled. No fulfillment logic (webhook is sole fulfillment path). |
-| `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Sole fulfillment on `checkout.session.completed`: atomic lock (`updateOrderStatus` pending→paid), claims activation code from Google Sheets, updates order to fulfilled, sends email. Rolls back to pending on failure so Stripe retries. |
+| `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Polls Stripe session status. Read-only — returns order status and activation code if fulfilled. Return page polls this to display code on screen. No fulfillment logic (webhook is sole fulfillment path). |
+| `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Sole fulfillment on `checkout.session.completed`: atomic lock (`updateOrderStatus` pending→paid), claims activation code from Google Sheets, updates order to fulfilled. Email sent separately (failure does not roll back fulfillment). Rolls back to pending on code-claim failure so Stripe retries. |
 | `/api/webinar/[id]/chat/stream` | GET | `src/app/api/webinar/[id]/chat/stream/route.ts` | SSE real-time chat stream via `chat-broker.ts` |
 | `/api/subtitles/generate` | POST | `src/app/api/subtitles/generate/route.ts` | Generate subtitles for video |
 | `/api/subtitles/logs` | GET | `src/app/api/subtitles/logs/route.ts` | Fetch subtitle generation logs |
