@@ -209,6 +209,7 @@ All tracking goes through **GTM** via `@next/third-parties/google` (`GoogleTagMa
 | `c_video_progress` | Custom | Live Room | 5% milestone intervals |
 | `c_chat_message` | Custom | Live Room | User sends message |
 | `c_cta_view` | Custom | Live Room | CTA overlay appears |
+| `c_cta_click` | Custom | Live Room | CTA overlay button click (`cta_position`, `cta_visible_duration_sec`, `session_watch_duration_sec`) |
 | `c_cta_dismiss` | Custom | Live Room | CTA overlay dismissed |
 | `begin_checkout` | Recommended | Live + End | CTA purchase click (includes `source`, `cta_id`) |
 | `c_webinar_complete` | Custom | End Page | Page mount (includes `watch_duration_sec` via sessionStorage) |

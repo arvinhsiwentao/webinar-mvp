@@ -15,6 +15,7 @@ type GA4EventMap = {
   c_video_progress: { webinar_id: string; percent: number }
   c_chat_message: { webinar_id: string; video_time_sec: number }
   c_cta_view: { webinar_id: string; cta_id: string; cta_type: string; video_time_sec: number }
+  c_cta_click: { webinar_id: string; cta_id: string; cta_type: string; video_time_sec: number; cta_position: 'on_video' | 'below_video'; cta_visible_duration_sec: number; session_watch_duration_sec: number }
   c_cta_dismiss: { webinar_id: string; cta_id: string; cta_type: string; video_time_sec: number }
   c_webinar_complete: { webinar_id: string; watch_duration_sec?: number }
   c_end_page_cta_click: { webinar_id: string; button_text: string }

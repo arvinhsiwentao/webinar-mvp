@@ -61,6 +61,11 @@ export default function LiveRoomPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // Track when each CTA became visible (for cta_visible_duration_sec)
+  const ctaViewTimestamps = useRef<Map<string, number>>(new Map());
+  // Track page load time (for session_watch_duration_sec)
+  const sessionStartTime = useRef(Date.now());
+
   // Extract unique auto-chat sender names for viewer sync
   const autoChatNames = useMemo(() => {
     if (!webinar?.autoChat) return [];
@@ -238,6 +243,7 @@ export default function LiveRoomPage() {
 
   // Handle CTA view/dismiss tracking
   const handleCTAView = useCallback((cta: CTAEvent) => {
+    ctaViewTimestamps.current.set(cta.id, Date.now());
     trackGA4('c_cta_view', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) });
   }, [webinarId, currentTime]);
 
@@ -247,6 +253,18 @@ export default function LiveRoomPage() {
 
   // Handle CTA clicks
   const handleCTAClick = useCallback((cta: CTAEvent) => {
+    const viewedAt = ctaViewTimestamps.current.get(cta.id);
+    const visibleDuration = viewedAt ? Math.round((Date.now() - viewedAt) / 1000) : 0;
+    trackGA4('c_cta_click', {
+      webinar_id: webinarId,
+      cta_id: cta.id,
+      cta_type: cta.buttonText.slice(0, 100),
+      video_time_sec: Math.round(currentTime),
+      cta_position: cta.position || 'below_video',
+      cta_visible_duration_sec: visibleDuration,
+      session_watch_duration_sec: Math.round((Date.now() - sessionStartTime.current) / 1000),
+    });
+
     trackGA4('begin_checkout', {
       currency: 'USD',
       value: DEFAULT_PRODUCT_PRICE,
