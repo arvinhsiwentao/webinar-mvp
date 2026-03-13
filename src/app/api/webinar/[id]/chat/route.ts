@@ -16,7 +16,7 @@ export async function GET(
     );
   }
 
-  const messages = await getChatMessages(id);
+  const messages = await getChatMessages(webinar.id);
   return NextResponse.json({ messages });
 }
 
@@ -46,7 +46,7 @@ export async function POST(
     }
 
     const newMessage = await addChatMessage({
-      webinarId: id,
+      webinarId: webinar.id,
       name,
       message,
       timestamp: timestamp || 0,

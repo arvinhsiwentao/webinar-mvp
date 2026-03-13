@@ -78,7 +78,7 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 |----------|---------|-------------|-------|
 | `/api/webinar` | GET | `src/app/api/webinar/route.ts` | List all webinars |
 | `/api/webinar/[id]` | GET | `src/app/api/webinar/[id]/route.ts` | Single webinar + `registrationCount` |
-| `/api/webinar/[id]/chat` | GET, POST | `src/app/api/webinar/[id]/chat/route.ts` | GET/POST by webinar ID |
+| `/api/webinar/[id]/chat` | GET, POST | `src/app/api/webinar/[id]/chat/route.ts` | GET/POST chat messages. Resolves numeric `[id]` to webinar UUID via `getWebinarById` before DB operations (chat_messages.webinar_id is UUID). |
 | `/api/register` | POST | `src/app/api/register/route.ts` | Checks duplicate email per webinar. Evergreen-aware: accepts `assignedSlot`, computes `slotExpiresAt`. Sends confirmation email with lobby URL built from `NEXT_PUBLIC_BASE_URL`. |
 | `/api/webinar/[id]/next-slot` | GET | `src/app/api/webinar/[id]/next-slot/route.ts` | Computes upcoming evergreen slots from config. Returns `slots[]`, `countdownTarget`, `expiresAt`. |
 | `/api/webinar/[id]/reassign` | POST | `src/app/api/webinar/[id]/reassign/route.ts` | Reassigns a registered user to the next available slot (for missed sessions). |
