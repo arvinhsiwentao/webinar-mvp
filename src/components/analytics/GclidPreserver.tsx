@@ -39,6 +39,24 @@ export function GclidPreserver() {
       setCookie('utm_campaign', utmCampaign)
       setCookie('utm_content', utmContent)
     }
+
+    // Preserve original campaign attribution from EDM links
+    const origSource = searchParams.get('orig_source')
+    if (origSource) {
+      const origMedium = searchParams.get('orig_medium') || ''
+      const origCampaign = searchParams.get('orig_campaign') || ''
+      const origContent = searchParams.get('orig_content') || ''
+      const origGclid = searchParams.get('orig_gclid') || ''
+
+      sessionStorage.setItem('orig_source', origSource)
+      sessionStorage.setItem('orig_medium', origMedium)
+      sessionStorage.setItem('orig_campaign', origCampaign)
+      sessionStorage.setItem('orig_content', origContent)
+      if (origGclid) {
+        sessionStorage.setItem('orig_gclid', origGclid)
+        setCookie('gclid', origGclid) // Restore original gclid to cookie too
+      }
+    }
   }, [searchParams])
 
   return null

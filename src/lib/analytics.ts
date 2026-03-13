@@ -48,12 +48,21 @@ function getCookie(name: string): string | null {
 /** Read attribution params from sessionStorage (fast) with cookie fallback (persistent). */
 function getAttribution(): Record<string, string> {
   const attrs: Record<string, string> = {}
-  const keys = ['gclid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content']
 
+  // Current session attribution
+  const keys = ['gclid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content']
   for (const key of keys) {
     const value = sessionStorage.getItem(key) || getCookie(key)
     if (value) attrs[key] = value
   }
+
+  // Original campaign attribution (from EDM links — survives cross-session)
+  const origKeys = ['orig_source', 'orig_medium', 'orig_campaign', 'orig_content', 'orig_gclid']
+  for (const key of origKeys) {
+    const value = sessionStorage.getItem(key)
+    if (value) attrs[`original_${key.replace('orig_', '')}`] = value
+  }
+
   return attrs
 }
 
