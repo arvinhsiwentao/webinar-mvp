@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    const paymentIntentId = session.payment_intent as string;
+    const paymentIntentId = (session.payment_intent as string | null) ?? undefined;
 
     const result = await fulfillOrder(session.id, paymentIntentId);
 

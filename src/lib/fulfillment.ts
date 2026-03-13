@@ -54,7 +54,11 @@ export async function fulfillOrder(
     console.log(`[Fulfillment] Order fulfilled: ${order.id}, code: ${code}`);
   } catch (err) {
     // Rollback to pending so webhook retry or next poll can try again
-    await updateOrder(order.id, { status: 'pending' });
+    try {
+      await updateOrder(order.id, { status: 'pending' });
+    } catch (rollbackErr) {
+      console.error('[Fulfillment] Rollback also failed:', rollbackErr);
+    }
     audit({ type: 'order_fulfillment_failed', orderId: order.id, error: String(err) });
     console.error('[Fulfillment] Failed, rolled back to pending:', err);
     return { status: 'failed', error: String(err) };
