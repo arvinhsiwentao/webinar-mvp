@@ -51,9 +51,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
+    // === FULFILLMENT (retryable via Stripe) ===
+    let code: string;
+    let paymentIntentId: string;
     try {
-      const paymentIntentId = session.payment_intent as string;
-      const code = await claimActivationCode(paymentIntentId || order.id, order.email);
+      paymentIntentId = session.payment_intent as string;
+      code = await claimActivationCode(paymentIntentId || order.id, order.email);
 
       const now = new Date().toISOString();
       await updateOrder(order.id, {
@@ -64,8 +67,21 @@ export async function POST(request: NextRequest) {
         fulfilledAt: now,
       });
 
-      // Send purchase confirmation email
-      const orderDate = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/');
+      audit({ type: 'order_fulfilled', orderId: order.id, activationCode: code });
+      console.log(`[Webhook] Order fulfilled: ${order.id}, code: ${code}`);
+    } catch (err) {
+      // Rollback: restore to pending so Stripe can retry
+      await updateOrder(order.id, { status: 'pending' });
+      audit({ type: 'order_fulfillment_failed', orderId: order.id, error: String(err) });
+      console.error('[Webhook] Fulfillment failed, rolled back to pending:', err);
+      return NextResponse.json({ error: 'Fulfillment failed' }, { status: 500 });
+    }
+
+    // === NOTIFICATION (best-effort, never rolls back fulfillment) ===
+    try {
+      const orderDate = new Date().toLocaleDateString('zh-CN', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+      }).replace(/-/g, '/');
       const emailParams = purchaseConfirmationEmail({
         to: order.email,
         name: order.name || order.email,
@@ -74,17 +90,12 @@ export async function POST(request: NextRequest) {
         orderId: paymentIntentId || session.id,
         email: order.email,
       });
-      await sendEmail(emailParams);
-
-      audit({ type: 'order_fulfilled', orderId: order.id, activationCode: code });
-      console.log(`[Webhook] Order fulfilled: ${order.id}, code: ${code}`);
-    } catch (err) {
-      // Rollback: restore to pending so it can be retried
-      await updateOrder(order.id, { status: 'pending' });
-      audit({ type: 'order_fulfillment_failed', orderId: order.id, error: String(err) });
-      console.error('[Webhook] Fulfillment failed, rolled back to pending:', err);
-      // Return 500 so Stripe retries this webhook
-      return NextResponse.json({ error: 'Fulfillment failed' }, { status: 500 });
+      const emailSent = await sendEmail(emailParams);
+      if (!emailSent) {
+        console.error(`[Webhook] Email failed for order ${order.id} — customer must use on-screen code`);
+      }
+    } catch (emailErr) {
+      console.error(`[Webhook] Email error for order ${order.id}:`, emailErr);
     }
   }
 
