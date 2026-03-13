@@ -215,9 +215,16 @@ export default function LobbyPage() {
     url.searchParams.set('utm_campaign', 'webinar_reminder');
 
     // Preserve original campaign attribution (same orig_* pattern as EDM buildEmailLink)
+    // Priority: orig_* (already-preserved original) > utm_* (first visit from ad)
     const getCk = (n: string) => { const m = document.cookie.match(new RegExp(`(?:^|; )${n}=([^;]*)`)); return m ? decodeURIComponent(m[1]) : ''; };
     const getAttr = (key: string) => { try { return sessionStorage.getItem(key) || getCk(key) || ''; } catch { return ''; } };
-    const orig = { source: getAttr('utm_source'), medium: getAttr('utm_medium'), campaign: getAttr('utm_campaign'), content: getAttr('utm_content'), gclid: getAttr('gclid') };
+    const orig = {
+      source: getAttr('orig_source') || getAttr('utm_source'),
+      medium: getAttr('orig_medium') || getAttr('utm_medium'),
+      campaign: getAttr('orig_campaign') || getAttr('utm_campaign'),
+      content: getAttr('orig_content') || getAttr('utm_content'),
+      gclid: getAttr('orig_gclid') || getAttr('gclid'),
+    };
     if (orig.source) url.searchParams.set('orig_source', orig.source);
     if (orig.medium) url.searchParams.set('orig_medium', orig.medium);
     if (orig.campaign) url.searchParams.set('orig_campaign', orig.campaign);
