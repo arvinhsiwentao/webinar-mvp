@@ -4,6 +4,17 @@ import { useState } from 'react';
 import { validateEmail } from '@/lib/utils';
 import { trackGA4 } from '@/lib/analytics';
 
+const getCookieValue = (name: string): string | null => {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+};
+
+const getAttr = (key: string): string | undefined => {
+  try {
+    return sessionStorage.getItem(key) || getCookieValue(key) || undefined;
+  } catch { return undefined; }
+};
+
 interface UseRegistrationFormOptions {
   webinarId: string;
   onSuccess: (name: string) => void;
@@ -44,6 +55,11 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
           email: email.trim(),
           phone: phone.trim() || undefined,
           assignedSlot: assignedSlot || undefined,
+          utmSource: getAttr('utm_source'),
+          utmMedium: getAttr('utm_medium'),
+          utmCampaign: getAttr('utm_campaign'),
+          utmContent: getAttr('utm_content'),
+          gclid: getAttr('gclid'),
         }),
       });
 
