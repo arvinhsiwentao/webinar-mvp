@@ -79,7 +79,7 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/webinar` | GET | `src/app/api/webinar/route.ts` | List all webinars |
 | `/api/webinar/[id]` | GET | `src/app/api/webinar/[id]/route.ts` | Single webinar + `registrationCount` |
 | `/api/webinar/[id]/chat` | GET, POST | `src/app/api/webinar/[id]/chat/route.ts` | GET/POST by webinar ID |
-| `/api/register` | POST | `src/app/api/register/route.ts` | Checks duplicate email per webinar. Evergreen-aware: accepts `assignedSlot`, computes `slotExpiresAt`. |
+| `/api/register` | POST | `src/app/api/register/route.ts` | Checks duplicate email per webinar. Evergreen-aware: accepts `assignedSlot`, computes `slotExpiresAt`. Sends confirmation email with lobby URL built from `NEXT_PUBLIC_BASE_URL`. |
 | `/api/webinar/[id]/next-slot` | GET | `src/app/api/webinar/[id]/next-slot/route.ts` | Computes upcoming evergreen slots from config. Returns `slots[]`, `countdownTarget`, `expiresAt`. |
 | `/api/webinar/[id]/reassign` | POST | `src/app/api/webinar/[id]/reassign/route.ts` | Reassigns a registered user to the next available slot (for missed sessions). |
 | `/api/checkout/create-session` | POST | `src/app/api/checkout/create-session/route.ts` | Creates Stripe Embedded Checkout session. Checks duplicate purchase, creates pending Order. Returns `clientSecret`. |
@@ -88,7 +88,7 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/webinar/[id]/chat/stream` | GET | `src/app/api/webinar/[id]/chat/stream/route.ts` | SSE real-time chat stream via `chat-broker.ts` |
 | `/api/subtitles/generate` | POST | `src/app/api/subtitles/generate/route.ts` | Generate subtitles for video |
 | `/api/subtitles/logs` | GET | `src/app/api/subtitles/logs/route.ts` | Fetch subtitle generation logs |
-| `/api/cron/reminders` | GET | `src/app/api/cron/reminders/route.ts` | Send scheduled email reminders |
+| `/api/cron/reminders` | GET | `src/app/api/cron/reminders/route.ts` | Send scheduled email reminders. Lobby URLs built from `NEXT_PUBLIC_BASE_URL`. |
 
 #### Admin Routes (`src/app/api/admin/`)
 
@@ -291,10 +291,11 @@ Upload flow: Browser → Mux Direct Upload (`@mux/upchunk`, chunked/resumable) �
 1. **No video seeking** — Business requirement. VideoPlayer blocks scrubbing, keyboard seeks, and programmatic seeking. Not a bug.
 2. **No WebSocket** — Chat uses SSE (Server-Sent Events) via `chat-broker.ts` pub/sub broker + auto-chat messages. Socket.io planned for production.
 3. **Admin password auth** — `ADMIN_PASSWORD` env var + HMAC-signed cookie session (24h expiry). Middleware at `src/middleware.ts` protects `/admin/*` and `/api/admin/*`. Login page at `/admin/login`.
-4. **North American Chinese locale** — Phone validation: US/Canada 10-digit format. Date formatting: `zh-CN` locale.
-5. **No i18n framework** — All UI text is hardcoded Simplified Chinese (zh-CN). i18n planned for future.
-6. **Unsplash images** — `next.config.ts` allows remote images from `*.unsplash.com`.
-7. **Dynamic video import** — Video.js imported client-side only to avoid SSR issues.
+4. **`NEXT_PUBLIC_BASE_URL` required in production** — Email links (confirmation, reminders) and Stripe checkout use this env var to build public-facing URLs. Without it, URLs may resolve to internal server addresses (e.g., `localhost`) behind reverse proxies.
+5. **North American Chinese locale** — Phone validation: US/Canada 10-digit format. Date formatting: `zh-CN` locale.
+6. **No i18n framework** — All UI text is hardcoded Simplified Chinese (zh-CN). i18n planned for future.
+7. **Unsplash images** — `next.config.ts` allows remote images from `*.unsplash.com`.
+8. **Dynamic video import** — Video.js imported client-side only to avoid SSR issues.
 
 ## Known Gaps vs SPEC.md
 

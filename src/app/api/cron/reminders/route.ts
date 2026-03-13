@@ -23,7 +23,8 @@ export async function GET() {
 
       if (!type) continue;
 
-      const liveUrl = `/webinar/${webinar.id}/lobby?name=${encodeURIComponent(reg.name)}&slot=${encodeURIComponent(reg.assignedSlot)}`;
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      const liveUrl = `${baseUrl}/webinar/${webinar.id}/lobby?name=${encodeURIComponent(reg.name)}&slot=${encodeURIComponent(reg.assignedSlot)}`;
       const emailData = reminderEmail(reg.email, type, reg.name, webinar.title, liveUrl);
       await sendEmail(emailData);
       sent++;

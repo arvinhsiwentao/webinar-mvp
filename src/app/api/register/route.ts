@@ -87,9 +87,9 @@ export async function POST(request: NextRequest) {
     audit({ type: 'registration_created', webinarId: resolvedWebinarId, email: body.email, registrationId: registration.id });
 
     // Send confirmation email (fire and forget)
-    const origin = request.nextUrl.origin;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin;
     const slotParam = body.assignedSlot ? `&slot=${encodeURIComponent(body.assignedSlot)}` : '';
-    const liveUrl = `${origin}/webinar/${resolvedWebinarId}/lobby?name=${encodeURIComponent(body.name)}${slotParam}`;
+    const liveUrl = `${baseUrl}/webinar/${resolvedWebinarId}/lobby?name=${encodeURIComponent(body.name)}${slotParam}`;
     const sessionStartTime = body.assignedSlot;
     if (sessionStartTime) {
       const emailData = confirmationEmail(body.email, body.name, webinar.title, sessionStartTime, liveUrl);
