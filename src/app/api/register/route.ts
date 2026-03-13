@@ -58,6 +58,11 @@ export async function POST(request: NextRequest) {
       name: body.name,
       email: body.email,
       phone: body.phone,
+      utmSource: body.utmSource,
+      utmMedium: body.utmMedium,
+      utmCampaign: body.utmCampaign,
+      utmContent: body.utmContent,
+      gclid: body.gclid,
     };
 
     // Add evergreen slot info

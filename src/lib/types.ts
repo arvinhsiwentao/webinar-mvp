@@ -102,6 +102,12 @@ export interface Registration {
   email: string;
   phone?: string;
   registeredAt: string;
+  // Attribution (captured at registration time)
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmContent?: string;
+  gclid?: string;
 }
 
 export interface ChatMessageData {
@@ -180,4 +186,10 @@ export interface RegisterRequest {
   name: string;
   email: string;
   phone?: string;
+  // Attribution params from client
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmContent?: string;
+  gclid?: string;
 }
