@@ -1,5 +1,4 @@
 import { google } from 'googleapis';
-import { generateActivationCode } from './activation-codes';
 
 const SPREADSHEET_ID = '1W9tK97n004XI7UbN_VuECcb_ZVVWmwa31sWRadBxZOQ';
 const SHEET_RANGE = 'A:E';
@@ -20,7 +19,7 @@ function getAuth() {
  * Claim an activation code from a Google Sheet.
  * Finds the first unused row, marks it as used with order details, and returns the code.
  *
- * Falls back to generating a random code if GOOGLE_SERVICE_ACCOUNT_KEY is not configured.
+ * Throws if GOOGLE_SERVICE_ACCOUNT_KEY is not configured.
  */
 export async function claimActivationCode(
   orderId: string,
@@ -29,10 +28,9 @@ export async function claimActivationCode(
   const auth = getAuth();
 
   if (!auth) {
-    console.warn(
-      '[google-sheets] GOOGLE_SERVICE_ACCOUNT_KEY not set — falling back to generated activation code'
+    throw new Error(
+      'GOOGLE_SERVICE_ACCOUNT_KEY is not configured — cannot claim activation code'
     );
-    return generateActivationCode();
   }
 
   const sheets = google.sheets({ version: 'v4', auth });
