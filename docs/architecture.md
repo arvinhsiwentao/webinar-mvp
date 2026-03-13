@@ -64,6 +64,14 @@ Supabase (hosted Postgres) replaces the previous JSON file storage. Server-side 
 
 **Activation codes:** `src/lib/google-sheets.ts` — Claims pre-populated activation codes from a Google Sheet via the Sheets API. Throws an error when `GOOGLE_SERVICE_ACCOUNT_KEY` is not configured (no fallback — Stripe retries the webhook).
 
+#### Purchase Fulfillment
+
+Two fulfillment paths (shared `src/lib/fulfillment.ts`):
+1. **Stripe webhook** (`/api/checkout/webhook`) — primary, triggered by Stripe on payment
+2. **Session-status polling** (`/api/checkout/session-status`) — fallback, triggered by return page polling
+
+Both use `updateOrderStatus(id, 'pending', 'paid')` as an atomic lock — only one caller wins the race. Safe against double fulfillment.
+
 **Tables:** `webinars`, `registrations`, `chat_messages`, `orders` (the `events` table exists but is no longer written to — tracking moved to GTM/GA4)
 
 **JSONB columns:** Nested arrays that are always read/written with the parent webinar are stored as JSONB columns rather than separate tables: `auto_chat`, `cta_events`, `highlights`, `subtitle_cues`, `evergreen`.
@@ -83,8 +91,8 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/webinar/[id]/next-slot` | GET | `src/app/api/webinar/[id]/next-slot/route.ts` | Computes upcoming evergreen slots from config. Returns `slots[]`, `countdownTarget`, `expiresAt`. |
 | `/api/webinar/[id]/reassign` | POST | `src/app/api/webinar/[id]/reassign/route.ts` | Reassigns a registered user to the next available slot (for missed sessions). |
 | `/api/checkout/create-session` | POST | `src/app/api/checkout/create-session/route.ts` | Creates Stripe Embedded Checkout session. Checks duplicate purchase, creates pending Order. Returns `clientSecret`. |
-| `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Polls Stripe session status. Read-only — returns order status and activation code if fulfilled. Return page polls this to display code on screen. No fulfillment logic (webhook is sole fulfillment path). |
-| `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Sole fulfillment on `checkout.session.completed`: atomic lock (`updateOrderStatus` pending→paid), claims activation code from Google Sheets, updates order to fulfilled. Email sent separately (failure does not roll back fulfillment). Rolls back to pending on code-claim failure so Stripe retries. |
+| `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Polls Stripe session status. Fallback fulfillment path — if webhook hasn't fired yet and Stripe confirms payment, triggers `fulfillOrder()`. Return page polls this to display activation code on screen. |
+| `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Primary fulfillment on `checkout.session.completed`: calls `fulfillOrder()`. Email sent separately (failure does not roll back fulfillment). Rolls back to pending on code-claim failure so Stripe retries. |
 | `/api/webinar/[id]/chat/stream` | GET | `src/app/api/webinar/[id]/chat/stream/route.ts` | SSE real-time chat stream via `chat-broker.ts` |
 | `/api/subtitles/generate` | POST | `src/app/api/subtitles/generate/route.ts` | Generate subtitles for video |
 | `/api/subtitles/logs` | GET | `src/app/api/subtitles/logs/route.ts` | Fetch subtitle generation logs |

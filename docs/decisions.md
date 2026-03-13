@@ -146,3 +146,7 @@ Supabase free tier has 50MB file upload limit (hard cap, no workaround). Cloudfl
 **Decision:** Removed random activation code generator (`activation-codes.ts`). Google Sheets is now the only source. If unavailable, webhook fails and Stripe retries. Decoupled email from fulfillment — email failure no longer rolls back the order. Return page now displays the activation code directly with polling, making email a backup channel. Customer service email updated to `CMoney_overseas@cmoney.com.tw`.
 
 **Why:** Fake codes can't be redeemed on CMoney — worse than an error. Silent email failure left customers with no code and no recourse. Showing the code on-screen eliminates single-point-of-failure on email delivery.
+
+### 2026-03-13: Add inline fulfillment fallback to session-status route
+
+Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Stripe webhook and the session-status polling route can now trigger fulfillment. Atomic lock (`updateOrderStatus: pending → paid`) prevents double fulfillment. Previously, if the webhook didn't fire (local dev without `stripe listen`, deployment misconfiguration), orders stayed stuck at `pending` forever.
