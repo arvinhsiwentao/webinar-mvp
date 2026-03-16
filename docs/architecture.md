@@ -107,6 +107,19 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/admin/login` | POST | `src/app/api/admin/login/route.ts` | Authenticate with ADMIN_PASSWORD, set session cookie |
 | `/api/admin/logout` | POST | `src/app/api/admin/logout/route.ts` | Clear session cookie |
 
+### Email Templates (`src/lib/email.ts`)
+
+SendGrid-based email service (fetch, no SDK). Gracefully degrades to console log when `SENDGRID_API_KEY` is absent.
+
+| Template | Function | Purpose |
+|----------|----------|---------|
+| Registration confirmation | `confirmationEmail()` | Brand-aligned HTML EDM (ivory + gold design system). Includes speaker header, event details card (date/time), benefit highlights, gold CTA, and urgency reminder. Table-based layout for cross-client compatibility. |
+| 24h / 1h reminder | `reminderEmail()` | Pre-session reminder with lobby link |
+| Follow-up / replay | `followUpEmail()` | Post-session replay link + optional CTA |
+| Purchase confirmation | `purchaseConfirmationEmail()` | Order details, activation code box, product links, step-by-step instructions |
+
+All templates use inline CSS for email client compatibility. Confirmation email mirrors the landing page design system (`#B8953F` gold accent, `#FAFAF7` ivory bg, `#E8E5DE` borders).
+
 ### Utilities (`src/lib/utils.ts`)
 
 - `formatDate`, `formatTime`, `formatDateTime` — `zh-CN` locale formatting

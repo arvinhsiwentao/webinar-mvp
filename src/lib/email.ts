@@ -46,21 +46,173 @@ export async function sendEmail({ to, subject, html }: EmailParams): Promise<boo
   }
 }
 
-export function confirmationEmail(to: string, name: string, title: string, startTime: string, liveUrl: string): EmailParams {
-  const date = new Date(startTime).toLocaleString('zh-CN', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
+export function confirmationEmail(to: string, name: string, title: string, startTime: string, liveUrl: string, speakerAvatarUrl?: string): EmailParams {
+  const d = new Date(startTime);
+  const dateFormatted = d.toLocaleDateString('zh-CN', {
+    year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
   });
+  const timeFormatted = d.toLocaleTimeString('zh-CN', {
+    hour: 'numeric', minute: '2-digit', hour12: true,
+  });
+
   return {
     to,
     subject: `报名成功！${title}`,
     html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2>Hi ${name}，恭喜你成功报名！</h2>
-        <p>直播时间：${date}</p>
-        <p>开播前我们会再次提醒你！</p>
-        <a href="${liveUrl}" style="display:inline-block;background:#000;color:#fff;padding:12px 24px;text-decoration:none;border-radius:4px;margin-top:16px;">进入直播间</a>
-      </div>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#F5F5F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;color:#1A1A1A;line-height:1.6;">
+  <!-- Outer wrapper -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F5F0;">
+    <tr><td align="center" style="padding:32px 16px;">
+
+      <!-- Email container -->
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#FFFFFF;border:1px solid #E8E5DE;">
+
+        <!-- Gold top accent bar -->
+        <tr><td style="height:4px;background:linear-gradient(90deg,#B8953F,#C9A962,#B8953F);font-size:0;line-height:0;">&nbsp;</td></tr>
+
+        <!-- Header: Speaker + Brand -->
+        <tr><td style="padding:32px 40px 24px 40px;text-align:center;">
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr>
+              ${speakerAvatarUrl ? `<td style="vertical-align:middle;padding-right:14px;">
+                <div style="width:52px;height:52px;border-radius:50%;background:#F5F5F0;border:2px solid #E8E5DE;overflow:hidden;display:inline-block;">
+                  <img src="${speakerAvatarUrl}" alt="Mike" width="52" height="52" style="width:52px;height:52px;object-fit:cover;border-radius:50%;display:block;" />
+                </div>
+              </td>` : ''}
+              <td style="vertical-align:middle;text-align:left;">
+                <p style="margin:0;font-size:16px;font-weight:700;color:#1A1A1A;">Mike是麦克</p>
+                <p style="margin:2px 0 0 0;font-size:12px;color:#6B6B6B;letter-spacing:0.5px;">美股财富自由攻略</p>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+
+        <!-- Divider -->
+        <tr><td style="padding:0 40px;"><div style="border-top:1px solid #E8E5DE;"></div></td></tr>
+
+        <!-- Main content -->
+        <tr><td style="padding:28px 40px 8px 40px;">
+          <h1 style="margin:0 0 6px 0;font-size:22px;font-weight:700;color:#1A1A1A;">
+            ${name}，你已成功报名！
+          </h1>
+          <p style="margin:0;font-size:14px;color:#6B6B6B;">
+            席位已为你保留，以下是你的讲座信息
+          </p>
+        </td></tr>
+
+        <!-- Event details card -->
+        <tr><td style="padding:20px 40px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAFAF7;border:1px solid #E8E5DE;border-radius:8px;">
+            <tr><td style="padding:24px 28px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-bottom:14px;">
+                    <p style="margin:0 0 4px 0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#B8953F;font-weight:600;">讲座主题</p>
+                    <p style="margin:0;font-size:16px;font-weight:700;color:#1A1A1A;">${title}</p>
+                  </td>
+                </tr>
+                <tr><td style="padding-bottom:14px;border-top:1px solid #E8E5DE;padding-top:14px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="vertical-align:top;padding-right:8px;font-size:16px;">&#128197;</td>
+                      <td>
+                        <p style="margin:0 0 2px 0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#B8953F;font-weight:600;">日期</p>
+                        <p style="margin:0;font-size:15px;color:#1A1A1A;font-weight:600;">${dateFormatted}</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td></tr>
+                <tr><td>
+                  <table role="presentation" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="vertical-align:top;padding-right:8px;font-size:16px;">&#9201;</td>
+                      <td>
+                        <p style="margin:0 0 2px 0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#B8953F;font-weight:600;">时间</p>
+                        <p style="margin:0;font-size:15px;color:#1A1A1A;font-weight:600;">${timeFormatted} (Central Time)</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <!-- CTA Button -->
+        <tr><td style="padding:8px 40px 28px 40px;text-align:center;">
+          <a href="${liveUrl}" style="display:inline-block;background-color:#B8953F;color:#FFFFFF;font-size:16px;font-weight:700;text-decoration:none;padding:14px 48px;letter-spacing:0.5px;mso-padding-alt:0;text-align:center;">
+            <!--[if mso]><i style="mso-font-width:300%;mso-text-raise:30pt">&nbsp;</i><![endif]-->
+            <span style="mso-text-raise:15pt;">进入直播间</span>
+            <!--[if mso]><i style="mso-font-width:300%">&nbsp;</i><![endif]-->
+          </a>
+          <p style="margin:10px 0 0 0;font-size:12px;color:#9CA3AF;">开播前我们会再次发送提醒邮件</p>
+        </td></tr>
+
+        <!-- Divider -->
+        <tr><td style="padding:0 40px;"><div style="border-top:1px solid #E8E5DE;"></div></td></tr>
+
+        <!-- Benefits section -->
+        <tr><td style="padding:24px 40px 8px 40px;">
+          <p style="margin:0 0 16px 0;font-size:14px;font-weight:700;color:#1A1A1A;">讲座中你将获得：</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:6px 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+                <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;">&#10003;</td>
+                <td style="font-size:14px;color:#1A1A1A;">学习辨识美股「抄底」时机，在低点精准布局</td>
+              </tr></table>
+            </td></tr>
+            <tr><td style="padding:6px 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+                <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;">&#10003;</td>
+                <td style="font-size:14px;color:#1A1A1A;">掌握「存股」策略，建立稳定被动收入</td>
+              </tr></table>
+            </td></tr>
+            <tr><td style="padding:6px 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+                <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;">&#10003;</td>
+                <td style="font-size:14px;color:#1A1A1A;">了解 Mike 如何 4 年内达成财务自由的完整路径</td>
+              </tr></table>
+            </td></tr>
+            <tr><td style="padding:6px 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+                <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;">&#10003;</td>
+                <td style="font-size:14px;color:#1A1A1A;">独家公开 Mike 的美股持仓清单与选股逻辑</td>
+              </tr></table>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <!-- Reminder box -->
+        <tr><td style="padding:20px 40px 28px 40px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#FAFAF7;border-left:3px solid #B8953F;border-radius:0 4px 4px 0;">
+            <tr><td style="padding:14px 20px;">
+              <p style="margin:0;font-size:13px;color:#6B6B6B;line-height:1.6;">
+                &#128161; <strong style="color:#1A1A1A;">温馨提示：</strong>建议提前 5 分钟进入直播间，确保网络连接顺畅。本次讲座为限时公开，名额有限，请务必准时参加。
+              </p>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="padding:20px 40px;background-color:#FAFAF7;border-top:1px solid #E8E5DE;">
+          <p style="margin:0 0 4px 0;font-size:11px;color:#9CA3AF;text-align:center;">
+            此邮件由系统自动发送，请勿直接回复
+          </p>
+          <p style="margin:0;font-size:11px;color:#9CA3AF;text-align:center;">
+            &copy; ${new Date().getFullYear()} Mike是麦克. All rights reserved.
+          </p>
+        </td></tr>
+
+      </table>
+      <!-- /Email container -->
+
+    </td></tr>
+  </table>
+</body>
+</html>
     `,
   };
 }

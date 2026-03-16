@@ -106,7 +106,9 @@ export async function POST(request: NextRequest) {
     );
     const sessionStartTime = body.assignedSlot;
     if (sessionStartTime) {
-      const emailData = confirmationEmail(body.email, body.name, webinar.title, sessionStartTime, liveUrl);
+      const avatarPath = webinar.speakerAvatar || webinar.speakerImage;
+      const speakerAvatarUrl = avatarPath ? `${baseUrl}${avatarPath.startsWith('/') ? '' : '/'}${avatarPath}` : undefined;
+      const emailData = confirmationEmail(body.email, body.name, webinar.title, sessionStartTime, liveUrl, speakerAvatarUrl);
       sendEmail(emailData);
     }
 
