@@ -156,3 +156,8 @@ Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Strip
 **Decision:** External HTTP cron (cron-job.org) calling `/api/cron/orders-sync` with CRON_SECRET bearer auth.
 **Why:** Zeabur is containerized (not serverless) so no Vercel Cron available. External HTTP cron is simplest, follows existing reminders pattern, and is free. Also retrofitted CRON_SECRET onto existing `/api/cron/reminders` which had no auth.
 **Alternatives rejected:** node-cron (process-internal, harder to debug), Supabase Edge Functions (separate Deno runtime), Google Apps Script (split codebase).
+
+### 2026-03-17: Product package ID and sales code on orders
+
+**Decision:** Store `productPackageId` and `salesCode` as webinar-level config, copied to order at fulfillment time.
+**Why:** These values identify the product package and sales channel for each purchase. Stored at webinar level so they can vary per webinar. Copied to order at fulfillment so the order is a self-contained record even if webinar config changes later.

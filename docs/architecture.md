@@ -44,14 +44,14 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 
 | Interface | Key Fields | Notes |
 |-----------|-----------|-------|
-| `Webinar` | `id`, `title`, `videoUrl`, `duration`, `autoChat[]`, `ctaEvents[]`, `status`, `evergreen?`, `viewerPeakTarget?`, `viewerRampMinutes?`, `heroImageUrl?`, `promoImageUrl?`, `disclaimerText?`, `endPageSalesCopy?`, `endPageCtaText?`, `endPageCtaUrl?`, `endPageCtaColor?`, `sidebarDescription?` | Top-level entity. Embeds auto-chat and CTA arrays inline. Extended with landing/end/sidebar fields. Uses `evergreen` config for dynamic scheduling. Viewer simulation configured via `viewerPeakTarget` and `viewerRampMinutes`. |
+| `Webinar` | `id`, `title`, `videoUrl`, `duration`, `autoChat[]`, `ctaEvents[]`, `status`, `evergreen?`, `viewerPeakTarget?`, `viewerRampMinutes?`, `heroImageUrl?`, `promoImageUrl?`, `disclaimerText?`, `endPageSalesCopy?`, `endPageCtaText?`, `endPageCtaUrl?`, `endPageCtaColor?`, `sidebarDescription?`, `productPackageId?`, `salesCode?` | Top-level entity. Embeds auto-chat and CTA arrays inline. Extended with landing/end/sidebar fields. Uses `evergreen` config for dynamic scheduling. Viewer simulation configured via `viewerPeakTarget` and `viewerRampMinutes`. `productPackageId` (商品包編號) and `salesCode` (銷售代碼) configure fulfillment metadata per webinar. |
 | `EvergreenConfig` | `enabled`, `dailySchedule[]`, `immediateSlot{}`, `videoDurationMinutes`, `timezone`, `displaySlotCount` | Configures dynamic slot generation. Daily anchor times + immediate slot injection for perpetual urgency. |
 | `EvergreenSlot` | `slotTime`, `type` | Computed session slot — either `'anchor'` (daily recurring) or `'immediate'` (dynamically injected). |
 | `AutoChatMessage` | `id`, `timeSec`, `name`, `message` | Bot message triggered at video timestamp. |
 | `CTAEvent` | `id`, `showAtSec`, `hideAtSec`, `buttonText`, `showCountdown`, `position?`, `color?`, `secondaryText?` | Promotional overlay with optional countdown. Supports on-video or below-video positioning. Clicks navigate to internal checkout page. |
 | `Registration` | `id`, `webinarId`, `name`, `email`, `phone?`, `assignedSlot?`, `slotExpiresAt?`, `reassignedFrom?` | One per email per webinar (duplicate check). Evergreen fields store computed slot times. |
 | `ChatMessageData` | `id`, `webinarId`, `name`, `message`, `timestamp`, `createdAt` | Real user chat message. |
-| `Order` | `id`, `webinarId`, `email`, `name`, `stripeSessionId`, `stripePaymentIntentId?`, `activationCode?`, `status`, `amount`, `currency`, `metadata?`, `createdAt`, `paidAt?`, `fulfilledAt?` | Stripe checkout order. Status: `pending` → `paid` → `fulfilled`. Activation code generated on fulfillment. |
+| `Order` | `id`, `webinarId`, `email`, `name`, `stripeSessionId`, `stripePaymentIntentId?`, `activationCode?`, `status`, `amount`, `currency`, `metadata?`, `createdAt`, `paidAt?`, `fulfilledAt?`, `productPackageId?`, `salesCode?` | Stripe checkout order. Status: `pending` → `paid` → `fulfilled`. Activation code generated on fulfillment. `productPackageId` and `salesCode` copied from webinar config at fulfillment time. |
 
 ### Storage Layer (Supabase)
 
