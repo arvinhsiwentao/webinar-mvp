@@ -161,25 +161,31 @@ export function confirmationEmail(to: string, name: string, title: string, start
             <tr><td style="padding:6px 0;">
               <table role="presentation" cellpadding="0" cellspacing="0"><tr>
                 <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;">&#10003;</td>
-                <td style="font-size:14px;color:#1A1A1A;">学习辨识美股「抄底」时机，在低点精准布局</td>
-              </tr></table>
-            </td></tr>
-            <tr><td style="padding:6px 0;">
-              <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-                <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;">&#10003;</td>
-                <td style="font-size:14px;color:#1A1A1A;">掌握「存股」策略，建立稳定被动收入</td>
-              </tr></table>
-            </td></tr>
-            <tr><td style="padding:6px 0;">
-              <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-                <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;">&#10003;</td>
-                <td style="font-size:14px;color:#1A1A1A;">了解 Mike 如何 4 年内达成财务自由的完整路径</td>
+                <td style="font-size:14px;color:#1A1A1A;">公开 Mike 如何从负债到达成财务自由的完整路径</td>
               </tr></table>
             </td></tr>
             <tr><td style="padding:6px 0;">
               <table role="presentation" cellpadding="0" cellspacing="0"><tr>
                 <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;">&#10003;</td>
                 <td style="font-size:14px;color:#1A1A1A;">独家公开 Mike 的美股持仓清单与选股逻辑</td>
+              </tr></table>
+            </td></tr>
+            <tr><td style="padding:6px 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+                <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;">&#10003;</td>
+                <td style="font-size:14px;color:#1A1A1A;">打造你的被动收入系统——用对的投资策略让钱自己长大</td>
+              </tr></table>
+            </td></tr>
+            <tr><td style="padding:6px 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+                <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;">&#10003;</td>
+                <td style="font-size:14px;color:#1A1A1A;">学会判断「什么时候该进场」——抓住 AI 时代的最佳买入时机</td>
+              </tr></table>
+            </td></tr>
+            <tr><td style="padding:6px 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+                <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;">&#10003;</td>
+                <td style="font-size:14px;color:#1A1A1A;">APP 陪跑带你执行——不用自己盯盘，打开手机就知道怎么做</td>
               </tr></table>
             </td></tr>
           </table>

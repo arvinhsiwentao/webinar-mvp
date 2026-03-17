@@ -114,7 +114,7 @@ SendGrid-based email service (fetch, no SDK). Gracefully degrades to console log
 
 | Template | Function | Purpose |
 |----------|----------|---------|
-| Registration confirmation | `confirmationEmail()` | Brand-aligned HTML EDM (ivory + gold design system). Includes speaker header, event details card (date/time), benefit highlights, gold CTA, and urgency reminder. Table-based layout for cross-client compatibility. |
+| Registration confirmation | `confirmationEmail()` | Brand-aligned HTML EDM (ivory + gold design system). Includes speaker header, event details card (date/time), 5 benefit highlights (financial freedom path, stock picks, passive income, market timing, APP guided execution), gold CTA, and urgency reminder. Table-based layout for cross-client compatibility. |
 | 24h / 1h reminder | `reminderEmail()` | Pre-session reminder with lobby link |
 | Follow-up / replay | `followUpEmail()` | Post-session replay link + optional CTA |
 | Purchase confirmation | `purchaseConfirmationEmail()` | Order details, activation code box, product links, step-by-step instructions |
