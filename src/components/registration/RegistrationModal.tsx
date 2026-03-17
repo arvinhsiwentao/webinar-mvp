@@ -163,7 +163,7 @@ export default function RegistrationModal({
                   className="mt-1 w-4 h-4 rounded border-[#E8E5DE] accent-[#B8953F]"
                 />
                 <span className="text-sm text-neutral-600 leading-snug">
-                  输入手机号码获得专属优惠
+                  输入手机号码
                   <span className="text-neutral-400 ml-1">(可选，但强烈建议使用)</span>
                 </span>
               </label>
