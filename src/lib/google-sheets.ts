@@ -6,7 +6,7 @@ const SHEET_RANGE = 'A:E';
 const MAX_RETRIES = 3;
 
 const ORDERS_SPREADSHEET_ID = '1sba5HDJav8aUO5L59-JmkeV2QXp8F6gpR4PUOLXMqD8';
-const ORDERS_SHEET_RANGE = 'Orders!A:K';
+const ORDERS_SHEET_RANGE = 'Orders!A:M';
 
 function getAuth() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
@@ -136,6 +136,7 @@ export async function syncOrdersToSheet(
     'ID', 'Webinar ID', 'Email', 'Name', 'Status',
     'Amount', 'Currency', 'Activation Code',
     'Created At', 'Paid At', 'Fulfilled At',
+    'Product Package ID', 'Sales Code',
   ];
 
   // Map orders to row arrays
@@ -151,6 +152,8 @@ export async function syncOrdersToSheet(
     order.createdAt,
     order.paidAt ?? '',
     order.fulfilledAt ?? '',
+    order.productPackageId ?? '',
+    order.salesCode ?? '',
   ]);
 
   const allRows = [header, ...dataRows];
