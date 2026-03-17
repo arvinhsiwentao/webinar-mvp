@@ -152,7 +152,7 @@ export default function CheckoutPage() {
                 你离财务自由，只差一个决定
               </h1>
               <p className="text-neutral-500 text-sm">
-                加入 2,000+ 学员，跟着 Mike 用美股抄底存股双策略打造被动收入
+                加入 3,000+ 学员，跟着 Mike 用美股抄底存股双策略打造被动收入
               </p>
             </div>
 
@@ -163,7 +163,7 @@ export default function CheckoutPage() {
                 <ValueItem text="震荡行情的美股期权操作解析 (价值 USD $312)" />
                 <ValueItem text="ETF 进阶资产放大术 (价值 USD $384)" />
                 <ValueItem text="MIKE是麦克 APP 完整权限 (年费价值 USD $1,000)" />
-                <ValueItem text="2,000+ 人美股操作社群 (独家福利)" />
+                <ValueItem text="3,000+ 人美股操作社群 (独家福利)" />
                 <ValueItem text="Mike 亲自录制选股逻辑教学 (独家内容)" />
               </ul>
             </div>
