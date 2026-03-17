@@ -1,6 +1,6 @@
 # Architecture
 
-> Last verified: 2026-03-17
+> Last verified: 2026-03-17 (content-only update to checkout testimonials — no structural changes)
 
 Living document. Hooks remind Claude to keep this current when structural changes are made.
 
