@@ -257,7 +257,7 @@ export default function HomePage() {
                 {webinar.speakerName}
               </h2>
               <p className="text-sm md:text-base text-neutral-600 leading-relaxed">
-                一个 26 岁负债 50 万美金的华人，靠一套投资策略在 43 岁实现财务自由，目前拥有20万+ YouTube订阅者，3,000+付费会员社群。
+                一个 32 岁负债 50 万美金的华人，靠一套投资策略在 43 岁实现财务自由，目前拥有20万+ YouTube订阅者，3,000+付费会员社群。
               </p>
               <p className="text-sm md:text-base text-neutral-600 leading-relaxed mt-3">
                 不是天才、更不是富二代，就是一个普通人进对时机、找对方法，从此破局致富、阶级跃升，现在他把整套方法毫无保留地讲给你听。
