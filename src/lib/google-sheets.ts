@@ -1,8 +1,12 @@
 import { google } from 'googleapis';
+import { Order } from './types';
 
 const SPREADSHEET_ID = '1W9tK97n004XI7UbN_VuECcb_ZVVWmwa31sWRadBxZOQ';
 const SHEET_RANGE = 'A:E';
 const MAX_RETRIES = 3;
+
+const ORDERS_SPREADSHEET_ID = '1sba5HDJav8aUO5L59-JmkeV2QXp8F6gpR4PUOLXMqD8';
+const ORDERS_SHEET_RANGE = 'Orders!A:K';
 
 function getAuth() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
@@ -106,4 +110,66 @@ function formatDate(date: Date): string {
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}/${m}/${d}`;
+}
+
+/**
+ * Sync all orders to a Google Sheet.
+ * Clears existing data (except header) and writes fresh rows.
+ * Returns the number of rows written.
+ */
+export async function syncOrdersToSheet(
+  orders: Order[]
+): Promise<number> {
+  const auth = getAuth();
+  if (!auth) {
+    throw new Error(
+      'GOOGLE_SERVICE_ACCOUNT_KEY is not configured — cannot sync orders'
+    );
+  }
+
+  const spreadsheetId = ORDERS_SPREADSHEET_ID;
+
+  const sheets = google.sheets({ version: 'v4', auth });
+
+  // Header row
+  const header = [
+    'ID', 'Webinar ID', 'Email', 'Name', 'Status',
+    'Amount', 'Currency', 'Activation Code',
+    'Created At', 'Paid At', 'Fulfilled At',
+  ];
+
+  // Map orders to row arrays
+  const dataRows = orders.map(order => [
+    order.id,
+    order.webinarId,
+    order.email,
+    order.name,
+    order.status,
+    order.amount,
+    order.currency,
+    order.activationCode ?? '',
+    order.createdAt,
+    order.paidAt ?? '',
+    order.fulfilledAt ?? '',
+  ]);
+
+  const allRows = [header, ...dataRows];
+
+  // Clear existing data in the sheet
+  await sheets.spreadsheets.values.clear({
+    spreadsheetId,
+    range: ORDERS_SHEET_RANGE,
+  });
+
+  // Write all rows
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: ORDERS_SHEET_RANGE,
+    valueInputOption: 'RAW',
+    requestBody: {
+      values: allRows,
+    },
+  });
+
+  return dataRows.length;
 }
