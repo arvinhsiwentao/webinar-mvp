@@ -148,6 +148,8 @@ VideoPlayer.onTimeUpdate(currentTime)
 
 The viewer count is **list-driven** — the displayed number equals the length of the simulated viewer list. No independent formula.
 
+The `NAME_POOL` (~180 names) is curated to mimic realistic North American Chinese (北美华人) naming patterns: Chinese full names with proper surnames (林嘉欣, 陈思远), English names popular in the diaspora (Vivian, Jasmine, Winston), mixed format (Cindy 陈, Tony 李), and a few natural nicknames (嘉嘉, 湾区老王). Avoids textbook placeholders (李明), celebrity names, and robotic 小X/阿X patterns.
+
 The `useViewerSimulator` hook manages a stateful name list following a 3-phase attendance curve tied to video playback time:
 
 1. **Hot start** (t=0): Instantly loads ~35% of `peakTarget` viewers (30-40% with random variance). Auto-chat sender names are prioritized in the initial pool. No join messages generated for this initial batch.

@@ -7,49 +7,53 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 /**
  * 200+ display names used for simulated viewer presence.
  *
- * Mix: ~55 % Chinese first names, ~45 % Western names common in Chinese diaspora.
+ * Designed to mimic realistic North American Chinese (北美华人) naming:
+ * - Chinese names use proper surname + given name (2-3 chars), avoiding
+ *   textbook placeholders (李明) and celebrity names (周杰)
+ * - English names reflect what Chinese diaspora actually use
+ * - Some names use English + Chinese surname format (e.g., "Cindy 陈")
+ * - Small/阿X patterns used sparingly (only as actual nicknames)
+ *
  * The first 48 entries are the auto-chat names already referenced in the codebase
  * so they always appear when the simulation samples from the pool.
  */
 export const NAME_POOL: string[] = [
   // ── Auto-chat names (must come first) ──────────────────────────────
-  '小美', '阿明', 'David', 'Emma', 'Kevin', '小芳', 'Jason', 'Linda',
-  'Alex', '小雨', 'Tom', '阿华', 'Jenny', '小李', 'Michael', '小张',
-  '王强', 'Amy', '陈伟', 'Sarah', '刘洋', 'Peter', '黄丽', 'Bob',
-  '赵敏', '周杰', 'Lucy', '吴涛', '孙燕', 'Jack', '李明', '张伟',
-  'Nicole', '陈静', 'Ryan', '王芳', 'Helen', '刘强', '杨磊', 'Grace',
-  '赵鑫', '周芳', 'Brian', '郭靖', '许可', '钱伟', 'Chris', '蒋勇',
+  'Cindy 陈', '林嘉欣', 'David', 'Emma', 'Kevin', '方思琪', 'Jason', 'Linda',
+  'Alex', '沈雨桐', 'Andy', '何志远', 'Jenny', 'Vivian', 'Michael', '黄婷婷',
+  '王瑞霖', 'Amy', '陈思远', 'Sarah', '刘雨涵', 'Steven', '苏晓彤', 'Justin',
+  '赵雅琪', '唐文博', 'Lucy', '吴思源', '朱雅芳', 'Ethan', '林泽宇', '张一鸣',
+  'Nicole', '陈雅文', 'Ryan', '王思颖', 'Helen', '罗浩然', '杨子琪', 'Grace',
+  '郑凯文', '曹艺馨', 'Brian', '徐嘉怡', '许晨曦', '钱逸飞', 'Chris', '蒋睿杰',
 
-  // ── Additional Chinese names ───────────────────────────────────────
-  '小红', '阿杰', '志远', '文静', '海涛', '丽华', '建国', '秀英',
-  '国强', '明珠', '伟东', '春花', '德华', '小玲', '阿宝', '文华',
-  '丽萍', '志强', '美玲', '大伟', '小凤', '阿龙', '玉兰', '建华',
-  '秋月', '晓东', '美华', '阿辉', '春梅', '文杰', '丽芳', '志华',
-  '秀兰', '明辉', '小燕', '阿强', '玉华', '建军', '秋霞', '晓明',
-  '美丽', '阿翔', '春兰', '文斌', '丽娟', '志刚', '秀芳', '明亮',
-  '小敏', '阿伟', '玉珍', '建平', '秋菊', '晓辉', '美珍', '阿峰',
-  '春燕', '小蓉', '阿成', '文龙', '丽红', '志明', '秀梅', '国华',
-  '明伟', '小琳', '阿军', '玉芳', '建生', '秋萍', '晓峰', '美凤',
-  '阿鹏', '春华', '文涛', '丽玲', '志伟', '秀华',
+  // ── Chinese names (surname + given, realistic style) ───────────────
+  '谢雨欣', '马晨阳', '宋佳宁', '韩博睿', '周思彤', '吕嘉琪', '潘子轩',
+  '冯雨萱', '郭晓雯', '姜浩宇', '程思涵', '蔡欣妍', '丁泽恩', '贾诗韵',
+  '田雨晨', '董子涵', '任嘉怡', '邓伟杰', '梁诗雅', '叶子默', '彭思远',
+  '魏晨曦', '傅嘉琳', '钟雨桐', '卢子琦', '邹嘉欣', '熊博文', '万雅婷',
+  '段子睿', '雷思源', '侯嘉宁', '龙雨萱', '廖子轩', '邱嘉怡', '石博源',
+  '孟晓彤', '崔雅琪', '汤思远', '秦子涵', '江嘉琦', '庄雨欣', '范博睿',
+  '苗子轩', '尹嘉怡', '顾思源', '沈雅文', '高子琦', '金嘉宁', '常雨桐',
+  '白子默', '施博文', '陆嘉琳', '夏雅婷', '贺子睿', '倪思源', '严嘉欣',
+  '文博源', '柳晓彤', '邢雅琪', '康思远', '毛子涵', '余嘉琦', '杜雨欣',
+  '宁博睿', '凌子轩', '关嘉怡', '乔思源', '向雅文', '苏子琦', '洪嘉宁',
 
-  // ── Additional Western names ───────────────────────────────────────
-  'Jennifer', 'Daniel', 'Michelle', 'Andrew', 'Jessica', 'Steven',
+  // ── English names (popular among Chinese diaspora) ─────────────────
+  'Jennifer', 'Daniel', 'Michelle', 'Andrew', 'Jessica', 'Derek',
   'Angela', 'Patrick', 'Stephanie', 'Jonathan', 'Christine', 'Timothy',
-  'Samantha', 'Gregory', 'Melissa', 'Kenneth', 'Rebecca', 'Jeffrey',
-  'Amanda', 'Raymond', 'Laura', 'Roger', 'Diane', 'Henry', 'Victoria',
-  'Arthur', 'Diana', 'Wayne', 'Tracy', 'Stanley', 'Cindy', 'Vincent',
-  'Teresa', 'Dennis', 'Sharon', 'George', 'Maria', 'Harry', 'Sophie',
-  'Leo', 'Tiffany', 'Ray', 'Catherine', 'Frank', 'Monica', 'Howard',
-  'Gloria',
+  'Samantha', 'Vincent', 'Melissa', 'Kenneth', 'Rebecca', 'Jeffrey',
+  'Amanda', 'Raymond', 'Laura', 'Henry', 'Victoria', 'Jasmine',
+  'Diana', 'Wayne', 'Tracy', 'Stanley', 'Tiffany', 'Winston',
+  'Teresa', 'Dennis', 'Sharon', 'Sophie', 'Leo', 'Vivienne',
+  'Catherine', 'Frank', 'Monica', 'Howard', 'Gloria', 'Elaine',
+  'Connie', 'Gary', 'Irene', 'Nelson', 'Sandra', 'Albert',
 
-  // ── Extra Chinese names ────────────────────────────────────────────
-  '永强', '淑芬', '嘉欣', '浩然', '雅婷', '俊杰', '思琪', '宇轩',
-  '雨萱', '子涵', '梓萱', '浩宇', '欣怡', '皓轩', '诗涵', '博文',
+  // ── Mixed format (English + Chinese surname) ───────────────────────
+  'Wendy 王', 'Tony 李', 'Sandy 张', 'Eric 林', 'Ivy 黄', 'Alan 吴',
+  'Karen 周', 'Marcus 陈', 'Cynthia 刘', 'Sean 杨', 'Maggie 赵', 'Roy 郑',
 
-  // ── Extra Western names ────────────────────────────────────────────
-  'Marcus', 'Olivia', 'Nathan', 'Natalie', 'Derek', 'Heather', 'Philip',
-  'Karen', 'Scott', 'Vanessa', 'Alan', 'Cynthia', 'Martin', 'Wendy',
-  'Eric', 'Ivy',
+  // ── Casual/nickname style (少量, more natural) ─────────────────────
+  '嘉嘉', '小鱼', 'CC', '阿睿', '豆豆妈', '湾区老王',
 ];
 
 /**
