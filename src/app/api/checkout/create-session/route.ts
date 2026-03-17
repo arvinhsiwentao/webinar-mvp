@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     // Create Stripe Checkout Session in embedded mode
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded',
-      locale: 'zh',
+      locale: 'auto',
       line_items: [
         {
           price: process.env.STRIPE_PRICE_ID,
