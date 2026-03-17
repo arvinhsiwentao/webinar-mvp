@@ -204,9 +204,9 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-lg border border-[#E8E5DE] p-6">
               <h3 className="font-semibold text-neutral-900 mb-4">课程套餐内容</h3>
               <ul className="space-y-3">
-                <ValueItem text="震盪行情的美股期權操作解析 (价值 USD $312)" />
-                <ValueItem text="ETF 進階資產放大術 (价值 USD $384)" />
-                <ValueItem text="MIKE是麥克 APP 完整权限 (年费价值 USD $1,000)" />
+                <ValueItem text="震荡行情的美股期权操作解析 (价值 USD $312)" />
+                <ValueItem text="ETF 进阶资产放大术 (价值 USD $384)" />
+                <ValueItem text="MIKE是麦克 APP 完整权限 (年费价值 USD $1,000)" />
                 <ValueItem text="2,000+ 人美股操作社群 (独家福利)" />
                 <ValueItem text="Mike 亲自录制选股逻辑教学 (独家内容)" />
               </ul>

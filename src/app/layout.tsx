@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mike是麥克 - 在线直播",
-  description: "Mike是麥克的专属直播间，分享北美华人生活与创业干货。",
+  title: "Mike是麦克 - 在线直播",
+  description: "Mike是麦克的专属直播间，分享北美华人生活与创业干货。",
 };
 
 export default function RootLayout({
