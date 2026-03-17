@@ -82,6 +82,10 @@ export interface Webinar {
   endPageSalesCopy?: string;
   endPageCtaText?: string;
 
+  // Product fulfillment config
+  productPackageId?: string;  // 商品包編號
+  salesCode?: string;         // 銷售代碼
+
   // Sidebar content
   sidebarDescription?: string;
 
@@ -136,6 +140,8 @@ export interface Order {
   createdAt: string;
   paidAt?: string;
   fulfilledAt?: string;
+  productPackageId?: string;  // 商品包編號 (copied from webinar at fulfillment)
+  salesCode?: string;         // 銷售代碼 (copied from webinar at fulfillment)
 }
 
 export interface VideoFile {
@@ -177,6 +183,8 @@ export interface CreateWebinarRequest {
   endPageSalesCopy?: string;
   endPageCtaText?: string;
   sidebarDescription?: string;
+  productPackageId?: string;
+  salesCode?: string;
   evergreen?: EvergreenConfig;
 }
 
