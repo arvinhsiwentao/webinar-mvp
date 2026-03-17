@@ -5,55 +5,69 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
- * 200+ display names used for simulated viewer presence.
+ * 200+ display names simulating a real North American Chinese livestream audience.
  *
- * Designed to mimic realistic North American Chinese (北美华人) naming:
- * - Chinese names use proper surname + given name (2-3 chars), avoiding
- *   textbook placeholders (李明) and celebrity names (周杰)
- * - English names reflect what Chinese diaspora actually use
- * - Some names use English + Chinese surname format (e.g., "Cindy 陈")
- * - Small/阿X patterns used sparingly (only as actual nicknames)
+ * Modeled after actual WeChat / livestream display names — chaotic, varied,
+ * and personal. Real people don't use formal 3-char names in livestreams.
+ * Mix includes: English-only, nicknames, 昵称, English+中文姓, location tags,
+ * role-based (xx妈妈), emoji, pinyin, internet handles, and only a few
+ * formal Chinese names (because some people do keep those).
  *
  * The first 48 entries are the auto-chat names already referenced in the codebase
  * so they always appear when the simulation samples from the pool.
  */
 export const NAME_POOL: string[] = [
   // ── Auto-chat names (must come first) ──────────────────────────────
-  'Cindy 陈', '林嘉欣', 'David', 'Emma', 'Kevin', '方思琪', 'Jason', 'Linda',
-  'Alex', '沈雨桐', 'Andy', '何志远', 'Jenny', 'Vivian', 'Michael', '黄婷婷',
-  '王瑞霖', 'Amy', '陈思远', 'Sarah', '刘雨涵', 'Steven', '苏晓彤', 'Justin',
-  '赵雅琪', '唐文博', 'Lucy', '吴思源', '朱雅芳', 'Ethan', '林泽宇', '张一鸣',
-  'Nicole', '陈雅文', 'Ryan', '王思颖', 'Helen', '罗浩然', '杨子琪', 'Grace',
-  '郑凯文', '曹艺馨', 'Brian', '徐嘉怡', '许晨曦', '钱逸飞', 'Chris', '蒋睿杰',
+  'Cindy 陈', '嘉欣', 'David', 'Emma', 'Kevin', '思琪F', 'Jason', 'Linda',
+  'Alex', '雨桐', 'Andy', '志远何', 'Jenny', 'Vivian', 'Michael', '婷婷',
+  '瑞霖', 'Amy', '陈思远', 'Sarah', '涵涵', 'Steven', '晓彤', 'Justin',
+  '雅琪z', '文博', 'Lucy', '思源W', '朱朱', 'Ethan', '泽宇L', '一鸣',
+  'Nicole', '雅文C', 'Ryan', '思颖', 'Helen', '浩然', '子琪', 'Grace',
+  'Kevin郑', '艺馨', 'Brian', '嘉怡', '晨曦', '逸飞', 'Chris', '睿杰',
 
-  // ── Chinese names (surname + given, realistic style) ───────────────
-  '谢雨欣', '马晨阳', '宋佳宁', '韩博睿', '周思彤', '吕嘉琪', '潘子轩',
-  '冯雨萱', '郭晓雯', '姜浩宇', '程思涵', '蔡欣妍', '丁泽恩', '贾诗韵',
-  '田雨晨', '董子涵', '任嘉怡', '邓伟杰', '梁诗雅', '叶子默', '彭思远',
-  '魏晨曦', '傅嘉琳', '钟雨桐', '卢子琦', '邹嘉欣', '熊博文', '万雅婷',
-  '段子睿', '雷思源', '侯嘉宁', '龙雨萱', '廖子轩', '邱嘉怡', '石博源',
-  '孟晓彤', '崔雅琪', '汤思远', '秦子涵', '江嘉琦', '庄雨欣', '范博睿',
-  '苗子轩', '尹嘉怡', '顾思源', '沈雅文', '高子琦', '金嘉宁', '常雨桐',
-  '白子默', '施博文', '陆嘉琳', '夏雅婷', '贺子睿', '倪思源', '严嘉欣',
-  '文博源', '柳晓彤', '邢雅琪', '康思远', '毛子涵', '余嘉琦', '杜雨欣',
-  '宁博睿', '凌子轩', '关嘉怡', '乔思源', '向雅文', '苏子琦', '洪嘉宁',
+  // ── WeChat-style nicknames (most common in real livestreams) ───────
+  '小鱼儿', '豆豆妈', '湾区老王', '纽约吃货', 'CC', '阿睿',
+  '西雅图下雨了', '嘉嘉', '大毛', '球球', 'Coco', '小胖',
+  '老赵', '团团', '多伦多的风', '阳阳妈', '琪琪', '小黑',
+  '美西老李', '安安', '皮皮虾', 'momo', '花花', '小七',
+  '湾区码农', '悠悠', '咪咪', 'yoyo', '宝妈日记', '叮当',
+  '加州阳光', '麦麦', '温哥华小林', '甜甜', '小宇宙', '果果妈',
+  '纽约老张', '月月', '蛋蛋', '芝加哥风城人', '点点', '星星',
+  'LA吃喝玩乐', '糖糖', '小确幸', '波士顿龙虾', '乐乐', '暖暖',
 
-  // ── English names (popular among Chinese diaspora) ─────────────────
-  'Jennifer', 'Daniel', 'Michelle', 'Andrew', 'Jessica', 'Derek',
-  'Angela', 'Patrick', 'Stephanie', 'Jonathan', 'Christine', 'Timothy',
-  'Samantha', 'Vincent', 'Melissa', 'Kenneth', 'Rebecca', 'Jeffrey',
-  'Amanda', 'Raymond', 'Laura', 'Henry', 'Victoria', 'Jasmine',
-  'Diana', 'Wayne', 'Tracy', 'Stanley', 'Tiffany', 'Winston',
+  // ── English names (华人常用英文名, casual style) ────────────────────
+  'Jennifer', 'Daniel', 'Michelle', 'Andrew', 'Jess', 'Derek',
+  'Angela', 'Pat', 'Steph', 'Jon', 'Christine', 'Tim',
+  'Sam', 'Vince', 'Mel', 'Ken', 'Becca', 'Jeff',
+  'Amanda', 'Ray', 'Laura', 'Henry', 'Vicky', 'Jasmine',
+  'Diana', 'Wayne', 'Tracy', 'Stan', 'Tiff', 'Winston',
   'Teresa', 'Dennis', 'Sharon', 'Sophie', 'Leo', 'Vivienne',
-  'Catherine', 'Frank', 'Monica', 'Howard', 'Gloria', 'Elaine',
-  'Connie', 'Gary', 'Irene', 'Nelson', 'Sandra', 'Albert',
 
-  // ── Mixed format (English + Chinese surname) ───────────────────────
-  'Wendy 王', 'Tony 李', 'Sandy 张', 'Eric 林', 'Ivy 黄', 'Alan 吴',
-  'Karen 周', 'Marcus 陈', 'Cynthia 刘', 'Sean 杨', 'Maggie 赵', 'Roy 郑',
+  // ── English + Chinese surname (very common pattern) ────────────────
+  'Wendy王', 'Tony李', 'Sandy张', 'Eric林', 'Ivy黄', 'Alan吴',
+  'Karen周', 'Marcus陈', 'Cynthia刘', 'Sean杨', 'Maggie赵', 'Roy郑',
+  'Rachel何', 'Peter孙', 'Lisa高', 'Frank徐', 'Nancy许', 'Jack曹',
 
-  // ── Casual/nickname style (少量, more natural) ─────────────────────
-  '嘉嘉', '小鱼', 'CC', '阿睿', '豆豆妈', '湾区老王',
+  // ── Casual Chinese (2-char, single char, or non-standard formats) ──
+  '大伟', '小敏', '阿杰', '丽丽', '老陈', '小王',
+  '阿May', '思思', '晓峰', '佳佳', '老周', '小蔡',
+  '小美', '阿强', '文文', '小马', '阿琳', '明明',
+  '小朱', '阿龙', '兰兰', '小孙', '阿飞', '萌萌',
+
+  // ── Internet handles / pinyin / playful ────────────────────────────
+  'happylife2026', 'sunflower', 'xixi_LA', 'lemon_tree',
+  'panda88', 'starry夜', '奋斗的小鸟', 'silverbullet',
+  'jasmine_tea', 'maple_leaf', 'ocean_blue', '追梦人',
+  'phoenix飞', 'rainbow彩虹', 'morning_dew', '向日葵',
+  'lucky_cat', 'coffee_addict', 'sunset_glow', '自由飞翔',
+
+  // ── Role/life-stage based (very common among 华人妈妈群) ───────────
+  '两娃妈', '三宝爸', '全职妈妈小李', 'homeschool妈妈',
+  '新手妈咪', '职场辣妈', '带娃看世界', '育儿ing',
+
+  // ── A few formal names (some people do keep real names) ────────────
+  '张伟', '王芳', '陈磊', '林小雨', '赵鑫', '周颖',
+  '吴昊', '杨洁', '黄志明', '刘洋',
 ];
 
 /**
