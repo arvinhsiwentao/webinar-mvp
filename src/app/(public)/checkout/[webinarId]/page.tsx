@@ -249,36 +249,17 @@ export default function CheckoutPage() {
 
           {/* Right column — Stripe Checkout */}
           <div className="space-y-4">
-            <div className="bg-white rounded-lg border border-[#E8E5DE] p-1 min-h-[400px]">
-              {error ? (
-                <div className="p-6 text-center">
-                  <p className="text-red-600 mb-4">{error}</p>
-                  <button
-                    onClick={() => { setError(''); window.location.reload(); }}
-                    className="text-[#B8953F] underline text-sm"
-                  >
-                    重新结账
-                  </button>
-                </div>
-              ) : (
-                <EmbeddedCheckoutProvider
-                  key={sessionKey}
-                  stripe={stripePromise}
-                  options={{ fetchClientSecret }}
-                >
-                  <EmbeddedCheckout />
-                </EmbeddedCheckoutProvider>
-              )}
-            </div>
-
-            {/* Change email */}
+            {/* Email display + change */}
             {!error && !changingEmail && (
-              <div className="text-center">
+              <div className="bg-white rounded-lg border border-[#E8E5DE] px-5 py-4 flex items-center justify-between">
+                <div className="text-sm text-neutral-600">
+                  结账邮箱：<span className="font-medium text-neutral-900">{email}</span>
+                </div>
                 <button
                   onClick={() => { setChangingEmail(true); setNewEmail(email); }}
-                  className="text-sm text-neutral-400 hover:text-neutral-600 underline transition-colors"
+                  className="text-sm text-[#B8953F] hover:text-[#A6842F] font-medium transition-colors"
                 >
-                  使用其他邮箱结账
+                  更换邮箱
                 </button>
               </div>
             )}
@@ -321,6 +302,28 @@ export default function CheckoutPage() {
                 {emailError && <p className="text-red-500 text-xs mt-2">{emailError}</p>}
               </div>
             )}
+
+            <div className="bg-white rounded-lg border border-[#E8E5DE] p-1 min-h-[400px]">
+              {error ? (
+                <div className="p-6 text-center">
+                  <p className="text-red-600 mb-4">{error}</p>
+                  <button
+                    onClick={() => { setError(''); window.location.reload(); }}
+                    className="text-[#B8953F] underline text-sm"
+                  >
+                    重新结账
+                  </button>
+                </div>
+              ) : (
+                <EmbeddedCheckoutProvider
+                  key={sessionKey}
+                  stripe={stripePromise}
+                  options={{ fetchClientSecret }}
+                >
+                  <EmbeddedCheckout />
+                </EmbeddedCheckoutProvider>
+              )}
+            </div>
 
             {/* Trust badges */}
             <div className="flex items-center justify-center gap-6 text-xs text-neutral-400 py-2">
