@@ -96,7 +96,8 @@ Routes are split into **public** (read-only + user actions) and **admin** (write
 | `/api/webinar/[id]/chat/stream` | GET | `src/app/api/webinar/[id]/chat/stream/route.ts` | SSE real-time chat stream via `chat-broker.ts` |
 | `/api/subtitles/generate` | POST | `src/app/api/subtitles/generate/route.ts` | Generate subtitles for video |
 | `/api/subtitles/logs` | GET | `src/app/api/subtitles/logs/route.ts` | Fetch subtitle generation logs |
-| `/api/cron/reminders` | GET | `src/app/api/cron/reminders/route.ts` | Send scheduled email reminders. Lobby URLs built from `NEXT_PUBLIC_BASE_URL`. |
+| `/api/cron/reminders` | GET | `src/app/api/cron/reminders/route.ts` | Send scheduled email reminders. CRON_SECRET protected. Lobby URLs built from `NEXT_PUBLIC_BASE_URL`. |
+| `/api/cron/orders-sync` | GET | `src/app/api/cron/orders-sync/route.ts` | Daily orders → Google Sheets sync. CRON_SECRET protected. |
 
 #### Admin Routes (`src/app/api/admin/`)
 

@@ -150,3 +150,9 @@ Supabase free tier has 50MB file upload limit (hard cap, no workaround). Cloudfl
 ### 2026-03-13: Add inline fulfillment fallback to session-status route
 
 Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Stripe webhook and the session-status polling route can now trigger fulfillment. Atomic lock (`updateOrderStatus: pending → paid`) prevents double fulfillment. Previously, if the webhook didn't fire (local dev without `stripe listen`, deployment misconfiguration), orders stayed stuck at `pending` forever.
+
+### 2026-03-17: Orders → Google Sheets sync approach
+
+**Decision:** External HTTP cron (cron-job.org) calling `/api/cron/orders-sync` with CRON_SECRET bearer auth.
+**Why:** Zeabur is containerized (not serverless) so no Vercel Cron available. External HTTP cron is simplest, follows existing reminders pattern, and is free. Also retrofitted CRON_SECRET onto existing `/api/cron/reminders` which had no auth.
+**Alternatives rejected:** node-cron (process-internal, harder to debug), Supabase Edge Functions (separate Deno runtime), Google Apps Script (split codebase).

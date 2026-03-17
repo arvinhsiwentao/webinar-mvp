@@ -76,7 +76,8 @@ All under `src/app/api/`:
 - `track/route.ts` — POST (event tracking)
 - `subtitles/generate/route.ts` — POST (subtitle generation)
 - `subtitles/logs/route.ts` — GET (subtitle logs)
-- `cron/reminders/route.ts` — GET (email reminder cron)
+- `cron/reminders/route.ts` — GET (email reminder cron, CRON_SECRET protected)
+- `cron/orders-sync/route.ts` — GET (daily orders → Google Sheets sync, CRON_SECRET protected)
 
 **Admin (protected by middleware):**
 - `admin/login/route.ts` — POST (authenticate)
@@ -110,6 +111,15 @@ A `Webinar` contains embedded arrays of `autoChat` and `ctaEvents` — stored in
 - Deep gold accent color: `#B8953F` (used for CTAs and highlights in globals.css)
 - Fonts: Geist Sans / Geist Mono (loaded via Next.js)
 - Minimal editorial aesthetic — warm ivory base, avoid decorative elements
+
+## Deployment
+
+- **Platform:** Zeabur (zeabur.com) — containerized deployment (not serverless)
+- **Build:** Zeabur auto-detects Next.js via zbpack, builds a Docker container image
+- **Runtime:** Persistent Node.js process (long-lived container, not ephemeral functions)
+- **Implication:** No serverless timeout limits; `node-cron` and in-process schedulers work because the process stays alive
+- **No `vercel.json`:** Zeabur does not support Vercel-specific config. Cron scheduling requires either in-process scheduler or external HTTP cron service.
+- **Env vars:** Configured in Zeabur dashboard for production
 
 ## Important Constraints
 
