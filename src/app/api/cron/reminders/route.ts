@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAllWebinars, getRegistrationsByWebinar } from '@/lib/db';
 import { sendEmail, reminderEmail } from '@/lib/email';
 import { buildEmailLink } from '@/lib/utils';
+import { verifyCronSecret } from '@/lib/cron-auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authError = verifyCronSecret(request);
+  if (authError) return authError;
+
   const webinars = await getAllWebinars();
   let sent = 0;
 
