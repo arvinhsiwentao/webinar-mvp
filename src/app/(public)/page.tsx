@@ -207,10 +207,10 @@ export default function HomePage() {
 
           {/* Main Title */}
           <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-bold leading-[1.15] mb-5 animate-[heroFadeIn_0.8s_ease-out_0.15s_both]">
-            如何用美股实现财务自由？
+            <span className="md:whitespace-nowrap">如何抓准 AI 时代最大的财富风口？</span>
           </h1>
           <p className="text-lg md:text-xl lg:text-2xl font-light text-white/75 mb-10 max-w-2xl mx-auto leading-relaxed animate-[heroFadeIn_0.8s_ease-out_0.3s_both]">
-            从负债到 4 年达成财务自由的完整路径
+            从负债 50 万美金到财务自由的翻身路径
           </p>
 
           {/* Primary CTA */}
@@ -257,7 +257,10 @@ export default function HomePage() {
                 {webinar.speakerName}
               </h2>
               <p className="text-sm md:text-base text-neutral-600 leading-relaxed">
-                2018年开始美股投资，成为特斯拉（TSLA）早期投资者。2022年通过投资美股，4年内实现财务自由。目前拥有20万+ YouTube订阅者，3,000+付费会员社群。现在他想把这套方法分享给你......
+                一个 26 岁负债 50 万美金的华人，靠一套投资策略在 43 岁实现财务自由，目前拥有20万+ YouTube订阅者，3,000+付费会员社群。
+              </p>
+              <p className="text-sm md:text-base text-neutral-600 leading-relaxed mt-3">
+                不是天才、更不是富二代，就是一个普通人进对时机、找对方法，从此破局致富、阶级跃升，现在他把整套方法毫无保留地讲给你听。
               </p>
             </div>
           </div>
@@ -325,11 +328,11 @@ export default function HomePage() {
             {(webinar.highlights && webinar.highlights.length > 0
               ? webinar.highlights
               : [
-                  '学习如何辨识美股「抄底」时机，在股价低点精准布局',
-                  '掌握「存股」策略，挑选高股息、低估值绩优股，建立被动收入',
-                  '了解 Mike 如何在 4 年内达成财务自由的完整路径',
+                  '公开 Mike 如何从负债到达成财务自由的完整路径',
                   '独家公开 Mike 的美股持仓清单与选股逻辑',
-                  '认识【MIKE是麥克】APP 的核心功能与实战应用',
+                  '打造你的被动收入系统—用对的投资策略让钱自己长大',
+                  '学会判断「什么时候该进场」— 抓住 AI 时代的最佳买入时机',
+                  'APP 陪跑带你执行 — 不用自己盯盘，打开手机就知道怎么做',
                 ]
             ).map((item, idx) => (
               <div key={idx} className="flex items-start gap-3.5">
