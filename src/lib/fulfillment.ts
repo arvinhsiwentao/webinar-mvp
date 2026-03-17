@@ -1,4 +1,4 @@
-import { getOrderBySessionId, updateOrder, updateOrderStatus } from '@/lib/db';
+import { getOrderBySessionId, updateOrder, updateOrderStatus, getWebinarById } from '@/lib/db';
 import { claimActivationCode } from '@/lib/google-sheets';
 import { sendEmail, purchaseConfirmationEmail } from '@/lib/email';
 import { audit } from '@/lib/audit';
@@ -41,6 +41,9 @@ export async function fulfillOrder(
   try {
     code = await claimActivationCode(resolvedPaymentIntentId || order.id, order.email);
 
+    // Load webinar to get product config
+    const webinar = await getWebinarById(order.webinarId);
+
     const now = new Date().toISOString();
     await updateOrder(order.id, {
       status: 'fulfilled',
@@ -48,6 +51,8 @@ export async function fulfillOrder(
       stripePaymentIntentId: resolvedPaymentIntentId,
       paidAt: now,
       fulfilledAt: now,
+      productPackageId: webinar?.productPackageId,
+      salesCode: webinar?.salesCode,
     });
 
     audit({ type: 'order_fulfilled', orderId: order.id, activationCode: code });
