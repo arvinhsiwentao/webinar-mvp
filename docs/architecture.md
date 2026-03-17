@@ -33,7 +33,7 @@ Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only
 | `/webinar/[id]/waiting` | Redirect stub → `/lobby` | Backward compatibility |
 | `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + 4-tab sidebar (Info/Viewers/Chat/Offers) + on-video CTA |
 | `/webinar/[id]/end` | `src/app/(public)/webinar/[id]/end/page.tsx` | Dark sales page with purple CTA, social sharing, replay link |
-| `/checkout/[webinarId]` | `src/app/(public)/checkout/[webinarId]/page.tsx` | Two-column checkout: marketing copy + Stripe Embedded Checkout form. Reads email/name/source from query params. **Email fallback:** If `email` param is missing (e.g. shared link), shows an inline email input form before rendering Stripe checkout. |
+| `/checkout/[webinarId]` | `src/app/(public)/checkout/[webinarId]/page.tsx` | Two-column checkout: marketing copy + Stripe Embedded Checkout form. Reads email/name/source from query params. **Email fallback:** If `email` param is missing (e.g. shared link), shows an inline email input form before rendering Stripe checkout. **Change email:** Users can switch to a different email mid-checkout, which re-creates the Stripe session via key remount. |
 | `/checkout/[webinarId]/return` | `src/app/(public)/checkout/[webinarId]/return/page.tsx` | Post-payment return page. Polls session status, displays activation code directly on screen, shows success or error. Email is a backup delivery channel. |
 | `/admin/login` | `src/app/(admin)/admin/login/page.tsx` | Admin login page (`ADMIN_PASSWORD` env var) |
 | `/admin` | `src/app/(admin)/admin/page.tsx` | Admin panel (password-protected) |

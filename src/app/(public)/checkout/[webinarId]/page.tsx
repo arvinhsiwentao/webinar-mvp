@@ -36,6 +36,9 @@ export default function CheckoutPage() {
   const [emailError, setEmailError] = useState('');
   const [error, setError] = useState('');
   const [alreadyPurchased, setAlreadyPurchased] = useState(false);
+  const [changingEmail, setChangingEmail] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [sessionKey, setSessionKey] = useState(0);
 
   const fetchClientSecret = useCallback(async () => {
     const res = await fetch('/api/checkout/create-session', {
@@ -259,6 +262,7 @@ export default function CheckoutPage() {
                 </div>
               ) : (
                 <EmbeddedCheckoutProvider
+                  key={sessionKey}
                   stripe={stripePromise}
                   options={{ fetchClientSecret }}
                 >
@@ -266,6 +270,57 @@ export default function CheckoutPage() {
                 </EmbeddedCheckoutProvider>
               )}
             </div>
+
+            {/* Change email */}
+            {!error && !changingEmail && (
+              <div className="text-center">
+                <button
+                  onClick={() => { setChangingEmail(true); setNewEmail(email); }}
+                  className="text-sm text-neutral-400 hover:text-neutral-600 underline transition-colors"
+                >
+                  使用其他邮箱结账
+                </button>
+              </div>
+            )}
+            {changingEmail && (
+              <div className="bg-white rounded-lg border border-[#E8E5DE] p-4">
+                <p className="text-sm text-neutral-500 mb-3">输入新的结账邮箱：</p>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const trimmed = newEmail.trim();
+                  if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+                    setEmailError('请输入有效的邮箱地址');
+                    return;
+                  }
+                  setEmailError('');
+                  setEmail(trimmed);
+                  setSessionKey(k => k + 1);
+                  setChangingEmail(false);
+                }} className="flex gap-2">
+                  <input
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-[#E8E5DE] rounded-lg text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#B8953F] focus:ring-1 focus:ring-[#B8953F]"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-[#B8953F] hover:bg-[#A6842F] text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    确认
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setChangingEmail(false); setEmailError(''); }}
+                    className="px-3 py-2 text-sm text-neutral-400 hover:text-neutral-600 transition-colors"
+                  >
+                    取消
+                  </button>
+                </form>
+                {emailError && <p className="text-red-500 text-xs mt-2">{emailError}</p>}
+              </div>
+            )}
 
             {/* Trust badges */}
             <div className="flex items-center justify-center gap-6 text-xs text-neutral-400 py-2">
