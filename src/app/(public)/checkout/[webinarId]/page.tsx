@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import {
@@ -21,46 +21,6 @@ function ValueItem({ text }: { text: string }) {
   );
 }
 
-function CountdownTimer({ initialSeconds }: { initialSeconds: number }) {
-  const [remaining, setRemaining] = useState(initialSeconds);
-
-  useEffect(() => {
-    if (remaining <= 0) return;
-    const timer = setInterval(() => {
-      setRemaining(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [remaining]);
-
-  if (remaining <= 0) {
-    return (
-      <div className="bg-[#1A1A1A] text-white text-center py-3 px-4 rounded-md text-sm font-medium">
-        限时优惠
-      </div>
-    );
-  }
-
-  const hours = Math.floor(remaining / 3600);
-  const minutes = Math.floor((remaining % 3600) / 60);
-  const seconds = remaining % 60;
-  const pad = (n: number) => n.toString().padStart(2, '0');
-
-  return (
-    <div className="bg-[#1A1A1A] text-white text-center py-3 px-4 rounded-md">
-      <span className="text-sm">限时优惠倒计时 </span>
-      <span className="text-[#B8953F] font-mono font-bold text-lg">
-        {hours > 0 ? `${pad(hours)}:` : ''}{pad(minutes)}:{pad(seconds)}
-      </span>
-    </div>
-  );
-}
-
 export default function CheckoutPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -68,7 +28,7 @@ export default function CheckoutPage() {
 
   const urlEmail = searchParams.get('email') || '';
   const source = searchParams.get('source') || 'direct';
-  const countdownSeconds = parseInt(searchParams.get('t') || '0', 10);
+
   const name = searchParams.get('name') || '';
 
   const [email, setEmail] = useState(urlEmail);
@@ -177,13 +137,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </header>
-
-      {/* Countdown banner */}
-      {countdownSeconds > 0 && (
-        <div className="max-w-6xl mx-auto px-4 pt-6">
-          <CountdownTimer initialSeconds={countdownSeconds} />
-        </div>
-      )}
 
       {/* Main content */}
       <main className="max-w-6xl mx-auto px-4 py-8 lg:py-12">
