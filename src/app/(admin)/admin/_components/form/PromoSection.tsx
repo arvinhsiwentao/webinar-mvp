@@ -6,6 +6,8 @@ interface PromoFormFields {
   sidebarDescription: string;
   endPageSalesCopy: string;
   endPageCtaText: string;
+  productPackageId: string;
+  salesCode: string;
 }
 
 interface PromoSectionProps {
@@ -74,6 +76,33 @@ export default function PromoSection({ formData, onFieldChange }: PromoSectionPr
               value={formData.endPageCtaText}
               onChange={(e) => onFieldChange('endPageCtaText', e.target.value)}
               placeholder="立即报名"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Product Fulfillment Config */}
+      <section className="bg-white rounded-lg p-6 border border-neutral-200">
+        <h2 className="text-lg font-semibold mb-4">商品出货设置</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">商品包编号</label>
+            <input
+              type="text"
+              value={formData.productPackageId}
+              onChange={(e) => onFieldChange('productPackageId', e.target.value)}
+              placeholder="例如: 8764"
+              className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-500 mb-2">销售代码</label>
+            <input
+              type="text"
+              value={formData.salesCode}
+              onChange={(e) => onFieldChange('salesCode', e.target.value)}
+              placeholder="例如: 12991"
               className="w-full bg-white text-neutral-900 px-4 py-2 rounded border border-neutral-300 focus:border-[#B8953F] focus:outline-none"
             />
           </div>

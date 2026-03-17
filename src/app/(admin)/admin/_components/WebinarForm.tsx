@@ -38,6 +38,8 @@ export default function WebinarForm({ webinar, onSaved }: WebinarFormProps) {
     sidebarDescription: webinar?.sidebarDescription || '',
     endPageSalesCopy: webinar?.endPageSalesCopy || '',
     endPageCtaText: webinar?.endPageCtaText || '',
+    productPackageId: webinar?.productPackageId || '',
+    salesCode: webinar?.salesCode || '',
     status: webinar?.status || 'draft',
   });
 
