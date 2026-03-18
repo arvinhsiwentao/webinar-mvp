@@ -314,7 +314,7 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
         <h3 style="margin: 24px 0 12px 0; font-size: 16px;">启用步骤</h3>
         <ol style="line-height: 2; padding-left: 20px;">
           <li>前往<a href="https://www.cmoney.tw/" style="color: #B8953F;">商品官网</a></li>
-          <li>输入上方商品启用序号后</li>
+          <li>输入上方商品启用序号</li>
           <li>点击「启用序号」</li>
           <li>如您尚未登入或註册理财宝帐号，请您登入或註册</li>
           <li>登入帐号并启用序号后，即可看到「序号启用成功！」</li>
