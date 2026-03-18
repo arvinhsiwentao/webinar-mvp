@@ -92,7 +92,9 @@ export async function POST(request: NextRequest) {
     audit({ type: 'registration_created', webinarId: resolvedWebinarId, email: body.email, registrationId: registration.id });
 
     // Send confirmation email (fire and forget)
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin;
+    const host = request.headers.get('host');
+    const proto = request.headers.get('x-forwarded-proto') || 'https';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (host ? `${proto}://${host}` : request.nextUrl.origin);
     const liveUrl = buildEmailLink(
       baseUrl,
       `/webinar/${resolvedWebinarId}/lobby`,

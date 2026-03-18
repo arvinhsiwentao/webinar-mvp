@@ -28,6 +28,8 @@ export default function HomePage() {
     assignedSlot: selectedSlotTime || evergreenSlots[0]?.slotTime,
     source: modalSource,
     onSuccess: (name) => {
+      const slotTime = selectedSlotTime || evergreenSlots[0]?.slotTime;
+
       // Update sticky session as registered
       const sticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
       if (sticky) {
@@ -39,8 +41,6 @@ export default function HomePage() {
           localStorage.setItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`, JSON.stringify(parsed));
         } catch { /* ignore */ }
       }
-
-      const slotTime = selectedSlotTime || evergreenSlots[0]?.slotTime;
       const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
       const emailParam = form.email ? `&email=${encodeURIComponent(form.email)}` : '';
       router.push(`/webinar/${DEFAULT_WEBINAR_ID}/lobby?name=${encodeURIComponent(name)}${slotParam}${emailParam}`);
