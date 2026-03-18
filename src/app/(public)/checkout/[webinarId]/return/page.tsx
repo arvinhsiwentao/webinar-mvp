@@ -214,23 +214,63 @@ export default function CheckoutReturnPage() {
           没收到？请检查垃圾邮件文件夹
         </p>
 
-        {/* Next steps */}
+        {/* Activation steps */}
         <div className="bg-white rounded-xl border border-[#E8E5DE] p-8 text-left">
-          <p className="text-sm font-semibold text-neutral-800 mb-4 tracking-wide">接下来</p>
+          <p className="text-sm font-semibold text-neutral-800 mb-4 tracking-wide">启用步骤</p>
           <div className="space-y-4">
             {[
-              { step: '1', text: '复制上方的商品启用序号' },
-              { step: '2', text: '前往 CMoney 平台兑换' },
-              { step: '3', text: '开始学习课程' },
+              { step: '1', content: <span>前往<a href="https://www.cmoney.tw/" target="_blank" rel="noopener noreferrer" className="text-[#B8953F] underline underline-offset-2 font-medium">商品官网</a></span> },
+              { step: '2', content: <span>输入上方商品启用序号</span> },
+              { step: '3', content: <span>点击「启用序号」</span> },
+              { step: '4', content: <span>如您尚未登入或注册理财宝帐号，请您登入或注册</span> },
+              { step: '5', content: <span>登入帐号并启用序号后，即可看到「序号启用成功！」</span> },
             ].map((item) => (
-              <div key={item.step} className="flex items-center gap-4">
-                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#FAFAF7] border border-[#E8E5DE] flex items-center justify-center text-sm font-semibold text-[#B8953F]">
+              <div key={item.step} className="flex items-start gap-4">
+                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#FAFAF7] border border-[#E8E5DE] flex items-center justify-center text-sm font-semibold text-[#B8953F] mt-0.5">
                   {item.step}
                 </span>
-                <span className="text-sm text-neutral-600">{item.text}</span>
+                <span className="text-sm text-neutral-600 leading-relaxed">{item.content}</span>
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Product access links */}
+        <div className="bg-white rounded-xl border border-[#E8E5DE] p-8 text-left mt-4">
+          <p className="text-sm font-semibold text-neutral-800 mb-4 tracking-wide">商品启用后，可前往以下页面使用权限</p>
+          <p className="text-xs text-neutral-400 mb-4">请确保已登入您的帐号</p>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <span className="text-[#B8953F] mt-0.5">•</span>
+              <span className="text-sm text-neutral-600">
+                Mike是麦克 美股财富导航 App 下载：
+                <a href="https://cmoneymike.onelink.me/ZEaW/kkyo4oqs" target="_blank" rel="noopener noreferrer" className="text-[#B8953F] underline underline-offset-2 break-all">点此下载</a>
+              </span>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-[#B8953F] mt-0.5">•</span>
+              <span className="text-sm text-neutral-600">
+                震荡行情的美股期权操作解析 线上课程观看：
+                <a href="https://cmy.tw/00CKIq" target="_blank" rel="noopener noreferrer" className="text-[#B8953F] underline underline-offset-2">点此观看</a>
+              </span>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-[#B8953F] mt-0.5">•</span>
+              <span className="text-sm text-neutral-600">
+                ETF 进阶资产放大术 线上课程观看：
+                <a href="https://cmy.tw/00ChKt" target="_blank" rel="noopener noreferrer" className="text-[#B8953F] underline underline-offset-2">点此观看</a>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Customer support */}
+        <div className="bg-[#FAFAF7] rounded-xl border border-[#E8E5DE] p-6 text-center mt-4">
+          <p className="text-sm text-neutral-500 mb-2">※ 如您遇到任何问题，欢迎联系官网客服</p>
+          <p className="text-sm text-neutral-600">
+            Email：<a href="mailto:csservice@cmoney.com.tw" className="text-[#B8953F] underline underline-offset-2">csservice@cmoney.com.tw</a>
+          </p>
+          <p className="text-xs text-neutral-400 mt-1">服务时间：北京时间周一到周五 8:30 ~ 17:30</p>
         </div>
       </div>
     </div>
