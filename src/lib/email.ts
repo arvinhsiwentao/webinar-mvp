@@ -275,8 +275,8 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
   const appLink = 'https://cmoneymike.onelink.me/ZEaW/kkyo4oqs';
   const course1Link = 'https://cmy.tw/00CKIq';
   const course2Link = 'https://cmy.tw/00ChKt';
-  const serviceEmail = 'CMoney_overseas@cmoney.com.tw';
-  const serviceHours = '周一至周五 09:00–18:00（台北时间）';
+  const serviceEmail = 'csservice@cmoney.com.tw';
+  const serviceHours = '北京时间週一到週五 8：30 ~ 17：30';
 
   return {
     to: data.to,
@@ -313,24 +313,25 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
         <!-- Instructions -->
         <h3 style="margin: 24px 0 12px 0; font-size: 16px;">启用步骤</h3>
         <ol style="line-height: 2; padding-left: 20px;">
-          <li>前往理财宝官网</li>
-          <li>输入序号</li>
-          <li>点击启用</li>
-          <li>登入／注册帐号</li>
-          <li>启用成功，即可开始使用</li>
+          <li>前往商品官网</li>
+          <li>输入上方商品启用序号后</li>
+          <li>点击「启用序号」</li>
+          <li>如您尚未登入或註册理财宝帐号，请您登入或註册</li>
+          <li>登入帐号并启用序号后，即可看到「序号启用成功！」</li>
         </ol>
 
         <!-- Product Links -->
-        <h3 style="margin: 24px 0 12px 0; font-size: 16px;">商品连结</h3>
+        <h3 style="margin: 24px 0 12px 0; font-size: 16px;">商品启用后，可前往三个商品各自页面，并确保已登入您的帐号后，方可享有以下商品权限：</h3>
         <ul style="line-height: 2; padding-left: 20px;">
-          <li><a href="${appLink}" style="color: #B8953F;">Mike是麦克 美股财富导航 App</a></li>
-          <li><a href="${course1Link}" style="color: #B8953F;">震荡行情的美股期权操作解析</a></li>
-          <li><a href="${course2Link}" style="color: #B8953F;">ETF 进阶资产放大术</a></li>
+          <li><a href="${appLink}" style="color: #B8953F;">Mike是麦克 美股财富导航 App 下载</a></li>
+          <li><a href="${course1Link}" style="color: #B8953F;">震盪行情的美股期权操作解析 线上课程观看</a></li>
+          <li><a href="${course2Link}" style="color: #B8953F;">ETF 进阶资产放大术 线上课程观看</a></li>
         </ul>
 
         <!-- Footer -->
         <hr style="border: none; border-top: 1px solid #E8E5DE; margin: 32px 0 16px 0;" />
-        <p style="font-size: 13px; color: #6B6B6B;">如有任何问题，请联系理财宝客服：<a href="mailto:${serviceEmail}" style="color: #B8953F;">${serviceEmail}</a></p>
+        <p style="font-size: 13px; color: #6B6B6B;">※ 如您遇到任何问题，欢迎联繫官网客服</p>
+        <p style="font-size: 13px; color: #6B6B6B;">Email：<a href="mailto:${serviceEmail}" style="color: #B8953F;">${serviceEmail}</a></p>
         <p style="font-size: 13px; color: #6B6B6B;">服务时间：${serviceHours}</p>
       </div>
     `,
