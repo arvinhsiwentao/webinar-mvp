@@ -21,6 +21,7 @@ export default function CheckoutReturnPage() {
   const [status, setStatus] = useState<PageStatus>('loading');
   const [customerEmail, setCustomerEmail] = useState('');
   const [activationCode, setActivationCode] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!sessionId) {
@@ -203,6 +204,26 @@ export default function CheckoutReturnPage() {
         <div className="border-2 border-[#B8953F] rounded-lg p-6 text-center my-6">
           <p className="text-sm text-neutral-500 mb-2">商品启用序号</p>
           <p className="text-2xl font-bold tracking-[4px] text-[#B8953F]">{activationCode}</p>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(activationCode);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}
+            className="mt-3 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-[#B8953F] text-white hover:bg-[#A6842F]"
+          >
+            {copied ? (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                已复制
+              </>
+            ) : (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+                一键复制
+              </>
+            )}
+          </button>
           <p className="text-xs text-[#B8953F] mt-3">※ 此序号仅限单次使用，启用后即失效，请勿分享给他人</p>
         </div>
 
