@@ -78,7 +78,7 @@ export async function uploadVideo(
 async function pollStatus(
   videoId: string,
   onProgress?: (progress: UploadProgress) => void,
-  maxAttempts = 180,
+  maxAttempts = 2400,
   intervalMs = 3000,
 ): Promise<Record<string, string>> {
   for (let i = 0; i < maxAttempts; i++) {

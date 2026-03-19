@@ -311,9 +311,11 @@ The admin panel (`WebinarForm.tsx`) exposes evergreen settings: daily anchor tim
 
 ## Video Storage & Delivery
 
-Videos are uploaded directly to **Mux** via Mux Direct Uploads. The browser uses `@mux/upchunk` for chunked, resumable uploads — no intermediary storage. The server creates a Mux Direct Upload URL, the browser streams the file to Mux, and Mux auto-creates an asset and transcodes to HLS adaptive bitrate (360p–1080p). The client polls a status endpoint for upload completion and transcoding. Mux serves video via its global CDN at `stream.mux.com`. The webinar's `videoUrl` stores the Mux HLS URL (`https://stream.mux.com/{PLAYBACK_ID}.m3u8`).
+Videos are uploaded directly to **Mux** via Mux Direct Uploads. The browser uses `@mux/upchunk` for chunked, resumable uploads — no intermediary storage. The server creates a Mux Direct Upload URL, the browser streams the file to Mux, and Mux auto-creates an asset and transcodes to HLS adaptive bitrate (360p–1080p). The client polls a status endpoint for upload completion and transcoding (up to 2 hours to accommodate large/long videos). Mux serves video via its global CDN at `stream.mux.com`. The webinar's `videoUrl` stores the Mux HLS URL (`https://stream.mux.com/{PLAYBACK_ID}.m3u8`).
 
-Upload flow: Browser → Mux Direct Upload (`@mux/upchunk`, chunked/resumable) → Mux transcodes → Status polling → Ready
+Upload flow: Browser → Mux Direct Upload (`@mux/upchunk`, chunked/resumable) → Mux transcodes → Status polling (max 2h) → Ready
+
+**Limits:** Max upload size 20GB (client-side enforced). Mux quality tier: `basic` (720p max renditions). Designed to support videos up to ~3 hours in duration.
 
 **Fallback:** Admin can paste any external MP4/HLS URL directly, bypassing the upload flow.
 
