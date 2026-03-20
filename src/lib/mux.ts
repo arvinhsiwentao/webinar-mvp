@@ -76,3 +76,36 @@ export async function getMuxUploadStatus(uploadId: string): Promise<{
     assetId: upload.asset_id ?? undefined,
   };
 }
+
+export interface MuxAssetSummary {
+  assetId: string;
+  playbackId: string;
+  durationSec: number;
+  createdAt: string;
+  displayName: string;
+  thumbnailUrl: string;
+}
+
+export async function listMuxAssets(): Promise<MuxAssetSummary[]> {
+  const mux = getMuxClient();
+  const page = await mux.video.assets.list({ limit: 100 });
+
+  const results: MuxAssetSummary[] = [];
+  for (const asset of page.data) {
+    if (asset.status !== 'ready') continue;
+    const publicPlayback = asset.playback_ids?.find(p => p.policy === 'public');
+    if (!publicPlayback) continue;
+
+    results.push({
+      assetId: asset.id,
+      playbackId: publicPlayback.id,
+      durationSec: asset.duration ?? 0,
+      // created_at is an ISO 8601 string in @mux/mux-node v12 (verified against type definitions)
+      createdAt: asset.created_at ?? new Date().toISOString(),
+      displayName: asset.passthrough || asset.id,
+      thumbnailUrl: `https://image.mux.com/${publicPlayback.id}/thumbnail.jpg?width=120&height=68&fit_mode=crop`,
+    });
+  }
+
+  return results;
+}
