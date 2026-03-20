@@ -9,6 +9,15 @@ interface VideoManagerProps {
   onChange: (url: string) => void;
 }
 
+interface MuxAsset {
+  assetId: string;
+  playbackId: string;
+  durationSec: number;
+  createdAt: string;
+  displayName: string;
+  thumbnailUrl: string;
+}
+
 export default function VideoManager({ value, onChange }: VideoManagerProps) {
   const [videos, setVideos] = useState<VideoFile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +29,10 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [externalUrl, setExternalUrl] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showMuxPanel, setShowMuxPanel] = useState(false);
+  const [muxAssets, setMuxAssets] = useState<MuxAsset[]>([]);
+  const [muxLoading, setMuxLoading] = useState(false);
+  const [importingId, setImportingId] = useState<string | null>(null);
 
   const fetchVideos = useCallback(async () => {
     try {
@@ -133,6 +146,49 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
       await fetchVideos();
     } catch (err) {
       setError(err instanceof Error ? err.message : '删除失败');
+    }
+  };
+
+  const fetchMuxAssets = async () => {
+    setMuxLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/admin/videos/mux-assets');
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '获取 Mux 资源失败');
+      }
+      const data = await res.json();
+      setMuxAssets(data.assets);
+      setShowMuxPanel(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '获取 Mux 资源失败');
+    } finally {
+      setMuxLoading(false);
+    }
+  };
+
+  const handleImport = async (assetId: string) => {
+    setImportingId(assetId);
+    setError('');
+    try {
+      const res = await fetch('/api/admin/videos/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assetId }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '导入失败');
+      }
+      // Remove imported asset from the panel list
+      setMuxAssets(prev => prev.filter(a => a.assetId !== assetId));
+      // Refresh local video library
+      await fetchVideos();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '导入失败');
+    } finally {
+      setImportingId(null);
     }
   };
 
@@ -287,6 +343,69 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
           onChange={handleFileSelect}
           className="hidden"
         />
+      </div>
+
+      {/* Mux import */}
+      <div className="mb-4">
+        <button
+          type="button"
+          onClick={() => showMuxPanel ? setShowMuxPanel(false) : fetchMuxAssets()}
+          disabled={muxLoading}
+          className="text-sm text-[#B8953F] hover:text-[#A07A2F] disabled:opacity-50 flex items-center gap-1"
+        >
+          {muxLoading ? (
+            <>
+              <span className="w-3 h-3 border-2 border-[#B8953F] border-t-transparent rounded-full animate-spin" />
+              加载中...
+            </>
+          ) : showMuxPanel ? '收起 Mux 资源' : '从 Mux 导入'}
+        </button>
+
+        {showMuxPanel && (
+          <div className="mt-2 border border-neutral-200 rounded-lg overflow-hidden">
+            {muxAssets.length === 0 ? (
+              <p className="text-sm text-neutral-400 text-center py-4">
+                Mux 账户中没有可导入的视频
+              </p>
+            ) : (
+              <div className="max-h-60 overflow-y-auto divide-y divide-neutral-100">
+                {muxAssets.map((asset) => (
+                  <div
+                    key={asset.assetId}
+                    className="flex items-center gap-3 p-3 hover:bg-neutral-50"
+                  >
+                    <img
+                      src={asset.thumbnailUrl}
+                      alt=""
+                      className="w-16 h-10 object-cover rounded bg-neutral-100 shrink-0"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-neutral-900 truncate">
+                        {asset.displayName}
+                      </p>
+                      <p className="text-xs text-neutral-400">
+                        {asset.durationSec > 0
+                          ? `${Math.floor(asset.durationSec / 60)}:${String(Math.floor(asset.durationSec % 60)).padStart(2, '0')}`
+                          : '未知时长'}
+                        {' · '}
+                        {new Date(asset.createdAt).toLocaleDateString('zh-CN')}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleImport(asset.assetId)}
+                      disabled={importingId === asset.assetId}
+                      className="px-3 py-1 text-xs bg-[#B8953F] text-white rounded hover:bg-[#A07E35] disabled:opacity-50 shrink-0"
+                    >
+                      {importingId === asset.assetId ? '导入中...' : '导入'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Video list */}
