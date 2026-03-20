@@ -34,11 +34,24 @@ export async function uploadVideo(
   const { videoFile, uploadUrl } = await initRes.json();
 
   // Step 2: Upload file to Mux via UpChunk (chunked, resumable)
+  // Scale chunk size with file size to reduce HTTP request count:
+  //   < 1GB  → 5MB chunks
+  //   1-5GB  → 16MB chunks
+  //   5-10GB → 32MB chunks
+  //   > 10GB → 64MB chunks
+  const fileSizeGB = file.size / (1024 * 1024 * 1024);
+  let chunkSize = 5120; // 5MB default (in KB)
+  if (fileSizeGB > 10) chunkSize = 65536;      // 64MB
+  else if (fileSizeGB > 5) chunkSize = 32768;   // 32MB
+  else if (fileSizeGB > 1) chunkSize = 16384;   // 16MB
+
   await new Promise<void>((resolve, reject) => {
     const upload = UpChunk.createUpload({
       endpoint: uploadUrl,
       file,
-      chunkSize: 5120, // ~5MB chunks
+      chunkSize,
+      attempts: 10,          // retry each chunk up to 10 times (default: 5)
+      delayBeforeAttempt: 3,  // wait 3s before retrying a failed chunk
     });
 
     upload.on('progress', (detail: { detail: number }) => {
@@ -57,6 +70,17 @@ export async function uploadVideo(
 
     upload.on('error', (err: { detail: { message: string } }) => {
       reject(new Error(err.detail?.message || 'Upload failed'));
+    });
+
+    upload.on('offline', () => {
+      // UpChunk pauses automatically when offline and resumes when back online.
+      // Surface this to the caller so UI can show a warning.
+      onProgress?.({ loaded: -1, total: file.size, percent: -2 });
+    });
+
+    upload.on('online', () => {
+      // Connection restored — UpChunk auto-resumes; clear warning
+      onProgress?.({ loaded: -1, total: file.size, percent: -3 });
     });
   });
 

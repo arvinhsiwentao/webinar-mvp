@@ -259,15 +259,21 @@ export default function VideoManager({ value, onChange }: VideoManagerProps) {
         {uploading && uploadProgress ? (
           <div>
             <p className="text-sm text-neutral-600 mb-2">
-              {uploadProgress.percent === -1
+              {uploadProgress.percent === -2
+                ? '⚠️ 网络已断开，上传暂停中... 恢复后将自动继续'
+                : uploadProgress.percent === -3
+                ? '网络已恢复，继续上传...'
+                : uploadProgress.percent === -1
                 ? '视频转码中，请稍候...'
                 : `上传中... ${uploadProgress.percent}% (${formatFileSize(uploadProgress.loaded)} / ${formatFileSize(uploadProgress.total)})`
               }
             </p>
             <div className="w-full bg-neutral-200 rounded-full h-2">
               <div
-                className="bg-[#B8953F] h-2 rounded-full transition-all duration-300"
-                style={{ width: `${uploadProgress.percent}%` }}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  uploadProgress.percent === -2 ? 'bg-amber-500' : 'bg-[#B8953F]'
+                }`}
+                style={{ width: `${Math.max(0, uploadProgress.percent)}%` }}
               />
             </div>
           </div>

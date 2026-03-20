@@ -315,6 +315,8 @@ Videos are uploaded directly to **Mux** via Mux Direct Uploads. The browser uses
 
 Upload flow: Browser → Mux Direct Upload (`@mux/upchunk`, chunked/resumable) → Mux transcodes → Status polling (max 2h) → Ready
 
+**Chunking strategy:** Chunk size scales dynamically with file size to reduce HTTP request count for large uploads — 5MB (<1GB), 16MB (1-5GB), 32MB (5-10GB), 64MB (>10GB). Each chunk retries up to 10 times with a 3-second delay. UpChunk's offline/online detection pauses and auto-resumes uploads on network loss.
+
 **Limits:** Max upload size 20GB (client-side enforced). Mux quality tier: `basic` (720p max renditions). Designed to support videos up to ~3 hours in duration.
 
 **Fallback:** Admin can paste any external MP4/HLS URL directly, bypassing the upload flow.
