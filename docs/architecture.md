@@ -327,6 +327,8 @@ Upload flow: Browser â†’ Mux Direct Upload (`@mux/upchunk`, chunked/resumable) â
 |----------|---------|---------|
 | `/api/admin/videos` | GET, POST | List video library / initiate upload (returns Mux Direct Upload URL) |
 | `/api/admin/videos/[id]` | PATCH, DELETE | Update metadata / delete video file |
+| `/api/admin/videos/mux-assets` | GET | List Mux assets available for import (excludes already-imported) |
+| `/api/admin/videos/import` | POST | Import an existing Mux asset into the local video library |
 
 **Admin UI:** The `VideoManager` component replaces the old URL text field in the webinar form, providing drag-and-drop upload with a video library picker. Only MP4 and HLS sources are supported.
 
