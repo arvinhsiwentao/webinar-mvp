@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleTagManager } from '@next/third-parties/google'
 import { GclidPreserver } from "@/components/analytics/GclidPreserver";
+import { RouteChangeTracker } from "@/components/analytics/RouteChangeTracker";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,6 +33,7 @@ export default function RootLayout({
       >
         <Suspense fallback={null}>
           <GclidPreserver />
+          <RouteChangeTracker />
         </Suspense>
         {children}
       </body>
