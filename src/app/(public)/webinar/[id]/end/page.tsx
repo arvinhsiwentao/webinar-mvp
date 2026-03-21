@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button, Card } from '@/components/ui';
 import { Webinar } from '@/lib/types';
 import { trackGA4, DEFAULT_PRODUCT_PRICE } from '@/lib/analytics';
+import { getStoredUtmParams } from '@/lib/utils';
 
 export default function EndPage() {
   const params = useParams();
@@ -135,6 +136,12 @@ export default function EndPage() {
                 if (email) params.set('email', email);
                 if (userName !== '观众') params.set('name', userName);
                 params.set('source', 'end');
+
+                // Append UTM attribution for checkout
+                const utmParams = getStoredUtmParams();
+                for (const [key, value] of Object.entries(utmParams)) {
+                  params.set(key, value);
+                }
 
                 router.push(`/checkout/${webinarId}?${params.toString()}`);
               }}

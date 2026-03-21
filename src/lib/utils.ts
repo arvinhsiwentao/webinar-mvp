@@ -142,3 +142,27 @@ export function buildEmailLink(
 
   return url.toString();
 }
+
+/**
+ * Read stored UTM attribution params from sessionStorage (fast) with cookie fallback.
+ * Returns a URLSearchParams-friendly record of non-empty values.
+ * Client-side only — returns empty object during SSR.
+ */
+export function getStoredUtmParams(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  const result: Record<string, string> = {};
+  const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'gclid'];
+  for (const key of keys) {
+    try {
+      const value = sessionStorage.getItem(key) || getCookieValue(key);
+      if (value) result[key] = value;
+    } catch { /* SSR or security error */ }
+  }
+  return result;
+}
+
+function getCookieValue(name: string): string {
+  if (typeof document === 'undefined') return '';
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : '';
+}

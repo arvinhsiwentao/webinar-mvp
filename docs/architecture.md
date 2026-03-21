@@ -234,9 +234,15 @@ All tracking goes through **GTM** via `@next/third-parties/google` (`GoogleTagMa
 | `purchase` | Recommended | Checkout Return | Stripe session confirmed complete |
 | `c_purchase_confirmation` | Custom | Checkout Return | Backup event alongside purchase (cross-check vs DB orders) |
 
-**gclid preservation:** `GclidPreserver` component stores gclid/UTM params in sessionStorage on first page load so Google Ads attribution survives client-side navigation.
+**SPA pageview tracking:** `RouteChangeTracker` component pushes `page_view` events to GTM dataLayer on every client-side navigation (via `usePathname()` + `useSearchParams()`), so GA4 sees all pages — not just the initial load. GTM uses a Custom Event trigger (`event == 'page_view'`) to fire the GA4 config tag on these navigations.
 
-**Files:** `src/lib/analytics.ts` (typed GA4 event map + `trackGA4()` function), `src/components/analytics/GclidPreserver.tsx`
+**gclid preservation:** `GclidPreserver` component stores gclid/UTM params in sessionStorage on first page load so Google Ads attribution survives client-side navigation. Cookies are set server-side by middleware (`src/middleware.ts`) to survive Safari ITP's 7-day cap on JavaScript-set cookies; `GclidPreserver` skips redundant client-side cookie writes when server cookies already exist.
+
+**Checkout URL attribution:** Checkout URLs (both `window.open` new tab from live page and `router.push` from end page) include UTM params from `getStoredUtmParams()`, since new tabs don't share sessionStorage.
+
+**GTM campaign fields:** GTM is configured to read UTM cookies (`utm_source`, `utm_medium`, `utm_campaign`, `gclid`) and map them to GA4 campaign parameters (`campaign_source`, `campaign_medium`, `campaign_name`, `gclid`) so GA4's built-in acquisition reports attribute events correctly across SPA navigations.
+
+**Files:** `src/lib/analytics.ts` (typed GA4 event map + `trackGA4()` function), `src/components/analytics/GclidPreserver.tsx`, `src/components/analytics/RouteChangeTracker.tsx`, `src/lib/utils.ts` (`getStoredUtmParams()`)
 
 ### Attribution Tracking (Cross-Session)
 

@@ -29,9 +29,30 @@ async function validateAdminSession(cookie: string): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only protect admin routes
+  // Non-admin routes: set UTM cookies server-side (survives Safari ITP 7-day cap)
   if (!pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) {
-    return NextResponse.next();
+    const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'gclid'];
+    const url = request.nextUrl;
+    const hasUtm = utmKeys.some(key => url.searchParams.has(key));
+
+    if (!hasUtm) return NextResponse.next();
+
+    const response = NextResponse.next();
+    const maxAge = 90 * 24 * 60 * 60; // 90 days
+
+    for (const key of utmKeys) {
+      const value = url.searchParams.get(key);
+      if (value) {
+        response.cookies.set(key, value, {
+          path: '/',
+          maxAge,
+          sameSite: 'lax',
+          httpOnly: false, // Client JS needs to read these
+        });
+      }
+    }
+
+    return response;
   }
 
   // Skip login endpoints
@@ -51,5 +72,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  matcher: [
+    '/',                    // Landing page (UTM params arrive here from ads)
+    '/webinar/:path*',      // Lobby/live/end pages (UTM params arrive here from EDM links)
+    '/admin/:path*',
+    '/api/admin/:path*',
+  ],
 };

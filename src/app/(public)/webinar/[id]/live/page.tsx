@@ -15,7 +15,7 @@ import PreShowOverlay from '@/components/video/PreShowOverlay';
 import { Webinar, CTAEvent } from '@/lib/types';
 import { Badge, Button } from '@/components/ui';
 import { trackGA4, DEFAULT_PRODUCT_PRICE } from '@/lib/analytics';
-import { formatElapsedTime } from '@/lib/utils';
+import { formatElapsedTime, getStoredUtmParams } from '@/lib/utils';
 import { calculateLateJoinPosition } from '@/lib/evergreen';
 import { useViewerSimulator } from '@/lib/viewer-simulator';
 import { useVisibilityResume } from '@/hooks/useVisibilityResume';
@@ -295,6 +295,12 @@ export default function LiveRoomPage() {
     if (email) params.set('email', email);
     if (userName) params.set('name', userName);
     params.set('source', 'live');
+
+    // Append UTM attribution for cross-tab checkout
+    const utmParams = getStoredUtmParams();
+    for (const [key, value] of Object.entries(utmParams)) {
+      params.set(key, value);
+    }
 
     // Pass remaining countdown time if CTA has countdown
     if (cta.showCountdown && cta.hideAtSec) {

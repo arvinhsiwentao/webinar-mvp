@@ -22,7 +22,8 @@ export function GclidPreserver() {
 
     if (gclid) {
       sessionStorage.setItem('gclid', gclid)
-      setCookie('gclid', gclid)
+      // Only set cookie client-side if middleware didn't already set it
+      if (!document.cookie.match(/(?:^|; )gclid=/)) setCookie('gclid', gclid)
     }
     if (utmSource) {
       const utmMedium = searchParams.get('utm_medium') || ''
@@ -34,10 +35,13 @@ export function GclidPreserver() {
       sessionStorage.setItem('utm_campaign', utmCampaign)
       sessionStorage.setItem('utm_content', utmContent)
 
-      setCookie('utm_source', utmSource)
-      setCookie('utm_medium', utmMedium)
-      setCookie('utm_campaign', utmCampaign)
-      setCookie('utm_content', utmContent)
+      // Only set cookies client-side if middleware didn't already set them
+      if (!document.cookie.match(/(?:^|; )utm_source=/)) {
+        setCookie('utm_source', utmSource)
+        setCookie('utm_medium', utmMedium)
+        setCookie('utm_campaign', utmCampaign)
+        setCookie('utm_content', utmContent)
+      }
     }
 
     // Preserve original campaign attribution from EDM links
