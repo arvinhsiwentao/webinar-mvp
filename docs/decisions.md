@@ -161,3 +161,8 @@ Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Strip
 
 **Decision:** Store `productPackageId` and `salesCode` as webinar-level config, copied to order at fulfillment time.
 **Why:** These values identify the product package and sales channel for each purchase. Stored at webinar level so they can vary per webinar. Copied to order at fulfillment so the order is a self-contained record even if webinar config changes later.
+
+### 2026-03-23: Container-based fullscreen instead of native video fullscreen
+
+**Decision:** In livestream mode, disable Video.js's native fullscreen button and replace with a custom button that fullscreens the wrapper `<div>`, not the `<video>` element. CSS fixed-position fallback for older iOS.
+**Why:** On mobile (especially iOS Safari), native video fullscreen exposes browser controls (duration, seekable progress bar, pause) that reveal the video is pre-recorded. Fullscreening the container div keeps our custom Video.js controls (hidden progress, LIVE pill, blocked seeking) active on both iOS and Android.
