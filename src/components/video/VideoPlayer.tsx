@@ -364,6 +364,47 @@ export default function VideoPlayer({
           0%, 100% { opacity: 1; }
           50% { opacity: 0.4; }
         }
+        /* Mobile: prevent control bar text truncation */
+        @media (max-width: 480px) {
+          .video-player-wrapper :global(.vjs-control-bar) {
+            flex-wrap: nowrap;
+          }
+          .video-player-wrapper :global(.vjs-control-bar > *) {
+            flex-shrink: 0;
+          }
+          .video-player-wrapper :global(.vjs-current-time) {
+            font-size: 11px;
+            padding: 0 2px;
+            min-width: auto;
+          }
+          .video-player-wrapper :global(.vjs-duration) {
+            font-size: 11px;
+            padding: 0 2px;
+            min-width: auto;
+          }
+          .video-player-wrapper :global(.vjs-time-divider) {
+            padding: 0 1px;
+            min-width: auto;
+          }
+          .video-player-wrapper :global(.vjs-live-pill) {
+            font-size: 10px;
+            padding: 2px 5px;
+            margin-left: 4px;
+            gap: 3px;
+          }
+          .video-player-wrapper :global(.vjs-live-dot) {
+            width: 6px;
+            height: 6px;
+          }
+          .video-player-wrapper :global(.vjs-volume-panel) {
+            width: auto !important;
+            min-width: auto;
+          }
+          .video-player-wrapper :global(.vjs-progress-control) {
+            flex: 1 1 0%;
+            min-width: 0;
+          }
+        }
         /* Custom fullscreen button in control bar */
         .video-player-wrapper :global(.vjs-custom-fullscreen-btn) {
           display: flex;

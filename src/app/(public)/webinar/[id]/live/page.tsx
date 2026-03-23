@@ -477,24 +477,6 @@ export default function LiveRoomPage() {
               </div>
             </div>
 
-            {/* Mobile: Speaker Info */}
-            <div className="lg:hidden bg-white/80 border border-neutral-200 rounded-lg p-5">
-              <div className="flex items-center gap-4">
-                {(webinar.speakerAvatar || webinar.speakerImage) && (
-                  <img
-                    src={webinar.speakerAvatar || webinar.speakerImage}
-                    alt={webinar.speakerName}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-[#B8953F]/30"
-                  />
-                )}
-                <div>
-                  <h3 className="font-bold text-lg">{webinar.speakerName}</h3>
-                  {webinar.speakerTitle && (
-                    <p className="text-sm text-[#B8953F]">{webinar.speakerTitle}</p>
-                  )}
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Sidebar with tabs */}
