@@ -19,6 +19,7 @@ interface RegistrationModalProps {
   evergreenSlots?: Array<{ slotTime: string; type: string }>;
   selectedSlotTime?: string;
   onSlotTimeChange?: (slotTime: string) => void;
+  timezone?: string;
 }
 
 export default function RegistrationModal({
@@ -36,6 +37,7 @@ export default function RegistrationModal({
   evergreenSlots,
   selectedSlotTime,
   onSlotTimeChange,
+  timezone,
 }: RegistrationModalProps) {
   const [showPhone, setShowPhone] = useState(false);
   const [countryCode, setCountryCode] = useState('+1');
@@ -142,7 +144,7 @@ export default function RegistrationModal({
                   >
                     {evergreenSlots.map((slot) => (
                       <option key={slot.slotTime} value={slot.slotTime}>
-                        {formatDate(slot.slotTime)} - {formatTime(slot.slotTime)}
+                        {formatDate(slot.slotTime, timezone)} - {formatTime(slot.slotTime, timezone)}
                       </option>
                     ))}
                   </select>

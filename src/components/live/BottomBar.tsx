@@ -5,14 +5,16 @@ interface BottomBarProps {
   sessionDate?: string;
   viewerCount: number;
   isLive?: boolean;
+  timezone?: string;
 }
 
-export default function BottomBar({ title, sessionDate, viewerCount, isLive = true }: BottomBarProps) {
+export default function BottomBar({ title, sessionDate, viewerCount, isLive = true, timezone }: BottomBarProps) {
   const formattedDate = sessionDate
     ? new Date(sessionDate).toLocaleDateString('zh-CN', {
         month: 'short',
         day: 'numeric',
         weekday: 'short',
+        ...(timezone && { timeZone: timezone }),
       })
     : '';
 

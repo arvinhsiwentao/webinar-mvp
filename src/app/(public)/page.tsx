@@ -378,6 +378,7 @@ export default function HomePage() {
         evergreenSlots={evergreenSlots}
         selectedSlotTime={selectedSlotTime}
         onSlotTimeChange={setSelectedSlotTime}
+        timezone={evergreenTimezone}
       />
     </div>
   );

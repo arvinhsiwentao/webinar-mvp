@@ -9,6 +9,7 @@ interface MissedSessionPromptProps {
   webinarId: string;
   registrationId: string;
   onReassigned: (newSlot: string, expiresAt: string) => void;
+  timezone?: string;
 }
 
 export default function MissedSessionPrompt({
@@ -17,6 +18,7 @@ export default function MissedSessionPrompt({
   webinarId,
   registrationId,
   onReassigned,
+  timezone,
 }: MissedSessionPromptProps) {
   const [reassigning, setReassigning] = useState(false);
 
@@ -24,6 +26,7 @@ export default function MissedSessionPrompt({
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
+    ...(timezone && { timeZone: timezone }),
   });
 
   const handleReassign = async () => {
