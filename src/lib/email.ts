@@ -1,4 +1,5 @@
 import { audit } from './audit';
+import { formatInTimezone, getTimezoneLabel } from './timezone';
 
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@webinar.example.com';
@@ -46,14 +47,9 @@ export async function sendEmail({ to, subject, html }: EmailParams): Promise<boo
   }
 }
 
-export function confirmationEmail(to: string, name: string, title: string, startTime: string, liveUrl: string, speakerAvatarUrl?: string): EmailParams {
-  const d = new Date(startTime);
-  const dateFormatted = d.toLocaleDateString('zh-CN', {
-    year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
-  });
-  const timeFormatted = d.toLocaleTimeString('zh-CN', {
-    hour: 'numeric', minute: '2-digit', hour12: true,
-  });
+export function confirmationEmail(to: string, name: string, title: string, startTime: string, liveUrl: string, speakerAvatarUrl?: string, timezone: string = 'America/Chicago'): EmailParams {
+  const { date: dateFormatted, time: timeFormatted } = formatInTimezone(startTime, timezone);
+  const tzLabel = getTimezoneLabel(timezone);
 
   return {
     to,
@@ -131,7 +127,7 @@ export function confirmationEmail(to: string, name: string, title: string, start
                       <td style="vertical-align:top;padding-right:8px;font-size:16px;">&#9201;</td>
                       <td>
                         <p style="margin:0 0 2px 0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#B8953F;font-weight:600;">时间</p>
-                        <p style="margin:0;font-size:15px;color:#1A1A1A;font-weight:600;">${timeFormatted} (Central Time)</p>
+                        <p style="margin:0;font-size:15px;color:#1A1A1A;font-weight:600;">${timeFormatted} (${tzLabel})</p>
                       </td>
                     </tr>
                   </table>
