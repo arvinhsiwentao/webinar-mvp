@@ -181,9 +181,13 @@ export default function HomePage() {
         <div className="relative max-w-[1400px] mx-auto">
           {/* Responsive hero image — natural aspect ratio, no cropping */}
           <picture>
-            <source media="(min-width: 768px)" srcSet="/images/hero-desktop.jpg" />
+            {/* Desktop: WebP preferred, compressed JPG fallback */}
+            <source media="(min-width: 768px)" srcSet="/images/hero-desktop.webp" type="image/webp" />
+            <source media="(min-width: 768px)" srcSet="/images/hero-desktop-opt.jpg" type="image/jpeg" />
+            {/* Mobile: WebP preferred, compressed JPG fallback */}
+            <source srcSet="/images/hero-mobile.webp" type="image/webp" />
             <img
-              src="/images/hero-mobile.jpg"
+              src="/images/hero-mobile-opt.jpg"
               alt="从负债50万到43岁财富自由 — 抓准AI风口、高胜率的美股投资策略"
               className="w-full h-auto block"
               fetchPriority="high"
