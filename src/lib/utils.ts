@@ -1,22 +1,24 @@
 // Utility functions
 
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string, timezone?: string): string {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
     weekday: 'short',
+    ...(timezone && { timeZone: timezone }),
   };
   return date.toLocaleDateString('zh-CN', options);
 }
 
-export function formatTime(dateString: string): string {
+export function formatTime(dateString: string, timezone?: string): string {
   const date = new Date(dateString);
   return date.toLocaleTimeString('zh-CN', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
+    ...(timezone && { timeZone: timezone }),
   });
 }
 
