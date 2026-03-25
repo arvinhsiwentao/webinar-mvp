@@ -69,6 +69,43 @@ html {
   }
 }
 
+/* Hero CTA — ambient gold glow pulse (layered: near + mid + far spread) */
+@keyframes ctaGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 15px rgba(201, 169, 98, 0.4),
+      0 0 40px rgba(201, 169, 98, 0.2),
+      0 0 80px rgba(184, 149, 63, 0.1),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(201, 169, 98, 0.55),
+      0 0 55px rgba(201, 169, 98, 0.3),
+      0 0 100px rgba(184, 149, 63, 0.15),
+      inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Hero CTA — shimmer sweep across button */
+@keyframes ctaShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Reduced motion: disable decorative animations */
+@media (prefers-reduced-motion: reduce) {
+  .hero-cta,
+  .hero-cta::before {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Prose customization for light theme */
 .prose-light {
   --tw-prose-body: #4B5563;

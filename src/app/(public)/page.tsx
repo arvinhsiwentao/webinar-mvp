@@ -176,56 +176,34 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-neutral-900">
 
-      {/* ========== Section 1: HERO — Urgency-First, Compelling ========== */}
-      <section className="min-h-[65vh] md:min-h-[70vh] relative overflow-hidden flex items-center">
-        {/* Background */}
-        {webinar.heroImageUrl ? (
-          <>
-            <Image
-              src={webinar.heroImageUrl}
-              alt=""
-              fill
-              className="object-cover"
-              priority
+      {/* ========== Section 1: HERO — Full-bleed background image with CTA ========== */}
+      <section className="w-full bg-[#0a0a08]">
+        <div className="relative max-w-[1400px] mx-auto">
+          {/* Responsive hero image — natural aspect ratio, no cropping */}
+          <picture>
+            <source media="(min-width: 768px)" srcSet="/images/hero-desktop.jpg" />
+            <img
+              src="/images/hero-mobile.jpg"
+              alt="从负债50万到43岁财富自由 — 抓准AI风口、高胜率的美股投资策略"
+              className="w-full h-auto block"
+              fetchPriority="high"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/75" />
-          </>
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1A] via-[#2D2520] to-[#1A1A1A]" />
-        )}
+          </picture>
 
-        <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-12 text-center py-16 text-white">
-          {/* Urgency Banner — Prominent, Animated */}
-          <div className="inline-flex items-center gap-2.5 bg-[#B8953F] px-6 py-2.5 mb-8 shadow-[0_0_30px_rgba(184,149,63,0.35)] animate-[heroFadeIn_0.8s_ease-out]">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-60" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white" />
-            </span>
-            <span className="text-sm md:text-base font-semibold tracking-widest text-white uppercase">
-              限时公开内容
-            </span>
-          </div>
-
-          {/* Main Title */}
-          <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-bold leading-[1.15] mb-5 animate-[heroFadeIn_0.8s_ease-out_0.15s_both]">
-            <span className="md:whitespace-nowrap">如何抓准 AI 时代最大的财富风口？</span>
-          </h1>
-          <p className="text-lg md:text-xl lg:text-2xl font-light text-white/75 mb-10 max-w-2xl mx-auto leading-relaxed animate-[heroFadeIn_0.8s_ease-out_0.3s_both]">
-            从负债 50 万美金到财务自由的翻身路径
-          </p>
-
-          {/* Primary CTA */}
-          <div className="animate-[heroFadeIn_0.8s_ease-out_0.45s_both]">
+          {/* CTA Button — positioned over the image */}
+          <div className="absolute bottom-[6%] md:bottom-[10%] left-1/2 -translate-x-1/2 z-10 animate-[heroFadeIn_0.8s_ease-out_0.3s_both]">
             <button
               onClick={() => openModal('hero')}
-              className="group inline-flex items-center gap-2 bg-[#B8953F] text-white px-12 py-4 text-lg font-semibold tracking-wide hover:bg-[#A6842F] hover:shadow-[0_0_50px_rgba(184,149,63,0.4)] transition-all duration-300"
+              className="hero-cta group relative overflow-hidden px-12 py-4 md:px-16 md:py-4.5 lg:px-20 lg:py-5 rounded-2xl border border-[#C9A962] bg-[#1a1508]/70 backdrop-blur-sm text-[#E8D5A3] text-lg md:text-xl lg:text-2xl font-bold tracking-widest cursor-pointer whitespace-nowrap transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_15px_rgba(201,169,98,0.4),0_0_40px_rgba(201,169,98,0.2),0_0_80px_rgba(184,149,63,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(201,169,98,0.6),0_0_50px_rgba(201,169,98,0.3),0_0_100px_rgba(184,149,63,0.15),inset_0_1px_1px_rgba(255,255,255,0.15)] hover:scale-105 active:scale-95 animate-[ctaGlow_3s_ease-in-out_infinite]"
             >
-              观看讲座
-              <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              {/* Glass highlight — top edge reflection */}
+              <span className="absolute inset-x-0 top-0 h-[45%] pointer-events-none rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" />
+              {/* Shimmer sweep overlay */}
+              <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[ctaShimmer_3s_ease-in-out_infinite_1.5s]" />
+              </span>
+              <span className="relative z-10">免费听策略</span>
             </button>
-            <p className="text-xs text-white/40 mt-3 tracking-wide">免费参加 · 名额有限</p>
           </div>
         </div>
       </section>
