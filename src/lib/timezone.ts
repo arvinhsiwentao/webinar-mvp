@@ -42,7 +42,7 @@ export function scheduleToUTC(time: string, timezone: string, baseDate: Date): D
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: false,
+    hourCycle: 'h23',
   });
   const tzParts = tzFormatter.formatToParts(naiveUTC);
   const tzYear = Number(tzParts.find(p => p.type === 'year')!.value);
