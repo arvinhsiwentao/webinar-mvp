@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Webinar } from '@/lib/types';
 import { trackGA4 } from '@/lib/analytics';
+import { formatInTimezone, getTimezoneLabel } from '@/lib/timezone';
 import PersistentCountdown from '@/components/countdown/PersistentCountdown';
 import { useRegistrationForm } from '@/components/registration/useRegistrationForm';
 import RegistrationModal from '@/components/registration/RegistrationModal';
@@ -20,6 +21,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [evergreenSlots, setEvergreenSlots] = useState<Array<{ slotTime: string; type: string }>>([]);
+  const [evergreenTimezone, setEvergreenTimezone] = useState('America/Chicago');
   const [selectedSlotTime, setSelectedSlotTime] = useState('');
   const [modalSource, setModalSource] = useState<string>('');
 
@@ -63,6 +65,9 @@ export default function HomePage() {
       if (!slotRes.ok) return;
       const slotData = await slotRes.json();
       setEvergreenSlots(slotData.slots);
+      if (slotData.config?.timezone) {
+        setEvergreenTimezone(slotData.config.timezone);
+      }
 
       // Store sticky session in localStorage
       const existingSticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
@@ -257,19 +262,10 @@ export default function HomePage() {
           <div className="space-y-6 md:space-y-8 mb-14 w-full max-w-xl">
             {evergreenSlots.map((item, idx) => {
               const dateStr = item.slotTime;
-              const date = new Date(dateStr);
-              const month = date.getMonth() + 1;
-              const day = date.getDate();
-              const fullDate = date.toLocaleDateString('zh-CN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              });
-              const time = date.toLocaleTimeString('zh-CN', {
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true,
-              });
+              const { date: fullDate, time } = formatInTimezone(dateStr, evergreenTimezone);
+              const dateObj = new Date(dateStr);
+              const month = Number(new Intl.DateTimeFormat('en-US', { timeZone: evergreenTimezone, month: 'numeric' }).format(dateObj));
+              const day = Number(new Intl.DateTimeFormat('en-US', { timeZone: evergreenTimezone, day: 'numeric' }).format(dateObj));
 
               return (
                 <div
@@ -285,7 +281,7 @@ export default function HomePage() {
                   <div>
                     <p className="text-lg md:text-2xl font-bold text-neutral-900">{fullDate}</p>
                     <p className="text-sm md:text-base text-neutral-500">
-                      {time} Central Standard Time
+                      {time} {getTimezoneLabel(evergreenTimezone)}
                     </p>
                   </div>
                 </div>
