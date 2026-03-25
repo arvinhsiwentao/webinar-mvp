@@ -7,6 +7,7 @@ import { Button, Badge, Card } from '@/components/ui';
 import { Webinar } from '@/lib/types';
 import { getEvergreenState, getSlotExpiresAt } from '@/lib/evergreen';
 import { generateICSContent } from '@/lib/utils';
+import { scheduleToUTC } from '@/lib/timezone';
 import { trackGA4 } from '@/lib/analytics';
 
 export default function LobbyPage() {
@@ -52,10 +53,8 @@ export default function LobbyPage() {
           // Check if any scheduled slot is currently in progress
           for (let dayOffset = 0; dayOffset >= -1; dayOffset--) {
             for (const schedule of evergreen.dailySchedule) {
-              const [hours, minutes] = schedule.time.split(':').map(Number);
-              const slotStart = new Date(now);
-              slotStart.setDate(slotStart.getDate() + dayOffset);
-              slotStart.setHours(hours, minutes, 0, 0);
+              const baseDate = new Date(now.getTime() + dayOffset * 86400000);
+              const slotStart = scheduleToUTC(schedule.time, evergreen.timezone, baseDate);
 
               if (now.getTime() >= slotStart.getTime() && now.getTime() < slotStart.getTime() + durationMs) {
                 effectiveSlot = slotStart.toISOString();
