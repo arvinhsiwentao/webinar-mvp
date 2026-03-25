@@ -1,4 +1,5 @@
 import { EvergreenConfig, EvergreenSlot } from './types';
+import { scheduleToUTC } from './timezone';
 
 /**
  * Generate upcoming display slots from evergreen config.
@@ -8,16 +9,14 @@ export function generateEvergreenSlots(
   config: EvergreenConfig,
   now: Date = new Date()
 ): EvergreenSlot[] {
-  const { dailySchedule, immediateSlot, displaySlotCount } = config;
+  const { dailySchedule, immediateSlot, displaySlotCount, timezone } = config;
 
   // 1. Generate anchor slots for today + next 2 days
   const anchorSlots: EvergreenSlot[] = [];
   for (let dayOffset = 0; dayOffset <= 2; dayOffset++) {
     for (const schedule of dailySchedule) {
-      const [hours, minutes] = schedule.time.split(':').map(Number);
-      const candidate = new Date(now);
-      candidate.setDate(candidate.getDate() + dayOffset);
-      candidate.setHours(hours, minutes, 0, 0);
+      const baseDate = new Date(now.getTime() + dayOffset * 86400000);
+      const candidate = scheduleToUTC(schedule.time, timezone, baseDate);
 
       // Only include future slots with at least bufferMinutes gap
       const minutesUntil = (candidate.getTime() - now.getTime()) / 60000;
