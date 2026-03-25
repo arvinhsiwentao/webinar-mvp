@@ -72,6 +72,7 @@ export async function fulfillOrder(
   // === NOTIFICATION (best-effort) ===
   try {
     const orderDate = new Date().toLocaleDateString('zh-CN', {
+      timeZone: 'America/Chicago',
       year: 'numeric', month: '2-digit', day: '2-digit',
     }).replace(/-/g, '/');
     const emailParams = purchaseConfirmationEmail({
