@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { formatDate, formatTime } from '@/lib/utils';
+import { getTimezoneLabel } from '@/lib/timezone';
 import CountryCodeSelect from './CountryCodeSelect';
 
 interface RegistrationModalProps {
@@ -144,7 +145,7 @@ export default function RegistrationModal({
                   >
                     {evergreenSlots.map((slot) => (
                       <option key={slot.slotTime} value={slot.slotTime}>
-                        {formatDate(slot.slotTime, timezone)} - {formatTime(slot.slotTime, timezone)}
+                        {formatDate(slot.slotTime, timezone)} - {formatTime(slot.slotTime, timezone)}{timezone ? ` ${getTimezoneLabel(timezone)}` : ''}
                       </option>
                     ))}
                   </select>

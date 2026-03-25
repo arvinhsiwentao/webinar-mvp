@@ -282,10 +282,20 @@ Defined in `src/styles/design-tokens.css` as CSS custom properties.
 
 The evergreen system dynamically generates session slots so visitors always see a webinar starting soon. Core logic lives in `src/lib/evergreen.ts`.
 
+### Timezone Handling
+
+All user-facing times display in the admin-configured timezone (stored as IANA string in `EvergreenConfig.timezone`, e.g., `America/Chicago`), not the user's browser timezone. Core utilities live in `src/lib/timezone.ts`:
+
+- **`scheduleToUTC(time, timezone, baseDate)`** — Converts a HH:mm schedule time in the configured timezone to a UTC `Date`. Uses `Intl.DateTimeFormat` with `hourCycle: 'h23'` to compute the offset (no external dependencies).
+- **`getTimezoneLabel(timezone)`** — Maps IANA timezone to Chinese display label (e.g., `America/Chicago` → `美中时间 (CT)`).
+- **`formatInTimezone(isoString, timezone)`** — Formats an ISO date for display in the configured timezone using `zh-CN` locale.
+
+This ensures anchor slot times (e.g., "20:00") are interpreted as 20:00 in the configured timezone (not server UTC), and all frontend displays (landing page, registration modal, lobby, confirmation email) show consistent times with a dynamic timezone label.
+
 ### Slot Generation
 
 Two slot types work together:
-- **Anchor slots** — Admin-configured daily recurring times (e.g., 8:00 AM, 9:00 PM). Creates realistic schedule appearance.
+- **Anchor slots** — Admin-configured daily recurring times (e.g., 8:00 AM, 9:00 PM). Interpreted in the configured timezone via `scheduleToUTC()`. Creates realistic schedule appearance.
 - **Immediate slots** — Dynamically injected when the next anchor is too far away (> `maxWaitMinutes`). Snaps to round clock boundaries (:00, :15, :30, :45).
 
 `generateEvergreenSlots(config)` produces a sorted list of upcoming slots for display.
