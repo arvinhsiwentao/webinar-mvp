@@ -213,6 +213,9 @@ export default function HomePage() {
               </span>
               <span className="relative z-10">免费听策略</span>
             </button>
+            <p className="mt-2.5 text-center text-xs md:text-sm tracking-wide text-[#E8D5A3]/80">
+              🎁 加贈限額一對一持倉分析
+            </p>
           </div>
         </div>
       </section>
