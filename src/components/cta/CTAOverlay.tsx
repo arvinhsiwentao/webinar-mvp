@@ -131,6 +131,11 @@ export default function CTAOverlay({ currentTime, ctaEvents, onCTAClick, onCTAVi
           <span className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-200" />
           <span className="relative">{activeCTA.buttonText}</span>
         </button>
+
+        {/* Bonus line */}
+        <p className={`text-center text-xs mt-2.5 tracking-wide ${isOnVideo ? 'text-white/70' : 'text-[#6B6B6B]'}`}>
+          🎁 加贈限額一對一持倉分析
+        </p>
       </div>
     </div>
   );
