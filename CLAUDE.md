@@ -16,10 +16,10 @@ Reference platform: JoinLive (live.yongmingu.com)
 5. **Maintain `docs/architecture.md`** — the living architecture document. When you make structural changes (new routes, components, data model changes, API changes), update the relevant section before finishing. Hooks will remind and enforce this.
 6. **Never treat existing documentation or code definitions as proof of runtime behavior.** Verify by checking call sites and imports, not just definitions. Grep for actual usage.
 7. Explain things in a beginner-friendly manner.
-9. **Record non-obvious decisions** in `docs/decisions.md`. When choosing between alternatives, append: date, decision, and why. Keep entries to 3-5 lines.
-10. To prevent inaccuracies caused by outdated training data, you are required to use web search tools when writing code for specific models. Always cross-reference parameters and implementation details with the most recent official documentation to accommodate the ever-changing nature of AI APIs.
-11. 请使用第一性原理思考。你不能总是假设我非常清楚自己想要什么和该怎么得到。请保持审慎，从原始需求和问题出发，如果动机和目标不清晰，停下来和我讨论。如果目标清晰但是路径不是最短，告诉我，并且建议更好的办法
-12. 使用繁體中文寫文件
+8. **Record non-obvious decisions** in `docs/decisions.md`. When choosing between alternatives, append: date, decision, and why. Keep entries to 3-5 lines.
+9. To prevent inaccuracies caused by outdated training data, you are required to use web search tools when writing code for specific models. Always cross-reference parameters and implementation details with the most recent official documentation to accommodate the ever-changing nature of AI APIs.
+10. 请使用第一性原理思考。你不能总是假设我非常清楚自己想要什么和该怎么得到。请保持审慎，从原始需求和问题出发，如果动机和目标不清晰，停下来和我讨论。如果目标清晰但是路径不是最短，告诉我，并且建议更好的办法
+11. 使用繁體中文寫文件
 
 ## Principles to Follow
 This application simulates a live streaming experience using prerecorded videos. All video playback must strictly preserve the illusion of a live broadcast at all times.
@@ -38,7 +38,11 @@ npm start        # Production server
 npm run lint     # ESLint
 ```
 
-No test framework is configured yet.
+## Testing
+
+```bash
+npm test         # Subtitle pipeline tests (tsx --test)
+```
 
 ## Tech Stack
 
@@ -53,20 +57,22 @@ No test framework is configured yet.
 ### User Journey (page flow)
 
 ```
-Landing Page → Registration → Lobby → Live Room → End
-/              (modal)         /webinar/[id]/lobby  /webinar/[id]/live  /webinar/[id]/end
+Landing Page → Registration → Confirm → Waiting/Lobby → Live Room → End
+/              (modal)         /webinar/[id]/confirm  /webinar/[id]/lobby  /webinar/[id]/live  /webinar/[id]/end
+                                                      /webinar/[id]/waiting (pre-start gate)
+
+Additional routes: /checkout/[webinarId] (Stripe checkout), /checkout/[webinarId]/return, /demo
 ```
 
 The root `/` is the only landing page, hardcoded for webinar ID `1` ("Mike是麥克"). There is no `/webinar/[id]` landing page — the `[id]` namespace only contains post-registration sub-routes (lobby, live, end).
 
 ### Key Directories
 
-- `src/app/` — Next.js App Router pages and API routes
+- `src/app/` — Next.js App Router pages and API routes, organized by route groups: `(public)/` (visitor-facing) and `(admin)/` (admin panel)
 - `src/components/` — Reusable components organized by feature (`video/`, `chat/`, `cta/`, `countdown/`, `ui/`, `analytics/`, `evergreen/`, `live/`, `registration/`, `sidebar/`, `subtitles/`)
-- `src/lib/` — Core utilities: `types.ts` (all TypeScript interfaces), `db.ts` (Supabase CRUD layer), `supabase.ts` (client init), `utils.ts` (date formatting, validation, `cn()`), `email.ts` (SendGrid templates), `tracking.ts` (event tracking + GA4 dual-fire), `analytics.ts` (typed GA4 helper), `chat-broker.ts` (SSE pub/sub singleton), `evergreen.ts` (slot generation), `viewer-simulator.ts` (simulated viewer list hook), `stripe.ts` (Stripe client), `video-upload.ts` (Mux Direct Upload + UpChunk orchestration), `google-sheets.ts` (Google Sheets activation code claiming)
+- `src/lib/` — Core utilities: `types.ts` (all TypeScript interfaces), `db.ts` (Supabase CRUD layer), `supabase.ts` (client init), `utils.ts` (date formatting, validation, `cn()`), `email.ts` (SendGrid templates), `analytics.ts` (typed GA4 helper), `chat-broker.ts` (SSE pub/sub singleton), `evergreen.ts` (slot generation), `viewer-simulator.ts` (simulated viewer list hook), `stripe.ts` (Stripe client), `video-upload.ts` (Mux Direct Upload + UpChunk orchestration), `google-sheets.ts` (Google Sheets activation code claiming), `mux.ts` (Mux API client), `fulfillment.ts` (order fulfillment logic), `timezone.ts` (timezone utilities)
 - `src/styles/` — `design-tokens.css` with CSS custom properties
-- `data/` — Legacy JSON files (pre-Supabase migration artifacts, not used at runtime)
-- `docs/` — PM specification documents (Chinese)
+- `docs/` — Architecture docs, decision log, and archived plan documents (Chinese)
 
 ### API Routes
 
@@ -83,7 +89,6 @@ All under `src/app/api/`:
 - `checkout/create-session/route.ts` — POST (Stripe Embedded Checkout)
 - `checkout/session-status/route.ts` — GET (poll Stripe session)
 - `checkout/webhook/route.ts` — POST (Stripe webhook fulfillment)
-- `track/route.ts` — POST (event tracking)
 - `subtitles/generate/route.ts` — POST (subtitle generation)
 - `subtitles/logs/route.ts` — GET (subtitle logs)
 - `cron/reminders/route.ts` — GET (email reminder cron, CRON_SECRET protected)
@@ -137,13 +142,12 @@ A `Webinar` contains embedded arrays of `autoChat` and `ctaEvents` — stored in
 - **No WebSocket yet:** Chat is simulated via auto-chat messages and polling. Socket.io integration is planned.
 - **Admin password auth:** `ADMIN_PASSWORD` env var + HMAC-signed cookie session (24h expiry). Middleware at `src/middleware.ts` protects `/admin/*` and `/api/admin/*`. Login page at `/admin/login`.
 - **North American Chinese locale:** Phone validation accepts US/Canada 10-digit format. Date formatting uses `zh-CN` locale.
-- **Unsplash images:** `next.config.ts` allows remote images from `*.unsplash.com`.
+- **Remote images:** `next.config.ts` allows remote images from `*.unsplash.com` and `image.mux.com`.
 
 ## Spec Documents
 
-- `SPEC.md` — Full PM specification (Chinese, ~36KB) covering all modules, flows, and planned features
-- `api-spec.md` — API endpoint specification with request/response examples
-- `AGENTS.md` — Tech stack decisions and MVP scope summary (legacy reference)
+- `docs/plans/08_Webinar完整規格書_PM版.md` — Full PM specification (Chinese)
+- Archived plan documents in `docs/plans/` (dated by feature)
 
 ## Documentation
 
@@ -151,8 +155,7 @@ Living documentation system — hooks enforce freshness automatically.
 
 - `docs/architecture.md` — How the system works (auto-maintained via hooks)
 - `docs/decisions.md` — Append-only architectural decision log
-- `SPEC.md` — PM specification (frozen reference)
-- `api-spec.md` — API design reference
+- `docs/plans/08_Webinar完整規格書_PM版.md` — PM specification (frozen reference)
 
 **Hooks:** PostToolUse hook (`.claude/hooks/doc-update-check.sh`) reminds on file changes in critical paths. Stop hook verifies documentation freshness before turn ends.
 
