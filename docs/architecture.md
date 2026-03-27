@@ -1,373 +1,234 @@
 # Architecture
 
-> Last verified: 2026-03-25
+> Last verified: 2026-03-27
 
 Living document. Hooks remind Claude to keep this current when structural changes are made.
 
 ## System Overview
 
-Simulive (simulated-live) webinar platform. A pre-recorded video plays on a schedule while interactive features — auto-chat, CTA overlays, viewer count — create the feel of a live broadcast. Built for the 北美華人 (North American Chinese) market (Simplified Chinese, zh-CN locale). Data stored in Supabase (hosted Postgres). Chat uses SSE (Server-Sent Events) via in-memory pub/sub broker (`src/lib/chat-broker.ts`). WebSocket planned for production.
+Simulive 研討會平台。預錄影片按排程播放，搭配自動聊天、CTA 彈窗、觀眾數模擬，營造即時直播感。北美華人市場（zh-CN）。
+
+**核心技術決策：**
+- 資料庫：Supabase (Postgres)，server-side only，service role key
+- 即時聊天：SSE（Server-Sent Events）via 記憶體 pub/sub broker（`chat-broker.ts`）
+- 影片：Mux HLS 串流 + Video.js 播放器（禁止拖拉）
+- 支付：Stripe Embedded Checkout + 雙重履約（webhook + polling fallback）
 
 ## Page Flow & Routing
 
-```
-Landing Page  →  Registration  →  Lobby              →  Live Room          →  End
-/                (modal)          /webinar/[id]/lobby    /webinar/[id]/live    /webinar/[id]/end
-```
+Route groups：`(public)/`（觀眾頁面）、`(admin)/`（管理後台）
 
-The root `/` is the only landing page — a single-purpose entry point hardcoded to webinar ID `1`. There is no `/webinar/[id]` landing page; the dynamic `[id]` namespace only contains the post-registration sub-routes (lobby, live, end).
-
-Pages are organized into **route groups** — parenthesized folders that are invisible in the URL but provide independent layouts:
-
-- `(public)/` — Viewer-facing pages (light luxury ivory theme)
-- `(admin)/` — Admin dashboard (separate layout, future auth boundary)
-
-Each group has its own `layout.tsx`. The root `src/app/layout.tsx` provides only `<html>`, `<body>`, and fonts.
-
-| Route | Source File | Purpose |
-|-------|-------------|---------|
-| `/` | `src/app/(public)/page.tsx` | Single landing page for webinar ID `1` ("Mike是麦克"). Modal registration. Sections: Hero → Speaker Intro (hardcoded bio copy) → Schedule/Countdown → Benefits → Urgency. **Hero** uses a `<picture>` element with multi-format sources: WebP preferred (`hero-desktop.webp` / `hero-mobile.webp`), compressed JPG fallback (`hero-desktop-opt.jpg` / `hero-mobile-opt.jpg`). Desktop (≥768px) serves 2800px-wide images, mobile serves 1536px-wide. Originals were 5508×3072 / 3072×5508 at ~6 MB; optimized to ~100-200 KB via sharp (resize + WebP q82 / mozjpeg q82). Title/subtitle text is baked into the images, only a CTA button is rendered as an HTML overlay with a bonus line ("加贈限額一對一持倉分析") beneath it. Post-registration redirect threads `email` param to lobby URL for downstream checkout pre-fill. |
-| `/demo` | `src/app/(public)/demo/page.tsx` | Demo/preview page |
-| `/webinar/[id]/lobby` | `src/app/(public)/webinar/[id]/lobby/page.tsx` | Event lobby: unified layout with progress bar, webinar info, social proof (registration count), highlights, calendar card. Phase A (>30min): success banner, calendar emphasis. Phase B (≤30min): gold "即将开始" badge, prominent CTA button above countdown. Auto-redirects to live at T=0. **Slot resolution:** Reads `slot` from query param; when missing (e.g. old calendar links), detects currently-live slots from the evergreen daily schedule or fetches the next upcoming slot via `/api/webinar/[id]/next-slot`. **Email passthrough:** Reads `email` from query param (set by email/calendar links) and threads it to live/end/calendar URLs so checkout works even without localStorage. Calendar invites (ICS + Google Calendar) include lobby URL with `slot`, `name`, `email`, and UTM params (`utm_source=calendar`, `utm_medium=ical|google`, `utm_campaign=webinar_reminder`) in both description text and URL/location fields. |
-| `/webinar/[id]/confirm` | Redirect stub → `/lobby` | Backward compatibility |
-| `/webinar/[id]/waiting` | Redirect stub → `/lobby` | Backward compatibility |
-| `/webinar/[id]/live` | `src/app/(public)/webinar/[id]/live/page.tsx` | Live room: video + 4-tab sidebar (Info/Viewers/Chat/Offers) + on-video CTA. Mobile: single video info card with speaker details (no duplicate speaker card). |
-| `/webinar/[id]/end` | `src/app/(public)/webinar/[id]/end/page.tsx` | Dark sales page with purple CTA, social sharing, replay link |
-| `/checkout/[webinarId]` | `src/app/(public)/checkout/[webinarId]/page.tsx` | Two-column checkout: marketing copy + Stripe Embedded Checkout form. Reads email/name/source from query params. **Email fallback:** If `email` param is missing (e.g. shared link), shows an inline email input form before rendering Stripe checkout. **Change email:** Users can switch to a different email mid-checkout, which re-creates the Stripe session via key remount. |
-| `/checkout/[webinarId]/return` | `src/app/(public)/checkout/[webinarId]/return/page.tsx` | Post-payment return page. Polls session status, displays activation code directly on screen, shows success or error. Email is a backup delivery channel. |
-| `/admin/login` | `src/app/(admin)/admin/login/page.tsx` | Admin login page (`ADMIN_PASSWORD` env var) |
-| `/admin` | `src/app/(admin)/admin/page.tsx` | Admin panel (password-protected) |
+| Route | Purpose |
+|-------|---------|
+| `/` | Landing page，硬編碼 webinar ID `1`。Modal 報名。Hero 圖 + 倒數 + 權益 |
+| `/demo` | 測試用直播間 |
+| `/webinar/[id]/lobby` | 等候室：倒數計時、行事曆整合、30 分鐘入場門檻。自動偵測 evergreen 時段 |
+| `/webinar/[id]/confirm` | 重定向 → `/lobby`（向下相容） |
+| `/webinar/[id]/waiting` | 重定向 → `/lobby`（向下相容） |
+| `/webinar/[id]/live` | 直播間：影片 + 4-tab 側邊欄（資訊/觀眾/聊天/優惠）+ CTA 疊層 |
+| `/webinar/[id]/end` | 結束頁：銷售文案 + CTA + 社群分享 |
+| `/checkout/[webinarId]` | 兩欄結帳：行銷文案 + Stripe Embedded Checkout |
+| `/checkout/[webinarId]/return` | 付款確認頁：輪詢狀態、顯示啟用碼 |
+| `/admin/login` | 管理員登入 |
+| `/admin` | 管理後台：研討會 CRUD、報名名單、影片庫 |
 
 ## Data Architecture
 
 ### Models (`src/lib/types.ts`)
 
-| Interface | Key Fields | Notes |
-|-----------|-----------|-------|
-| `Webinar` | `id`, `title`, `videoUrl`, `duration`, `autoChat[]`, `ctaEvents[]`, `status`, `evergreen?`, `viewerPeakTarget?`, `viewerRampMinutes?`, `heroImageUrl?`, `promoImageUrl?`, `disclaimerText?`, `endPageSalesCopy?`, `endPageCtaText?`, `endPageCtaUrl?`, `endPageCtaColor?`, `sidebarDescription?`, `productPackageId?`, `salesCode?` | Top-level entity. Embeds auto-chat and CTA arrays inline. Extended with landing/end/sidebar fields. Uses `evergreen` config for dynamic scheduling. Viewer simulation configured via `viewerPeakTarget` and `viewerRampMinutes`. `productPackageId` (商品包編號) and `salesCode` (銷售代碼) configure fulfillment metadata per webinar. |
-| `EvergreenConfig` | `enabled`, `dailySchedule[]`, `immediateSlot{}`, `videoDurationMinutes`, `timezone`, `displaySlotCount` | Configures dynamic slot generation. Daily anchor times + immediate slot injection for perpetual urgency. |
-| `EvergreenSlot` | `slotTime`, `type` | Computed session slot — either `'anchor'` (daily recurring) or `'immediate'` (dynamically injected). |
-| `AutoChatMessage` | `id`, `timeSec`, `name`, `message` | Bot message triggered at video timestamp. |
-| `CTAEvent` | `id`, `showAtSec`, `hideAtSec`, `buttonText`, `showCountdown`, `position?`, `color?`, `secondaryText?` | Promotional overlay with optional countdown. Supports on-video or below-video positioning. Clicks navigate to internal checkout page. |
-| `Registration` | `id`, `webinarId`, `name`, `email`, `phone?`, `assignedSlot?`, `slotExpiresAt?`, `reassignedFrom?` | One per email per webinar (duplicate check). Evergreen fields store computed slot times. |
-| `ChatMessageData` | `id`, `webinarId`, `name`, `message`, `timestamp`, `createdAt` | Real user chat message. |
-| `Order` | `id`, `webinarId`, `email`, `name`, `stripeSessionId`, `stripePaymentIntentId?`, `activationCode?`, `status`, `amount`, `currency`, `metadata?`, `createdAt`, `paidAt?`, `fulfilledAt?`, `productPackageId?`, `salesCode?` | Stripe checkout order. Status: `pending` → `paid` → `fulfilled`. Activation code generated on fulfillment. `productPackageId` and `salesCode` copied from webinar config at fulfillment time. |
+| Interface | 關鍵欄位 | 說明 |
+|-----------|----------|------|
+| `Webinar` | id, title, videoUrl, duration, autoChat[], ctaEvents[], evergreen?, viewerPeakTarget?, productPackageId?, salesCode? | 頂層實體。內嵌 autoChat 和 ctaEvents 陣列 |
+| `EvergreenConfig` | enabled, dailySchedule[], immediateSlot{}, videoDurationMinutes, timezone | 動態時段生成配置 |
+| `AutoChatMessage` | id, timeSec, name, message | 依影片時間觸發的機器人訊息 |
+| `CTAEvent` | id, showAtSec, hideAtSec, buttonText, position?, color?, showCountdown | 促銷疊層，支援 on_video / below_video |
+| `Registration` | id, webinarId, name, email, phone?, assignedSlot?, slotExpiresAt? | 每人每場唯一（email 查重） |
+| `Order` | id, webinarId, email, stripeSessionId, activationCode?, status, productPackageId?, salesCode? | 狀態機：pending → paid → fulfilled |
+| `VideoFile` | id, filename, muxAssetId, muxPlaybackId, playbackUrl, status, duration | Mux 上傳追蹤 |
+| `ChatMessageData` | id, webinarId, name, message, timestamp | 真實用戶聊天訊息 |
 
-### Storage Layer (Supabase)
+### Storage Layer
 
-Supabase (hosted Postgres) replaces the previous JSON file storage. Server-side only — no client SDK.
+- `src/lib/supabase.ts` — Supabase client（lazy-init proxy）
+- `src/lib/db.ts` — CRUD 函數，自動 snake_case ↔ camelCase 轉換
+- **Tables：** `webinars`, `registrations`, `chat_messages`, `orders`, `video_files`, `events`
+- **JSONB 欄位：** `auto_chat`, `cta_events`, `highlights`, `subtitle_cues`, `evergreen`（隨 parent webinar 讀寫）
+- **Atomic lock：** `updateOrderStatus(id, fromStatus, toStatus)` 防止重複履約
 
-- `src/lib/supabase.ts` — Supabase client initialized with service role key (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` env vars)
-- `src/lib/db.ts` — Async CRUD functions with automatic snake_case (DB) ↔ camelCase (TypeScript) mapping. Includes `updateOrderStatus(id, fromStatus, toStatus)` for atomic status transitions (used by webhook to prevent duplicate fulfillment).
-- `scripts/supabase-schema.sql` — Full schema definition (tables, indexes, RLS policies)
-- `scripts/migrate-to-supabase.ts` — One-time data migration from JSON files
+### Purchase Fulfillment
 
-**Activation codes:** `src/lib/google-sheets.ts` — Claims pre-populated activation codes from a Google Sheet via the Sheets API. Throws an error when `GOOGLE_SERVICE_ACCOUNT_KEY` is not configured (no fallback — Stripe retries the webhook).
+兩條履約路徑共用 `src/lib/fulfillment.ts`：
 
-#### Purchase Fulfillment
+1. **Stripe webhook**（`/api/checkout/webhook`）— 主要路徑
+2. **Session-status polling**（`/api/checkout/session-status`）— 備用路徑
 
-Two fulfillment paths (shared `src/lib/fulfillment.ts`):
-1. **Stripe webhook** (`/api/checkout/webhook`) — primary, triggered by Stripe on payment
-2. **Session-status polling** (`/api/checkout/session-status`) — fallback, triggered by return page polling
+流程：驗證付款 → atomic lock (pending→paid) → 從 Google Sheets 領取啟用碼 → 更新 order → 寄確認信。失敗時 rollback 為 pending 讓 Stripe 重試。
 
-Both use `updateOrderStatus(id, 'pending', 'paid')` as an atomic lock — only one caller wins the race. Safe against double fulfillment.
+### Activation Codes
 
-**Tables:** `webinars`, `registrations`, `chat_messages`, `orders` (the `events` table exists but is no longer written to — tracking moved to GTM/GA4)
+`src/lib/google-sheets.ts` 從預填的 Google Sheet 領取啟用碼（race-condition safe，最多 3 次重試）。`GOOGLE_SERVICE_ACCOUNT_KEY` 未設定時拋錯（無 fallback）。
 
-**JSONB columns:** Nested arrays that are always read/written with the parent webinar are stored as JSONB columns rather than separate tables: `auto_chat`, `cta_events`, `highlights`, `subtitle_cues`, `evergreen`.
+## API Routes
 
-### API Routes
+### Public
 
-Routes are split into **public** (read-only + user actions) and **admin** (write operations) namespaces. Admin routes are protected by password auth middleware (`src/middleware.ts`) matching `/admin/*` and `/api/admin/*`.
+| Endpoint | Methods | 說明 |
+|----------|---------|------|
+| `/api/webinar` | GET | 列出所有 webinar |
+| `/api/webinar/[id]` | GET | 單一 webinar + registrationCount |
+| `/api/webinar/[id]/chat` | GET, POST | 聊天訊息 CRUD + SSE 廣播 |
+| `/api/webinar/[id]/chat/stream` | GET | SSE 即時聊天串流 |
+| `/api/webinar/[id]/next-slot` | GET | 計算 evergreen 時段 |
+| `/api/webinar/[id]/reassign` | POST | 錯過時段後重新指派 |
+| `/api/register` | POST | 報名（email 查重、evergreen-aware、寄確認信） |
+| `/api/checkout/create-session` | POST | 建立 Stripe Embedded Checkout session |
+| `/api/checkout/session-status` | GET | 輪詢 Stripe 狀態 + 備用履約 |
+| `/api/checkout/webhook` | POST | Stripe webhook 主要履約 |
+| `/api/subtitles/generate` | POST | Whisper 轉錄 → 字幕生成（支援 CJK） |
+| `/api/subtitles/logs` | GET | 字幕生成日誌 |
+| `/api/cron/reminders` | GET | 24h/1h 郵件提醒（CRON_SECRET 保護） |
+| `/api/cron/orders-sync` | GET | 訂單同步至 Google Sheets（CRON_SECRET 保護） |
 
-#### Public Routes (`src/app/api/`)
+### Admin（middleware 保護 `/admin/*` 和 `/api/admin/*`）
 
-| Endpoint | Methods | Source File | Notes |
-|----------|---------|-------------|-------|
-| `/api/webinar` | GET | `src/app/api/webinar/route.ts` | List all webinars |
-| `/api/webinar/[id]` | GET | `src/app/api/webinar/[id]/route.ts` | Single webinar + `registrationCount` |
-| `/api/webinar/[id]/chat` | GET, POST | `src/app/api/webinar/[id]/chat/route.ts` | GET/POST chat messages. Resolves numeric `[id]` to webinar UUID via `getWebinarById` before DB operations (chat_messages.webinar_id is UUID). |
-| `/api/register` | POST | `src/app/api/register/route.ts` | Checks duplicate email per webinar. Evergreen-aware: accepts `assignedSlot`, computes `slotExpiresAt`. Sends confirmation email with lobby URL. Base URL derived from `NEXT_PUBLIC_BASE_URL` → `Host`/`x-forwarded-proto` headers → hardcoded fallback. |
-| `/api/webinar/[id]/next-slot` | GET | `src/app/api/webinar/[id]/next-slot/route.ts` | Computes upcoming evergreen slots from config. Returns `slots[]`, `countdownTarget`, `expiresAt`. |
-| `/api/webinar/[id]/reassign` | POST | `src/app/api/webinar/[id]/reassign/route.ts` | Reassigns a registered user to the next available slot (for missed sessions). |
-| `/api/checkout/create-session` | POST | `src/app/api/checkout/create-session/route.ts` | Creates Stripe Embedded Checkout session. Checks duplicate purchase, creates pending Order. Returns `clientSecret`. |
-| `/api/checkout/session-status` | GET | `src/app/api/checkout/session-status/route.ts` | Polls Stripe session status. Fallback fulfillment path — if webhook hasn't fired yet and Stripe confirms payment, triggers `fulfillOrder()`. Return page polls this to display activation code on screen. |
-| `/api/checkout/webhook` | POST | `src/app/api/checkout/webhook/route.ts` | Stripe webhook handler. Primary fulfillment on `checkout.session.completed`: calls `fulfillOrder()`. Email sent separately (failure does not roll back fulfillment). Rolls back to pending on code-claim failure so Stripe retries. |
-| `/api/webinar/[id]/chat/stream` | GET | `src/app/api/webinar/[id]/chat/stream/route.ts` | SSE real-time chat stream via `chat-broker.ts` |
-| `/api/subtitles/generate` | POST | `src/app/api/subtitles/generate/route.ts` | Generate subtitles for video |
-| `/api/subtitles/logs` | GET | `src/app/api/subtitles/logs/route.ts` | Fetch subtitle generation logs |
-| `/api/cron/reminders` | GET | `src/app/api/cron/reminders/route.ts` | Send scheduled email reminders. CRON_SECRET protected. Base URL derived from `NEXT_PUBLIC_BASE_URL` → `Host`/`x-forwarded-proto` headers → `https://mike.cmoney.cc` fallback. |
-| `/api/cron/orders-sync` | GET | `src/app/api/cron/orders-sync/route.ts` | Daily orders → Google Sheets sync. CRON_SECRET protected. |
-
-#### Admin Routes (`src/app/api/admin/`)
-
-| Endpoint | Methods | Source File | Notes |
-|----------|---------|-------------|-------|
-| `/api/admin/webinar` | GET, POST | `src/app/api/admin/webinar/route.ts` | List all / create new |
-| `/api/admin/webinar/[id]` | GET, PUT, DELETE | `src/app/api/admin/webinar/[id]/route.ts` | Full CRUD, GET includes registrations |
-| `/api/admin/login` | POST | `src/app/api/admin/login/route.ts` | Authenticate with ADMIN_PASSWORD, set session cookie |
-| `/api/admin/logout` | POST | `src/app/api/admin/logout/route.ts` | Clear session cookie |
-
-### Email Templates (`src/lib/email.ts`)
-
-SendGrid-based email service (fetch, no SDK). Gracefully degrades to console log when `SENDGRID_API_KEY` is absent.
-
-| Template | Function | Purpose |
-|----------|----------|---------|
-| Registration confirmation | `confirmationEmail()` | Brand-aligned HTML EDM (ivory + gold design system). Includes speaker header, event details card (date/time), 5 benefit highlights (financial freedom path, stock picks, passive income, market timing, APP guided execution), gold CTA, and urgency reminder. Table-based layout for cross-client compatibility. |
-| 24h / 1h reminder | `reminderEmail()` | Pre-session reminder with lobby link |
-| Follow-up / replay | `followUpEmail()` | Post-session replay link + optional CTA |
-| Purchase confirmation | `purchaseConfirmationEmail()` | Order details, activation code box, product links, step-by-step instructions |
-
-All templates use inline CSS for email client compatibility. Confirmation email mirrors the landing page design system (`#B8953F` gold accent, `#FAFAF7` ivory bg, `#E8E5DE` borders).
-
-### Utilities (`src/lib/utils.ts`)
-
-- `formatDate`, `formatTime`, `formatDateTime` — `zh-CN` locale formatting
-- `formatCountdown`, `getTimeUntil` — countdown math
-- `generateICSContent` — calendar file generation (ICS `DESCRIPTION` + `URL` fields)
-- `buildEmailLink` — EDM link builder with UTM + original attribution preservation
-- `validateEmail`, `validatePhone` — phone accepts North American 10-digit format (with optional +1)
-- `cn(...classes)` — className join helper (like `clsx`)
-- `getVideoSourceType(url)` — returns Video.js MIME type (`application/x-mpegURL` or `video/mp4`)
+| Endpoint | Methods | 說明 |
+|----------|---------|------|
+| `/api/admin/login` | POST | 密碼認證，設定 session cookie |
+| `/api/admin/logout` | POST | 清除 session cookie |
+| `/api/admin/webinar` | GET, POST | 列出 / 建立 webinar |
+| `/api/admin/webinar/[id]` | GET, PUT, DELETE | CRUD（GET 含 registrations） |
+| `/api/admin/videos` | GET, POST | 影片庫 / 啟動 Mux Direct Upload |
+| `/api/admin/videos/[id]` | PATCH, DELETE | 更新 / 刪除影片 |
+| `/api/admin/videos/[id]/status` | GET | 上傳 + 轉碼狀態輪詢 |
+| `/api/admin/videos/import` | POST | 匯入既有 Mux asset |
+| `/api/admin/videos/mux-assets` | GET | 列出可匯入的 Mux assets |
 
 ## Component Architecture
 
 ### Video Sync System
 
-The live room (`src/app/webinar/[id]/live/page.tsx`) orchestrates three systems synced to video playback time:
+直播間（`live/page.tsx`）將三個系統同步到影片播放時間：
 
 ```
 VideoPlayer.onTimeUpdate(currentTime)
-    ├── ChatRoom — triggers autoChat at configured timeSec
-    ├── CTAOverlay — shows/hides between showAtSec and hideAtSec
-    └── ViewerSimulator — grows/shrinks viewer list following 3-phase attendance curve
+    ├── ChatRoom — 在 timeSec 觸發 autoChat 訊息
+    ├── CTAOverlay — 在 showAtSec~hideAtSec 區間顯示
+    └── ViewerSimulator — 按 3 階段曲線增減觀眾列表
 ```
-
-### Viewer Count System (`src/lib/viewer-simulator.ts`)
-
-The viewer count is **list-driven** — the displayed number equals the length of the simulated viewer list. No independent formula.
-
-The `NAME_POOL` (~180 names) is curated to mimic realistic North American Chinese (北美华人) naming patterns: Chinese full names with proper surnames (林嘉欣, 陈思远), English names popular in the diaspora (Vivian, Jasmine, Winston), mixed format (Cindy 陈, Tony 李), and a few natural nicknames (嘉嘉, 湾区老王). Avoids textbook placeholders (李明), celebrity names, and robotic 小X/阿X patterns.
-
-The `useViewerSimulator` hook manages a stateful name list following a 3-phase attendance curve tied to video playback time:
-
-1. **Hot start** (t=0): Instantly loads ~35% of `peakTarget` viewers (30-40% with random variance). Auto-chat sender names are prioritized in the initial pool. No join messages generated for this initial batch.
-2. **Ramp-up** (0 → `rampMinutes`): easeOutQuad growth from base (~35% of peak) to `peakTarget`, with ±8% organic jitter per tick (biased upward during ramp to avoid stalling)
-3. **Plateau** (`rampMinutes` → 80% of duration): stable at peak with churn swaps and ±8% jitter for natural fluctuation
-4. **Decline** (80% → 100%): linear drop to 60% of peak (floored at 30% of peak)
-
-Key behaviors:
-- **Hot start:** Users never enter an "empty room" — base viewers and auto-chat names are pre-loaded instantly
-- **Organic jitter:** ±8% of peak per tick creates natural fluctuation (e.g., 58→62→57→63 instead of flat 60)
-- **Chat-viewer sync:** Auto-chat sender names are always in the viewer list before their first message fires
-- **Late join fast-forward:** When `initialTimeSec > 0`, computes snapshot at that point (floored at base count)
-- **Auto-chat protection:** Names from auto-chat messages are protected from removal during ramp and plateau
-- **Stable list:** Joins append to end, leaves remove from middle — no reshuffling
-- **Cooldown:** Removed names wait 120s (video time) before becoming available again
-- **Admin config:** `viewerPeakTarget` (peak count) and `viewerRampMinutes` (ramp time) per webinar
 
 ### Live Room Access Gate
 
-The live page enforces timing-based access control via a client-side event state machine:
+Client-side 狀態機控制進場：
+- **PRE_EVENT**（>30min before）→ 重定向至 lobby
+- **PRE_SHOW**（≤30min, before start）→ 顯示 PreShowOverlay
+- **LIVE**（started）→ VideoPlayer + muted autoplay + UnmuteOverlay
+- **ENDED**（video 結束）→ 重定向至 end page
 
-- **PRE_EVENT** (>30 min before start): Redirects to `/lobby`
-- **PRE_SHOW** (<=30 min, before start): Shows PreShowOverlay in video area, rest of live room visible
-- **LIVE** (after start): VideoPlayer with muted autoplay + UnmuteOverlay
-- **ENDED** (after video duration): Redirects to `/end`
+`replay=true` 參數跳過所有門檻。
 
-The `replay=true` query parameter bypasses all gates (used by the end page replay link).
+### Key Components
 
-### Components
+| Component | 功能 |
+|-----------|------|
+| `VideoPlayer` | Video.js + HLS。禁止拖拉、container-based fullscreen、muted autoplay、late-join seeking |
+| `ChatRoom` | 自動訊息觸發 + 真實用戶訊息 + SSE 串流 + late-join backfill |
+| `CTAOverlay` | 時間觸發的促銷疊層，支援 on_video/below_video、倒數計時 |
+| `CountdownTimer` | 3D flip 動畫倒數，多種 variant |
+| `RegistrationModal` | 報名表單 + 時段選擇 + 電話國碼選擇 |
+| `SidebarTabs` | 4-tab 側邊欄（Info/Viewers/Chat/Offers） |
+| `ViewersTab` | 模擬觀眾列表（由 useViewerSimulator hook 驅動） |
+| `SubtitleOverlay` | 影片字幕疊層（binary search 定位 cue） |
+| `PreShowOverlay` / `UnmuteOverlay` / `JoinOverlay` | 播放前狀態覆蓋層 |
+| `BottomBar` | 固定底部欄：標題、LIVE 徽章、觀眾數 |
 
-| Component | Source | Role |
-|-----------|--------|------|
-| `VideoPlayer` | `src/components/video/VideoPlayer.tsx` | Video.js + HLS.js player. Supports MP4 and HLS sources. Dynamically imported (no SSR). **Seeking disabled** — blocks scrubbing, arrow keys, Home/End. Emits `onTimeUpdate`. Supports `initialTime` prop for late-join video seeking. `livestreamMode` prop hides controls, enables muted autoplay, disables PiP, and uses **container-based fullscreen** (fullscreens wrapper `<div>`, not `<video>`) to prevent mobile native controls from exposing pre-recorded duration/seekbar. CSS fixed-position fallback for older iOS. |
-| `ChatRoom` | `src/components/chat/ChatRoom.tsx` | Displays auto-chat messages at configured timestamps (with randomized variance). Accepts real user messages via API polling. Supports `initialTime` prop for late-join chat backfill. |
-| `MissedSessionPrompt` | `src/components/evergreen/MissedSessionPrompt.tsx` | Shows missed session message with countdown to next slot and reassignment button. |
-| `CTAOverlay` | `src/components/cta/CTAOverlay.tsx` | Promotional overlay with `position` support (`on_video`/`below_video`), configurable `color`, and `secondaryText`. Includes a static bonus line ("加贈限額一對一持倉分析") below the CTA button. |
-| `CountdownTimer` | `src/components/countdown/CountdownTimer.tsx` | Countdown to session start time with `onComplete` callback. |
-| `RegistrationModal` | `src/components/registration/RegistrationModal.tsx` | Full-screen modal overlay for registration. Triggered by landing page CTAs. |
-| `SidebarTabs` | `src/components/sidebar/SidebarTabs.tsx` | 4-tab container (Info/Viewers/Chat/Offers) for live room sidebar. Dark theme. |
-| `InfoTab` | `src/components/sidebar/InfoTab.tsx` | Webinar info tab: promo image, speaker info, description. |
-| `ViewersTab` | `src/components/sidebar/ViewersTab.tsx` | Renders the simulated viewer list from `useViewerSimulator` hook. Shows host badge, current user, and active viewers. |
-| `OffersTab` | `src/components/sidebar/OffersTab.tsx` | Time-based offer cards that activate with CTA events. |
-| `UnmuteOverlay` | `src/components/video/UnmuteOverlay.tsx` | Click-to-unmute overlay for muted autoplay compliance. Shows over video when audio is muted. |
-| `PreShowOverlay` | `src/components/video/PreShowOverlay.tsx` | Pre-event countdown shown in the video area for users who enter the live room before the event starts (within 30 min gate). |
-| `JoinOverlay` | `src/components/live/JoinOverlay.tsx` | Pre-playback overlay: "connecting..." → "ready to join" transition. |
-| `BottomBar` | `src/components/live/BottomBar.tsx` | Fixed bottom bar: title, date, LIVE badge, viewer count. |
+### Viewer Simulation (`src/lib/viewer-simulator.ts`)
 
-### UI Library (`src/components/ui/`)
+觀眾數 = 模擬觀眾列表長度（list-driven）。~200 個擬真名字池。
 
-Shared primitives:
-- `Button.tsx` — styled button component
-- `Badge.tsx` — status/tag badges
-- `Input.tsx` — form input
-- `Card.tsx` — content card container
+3 階段曲線：
+1. **Hot start**（t=0）：立即載入 ~35% peak 觀眾，避免空房間
+2. **Ramp → Plateau**（0 → 80% duration）：漸增至 peak，有機抖動
+3. **Decline**（80% → end）：線性下降至 60% peak
 
-## Analytics (GTM / GA4)
-
-All tracking goes through **GTM** via `@next/third-parties/google` (`GoogleTagManager` component in root layout, gated on `NEXT_PUBLIC_GTM_ID` env var). Every event uses `trackGA4()` → `window.dataLayer.push()` → GTM → GA4. No server-side event storage.
-
-**Event inventory (19 events):**
-
-| GA4 Event | Type | Page | Trigger |
-|---|---|---|---|
-| `c_scroll_depth` | Custom | Landing | 10% scroll intervals |
-| `c_signup_button_click` | Custom | Landing | CTA button click |
-| `sign_up` | Recommended | Registration | Form submit success |
-| `c_add_to_calendar` | Custom | Lobby | Google/iCal click |
-| `c_lobby_entered` | Custom | Lobby | Page load (measures reg→lobby conversion) |
-| `c_lobby_duration` | Custom | Lobby | Page exit (duration_sec + exit_type: enter_live/abandon) |
-| `c_lobby_abandon` | Custom | Lobby | pagehide before entering live (duration + minutes_until_start) |
-| `c_enter_live` | Custom | Lobby | Enter live room (button/countdown/redirect) |
-| `c_video_heartbeat` | Custom | Live Room | Every 60s while playing (uses ref to avoid interval reset) |
-| `c_video_progress` | Custom | Live Room | 5% milestone intervals |
-| `c_chat_message` | Custom | Live Room | User sends message |
-| `c_cta_view` | Custom | Live Room | CTA overlay appears |
-| `c_cta_click` | Custom | Live Room | CTA overlay button click (`cta_position`, `cta_visible_duration_sec`, `session_watch_duration_sec`) |
-| `c_cta_dismiss` | Custom | Live Room | CTA overlay dismissed |
-| `begin_checkout` | Recommended | Live + End | CTA purchase click (includes `source`, `cta_id`) |
-| `c_webinar_complete` | Custom | End Page | Page mount (includes `watch_duration_sec` via sessionStorage) |
-| `c_end_page_cta_click` | Custom | End Page | CTA button click |
-| `c_share_click` | Custom | End Page | Facebook/Twitter share |
-| `purchase` | Recommended | Checkout Return | Stripe session confirmed complete |
-| `c_purchase_confirmation` | Custom | Checkout Return | Backup event alongside purchase (cross-check vs DB orders) |
-
-**SPA pageview tracking:** `RouteChangeTracker` component pushes `page_view` events to GTM dataLayer on every client-side navigation (via `usePathname()` + `useSearchParams()`), so GA4 sees all pages — not just the initial load. GTM uses a Custom Event trigger (`event == 'page_view'`) to fire the GA4 config tag on these navigations.
-
-**gclid preservation:** `GclidPreserver` component stores gclid/UTM params in sessionStorage on first page load so Google Ads attribution survives client-side navigation. Cookies are set server-side by middleware (`src/middleware.ts`) to survive Safari ITP's 7-day cap on JavaScript-set cookies; `GclidPreserver` skips redundant client-side cookie writes when server cookies already exist.
-
-**Checkout URL attribution:** Checkout URLs (both `window.open` new tab from live page and `router.push` from end page) include UTM params from `getStoredUtmParams()`, since new tabs don't share sessionStorage.
-
-**GTM campaign fields:** GTM is configured to read UTM cookies (`utm_source`, `utm_medium`, `utm_campaign`, `gclid`) and map them to GA4 campaign parameters (`campaign_source`, `campaign_medium`, `campaign_name`, `gclid`) so GA4's built-in acquisition reports attribute events correctly across SPA navigations.
-
-**Files:** `src/lib/analytics.ts` (typed GA4 event map + `trackGA4()` function), `src/components/analytics/GclidPreserver.tsx`, `src/components/analytics/RouteChangeTracker.tsx`, `src/lib/utils.ts` (`getStoredUtmParams()`)
-
-### Attribution Tracking (Cross-Session)
-
-Registration captures the user's current UTM/gclid parameters and stores them on the `registrations` table. When generating links that cross session boundaries (EDM emails, calendar events), the system appends:
-- Current touchpoint UTM (e.g. `utm_source=edm&utm_medium=email` or `utm_source=calendar&utm_medium=google`)
-- `orig_source`, `orig_medium`, `orig_campaign`, `orig_content`, `orig_gclid` — original campaign attribution preserved from registration
-
-**Post-registration redirect:** Landing page (`page.tsx`) threads `email` param into the lobby redirect URL, ensuring calendar links created during the initial lobby visit carry the email.
-**EDM links:** `buildEmailLink()` in `utils.ts` reads attribution from the registration record (server-side). Also includes `email` param so users landing from email links have their email threaded through the page chain to checkout.
-**Calendar links:** `getLobbyUrlWithUtm()` in `lobby/page.tsx` reads attribution from sessionStorage/cookie (client-side). Also includes `email` param when available.
-
-**Email resolution priority** (at checkout): localStorage sticky session > URL `email` param > inline email input form.
-
-`GclidPreserver` parses both standard `utm_*` and `orig_*` params. GA4 conversion events automatically attach `original_*` custom dimensions via `getAttribution()` in `analytics.ts`.
-
-## Design System
-
-Defined in `src/styles/design-tokens.css` as CSS custom properties.
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--color-bg` | `#FAFAF7` | Warm ivory page background |
-| `--color-surface` | `#FFFFFF` | Card/panel background |
-| `--color-surface-elevated` | `#F5F5F0` | Elevated surfaces |
-| `--color-border` | `#E8E5DE` | Warm default borders |
-| `--color-text` | `#1A1A1A` | Primary text |
-| `--color-text-secondary` | `#6B6B6B` | Secondary text |
-| `--color-gold` | `#B8953F` | Deep gold accent — CTAs, highlights, focus rings |
-| `--color-gold-dim` | `rgba(184,149,63,0.08)` | Gold tint backgrounds |
-| `--color-live` | `#ef4444` | Live indicator red |
-
-- **Fonts:** Geist Sans / Geist Mono (via Next.js font loading)
-- **Radii:** Subtle editorial — `2px` / `4px` / `8px`
-- **Aesthetic:** Light, minimal, editorial. Warm ivory base. Deep gold accent for CTAs.
+Admin 配置：`viewerPeakTarget`（峰值）、`viewerRampMinutes`（爬升時間）。Auto-chat 名字在列表中受保護。
 
 ## Evergreen Countdown System
 
-The evergreen system dynamically generates session slots so visitors always see a webinar starting soon. Core logic lives in `src/lib/evergreen.ts`.
+動態生成時段，讓訪客永遠看到「即將開始」的研討會。
 
-### Timezone Handling
+**時段類型：**
+- **Anchor slots** — Admin 設定的每日重複時間，在配置的 timezone 中解讀
+- **Immediate slots** — 下一個 anchor 太遠時動態注入，對齊 :00/:15/:30/:45
 
-All user-facing times display in the admin-configured timezone (stored as IANA string in `EvergreenConfig.timezone`, e.g., `America/Chicago`), not the user's browser timezone. Core utilities live in `src/lib/timezone.ts`:
-
-- **`scheduleToUTC(time, timezone, baseDate)`** — Converts a HH:mm schedule time in the configured timezone to a UTC `Date`. Uses `Intl.DateTimeFormat` with `hourCycle: 'h23'` to compute the offset (no external dependencies).
-- **`getTimezoneLabel(timezone)`** — Maps IANA timezone to Chinese display label (e.g., `America/Chicago` → `美中时间 (CT)`).
-- **`formatInTimezone(isoString, timezone)`** — Formats an ISO date for display in the configured timezone using `zh-CN` locale.
-
-This ensures anchor slot times (e.g., "20:00") are interpreted as 20:00 in the configured timezone (not server UTC), and all frontend displays (landing page, registration modal, lobby, confirmation email) show consistent times with a dynamic timezone label.
-
-### Slot Generation
-
-Two slot types work together:
-- **Anchor slots** — Admin-configured daily recurring times (e.g., 8:00 AM, 9:00 PM). Interpreted in the configured timezone via `scheduleToUTC()`. Creates realistic schedule appearance.
-- **Immediate slots** — Dynamically injected when the next anchor is too far away (> `maxWaitMinutes`). Snaps to round clock boundaries (:00, :15, :30, :45).
-
-`generateEvergreenSlots(config)` produces a sorted list of upcoming slots for display.
-
-### User State Machine
-
+**用戶狀態機：**
 ```
-FIRST_VISIT → assign slot → PRE_REG → register → CONFIRMED → slot time → LIVE → video ends → MISSED
-                                                                                              ↓
-                                                                               "预约下一场" → CONFIRMED (new slot)
+首次訪問 → 指派時段 → PRE_REG → 報名 → CONFIRMED → 時段開始 → LIVE → 影片結束 → MISSED → 重新指派
 ```
 
-State determined by `getEvergreenState(assignedSlot, expiresAt, registered)` in `src/lib/evergreen.ts`.
+**Late Join：** 遲到者進入時，影片自動快轉至 `(now - slotTime)` 秒，聊天回填已過的訊息。
 
-### Late Join
+**Sticky Session：** localStorage 儲存 `{ visitorId, assignedSlot, expiresAt, registered, email }`，確保重整後倒數一致。
 
-When a user enters after their slot started but before it expired (slot + video duration):
-- **Video**: Seeks to `(now - slotTime)` seconds via `initialTime` prop on `VideoPlayer`
-- **Chat**: Backfills all auto-chat messages with `timeSec <= elapsedSeconds` (rendered without animation)
-- **CTAs**: Follow video position as normal (no change needed)
-
-### Sticky Session (Client-Side)
-
-`localStorage` key `webinar-{id}-evergreen` stores: `{ visitorId, assignedSlot, expiresAt, registered, registrationId, email }`. Ensures consistent countdown across page refreshes. The `email` field is set at registration time; for users entering via email/calendar links (different device/browser), `email` is threaded via URL search params instead.
-
-### Admin Configuration
-
-The admin panel (`WebinarForm.tsx`) exposes evergreen settings: daily anchor times, immediate slot interval/buffer/trigger threshold, timezone, and display slot count. Evergreen is always enabled (the `Session` type was removed).
+**Timezone：** `src/lib/timezone.ts` — 所有用戶端時間顯示使用 admin 配置的 timezone（IANA 字串），非瀏覽器 timezone。
 
 ## Video Storage & Delivery
 
-Videos are uploaded directly to **Mux** via Mux Direct Uploads. The browser uses `@mux/upchunk` for chunked, resumable uploads — no intermediary storage. The server creates a Mux Direct Upload URL, the browser streams the file to Mux, and Mux auto-creates an asset and transcodes to HLS adaptive bitrate (360p–1080p). The client polls a status endpoint for upload completion and transcoding (up to 2 hours to accommodate large/long videos). Mux serves video via its global CDN at `stream.mux.com`. The webinar's `videoUrl` stores the Mux HLS URL (`https://stream.mux.com/{PLAYBACK_ID}.m3u8`).
+上傳流程：瀏覽器 → `@mux/upchunk`（分塊可恢復上傳）→ Mux 轉碼 → HLS 自適應串流 → `stream.mux.com` CDN
 
-Upload flow: Browser → Mux Direct Upload (`@mux/upchunk`, chunked/resumable) → Mux transcodes → Status polling (max 2h) → Ready
+Webinar 的 `videoUrl` 儲存 Mux HLS URL。Admin 也可直接貼外部 MP4/HLS URL。
 
-**Chunking strategy:** Chunk size scales dynamically with file size to reduce HTTP request count for large uploads — 5MB (<1GB), 16MB (1-5GB), 32MB (5-10GB), 64MB (>10GB). Each chunk retries up to 10 times with a 3-second delay. UpChunk's offline/online detection pauses and auto-resumes uploads on network loss.
+## Email (`src/lib/email.ts`)
 
-**Limits:** Max upload size 20GB (client-side enforced). Mux quality tier: `basic` (720p max renditions). Designed to support videos up to ~3 hours in duration.
+SendGrid fetch-based（無 SDK）。`SENDGRID_API_KEY` 未設定時 console log。
 
-**Fallback:** Admin can paste any external MP4/HLS URL directly, bypassing the upload flow.
+| 模板 | 用途 |
+|------|------|
+| `confirmationEmail()` | 報名確認（speaker 頭像、活動資訊、權益列表） |
+| `reminderEmail()` | 24h/1h 開場提醒 |
+| `followUpEmail()` | 回放連結 + CTA |
+| `purchaseConfirmationEmail()` | 訂單確認 + 啟用碼 + 操作步驟 |
 
-**Admin API routes:**
+## Analytics (GTM / GA4)
 
-| Endpoint | Methods | Purpose |
-|----------|---------|---------|
-| `/api/admin/videos` | GET, POST | List video library / initiate upload (returns Mux Direct Upload URL) |
-| `/api/admin/videos/[id]` | PATCH, DELETE | Update metadata / delete video file |
-| `/api/admin/videos/mux-assets` | GET | List Mux assets available for import (excludes already-imported) |
-| `/api/admin/videos/import` | POST | Import an existing Mux asset into the local video library |
+GTM 透過 `@next/third-parties/google` 注入。所有事件經 `trackGA4()` → `window.dataLayer.push()` → GTM → GA4。
 
-**Admin UI:** The `VideoManager` component replaces the old URL text field in the webinar form, providing drag-and-drop upload with a video library picker. Only MP4 and HLS sources are supported.
+**關鍵機制：**
+- **SPA pageview：** `RouteChangeTracker` 在 client-side navigation 時推送 `page_view`
+- **gclid 保留：** `GclidPreserver` 將 gclid/UTM 存入 sessionStorage + cookies（middleware 設定 server-side cookie 繞過 Safari ITP）
+- **跨 session 歸因：** 報名時儲存 UTM/gclid，EDM/行事曆連結攜帶 `orig_*` 參數保留原始來源
+
+**事件清單（19 個）：** `c_scroll_depth`, `c_signup_button_click`, `sign_up`, `c_add_to_calendar`, `c_lobby_entered`, `c_lobby_duration`, `c_lobby_abandon`, `c_enter_live`, `c_video_heartbeat`, `c_video_progress`, `c_chat_message`, `c_cta_view`, `c_cta_click`, `c_cta_dismiss`, `begin_checkout`, `c_webinar_complete`, `c_end_page_cta_click`, `c_share_click`, `purchase`
+
+## Design System
+
+定義在 `src/styles/design-tokens.css`。
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--color-bg` | `#FAFAF7` | 暖象牙色背景 |
+| `--color-surface` | `#FFFFFF` | 卡片/面板背景 |
+| `--color-border` | `#E8E5DE` | 暖色邊框 |
+| `--color-text` | `#1A1A1A` | 主文字 |
+| `--color-gold` | `#B8953F` | 深金色強調（CTA、focus ring） |
+| `--color-live` | `#ef4444` | LIVE 紅色 |
+
+字體 Geist Sans / Geist Mono。圓角 2px / 4px / 8px。
 
 ## Key Constraints
 
-1. **No video seeking** — Business requirement. VideoPlayer blocks scrubbing, keyboard seeks, and programmatic seeking. Not a bug.
-1a. **Container-based fullscreen** — In livestream mode, the native Video.js fullscreen button is replaced with a custom button that fullscreens the wrapper `<div>` (not `<video>`). This prevents mobile browsers (especially iOS Safari) from showing native video controls that expose duration and seekbar. Falls back to CSS `position: fixed` on older iOS. `playsinline` attribute prevents iOS auto-native-fullscreen on play.
-2. **No WebSocket** — Chat uses SSE (Server-Sent Events) via `chat-broker.ts` pub/sub broker + auto-chat messages. Socket.io planned for production.
-3. **Admin password auth** — `ADMIN_PASSWORD` env var + HMAC-signed cookie session (24h expiry). Middleware at `src/middleware.ts` protects `/admin/*` and `/api/admin/*`. Login page at `/admin/login`.
-4. **`NEXT_PUBLIC_BASE_URL` recommended in production** — Email links (confirmation, reminders) and Stripe checkout prefer this env var for public-facing URLs. If unset, routes fall back to the request's `Host` header + `x-forwarded-proto` (set by reverse proxies like Zeabur), then to a hardcoded `https://mike.cmoney.cc` default.
-5. **North American Chinese locale** — Phone validation: US/Canada 10-digit format. Date formatting: `zh-CN` locale.
-6. **No i18n framework** — All UI text is hardcoded Simplified Chinese (zh-CN). i18n planned for future.
-7. **Unsplash images** — `next.config.ts` allows remote images from `*.unsplash.com`.
-8. **Dynamic video import** — Video.js imported client-side only to avoid SSR issues.
+1. **禁止影片拖拉** — 商業需求。VideoPlayer 封鎖 scrubbing、鍵盤快捷鍵、程式化 seeking
+2. **Container-based fullscreen** — fullscreen wrapper `<div>` 而非 `<video>`，防止行動裝置原生控制項暴露時長
+3. **SSE 聊天** — 記憶體 pub/sub broker，WebSocket 規劃中
+4. **Admin 密碼認證** — HMAC-signed cookie（24h 過期），middleware 保護 admin 路由
+5. **`NEXT_PUBLIC_BASE_URL` 建議設定** — 郵件連結和 Stripe 回調使用，fallback 為 Host header → `https://mike.cmoney.cc`
+6. **北美華人 locale** — 電話驗證 US/Canada 10 位數，日期 `zh-CN`
+7. **無 i18n** — 所有 UI 文字硬編碼簡體中文
 
-## Known Gaps vs SPEC.md
+## Known Gaps
 
-Modules defined in SPEC.md but **not yet implemented**:
-
-- **Picture-in-Picture (PiP)** — Floating mini-player when scrolling
-- **WebSocket real-time chat** — Currently simulated with polling + auto-chat
-- **Polls / Q&A** — Interactive engagement features
-- **Advanced admin** — Full CRUD dashboard, analytics, session management
-- **Social sharing OG tags** — Share buttons added to end page, but OG meta tags not yet implemented
-- **Multi-language support** — Currently zh-CN only, no language switcher
-- **Recording/replay** — Post-live replay functionality
+- Picture-in-Picture 浮動迷你播放器
+- WebSocket 即時聊天
+- 投票 / Q&A 互動功能
+- 進階 admin 分析儀表板
+- OG meta tags（社群分享預覽）
+- 多語言支援
