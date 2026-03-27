@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Webinar MVP — 仿直播研讨会平台
 
-## Getting Started
+播放预录视频，搭配实时互动功能（自动聊天、CTA 弹窗、观众人数模拟），打造仿真直播体验。面向北美华人市场，界面语言为简体中文。
 
-First, run the development server:
+## 技术栈
+
+- **框架：** Next.js 16 (App Router) + React 19 + TypeScript
+- **样式：** Tailwind CSS v4
+- **视频：** Video.js + HLS.js（Mux 托管）
+- **数据库：** Supabase (Postgres)
+- **支付：** Stripe Embedded Checkout
+- **邮件：** SendGrid
+- **部署：** Zeabur（容器化部署）
+
+## 快速开始
 
 ```bash
+# 安装依赖
+npm install
+
+# 配置环境变量（参考 .env.example 或向管理员索取）
+cp .env.example .env.local
+
+# 启动开发服务器
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+打开 [http://localhost:3000](http://localhost:3000) 查看。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 常用命令
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 命令 | 说明 |
+|------|------|
+| `npm run dev` | 本地开发（端口 3000） |
+| `npm run build` | 生产构建 |
+| `npm start` | 启动生产服务器 |
+| `npm run lint` | ESLint 检查 |
 
-## Learn More
+## 用户流程
 
-To learn more about Next.js, take a look at the following resources:
+```
+首页 (/) → 注册 (弹窗) → 等候室 (/webinar/[id]/lobby) → 直播间 (/webinar/[id]/live) → 结束页 (/webinar/[id]/end)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 项目文档
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `CLAUDE.md` — AI 协作指南与项目约束
+- `docs/architecture.md` — 系统架构（持续更新）
+- `docs/decisions.md` — 架构决策记录
+- `SPEC.md` — 产品需求规格书

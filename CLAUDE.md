@@ -19,6 +19,7 @@ Reference platform: JoinLive (live.yongmingu.com)
 9. **Record non-obvious decisions** in `docs/decisions.md`. When choosing between alternatives, append: date, decision, and why. Keep entries to 3-5 lines.
 10. To prevent inaccuracies caused by outdated training data, you are required to use web search tools when writing code for specific models. Always cross-reference parameters and implementation details with the most recent official documentation to accommodate the ever-changing nature of AI APIs.
 11. 请使用第一性原理思考。你不能总是假设我非常清楚自己想要什么和该怎么得到。请保持审慎，从原始需求和问题出发，如果动机和目标不清晰，停下来和我讨论。如果目标清晰但是路径不是最短，告诉我，并且建议更好的办法
+12. 使用繁體中文寫文件
 
 ## Principles to Follow
 This application simulates a live streaming experience using prerecorded videos. All video playback must strictly preserve the illusion of a live broadcast at all times.
