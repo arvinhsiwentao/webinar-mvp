@@ -1,0 +1,388 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { Webinar } from '@/lib/types';
+import { trackGA4 } from '@/lib/analytics';
+import { formatInTimezone, getTimezoneLabel } from '@/lib/timezone';
+import PersistentCountdown from '@/components/countdown/PersistentCountdown';
+import { useRegistrationForm } from '@/components/registration/useRegistrationForm';
+import RegistrationModal from '@/components/registration/RegistrationModal';
+
+// Mike是麦克 专属 Landing Page
+// 这是一个 Single-purpose site，默认显示 Mike 的 webinar
+const DEFAULT_WEBINAR_ID = '1';
+
+export default function HomePage() {
+  const router = useRouter();
+
+  const [webinar, setWebinar] = useState<Webinar | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [evergreenSlots, setEvergreenSlots] = useState<Array<{ slotTime: string; type: string }>>([]);
+  const [evergreenTimezone, setEvergreenTimezone] = useState('America/Chicago');
+  const [selectedSlotTime, setSelectedSlotTime] = useState('');
+  const [modalSource, setModalSource] = useState<string>('');
+
+  const form = useRegistrationForm({
+    webinarId: DEFAULT_WEBINAR_ID,
+    assignedSlot: selectedSlotTime || evergreenSlots[0]?.slotTime,
+    source: modalSource,
+    onSuccess: (name) => {
+      const slotTime = selectedSlotTime || evergreenSlots[0]?.slotTime;
+
+      // Update sticky session as registered
+      const sticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
+      if (sticky) {
+        try {
+          const parsed = JSON.parse(sticky);
+          parsed.registered = true;
+          parsed.email = form.email;
+          parsed.assignedSlot = slotTime;
+          localStorage.setItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`, JSON.stringify(parsed));
+        } catch { /* ignore */ }
+      }
+      const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
+      const emailParam = form.email ? `&email=${encodeURIComponent(form.email)}` : '';
+      router.push(`/webinar/${DEFAULT_WEBINAR_ID}/lobby?name=${encodeURIComponent(name)}${slotParam}${emailParam}`);
+    },
+  });
+
+  // Auto-select first slot when evergreen slots load (if no selection yet)
+  useEffect(() => {
+    if (evergreenSlots.length > 0 && !selectedSlotTime) {
+      setSelectedSlotTime(evergreenSlots[0].slotTime);
+    }
+  }, [evergreenSlots, selectedSlotTime]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Fetch fresh evergreen slots from the API, respecting localStorage sticky session
+  const refreshEvergreenSlots = useCallback(async () => {
+    try {
+      const slotRes = await fetch(`/api/webinar/${DEFAULT_WEBINAR_ID}/next-slot`);
+      if (!slotRes.ok) return;
+      const slotData = await slotRes.json();
+      setEvergreenSlots(slotData.slots);
+      if (slotData.config?.timezone) {
+        setEvergreenTimezone(slotData.config.timezone);
+      }
+
+      // Store sticky session in localStorage
+      const existingSticky = localStorage.getItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`);
+      const now = new Date();
+      let shouldUpdate = true;
+
+      if (existingSticky) {
+        try {
+          const parsed = JSON.parse(existingSticky);
+          // Only reuse stored slot if it hasn't expired and is still in the future
+          if (new Date(parsed.expiresAt) > now && new Date(parsed.assignedSlot) > now) {
+            shouldUpdate = false;
+            // Use the stored slot instead
+            setEvergreenSlots(prev => {
+              const stored = { slotTime: parsed.assignedSlot, type: 'stored' };
+              return [stored, ...prev.filter(s => s.slotTime !== parsed.assignedSlot)].slice(0, slotData.slots.length);
+            });
+          }
+        } catch { /* invalid stored data, update */ }
+      }
+
+      if (shouldUpdate && slotData.slots.length > 0) {
+        const visitorId = localStorage.getItem('webinar-visitor-id') || `v_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        if (!localStorage.getItem('webinar-visitor-id')) {
+          localStorage.setItem('webinar-visitor-id', visitorId);
+        }
+        localStorage.setItem(`webinar-${DEFAULT_WEBINAR_ID}-evergreen`, JSON.stringify({
+          visitorId,
+          assignedSlot: slotData.countdownTarget,
+          expiresAt: slotData.expiresAt,
+          registered: false,
+          registrationId: null,
+        }));
+      }
+    } catch {
+      // Fall back to existing slots
+    }
+  }, []);
+
+  useEffect(() => {
+    async function fetchWebinar() {
+      try {
+        const res = await fetch(`/api/webinar/${DEFAULT_WEBINAR_ID}`);
+        if (!res.ok) throw new Error('Webinar not found');
+        const data = await res.json();
+        setWebinar(data.webinar);
+
+        // Fetch evergreen slots
+        if (data.webinar.evergreen?.enabled) {
+          await refreshEvergreenSlots();
+        }
+      } catch {
+        setError('找不到此研讨会');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchWebinar();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Scroll depth tracking
+  useEffect(() => {
+    const milestones = new Set<number>();
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollHeight <= 0) return;
+      const scrollPct = Math.round((window.scrollY / scrollHeight) * 100);
+      for (const m of [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]) {
+        if (scrollPct >= m && !milestones.has(m)) {
+          milestones.add(m);
+          trackGA4('c_scroll_depth', { percent: m, page: 'landing' });
+        }
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
+        <div className="w-8 h-8 border border-[#E8E5DE] border-t-neutral-900 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error || !webinar) {
+    return (
+      <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
+        <div className="text-center text-neutral-900">
+          <p className="text-xl mb-4">{error || '找不到研讨会'}</p>
+          <a href="/admin" className="text-neutral-500 hover:text-neutral-900">
+            前往后台设置
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  const openModal = async (source: string) => {
+    // Re-fetch fresh evergreen slots so the displayed time is current
+    if (webinar?.evergreen?.enabled) {
+      await refreshEvergreenSlots();
+    }
+    trackGA4('c_signup_button_click', { button_position: source, webinar_id: DEFAULT_WEBINAR_ID });
+    setModalSource(source);
+    setIsModalOpen(true);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FAFAF7] text-neutral-900">
+
+      {/* ========== Section 1: HERO — Full-bleed background image with CTA ========== */}
+      <section className="w-full bg-[#0a0a08]">
+        <div className="relative max-w-[1400px] mx-auto">
+          {/* Responsive hero image — natural aspect ratio, no cropping */}
+          <picture>
+            {/* Desktop: WebP preferred, compressed JPG fallback */}
+            <source media="(min-width: 768px)" srcSet="/images/hero-desktop.webp" type="image/webp" />
+            <source media="(min-width: 768px)" srcSet="/images/hero-desktop-opt.jpg" type="image/jpeg" />
+            {/* Mobile: WebP preferred, compressed JPG fallback */}
+            <source srcSet="/images/hero-mobile.webp" type="image/webp" />
+            <img
+              src="/images/hero-mobile-opt.jpg"
+              alt="从负债50万到43岁财富自由 — 抓准AI风口、高胜率的美股投资策略"
+              className="w-full h-auto block"
+              fetchPriority="high"
+            />
+          </picture>
+
+          {/* CTA Button — positioned over the image */}
+          <div className="absolute bottom-[6%] md:bottom-[10%] left-1/2 -translate-x-1/2 z-10 animate-[heroFadeIn_0.8s_ease-out_0.3s_both]">
+            <button
+              onClick={() => openModal('hero')}
+              className="hero-cta group relative overflow-hidden px-12 py-4 md:px-16 md:py-4.5 lg:px-20 lg:py-5 rounded-2xl border border-[#C9A962] bg-[#1a1508]/70 backdrop-blur-sm text-[#E8D5A3] text-lg md:text-xl lg:text-2xl font-bold tracking-widest cursor-pointer whitespace-nowrap transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_15px_rgba(201,169,98,0.4),0_0_40px_rgba(201,169,98,0.2),0_0_80px_rgba(184,149,63,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(201,169,98,0.6),0_0_50px_rgba(201,169,98,0.3),0_0_100px_rgba(184,149,63,0.15),inset_0_1px_1px_rgba(255,255,255,0.15)] hover:scale-105 active:scale-95 animate-[ctaGlow_3s_ease-in-out_infinite]"
+            >
+              {/* Glass highlight — top edge reflection */}
+              <span className="absolute inset-x-0 top-0 h-[45%] pointer-events-none rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" />
+              {/* Shimmer sweep overlay */}
+              <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[ctaShimmer_3s_ease-in-out_infinite_1.5s]" />
+              </span>
+              <span className="relative z-10">免费听策略</span>
+            </button>
+            <p className="mt-2.5 text-center text-xs md:text-sm tracking-wide text-[#E8D5A3]/80">
+              🎁 加贈限額一對一持倉分析
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ========== Section 2: SPEAKER INTRO — Avatar Left, Bio Right ========== */}
+      <section className="py-12 md:py-16 px-6 lg:px-12 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center md:items-center gap-6 md:gap-10">
+            {/* Circular Avatar */}
+            <div className="flex-shrink-0">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-[#F5F5F0] shadow-sm">
+                {(webinar.speakerAvatar || webinar.speakerImage) ? (
+                  <Image
+                    src={webinar.speakerAvatar || webinar.speakerImage!}
+                    alt={webinar.speakerName}
+                    width={160}
+                    height={160}
+                    className="w-full h-full object-cover"
+                    priority
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#F5F5F0]" />
+                )}
+              </div>
+            </div>
+
+            {/* Name + Bio */}
+            <div className="text-center md:text-left">
+              <h2 className="text-xl md:text-2xl font-bold text-neutral-900 mb-3">
+                {webinar.speakerName}
+              </h2>
+              <p className="text-sm md:text-base text-neutral-600 leading-relaxed">
+                一个 32 岁负债 50 万美金的华人，靠一套投资策略在 43 岁实现财务自由，目前拥有20万+ YouTube订阅者，3,000+付费会员社群。
+              </p>
+              <p className="text-sm md:text-base text-neutral-600 leading-relaxed mt-3">
+                不是天才、更不是富二代，就是一个普通人进对时机、找对方法，从此破局致富、阶级跃升，现在他把整套方法毫无保留地讲给你听。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========== Section 3+4: DATE SCHEDULE + COUNTDOWN (unified) ========== */}
+      <section className="py-16 md:py-24 px-6 lg:px-12 bg-[#F5F5F0]">
+        <div className="max-w-3xl mx-auto flex flex-col items-center">
+          {/* Date Schedule */}
+          <div className="space-y-6 md:space-y-8 mb-14 w-full max-w-xl">
+            {evergreenSlots.map((item, idx) => {
+              const dateStr = item.slotTime;
+              const { date: fullDate, time } = formatInTimezone(dateStr, evergreenTimezone);
+              const dateObj = new Date(dateStr);
+              const month = Number(new Intl.DateTimeFormat('en-US', { timeZone: evergreenTimezone, month: 'numeric' }).format(dateObj));
+              const day = Number(new Intl.DateTimeFormat('en-US', { timeZone: evergreenTimezone, day: 'numeric' }).format(dateObj));
+
+              return (
+                <div
+                  key={idx}
+                  className="flex items-center gap-5 md:gap-7 justify-center"
+                >
+                  <div className="flex-shrink-0 w-16 md:w-20 text-center rounded-md border border-[#D8CFB6] bg-white/85 overflow-hidden shadow-[0_2px_8px_rgba(15,23,42,0.08)]">
+                    <div className="bg-[#B8953F] text-white text-xs md:text-sm font-medium px-2.5 py-1 mb-1">
+                      {month}月
+                    </div>
+                    <div className="text-2xl md:text-3xl font-bold text-neutral-900 pb-1.5">{day}</div>
+                  </div>
+                  <div>
+                    <p className="text-lg md:text-2xl font-bold text-neutral-900">{fullDate}</p>
+                    <p className="text-sm md:text-base text-neutral-500">
+                      {time} {getTimezoneLabel(evergreenTimezone)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Countdown Timer */}
+          <PersistentCountdown
+            slots={evergreenSlots}
+          />
+        </div>
+      </section>
+
+      {/* ========== Section 5: BENEFITS — Checklist Style ========== */}
+      <section className="py-16 md:py-24 px-6 lg:px-12 bg-[#FAFAF7]">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-10">
+            讲座中你将会获得什么：
+          </h2>
+
+          <div className="space-y-5 pl-1">
+            {(webinar.highlights && webinar.highlights.length > 0
+              ? webinar.highlights
+              : [
+                  '公开 Mike 如何从负债到达成财务自由的完整路径',
+                  '独家公开 Mike 的美股持仓清单与选股逻辑',
+                  '打造你的被动收入系统—用对的投资策略让钱自己长大',
+                  '学会判断「什么时候该进场」— 抓住 AI 时代的最佳买入时机',
+                  'APP 陪跑带你执行 — 不用自己盯盘，打开手机就知道怎么做',
+                ]
+            ).map((item, idx) => (
+              <div key={idx} className="flex items-start gap-3.5">
+                {/* Gold checkmark circle */}
+                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-[#B8953F] flex items-center justify-center mt-0.5">
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-base md:text-lg text-neutral-800 leading-relaxed">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
+      {/* ========== Section 7: URGENCY / DISCLAIMER ========== */}
+      <section className="py-16 md:py-20 px-6 lg:px-12 bg-white border-t-[3px] border-[#B8953F]">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="text-6xl mb-6">&#x26A0;&#xFE0F;</div>
+          <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-6">
+            限时公开，名额有限
+          </h2>
+          <p className="text-sm text-neutral-500 mb-8 leading-relaxed">
+            {webinar.disclaimerText || '本次讲座内容仅为知识分享与经验探讨，不构成任何形式的投资建议、理财推荐或收益保证。所有提及的策略、工具及案例均为 Mike 个人投资经验分享。'}
+          </p>
+          <button
+            onClick={() => openModal('footer')}
+            className="inline-block bg-[#B8953F] text-white px-10 py-4 text-lg font-semibold tracking-wide hover:bg-[#A6842F] hover:shadow-[0_0_40px_rgba(184,149,63,0.3)] transition-all"
+          >
+            锁定名额，观看讲座
+          </button>
+        </div>
+      </section>
+
+      {/* ========== Footer ========== */}
+      <footer className="py-8 px-6 bg-[#F5F5F0] border-t border-[#E8E5DE]">
+        <div className="max-w-4xl mx-auto text-center text-xs text-neutral-400 space-y-2">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <a href="#" className="hover:text-[#B8953F] underline">隐私政策</a>
+            <span>|</span>
+            <a href="#" className="hover:text-[#B8953F] underline">服务条款</a>
+            <span>|</span>
+            <a href="#" className="hover:text-[#B8953F] underline">退款政策</a>
+          </div>
+          <p>&copy; {new Date().getFullYear()} {webinar.speakerName}. All rights reserved.</p>
+        </div>
+      </footer>
+
+      {/* ========== Registration Modal ========== */}
+      <RegistrationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        name={form.name}
+        onNameChange={form.setName}
+        email={form.email}
+        onEmailChange={form.setEmail}
+        phone={form.phone}
+        onPhoneChange={form.setPhone}
+        onSubmit={form.handleSubmit}
+        submitting={form.submitting}
+        formError={form.formError}
+        evergreenSlots={evergreenSlots}
+        selectedSlotTime={selectedSlotTime}
+        onSlotTimeChange={setSelectedSlotTime}
+        timezone={evergreenTimezone}
+      />
+    </div>
+  );
+}
