@@ -556,7 +556,7 @@ export default function HomePageV2() {
                     走过的每一个弯路，都变成了现在能教给你的方法。
                   </p>
                   <p>
-                    著有投资畅销书《破局致富》，曾受邀电视财经节目分享投资策略，
+                    著有投资畅销书《人生重启》，曾受邀电视财经节目分享投资策略，
                     并与台湾最大财经平台 CMoney 合作推出投资工具。
                   </p>
                   <p className="font-medium text-neutral-200">
@@ -576,7 +576,7 @@ export default function HomePageV2() {
                     <svg className="w-3.5 h-3.5 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    畅销书《破局致富》作者
+                    畅销书《人生重启》作者
                   </a>
                   <a
                     href="https://www.youtube.com/watch?v=cWsTo3Vp-Wc"
@@ -639,10 +639,10 @@ export default function HomePageV2() {
                   className="group/card flex flex-col items-center gap-3 rounded-xl bg-white/[0.04] border border-white/10 hover:border-[#C9A962]/40 hover:bg-white/[0.07] p-5 transition-all duration-300 text-center"
                 >
                   <div className="w-16 h-22 rounded overflow-hidden shadow-lg">
-                    <Image src="/images/book-cover.jpg" alt="《破局致富》" width={64} height={88} className="w-full h-full object-cover" />
+                    <Image src="/images/book-cover.jpg" alt="《人生重启》" width={64} height={88} className="w-full h-full object-cover" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-neutral-200 group-hover/card:text-white transition-colors">《破局致富》</p>
+                    <p className="text-sm font-semibold text-neutral-200 group-hover/card:text-white transition-colors">《人生重启》</p>
                     <p className="text-xs text-neutral-500 mt-0.5">投资畅销书</p>
                   </div>
                 </a>
