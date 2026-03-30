@@ -567,7 +567,7 @@ export default function HomePageV2() {
                 {/* 第三方背书标签 */}
                 <div className="mt-5 flex flex-wrap items-center gap-2 justify-center md:justify-start">
                   <a
-                    href="https://www.eslite.com/product/10012011762682978678009"
+                    href="https://www.amazon.in/%E4%BA%BA%E7%94%9F%E9%87%8D%E5%95%9F%EF%BC%9A%E7%A7%BB%E6%B0%91%E7%BE%8E%E5%9C%8B%E8%B7%A8%E8%B6%8A%E8%B2%A1%E5%AF%8C%E9%AB%98%E7%89%86%EF%BC%8C%E5%BE%9E%E6%99%AE%E9%80%9A%E4%BA%BA%E5%88%B0%E4%B8%80%E5%80%8B%E6%9C%89%E9%8C%A2%E7%9A%84%E6%99%AE%E9%80%9A%E4%BA%BA-Traditional-Chinese-Mike-ebook/dp/B0FQRN9YKD"
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => trackExternalLink('book', 'speaker_badge')}
@@ -632,7 +632,7 @@ export default function HomePageV2() {
 
                 {/* 书籍 */}
                 <a
-                  href="https://www.eslite.com/product/10012011762682978678009"
+                  href="https://www.amazon.in/%E4%BA%BA%E7%94%9F%E9%87%8D%E5%95%9F%EF%BC%9A%E7%A7%BB%E6%B0%91%E7%BE%8E%E5%9C%8B%E8%B7%A8%E8%B6%8A%E8%B2%A1%E5%AF%8C%E9%AB%98%E7%89%86%EF%BC%8C%E5%BE%9E%E6%99%AE%E9%80%9A%E4%BA%BA%E5%88%B0%E4%B8%80%E5%80%8B%E6%9C%89%E9%8C%A2%E7%9A%84%E6%99%AE%E9%80%9A%E4%BA%BA-Traditional-Chinese-Mike-ebook/dp/B0FQRN9YKD"
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => trackExternalLink('book', 'speaker_card')}
