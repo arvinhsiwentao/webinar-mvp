@@ -87,6 +87,24 @@ html {
   }
 }
 
+/* Hero CTA — gift bounce + glow for bonus line */
+@keyframes giftBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.75; }
+  50% { transform: translateY(-3px); opacity: 1; }
+}
+
+/* Photo marquee — infinite horizontal scroll */
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Speaker avatar — slow rotating ring */
+@keyframes speakerRingSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Hero CTA — shimmer sweep across button */
 @keyframes ctaShimmer {
   0% {
@@ -95,6 +113,15 @@ html {
   100% {
     transform: translateX(100%);
   }
+}
+
+/* Hide scrollbar for horizontal-scroll nav on mobile */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Safe area padding for sticky bottom CTA (iPhone notch) */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 /* Reduced motion: disable decorative animations */

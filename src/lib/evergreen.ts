@@ -11,9 +11,10 @@ export function generateEvergreenSlots(
 ): EvergreenSlot[] {
   const { dailySchedule, immediateSlot, displaySlotCount, timezone } = config;
 
-  // 1. Generate anchor slots for today + next 2 days
+  // 1. Generate anchor slots for today + next several days (enough to fill displaySlotCount)
   const anchorSlots: EvergreenSlot[] = [];
-  for (let dayOffset = 0; dayOffset <= 2; dayOffset++) {
+  const daysToGenerate = Math.max(3, displaySlotCount + 1);
+  for (let dayOffset = 0; dayOffset <= daysToGenerate; dayOffset++) {
     for (const schedule of dailySchedule) {
       const baseDate = new Date(now.getTime() + dayOffset * 86400000);
       const candidate = scheduleToUTC(schedule.time, timezone, baseDate);

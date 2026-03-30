@@ -24,6 +24,13 @@ type GA4EventMap = {
   c_lobby_abandon: { webinar_id: string; duration_sec: number; minutes_until_start: number }
   c_lobby_duration: { webinar_id: string; duration_sec: number; exit_type: 'enter_live' | 'abandon' }
   c_purchase_confirmation: { webinar_id: string; transaction_id: string; order_status: string }
+
+  // Landing Page V2 engagement events
+  c_external_link_click: { link_type: string; link_position: string }
+  c_faq_click: { question_index: number; question_text: string }
+  c_nav_click: { nav_item: string }
+  c_modal_close: { had_input: boolean; source: string }
+  c_schedule_card_click: { slot_index: number; slot_type: string; remaining_seats: number }
 }
 
 type GA4EventName = keyof GA4EventMap

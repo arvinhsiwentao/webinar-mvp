@@ -1,0 +1,217 @@
+'use client';
+
+import { useEffect, useCallback } from 'react';
+import { formatDate, formatTime } from '@/lib/utils';
+import { getTimezoneLabel } from '@/lib/timezone';
+import { trackGA4 } from '@/lib/analytics';
+
+interface RegistrationModalV2Props {
+  isOpen: boolean;
+  onClose: () => void;
+  name: string;
+  onNameChange: (value: string) => void;
+  email: string;
+  onEmailChange: (value: string) => void;
+  phone: string;
+  onPhoneChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  submitting: boolean;
+  formError: string;
+  evergreenSlots?: Array<{ slotTime: string; type: string }>;
+  selectedSlotTime?: string;
+  onSlotTimeChange?: (slotTime: string) => void;
+  timezone?: string;
+  /** 如果从场次卡片点进来，已有预选场次，隐藏选择器 */
+  hideSlotSelector?: boolean;
+  /** 追踪来源 */
+  source?: string;
+}
+
+export default function RegistrationModalV2({
+  isOpen,
+  onClose,
+  name,
+  onNameChange,
+  email,
+  onEmailChange,
+  phone,
+  onPhoneChange,
+  onSubmit,
+  submitting,
+  formError,
+  evergreenSlots,
+  selectedSlotTime,
+  onSlotTimeChange,
+  timezone,
+  hideSlotSelector = false,
+  source = '',
+}: RegistrationModalV2Props) {
+  const handleClose = useCallback(() => {
+    trackGA4('c_modal_close', {
+      had_input: name.length > 0 || email.length > 0,
+      source,
+    });
+    onClose();
+  }, [name, email, source, onClose]);
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    if (isOpen) window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, handleClose]);
+
+  if (!isOpen) return null;
+
+  // 显示已选场次的时间
+  const selectedSlotDisplay = selectedSlotTime && timezone
+    ? `${formatDate(selectedSlotTime, timezone)} ${formatTime(selectedSlotTime, timezone)} ${getTimezoneLabel(timezone)}`
+    : null;
+
+  return (
+    <div className="fixed inset-0 z-[2147483646] flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={handleClose}
+      />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-md mx-4 bg-[#111318] border border-[#C9A962]/20 rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-300">
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-neutral-500 hover:text-neutral-300 transition-colors cursor-pointer"
+          aria-label="关闭"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
+
+        <div className="px-8 md:px-10 pt-8 pb-6">
+          {/* Heading */}
+          <h2 className="text-xl md:text-2xl font-bold text-center text-white mb-2" style={{ fontFamily: '"Noto Serif SC", serif' }}>
+            锁定你的免费席位
+          </h2>
+          <p className="text-sm text-neutral-400 text-center mb-6 inline-flex items-center justify-center gap-1.5 w-full animate-[giftBounce_2s_ease-in-out_infinite]">
+            <svg className="w-4 h-4 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+            </svg>
+            报名即有机会获得 Mike 一对一持仓分析
+          </p>
+
+          {/* 已选场次提示 */}
+          {hideSlotSelector && selectedSlotDisplay && (
+            <div className="mb-5 flex items-center gap-2 px-4 py-3 rounded-lg bg-[#C9A962]/10 border border-[#C9A962]/20">
+              <svg className="w-4 h-4 text-[#C9A962] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm text-[#E8D5A3]">{selectedSlotDisplay}</p>
+            </div>
+          )}
+
+          <form onSubmit={onSubmit} className="space-y-4">
+            {/* Name field */}
+            <div className="relative">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => onNameChange(e.target.value)}
+                placeholder="你的昵称 *"
+                className="w-full h-[50px] px-4 pr-10 text-base bg-white/[0.06] border border-white/10 rounded-lg text-white placeholder-neutral-500 focus:border-[#C9A962] focus:outline-none transition-colors"
+                required
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+            </div>
+
+            {/* Email field */}
+            <div className="relative">
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => onEmailChange(e.target.value)}
+                placeholder="电子邮箱 *"
+                className="w-full h-[50px] px-4 pr-10 text-base bg-white/[0.06] border border-white/10 rounded-lg text-white placeholder-neutral-500 focus:border-[#C9A962] focus:outline-none transition-colors"
+                required
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+              </span>
+            </div>
+            <p className="text-xs text-neutral-500 -mt-2">仅用于发送直播提醒，不会收到任何销售邮件。</p>
+
+            {/* Slot selector — 只在非预选模式显示 */}
+            {!hideSlotSelector && evergreenSlots && evergreenSlots.length > 0 && (
+              <div>
+                <label className="block text-sm font-semibold text-neutral-300 mb-2">
+                  选择一个时间
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedSlotTime || ''}
+                    onChange={(e) => onSlotTimeChange?.(e.target.value)}
+                    className="w-full h-[50px] px-4 pr-10 text-base bg-white/[0.06] border border-white/10 rounded-lg text-white focus:border-[#C9A962] focus:outline-none appearance-none transition-colors"
+                  >
+                    {evergreenSlots.map((slot) => (
+                      <option key={slot.slotTime} value={slot.slotTime} className="bg-[#111318] text-white">
+                        {formatDate(slot.slotTime, timezone)} - {formatTime(slot.slotTime, timezone)}{timezone ? ` ${getTimezoneLabel(timezone)}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none">
+                    ▼
+                  </span>
+                </div>
+              </div>
+            )}
+
+
+            {/* Error message */}
+            {formError && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-3 py-2 rounded-lg">
+                {formError}
+              </div>
+            )}
+
+            {/* Submit button */}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="group relative w-full h-[50px] overflow-hidden bg-[#B8953F] text-white text-lg font-semibold rounded-lg hover:bg-[#A6842F] hover:shadow-[0_0_20px_rgba(184,149,63,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[ctaShimmer_2s_ease-in-out_infinite]" />
+              </span>
+              <span className="relative z-10">{submitting ? '处理中...' : '立即锁定席位'}</span>
+            </button>
+          </form>
+
+          {/* Privacy notice */}
+          <p className="text-xs text-neutral-500 text-center mt-4">
+            我们不会发送垃圾信息，也不会出售你的个人信息。
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
