@@ -25,6 +25,8 @@ interface RegistrationModalV2Props {
   hideSlotSelector?: boolean;
   /** 追踪来源 */
   source?: string;
+  /** 剩余名额（从场次卡片传入，增强 FOMO） */
+  remainingSeats?: number;
 }
 
 export default function RegistrationModalV2({
@@ -45,6 +47,7 @@ export default function RegistrationModalV2({
   timezone,
   hideSlotSelector = false,
   source = '',
+  remainingSeats,
 }: RegistrationModalV2Props) {
   const handleClose = useCallback(() => {
     trackGA4('c_modal_close', {
@@ -105,11 +108,8 @@ export default function RegistrationModalV2({
           <h2 className="text-xl md:text-2xl font-bold text-center text-white mb-2" style={{ fontFamily: '"Noto Serif SC", serif' }}>
             锁定你的免费席位
           </h2>
-          <p className="text-sm text-neutral-400 text-center mb-6 inline-flex items-center justify-center gap-1.5 w-full animate-[giftBounce_2s_ease-in-out_infinite]">
-            <svg className="w-4 h-4 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-            </svg>
-            报名即有机会获得 Mike 一对一持仓分析
+          <p className="text-sm text-neutral-400 text-center mb-6">
+            完全免费，名额有限
           </p>
 
           {/* 已选场次提示 */}
@@ -193,6 +193,19 @@ export default function RegistrationModalV2({
               </div>
             )}
 
+            {/* Remaining seats FOMO */}
+            {remainingSeats !== undefined && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                <span className="relative flex h-2 w-2 flex-shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                </span>
+                <p className="text-sm text-red-300">
+                  该场次仅剩 <span className="font-bold text-red-200">{remainingSeats}</span> 个名额，即将截止
+                </p>
+              </div>
+            )}
+
             {/* Submit button */}
             <button
               type="submit"
@@ -204,6 +217,14 @@ export default function RegistrationModalV2({
               </span>
               <span className="relative z-10">{submitting ? '处理中...' : '立即锁定席位'}</span>
             </button>
+
+            {/* Gift incentive — 紧贴按钮下方 */}
+            <p className="text-sm text-center inline-flex items-center justify-center gap-1.5 w-full text-[#C9A962] animate-[giftBounce_2s_ease-in-out_infinite]">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+              </svg>
+              报名即有机会获得 Mike 一对一持仓分析
+            </p>
           </form>
 
           {/* Privacy notice */}

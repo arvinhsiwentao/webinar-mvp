@@ -89,6 +89,8 @@ export default function HomePageV2() {
   const [evergreenTimezone, setEvergreenTimezone] = useState('America/Chicago');
   const [selectedSlotTime, setSelectedSlotTime] = useState('');
   const [modalSource, setModalSource] = useState<string>('');
+  const [modalRemainingSeats, setModalRemainingSeats] = useState<number | undefined>(undefined);
+  const [scheduleHint, setScheduleHint] = useState(false);
 
   const form = useRegistrationForm({
     webinarId: DEFAULT_WEBINAR_ID,
@@ -274,12 +276,35 @@ export default function HomePageV2() {
     trackGA4('c_external_link_click', { link_type: linkType, link_position: linkPosition });
   };
 
-  const openModal = async (source: string) => {
+  const scrollToSchedule = (source: string) => {
+    trackGA4('c_signup_button_click', { button_position: source, webinar_id: DEFAULT_WEBINAR_ID });
+    const el = document.getElementById('schedule');
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    const inView = rect.top >= -100 && rect.top <= window.innerHeight * 0.5;
+
+    if (inView) {
+      // 已在场次区 — 闪烁提示选择
+      setScheduleHint(true);
+      setTimeout(() => setScheduleHint(false), 2000);
+    } else {
+      el.scrollIntoView({ behavior: 'smooth' });
+      // 滚动完后闪烁提示
+      setTimeout(() => {
+        setScheduleHint(true);
+        setTimeout(() => setScheduleHint(false), 2000);
+      }, 600);
+    }
+  };
+
+  const openModal = async (source: string, remainingSeats?: number) => {
     if (webinar?.evergreen?.enabled) {
       await refreshEvergreenSlots();
     }
     trackGA4('c_signup_button_click', { button_position: source, webinar_id: DEFAULT_WEBINAR_ID });
     setModalSource(source);
+    setModalRemainingSeats(remainingSeats);
     setIsModalOpen(true);
   };
 
@@ -287,7 +312,7 @@ export default function HomePageV2() {
     <div className="min-h-screen bg-[#0a0a08] text-neutral-200">
 
       {/* Sticky Navigation Bar — always visible */}
-      <StickyNav onCtaClick={() => openModal('nav')} logoSrc="/icon.png" />
+      <StickyNav onCtaClick={() => scrollToSchedule('nav')} logoSrc="/icon.png" />
 
       {/* Spacer for fixed nav height */}
       <div className="h-14" />
@@ -301,9 +326,9 @@ export default function HomePageV2() {
         <div className="relative">
           <picture>
             {/* V2 hero banners */}
-            <source media="(min-width: 768px)" srcSet="/images/hero-v2-desktop.png" />
+            <source media="(min-width: 768px)" srcSet="/images/hero-v2-desktop.webp" />
             <img
-              src="/images/hero-v2-mobile.png"
+              src="/images/hero-v2-mobile.webp"
               alt="AI时代，普通人最好的美股机会来了 — 一套不用盯盘、可复制的高胜率投资策略"
               className="w-full h-auto block"
               fetchPriority="high"
@@ -317,7 +342,7 @@ export default function HomePageV2() {
         <div className="pt-6 md:pt-10 relative z-10 pb-8 md:pb-12">
         <div className="max-w-xl mx-auto text-center px-6 animate-[heroFadeIn_0.8s_ease-out_0.3s_both]">
           <button
-            onClick={() => openModal('hero')}
+            onClick={() => scrollToSchedule('hero')}
             className="hero-cta group relative overflow-hidden px-12 py-4 md:px-16 md:py-4.5 lg:px-20 lg:py-5 rounded-2xl border border-[#C9A962] bg-gradient-to-r from-[#1a1508]/80 to-[#0f1a2e]/80 backdrop-blur-sm text-[#E8D5A3] text-lg md:text-xl lg:text-2xl font-bold tracking-widest cursor-pointer whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_15px_rgba(201,169,98,0.4),0_0_40px_rgba(201,169,98,0.2),0_0_80px_rgba(184,149,63,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(201,169,98,0.7),0_0_60px_rgba(201,169,98,0.4),0_0_120px_rgba(37,99,235,0.2),inset_0_1px_2px_rgba(255,255,255,0.2)] hover:border-[#E8D5A3] hover:scale-105 active:scale-95 animate-[ctaGlow_3s_ease-in-out_infinite]"
           >
             {/* 顶部玻璃高光 */}
@@ -433,7 +458,7 @@ export default function HomePageV2() {
           <ScrollReveal delay={500}>
             <div className="mt-10 text-center">
               <button
-                onClick={() => openModal('benefits')}
+                onClick={() => scrollToSchedule('benefits')}
                 className="group relative inline-block overflow-hidden px-10 py-4 text-lg font-semibold tracking-wide rounded-xl border border-[#C9A962] bg-gradient-to-r from-[#1a1508]/80 to-[#0f1a2e]/80 text-[#E8D5A3] hover:border-[#E8D5A3] hover:shadow-[0_0_20px_rgba(201,169,98,0.5),0_0_60px_rgba(201,169,98,0.2)] hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer"
               >
                 <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
@@ -775,6 +800,18 @@ export default function HomePageV2() {
             </h2>
           </ScrollReveal>
 
+          {/* 提示选择场次 */}
+          <div
+            className={`overflow-hidden transition-all duration-500 w-full max-w-xl ${scheduleHint ? 'max-h-16 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}
+          >
+            <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-[#C9A962]/15 border border-[#C9A962]/30 animate-pulse">
+              <svg className="w-4 h-4 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
+              </svg>
+              <p className="text-sm font-medium text-[#E8D5A3]">请选择一个场次时间报名</p>
+            </div>
+          </div>
+
           {/* Slot cards — 过滤凌晨场次，保留合理时段，确保至少显示 3 场 */}
           <div className="space-y-5 mb-14 w-full max-w-xl">
             {(() => {
@@ -833,15 +870,19 @@ export default function HomePageV2() {
                     {/* 底部操作栏 */}
                     <div className="flex items-center justify-between px-6 py-3 bg-white/[0.02] border-t border-white/5">
                       {remaining !== undefined && (
-                        <p className="text-xs text-[#C9A962]">
-                          仅剩 <span className="font-bold">{remaining}</span> 个名额
+                        <p className="text-xs text-red-400 flex items-center gap-1.5">
+                          <span className="relative flex h-2 w-2 flex-shrink-0">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                          </span>
+                          仅剩 <span className="font-bold text-red-300">{remaining}</span> 个名额
                         </p>
                       )}
                       <button
                         onClick={() => {
                           trackGA4('c_schedule_card_click', { slot_index: idx, slot_type: item.type, remaining_seats: remaining ?? 0 });
                           setSelectedSlotTime(dateStr);
-                          openModal('schedule_card');
+                          openModal('schedule_card', remaining);
                         }}
                         className="ml-auto text-sm font-semibold px-5 py-2 rounded-lg border border-[#C9A962]/50 text-[#E8D5A3] bg-[#C9A962]/10 hover:bg-[#C9A962]/20 hover:border-[#C9A962] transition-all duration-300 cursor-pointer"
                       >
@@ -893,7 +934,7 @@ export default function HomePageV2() {
 
           <ScrollReveal delay={150}>
             <button
-              onClick={() => openModal('footer')}
+              onClick={() => scrollToSchedule('footer')}
               className="group relative inline-block overflow-hidden px-12 py-4 text-lg font-semibold tracking-wide rounded-xl border border-[#C9A962] bg-gradient-to-r from-[#1a1508]/80 to-[#0f1a2e]/80 text-[#E8D5A3] hover:border-[#E8D5A3] hover:shadow-[0_0_20px_rgba(201,169,98,0.5),0_0_60px_rgba(201,169,98,0.2)] hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer"
             >
               <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
@@ -960,7 +1001,7 @@ export default function HomePageV2() {
           ================================================================ */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#0a0a08]/95 backdrop-blur-sm border-t border-[#C9A962]/20 px-4 py-3 safe-area-pb">
         <button
-          onClick={() => openModal('sticky')}
+          onClick={() => scrollToSchedule('sticky')}
           className="w-full bg-[#B8953F] text-white py-3.5 text-base font-semibold rounded-lg hover:bg-[#A6842F] transition-colors"
         >
           免费报名讲座
@@ -983,7 +1024,7 @@ export default function HomePageV2() {
         </button>
         {/* 浮动 CTA */}
         <button
-          onClick={() => openModal('floating')}
+          onClick={() => scrollToSchedule('floating')}
           className="group flex items-center gap-2 px-5 py-3 rounded-full bg-[#B8953F] text-white font-semibold shadow-[0_4px_20px_rgba(184,149,63,0.4)] hover:shadow-[0_4px_30px_rgba(184,149,63,0.6)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1017,6 +1058,7 @@ export default function HomePageV2() {
         timezone={evergreenTimezone}
         hideSlotSelector={modalSource === 'schedule_card'}
         source={modalSource}
+        remainingSeats={modalRemainingSeats}
       />
     </div>
   );
