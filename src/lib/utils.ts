@@ -153,10 +153,18 @@ export function buildEmailLink(
 export function getStoredUtmParams(): Record<string, string> {
   if (typeof window === 'undefined') return {};
   const result: Record<string, string> = {};
-  const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'gclid'];
-  for (const key of keys) {
+  // Prioritize original ad attribution (orig_*) over current session (e.g. edm).
+  // This ensures page_location always reflects the initial ad source for ROAS analysis.
+  const mapping: [string, string][] = [
+    ['utm_source', 'orig_source'],
+    ['utm_medium', 'orig_medium'],
+    ['utm_campaign', 'orig_campaign'],
+    ['utm_content', 'orig_content'],
+    ['gclid', 'orig_gclid'],
+  ];
+  for (const [key, origKey] of mapping) {
     try {
-      const value = sessionStorage.getItem(key) || getCookieValue(key);
+      const value = sessionStorage.getItem(origKey) || sessionStorage.getItem(key) || getCookieValue(key);
       if (value) result[key] = value;
     } catch { /* SSR or security error */ }
   }

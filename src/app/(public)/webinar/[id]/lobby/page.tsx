@@ -6,7 +6,7 @@ import CountdownTimer from '@/components/countdown/CountdownTimer';
 import { Button, Badge, Card } from '@/components/ui';
 import { Webinar } from '@/lib/types';
 import { getEvergreenState, getSlotExpiresAt } from '@/lib/evergreen';
-import { generateICSContent } from '@/lib/utils';
+import { generateICSContent, getStoredUtmParams } from '@/lib/utils';
 import { scheduleToUTC } from '@/lib/timezone';
 import { trackGA4 } from '@/lib/analytics';
 
@@ -105,7 +105,9 @@ export default function LobbyPage() {
             trackGA4('c_enter_live', { webinar_id: webinarId, entry_method: 'redirect_live' });
             const slotParam = `&slot=${encodeURIComponent(effectiveSlot)}`;
             const emailParam = userEmail ? `&email=${encodeURIComponent(userEmail)}` : '';
-            router.push(`/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}${emailParam}`);
+            const utmStr = new URLSearchParams(getStoredUtmParams()).toString();
+            const utmParam = utmStr ? `&${utmStr}` : '';
+            router.push(`/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}${emailParam}${utmParam}`);
             return;
           }
 
@@ -138,7 +140,9 @@ export default function LobbyPage() {
   const buildLiveUrl = useCallback(() => {
     const slotParam = resolvedSlot ? `&slot=${encodeURIComponent(resolvedSlot)}` : '';
     const emailParam = userEmail ? `&email=${encodeURIComponent(userEmail)}` : '';
-    return `/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}${emailParam}`;
+    const utmStr = new URLSearchParams(getStoredUtmParams()).toString();
+    const utmParam = utmStr ? `&${utmStr}` : '';
+    return `/webinar/${webinarId}/live?name=${encodeURIComponent(userName)}${slotParam}${emailParam}${utmParam}`;
   }, [webinarId, userName, resolvedSlot, userEmail]);
 
   const handleCountdownComplete = useCallback(() => {
@@ -293,7 +297,9 @@ export default function LobbyPage() {
   // Missed session (evergreen) — redirect to end page with purchase CTA
   if (evergreenState === 'MISSED') {
     const endEmailParam = userEmail ? `&email=${encodeURIComponent(userEmail)}` : '';
-    router.replace(`/webinar/${webinarId}/end?name=${encodeURIComponent(userName)}${endEmailParam}`);
+    const endUtmStr = new URLSearchParams(getStoredUtmParams()).toString();
+    const endUtmParam = endUtmStr ? `&${endUtmStr}` : '';
+    router.replace(`/webinar/${webinarId}/end?name=${encodeURIComponent(userName)}${endEmailParam}${endUtmParam}`);
     return (
       <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
         <div className="w-12 h-12 border-2 border-[#B8953F] border-t-transparent rounded-full animate-spin" />

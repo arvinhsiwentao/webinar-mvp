@@ -106,7 +106,9 @@ export default function LiveRoomPage() {
             if (minutesUntil > 30) {
               // Too early — redirect to lobby
               const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
-              router.replace(`/webinar/${webinarId}/lobby?name=${encodeURIComponent(userName)}${slotParam}`);
+              const utmStr = new URLSearchParams(getStoredUtmParams()).toString();
+              const utmParam = utmStr ? `&${utmStr}` : '';
+              router.replace(`/webinar/${webinarId}/lobby?name=${encodeURIComponent(userName)}${slotParam}${utmParam}`);
               return;
             } else if (minutesUntil > 0) {
               setEventPhase('pre_show');

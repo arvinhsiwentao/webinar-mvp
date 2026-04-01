@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { trackGA4 } from '@/lib/analytics';
+import { getStoredUtmParams } from '@/lib/utils';
 
 interface UsePlaybackTrackingOptions {
   webinarId: string;
@@ -78,7 +79,9 @@ export function usePlaybackTracking(options: UsePlaybackTrackingOptions): {
         } catch { /* ignore */ }
         // Redirect to end page after short delay
         setTimeout(() => {
-          router.push(`/webinar/${webinarId}/end?name=${encodeURIComponent(userName)}`);
+          const utmStr = new URLSearchParams(getStoredUtmParams()).toString();
+          const utmParam = utmStr ? `&${utmStr}` : '';
+          router.push(`/webinar/${webinarId}/end?name=${encodeURIComponent(userName)}${utmParam}`);
         }, 2000);
       }
     },

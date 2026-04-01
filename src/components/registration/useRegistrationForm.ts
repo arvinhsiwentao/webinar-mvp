@@ -35,10 +35,6 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
     e.preventDefault();
     setFormError('');
 
-    if (!name.trim()) {
-      setFormError('请输入姓名');
-      return;
-    }
     if (!validateEmail(email)) {
       setFormError(emailErrorMessage);
       return;
@@ -51,7 +47,7 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           webinarId,
-          name: name.trim(),
+          name: name.trim() || '学员',
           email: email.trim(),
           phone: phone.trim() || undefined,
           assignedSlot: assignedSlot || undefined,
@@ -71,7 +67,7 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
         method: source ? `webinar_registration_${source}` : 'webinar_registration',
         webinar_id: String(webinarId),
       });
-      onSuccess(name);
+      onSuccess(name.trim() || '学员');
     } catch (err) {
       setFormError(err instanceof Error ? err.message : '报名失败，请稍后再试');
     } finally {

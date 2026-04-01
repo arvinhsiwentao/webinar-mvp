@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Webinar } from '@/lib/types';
 import { trackGA4 } from '@/lib/analytics';
+import { getStoredUtmParams } from '@/lib/utils';
 import { formatInTimezone, getTimezoneLabel } from '@/lib/timezone';
 import PersistentCountdown from '@/components/countdown/PersistentCountdown';
 import { useRegistrationForm } from '@/components/registration/useRegistrationForm';
@@ -110,7 +111,9 @@ export default function HomePageV2() {
       }
       const slotParam = slotTime ? `&slot=${encodeURIComponent(slotTime)}` : '';
       const emailParam = form.email ? `&email=${encodeURIComponent(form.email)}` : '';
-      router.push(`/webinar/${DEFAULT_WEBINAR_ID}/lobby?name=${encodeURIComponent(name)}${slotParam}${emailParam}`);
+      const utmStr = new URLSearchParams(getStoredUtmParams()).toString();
+      const utmParam = utmStr ? `&${utmStr}` : '';
+      router.push(`/webinar/${DEFAULT_WEBINAR_ID}/lobby?name=${encodeURIComponent(name)}${slotParam}${emailParam}${utmParam}`);
     },
   });
 
@@ -487,7 +490,7 @@ export default function HomePageV2() {
 
           <div className="relative">
             {/* 左侧时间线 */}
-            <div className="absolute left-5 md:left-6 top-0 bottom-0 w-px bg-gradient-to-b from-[#C9A962]/50 via-[#C9A962]/20 to-transparent" />
+            <div className="absolute left-5 md:left-6 top-0 bottom-6 w-px bg-[#C9A962]/30" />
 
             <div className="space-y-8">
               {[
@@ -520,7 +523,7 @@ export default function HomePageV2() {
                 <ScrollReveal key={idx} delay={idx * 100}>
                   <div className="flex gap-5 md:gap-7 relative">
                     {/* 编号圆点 */}
-                    <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#C9A962]/15 border border-[#C9A962]/40 flex items-center justify-center z-10">
+                    <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#0f0f0d] border border-[#C9A962]/40 flex items-center justify-center z-10">
                       <span className="text-sm md:text-base font-bold text-[#C9A962]">{item.num}</span>
                     </div>
                     {/* 内容 */}

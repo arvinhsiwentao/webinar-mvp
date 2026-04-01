@@ -129,9 +129,8 @@ export default function RegistrationModalV2({
                 type="text"
                 value={name}
                 onChange={(e) => onNameChange(e.target.value)}
-                placeholder="你的昵称 *"
+                placeholder="你的昵称（选填）"
                 className="w-full h-[50px] px-4 pr-10 text-base bg-white/[0.06] border border-white/10 rounded-lg text-white placeholder-neutral-500 focus:border-[#C9A962] focus:outline-none transition-colors"
-                required
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -210,21 +209,16 @@ export default function RegistrationModalV2({
             <button
               type="submit"
               disabled={submitting}
-              className="group relative w-full h-[50px] overflow-hidden bg-[#B8953F] text-white text-lg font-semibold rounded-lg hover:bg-[#A6842F] hover:shadow-[0_0_20px_rgba(184,149,63,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="group relative w-full py-3 overflow-hidden bg-[#B8953F] text-white font-semibold rounded-lg hover:bg-[#A6842F] hover:shadow-[0_0_20px_rgba(184,149,63,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[ctaShimmer_2s_ease-in-out_infinite]" />
               </span>
-              <span className="relative z-10">{submitting ? '处理中...' : '立即锁定席位'}</span>
+              <span className="relative z-10 flex flex-col items-center leading-snug">
+                <span className="text-lg">{submitting ? '处理中...' : '立即报名'}</span>
+                {!submitting && <span className="text-sm text-white/90 animate-pulse">✦ 获得 Mike 一对一持仓分析的机会 ✦</span>}
+              </span>
             </button>
-
-            {/* Gift incentive — 紧贴按钮下方 */}
-            <p className="text-sm text-center inline-flex items-center justify-center gap-1.5 w-full text-[#C9A962] animate-[giftBounce_2s_ease-in-out_infinite]">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-              </svg>
-              报名即有机会获得 Mike 一对一持仓分析
-            </p>
           </form>
 
           {/* Privacy notice */}
