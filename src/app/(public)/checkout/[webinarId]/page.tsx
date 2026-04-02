@@ -177,6 +177,9 @@ export default function CheckoutPage() {
               <div className="inline-block bg-[rgba(184,149,63,0.08)] text-[#B8953F] text-sm font-medium px-3 py-1 rounded-md">
                 立省 USD $1,097 (65% OFF)
               </div>
+              <p className="text-xs text-neutral-400 mt-4">
+                有任何问题？联系客服：<a href="mailto:cmoney_overseas@cmoney.com.tw" className="text-[#B8953F] underline underline-offset-2">cmoney_overseas@cmoney.com.tw</a>
+              </p>
             </div>
 
             {/* Testimonials */}
