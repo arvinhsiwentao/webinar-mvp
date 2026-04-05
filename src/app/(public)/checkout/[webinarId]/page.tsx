@@ -258,7 +258,7 @@ export default function CheckoutPage() {
                   name="陈先生"
                 />
                 <Testimonial
-                  text="我是上班族，没时间整天研究，平常就靠 App 语音直播通勤时听 Mike 的盘势分析，有什么变动社团也会即时更新，还��方便。"
+                  text="我是上班族，没时间整天研究，平常就靠 App 语音直播通勤时听 Mike 的盘势分析，有什么变动社团也会即时更新，还挺方便。"
                   name="林先生"
                 />
                 <Testimonial
@@ -302,7 +302,7 @@ export default function CheckoutPage() {
                 <StepCard step="1" title="完成付款" desc="支持信用卡、Apple Pay、Google Pay" />
                 <StepCard step="2" title="查收邮件" desc="付款后立即收到启用序号" />
                 <StepCard step="3" title="下载 APP" desc="App Store / Google Play 搜索「MIKE是麦克」" />
-                <StepCard step="4" title="���始学习" desc="输入序号，解锁全部课程和社群" />
+                <StepCard step="4" title="开始学习" desc="输入序号，解锁全部课程和社群" />
               </div>
             </div>
 
