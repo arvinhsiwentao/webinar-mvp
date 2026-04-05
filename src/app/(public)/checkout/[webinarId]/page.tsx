@@ -25,8 +25,6 @@ export default function CheckoutPage() {
   const urlEmail = searchParams.get('email') || '';
   const source = searchParams.get('source') || 'direct';
   const name = searchParams.get('name') || '';
-  const countdownParam = searchParams.get('t'); // remaining seconds from CTA
-
   const [email, setEmail] = useState(urlEmail);
   const [emailSubmitted, setEmailSubmitted] = useState(!!urlEmail);
   const [emailError, setEmailError] = useState('');
@@ -36,21 +34,39 @@ export default function CheckoutPage() {
   const [newEmail, setNewEmail] = useState('');
   const [sessionKey, setSessionKey] = useState(0);
 
-  // Countdown timer (from live page CTA)
-  const [countdown, setCountdown] = useState(() =>
-    countdownParam ? parseInt(countdownParam, 10) : 0
-  );
+  // Countdown timer — 2 hours, persisted in localStorage so refresh doesn't reset
+  const COUNTDOWN_DURATION = 2 * 60 * 60; // 2 hours in seconds
+  const storageKey = `checkout-${webinarId}-deadline`;
+  const [countdown, setCountdown] = useState<number | null>(null); // null = not yet initialized
 
+  // Initialize countdown on client only (avoids hydration mismatch)
   useEffect(() => {
-    if (countdown <= 0) return;
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        const remaining = Math.round((parseInt(stored, 10) - Date.now()) / 1000);
+        setCountdown(remaining > 0 ? remaining : 0);
+      } else {
+        const deadline = Date.now() + COUNTDOWN_DURATION * 1000;
+        localStorage.setItem(storageKey, deadline.toString());
+        setCountdown(COUNTDOWN_DURATION);
+      }
+    } catch {
+      setCountdown(COUNTDOWN_DURATION);
+    }
+  }, [storageKey, COUNTDOWN_DURATION]);
+
+  // Tick every second
+  useEffect(() => {
+    if (countdown === null || countdown <= 0) return;
     const timer = setInterval(() => {
       setCountdown(prev => {
-        if (prev <= 1) { clearInterval(timer); return 0; }
+        if (prev === null || prev <= 1) { clearInterval(timer); return 0; }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [countdown > 0]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [countdown !== null && countdown > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchClientSecret = useCallback(async () => {
     const res = await fetch('/api/checkout/create-session', {
@@ -72,11 +88,7 @@ export default function CheckoutPage() {
     return data.clientSecret;
   }, [webinarId, email, name, source]);
 
-  // Scroll to checkout section
   const checkoutRef = useRef<HTMLDivElement>(null);
-  const scrollToCheckout = () => {
-    checkoutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
 
   /* --- Already purchased --- */
   if (alreadyPurchased) {
@@ -145,9 +157,14 @@ export default function CheckoutPage() {
   }
 
   /* --- Main checkout page --- */
-  const countdownDisplay = countdown > 0
-    ? `${String(Math.floor(countdown / 60)).padStart(2, '0')}:${String(countdown % 60).padStart(2, '0')}`
+  const cd = countdown ?? 0;
+  const hours = Math.floor(cd / 3600);
+  const mins = Math.floor((cd % 3600) / 60);
+  const secs = cd % 60;
+  const countdownDisplay = countdown !== null && countdown > 0
+    ? `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
     : null;
+  const bonusExpired = countdown !== null && countdown <= 0;
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]">
@@ -159,11 +176,14 @@ export default function CheckoutPage() {
             安全结账
           </div>
           {countdownDisplay && (
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-neutral-500">限时优惠剩余</span>
-              <span className="font-mono font-bold text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded">
-                {countdownDisplay}
-              </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-red-500 font-medium hidden sm:inline">直播限定 · 错过不再</span>
+              <div className="flex items-center gap-1.5 bg-red-50 border border-red-200 rounded-md px-3 py-1.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span className="font-mono font-bold text-red-600 text-sm">{countdownDisplay}</span>
+              </div>
             </div>
           )}
         </div>
@@ -178,131 +198,225 @@ export default function CheckoutPage() {
             {/* 1. Headline */}
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900 mb-2">
-                你离财务自由，只差一个决定
+                一套学得会、用得上的美股攻守系统
               </h1>
               <p className="text-neutral-500">
-                加入 3,000+ 学员，跟着 Mike 用美股抄底存股双策略打造被动收入
+                不再凭感觉操作美股，从「听懂了」到「能执行」— ETF 配置做进攻、期权收保费做防守
               </p>
             </div>
 
-            {/* 2. Course package — detailed */}
-            <div className="bg-white rounded-lg border border-[#E8E5DE] p-6 lg:p-8">
-              <h2 className="text-lg font-bold text-neutral-900 mb-6">课程套餐内容</h2>
-              <div className="space-y-6">
-                <PackageItem
-                  number="1"
-                  title="震荡行情的美股期权操作解析"
-                  value="USD $312"
-                  description="学会用 Sell Put、Covered Call 等期权策略，在震荡市场中稳定收保费。不再害怕大跌，反而利用波动创造收入。"
-                />
-                <PackageItem
-                  number="2"
-                  title="ETF 进阶资产放大术"
-                  value="USD $384"
-                  description="从 ETF 选择、结构性主题配置到攻守转换，建立一套完整的资产配置框架。适合想从「定期定额」升级到「主动配置」的投资人。"
-                />
-                <PackageItem
-                  number="3"
-                  title="「MIKE是麦克」APP 一年完整权限"
-                  value="年费 USD $1,000"
-                  description="包含 VIP 聊天室（直接向 Mike 提问）、每日语音直播（盘势分析）、即时选股逻辑分享、所有课程无限回放。通勤路上就能掌握市场动态。"
-                />
-                <PackageItem
-                  number="4"
-                  title="3,000+ 人美股操作社群"
-                  value="独家福利"
-                  description="与志同道合的投资人交流心得、分享操作。Mike 每天在社群发布实战配置思路，课堂理论搭配即时实战。"
-                />
-                <PackageItem
-                  number="5"
-                  title="Mike 亲自录制选股逻辑教学"
-                  value="独家内容"
-                  description="不是泛泛而谈的理论，而是 Mike 本人实际使用的选股框架和进出场判断逻辑，带你理解每一笔操作背后的思考。"
-                />
-              </div>
-            </div>
+            {/* 2. Course package — one unified card */}
+            <div className="bg-white rounded-lg border-2 border-[#B8953F]/30 overflow-hidden">
 
-            {/* 3. Speaker intro */}
-            <div className="bg-white rounded-lg border border-[#E8E5DE] p-6 lg:p-8">
-              <h2 className="text-lg font-bold text-neutral-900 mb-5">关于 Mike</h2>
-              <div className="flex gap-5 items-start">
-                <img
-                  src="/images/mike-avatar.jpg"
-                  alt="Mike是麦克"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-[#E8E5DE] shrink-0"
-                />
-                <div className="text-sm text-neutral-600 leading-relaxed space-y-2">
-                  <p className="font-medium text-neutral-900">Mike｜美股投资人 / YouTube 创作者</p>
-                  <p>
-                    从负债 50 万到 43 岁实现财务自由。专注美股 ETF 资产配置与期权策略，
-                    透过系统化教学帮助超过 3,000 位学员建立被动收入。
+              {/* Package header — value comparison + pricing */}
+              <div className="bg-[#B8953F] p-6 lg:p-8 text-white">
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                  <h2 className="text-lg font-bold">直播限定课程套餐</h2>
+                  <span className="text-xs bg-white/20 px-2 py-0.5 rounded font-medium">错过不再</span>
+                </div>
+                <div className="space-y-1.5 text-sm mb-5">
+                  <div className="flex items-center justify-between text-white/80">
+                    <span>「MIKE是麦克」APP 一年权限</span>
+                    <span>USD $1,000 / 年</span>
+                  </div>
+                  <div className="flex items-center justify-between text-white/80">
+                    <span>震荡行情的美股期权操作解析</span>
+                    <span>USD $312</span>
+                  </div>
+                  <div className="flex items-center justify-between text-white/80">
+                    <span>ETF 进阶资产放大术</span>
+                    <span>USD $384</span>
+                  </div>
+                  <div className={`flex items-center justify-between ${bonusExpired ? 'text-white/40 line-through' : 'text-white/80'}`}>
+                    <span>Mike 一对一持仓分析</span>
+                    <span>{bonusExpired ? '已过期' : '非卖品'}</span>
+                  </div>
+                  <div className="border-t border-white/20 pt-2 mt-2 flex items-center justify-between">
+                    <span className="text-white/60">分开购买总价</span>
+                    <span className="text-white/60 line-through">USD $1,696+</span>
+                  </div>
+                </div>
+                {/* Big price */}
+                <div className="bg-white rounded-lg p-4 text-center">
+                  <div className="flex flex-wrap items-baseline justify-center gap-3 mb-1">
+                    <span className="text-neutral-400 line-through text-lg">$1,696+</span>
+                    <span className="text-4xl font-bold text-[#B8953F]">$599</span>
+                  </div>
+                  <span className="inline-block bg-red-50 text-red-600 text-sm font-bold px-4 py-1 rounded-full">
+                    立省 $1,097+ · 65% OFF
+                  </span>
+                  {countdownDisplay && (
+                    <div className="flex items-center justify-center gap-2 mt-3 text-sm text-neutral-500">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      优惠剩余 <span className="font-mono font-bold text-red-600">{countdownDisplay}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Package content — detailed items */}
+              <div className="p-6 lg:p-8 space-y-8">
+
+                {/* Item 1: APP */}
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <img src="/images/app-icon.png" alt="MIKE是麦克 APP" className="w-7 h-7 rounded-lg shrink-0" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-white bg-[#B8953F] px-2 py-0.5 rounded font-medium">APP 工具</span>
+                      <h3 className="font-bold text-neutral-900">「MIKE是麦克」APP 一年完整权限</h3>
+                      <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">
+                        年费价值 $1,000
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-neutral-500 mb-3 ml-8">
+                    不只是工具，是一个有 Mike 在、有学员在、持续更新的投资学习社群。买完课不是就没人管了，是真的有人陪你一起走。
                   </p>
-                  <p>
-                    每天在 APP 社群分享即时盘势分析和操作逻辑，
-                    不只教框架，更带你跟上市场节奏。
+                  <ul className="space-y-2 ml-8">
+                    <FeatureItem text="价值灯号 — 基于本益比、营收增长、现金流算出红 / 黄 / 绿灯，5 分钟扫完，不用花两三个小时看盘" />
+                    <FeatureItem text="Mike 关注清单 — Mike 正在研究、追踪的股票即时更新，作为你自己选股的起点" />
+                    <FeatureItem text="语音直播 — 约每两周一场，至少一小时，聊最新市场趋势，可直接提问交流" />
+                    <FeatureItem text="学员 & Mike 即时文字聊天室 — 随时提问，分享持仓、讨论操作逻辑、互相提醒机会和风险" />
+                    <FeatureItem text="APP 专属付费内容文章 — 解锁 Mike 对最新趋势的深度分析与即时分享" />
+                  </ul>
+                </div>
+
+                <hr className="border-[#E8E5DE]" />
+
+                {/* Item 2: Options course */}
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <div className="w-7 h-7 rounded-lg bg-[#B8953F] text-white flex items-center justify-center shrink-0">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                      </svg>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-white bg-[#B8953F] px-2 py-0.5 rounded font-medium">线上课程</span>
+                      <h3 className="font-bold text-neutral-900">震荡行情的美股期权操作解析</h3>
+                      <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">
+                        价值 $312
+                      </span>
+                      <span className="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded">
+                        无期限 · 无限次数观看
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-neutral-500 mb-3 ml-8">
+                    市场不可能永远涨。这门课教你在波动和震荡中也能赚钱的「防守」策略 — 跟直播中讲的「攻守框架」里的守端完全对应。
                   </p>
+                  <ul className="space-y-2 ml-8">
+                    <FeatureItem text="Sell Put 低接收保费 — 学会像「等房价跌到理想价才买，等待期间还能收租」一样操作期权，市场越跌你越从容" />
+                    <FeatureItem text="Sell Call 持仓收租 — 手上有 ETF 就能额外收保费，不卖股票也有现金流，波动月份反而赚更多" />
+                    <FeatureItem text="风险控制 SOP — 保证金怎么算、什么时候该做什么时候不该做、小白跟着步骤走就行，避开 Mike 自己踩过的上万美金学费的坑" />
+                  </ul>
+                </div>
+
+                <hr className="border-[#E8E5DE]" />
+
+                {/* Item 3: ETF course */}
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <div className="w-7 h-7 rounded-lg bg-[#B8953F] text-white flex items-center justify-center shrink-0">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                      </svg>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-white bg-[#B8953F] px-2 py-0.5 rounded font-medium">线上课程</span>
+                      <h3 className="font-bold text-neutral-900">ETF 进阶资产放大术</h3>
+                      <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">
+                        价值 $384
+                      </span>
+                      <span className="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded">
+                        无期限 · 无限次数观看
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-neutral-500 mb-3 ml-8">
+                    直播中讲的「攻守框架」进攻端完整教学 — 从只会定期定额买 VOO，升级到有系统的主动配置，让报酬最大化。
+                  </p>
+                  <ul className="space-y-2 ml-8">
+                    <FeatureItem text="四类 ETF 组合配置 — 成长型做加速、防御型做安全垫、收益型提供现金流、进阶型博超额回报，像逛 Costco 一样有系统地装满你的推车" />
+                    <FeatureItem text="从退休目标倒推配比 — 你想几岁退休、需要多少钱、现在有多少本金，三个数字算出你该偏攻还是偏守，不是照搬别人的比例" />
+                    <FeatureItem text="长短线账户策略 + 动态再平衡 — 退休账户做长线、一般账户做短线，每季度花十分钟调整配比，用纪律替代情绪" />
+                  </ul>
+                </div>
+
+                <hr className="border-[#E8E5DE]" />
+
+                {/* Bonus: 1-on-1 portfolio review */}
+                <div className={`rounded-lg p-5 relative ${bonusExpired ? 'bg-neutral-50 border border-neutral-200' : 'bg-[#B8953F]/5 border border-[#B8953F]/20'}`}>
+                  <div className={`absolute -top-3 left-4 text-white text-xs font-bold px-3 py-1 rounded ${bonusExpired ? 'bg-neutral-400' : 'bg-[#B8953F]'}`}>
+                    {bonusExpired ? '此福利已过期' : '直播限定加赠'}
+                  </div>
+                  <div className={`flex flex-wrap items-center gap-2 mb-3 mt-1 ${bonusExpired ? 'opacity-50' : ''}`}>
+                    <div className={`w-6 h-6 rounded text-white text-xs font-bold flex items-center justify-center shrink-0 ${bonusExpired ? 'bg-neutral-400' : 'bg-[#B8953F]'}`}>+</div>
+                    <h3 className={`font-bold ${bonusExpired ? 'text-neutral-400 line-through' : 'text-neutral-900'}`}>Mike 一对一持仓分析</h3>
+                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${bonusExpired ? 'text-neutral-400 bg-neutral-200' : 'text-white bg-[#B8953F]'}`}>
+                      {bonusExpired ? '已过期' : '非卖品'}
+                    </span>
+                  </div>
+                  {bonusExpired ? (
+                    <p className="text-sm text-neutral-400 ml-8">
+                      直播限定 2 小时内的福利已过期。课程套餐内容不受影响，仍可正常购买。
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-sm text-neutral-600 mb-3 ml-8">
+                        Mike 亲自检视你的投资账户，告诉你哪里配得好、哪里可以优化、你的 ETF 和期权配比跟退休目标匹不匹配。
+                        就像直播中 A 同学那样，15 支 ETF 精简到 6 支，思路立刻清晰。
+                      </p>
+                      <div className="flex items-center gap-2 text-sm font-medium text-[#B8953F] ml-8">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        限直播后 2 小时内购买才享有此福利
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* 4. Testimonials */}
+            {/* 3. Testimonials */}
             <div>
               <h2 className="text-lg font-bold text-neutral-900 mb-5">学员真实反馈</h2>
               <div className="space-y-4">
                 <Testimonial
-                  text="跟着 Mike 学了三个月，现在每个月被动收入已经超过生活费了。课程内容非常实用！"
-                  name="Wei Z."
+                  text="做工程师五年了，投资知识看了一堆，帐户里买了十几支 ETF 但一直不敢动。加入后做了一对一持仓分析，Mike 直接帮我把重叠的砍掉，从十几支精简到六支，每支为什么买、占多少比例，逻辑一下子就清楚了。现在每天看价值灯号十分钟就搞定，反而比以前花三小时看盘绩效更好。"
+                  name="Kevin L."
                 />
                 <Testimonial
-                  text="以前只会定期定额买 VOO，跌了就慌、涨了又不敢加。上完 ETF 课才知道原来可以用结构性主题去选不同类型的 ETF 做攻守配置；再上期权课学会 Sell Put，现在大跌反而是我收保费＋低接的机会。"
+                  text="家里两个小孩，存下来的每一块钱都是血汗钱，之前全放银行定存不敢动。后来从收益型 ETF 开始，每个月多了好几百加币股息。半年后在社群里学会 Sell Put，现在市场跌的时候也能收保费，心态完全不一样。老婆看我赚钱了也加入一起学。"
                   name="陈先生"
                 />
                 <Testimonial
-                  text="我是上班族，没时间整天研究，平常就靠 App 语音直播通勤时听 Mike 的盘势分析，有什么变动社团也会即时更新，还挺方便。"
+                  text="刚毕业没什么本金，每个月只能定投 300 块。一开始跌 5% 就慌得想卖，在社群里看到其他学员也经历过一样的波动都在坚持，就安心了。有次直播直接问 Mike 要不要卖，他说回去看配比框架，基本面没变就不动。三个月后我不再觉得只能靠打工了。"
+                  name="Sarah W."
+                />
+                <Testimonial
+                  text="上班族没时间整天盯盘，App 语音直播通勤路上就能听，Mike 分析完我就知道这周该不该调整。有一次问 Sell Put 的履约价怎么选，Mike 隔天直播还专门花十分钟讲这个。这种即时互动是课程没办法替代的。"
                   name="林先生"
                 />
                 <Testimonial
-                  text="App VIP 聊天室能直接问 Mike 问题，有一次我问 Sell Put 的履约价怎么选，Mike 隔天语音直播还专门讲了这个。"
-                  name="Yiming L."
-                />
-                <Testimonial
-                  text="老实说以前对 Mike 的印象还停留在看准 Tesla 的眼光，上了课才懂...原来背后靠的是一套扎实的 ETF 的策略，帮助心态更稳。自己现在遇到市场震荡，也能相对冷静了。"
+                  text="以前什么都懂一点，ETF、期权、AI 股票都买过，但从来没有一套完整的系统。上完课最大的改变不是赚多少，是终于不焦虑了。框架告诉你什么时候该动、什么时候不动，市场再怎么震荡也能睡好觉。"
                   name="赵先生"
                 />
               </div>
             </div>
 
-            {/* 5. Price + urgency */}
-            <div className="bg-white rounded-lg border border-[#E8E5DE] p-6 lg:p-8">
-              <div className="flex flex-wrap items-baseline gap-3 mb-3">
-                <span className="text-neutral-400 line-through text-lg">USD $1,696</span>
-                <span className="text-3xl font-bold text-neutral-900">USD $599</span>
-                <span className="inline-block bg-[rgba(184,149,63,0.08)] text-[#B8953F] text-sm font-medium px-3 py-1 rounded-md">
-                  立省 $1,097 (65% OFF)
-                </span>
-              </div>
-              {countdownDisplay && (
-                <div className="flex items-center gap-2 mb-4 text-sm">
-                  <span className="text-neutral-500">限时优惠倒数：</span>
-                  <span className="font-mono font-bold text-[#B8953F]">{countdownDisplay}</span>
-                </div>
-              )}
-              <button
-                onClick={scrollToCheckout}
-                className="w-full sm:w-auto px-8 py-3 bg-[#B8953F] hover:bg-[#A6842F] text-white font-medium rounded-lg transition-colors"
-              >
-                立即购买
-              </button>
-            </div>
-
-            {/* 6. How it works — post-purchase flow */}
+            {/* 4. How it works — post-purchase flow */}
             <div className="bg-white rounded-lg border border-[#E8E5DE] p-6 lg:p-8">
               <h2 className="text-lg font-bold text-neutral-900 mb-5">购买后怎么开始？</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <StepCard step="1" title="完成付款" desc="支持信用卡、Apple Pay、Google Pay" />
-                <StepCard step="2" title="查收邮件" desc="付款后立即收到启用序号" />
-                <StepCard step="3" title="下载 APP" desc="App Store / Google Play 搜索「MIKE是麦克」" />
-                <StepCard step="4" title="开始学习" desc="输入序号，解锁全部课程和社群" />
+              <div className="space-y-0">
+                <StepRow step="1" title="完成付款" desc="支持信用卡、Apple Pay、Google Pay" />
+                <StepRow step="2" title="取得启用序号" desc="付款成功后页面自动显示，同时发送至你的邮箱" />
+                <StepRow step="3" title="前往商品官网" desc="在官网输入启用序号，登入或注册理财宝帐号" />
+                <StepRow step="4" title="下载 APP" desc="App Store / Google Play 搜索「MIKE是麦克」并登入" />
+                <StepRow step="5" title="开始学习" desc="APP 内观看课程、加入社群、使用全部工具" isLast />
               </div>
             </div>
 
@@ -495,28 +609,22 @@ function CheckoutSection({
   );
 }
 
-/** Course package item with number, title, value tag, and description */
-function PackageItem({ number, title, value, description }: {
-  number: string;
-  title: string;
-  value: string;
-  description: string;
-}) {
+/** Feature bullet item with checkmark */
+function FeatureItem({ text }: { text: string }) {
+  // Split on " — " to bold the part before the dash
+  const dashIndex = text.indexOf(' — ');
   return (
-    <div className="flex gap-4">
-      <div className="w-8 h-8 rounded-full bg-[#B8953F] text-white text-sm font-bold flex items-center justify-center shrink-0 mt-0.5">
-        {number}
-      </div>
-      <div className="flex-1">
-        <div className="flex flex-wrap items-center gap-2 mb-1">
-          <h3 className="font-semibold text-neutral-900 text-sm">{title}</h3>
-          <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded">
-            价值 {value}
-          </span>
-        </div>
-        <p className="text-sm text-neutral-500 leading-relaxed">{description}</p>
-      </div>
-    </div>
+    <li className="flex items-start gap-2 text-sm text-neutral-600 leading-relaxed">
+      <span className="text-[#B8953F] mt-0.5 shrink-0">&#10003;</span>
+      {dashIndex > -1 ? (
+        <span>
+          <span className="font-medium text-neutral-800">{text.slice(0, dashIndex)}</span>
+          {' — '}{text.slice(dashIndex + 3)}
+        </span>
+      ) : (
+        <span>{text}</span>
+      )}
+    </li>
   );
 }
 
@@ -531,14 +639,22 @@ function Testimonial({ text, name }: { text: string; name: string }) {
 }
 
 /** Step card for post-purchase flow */
-function StepCard({ step, title, desc }: { step: string; title: string; desc: string }) {
+/** Step row with vertical connector line */
+function StepRow({ step, title, desc, isLast = false }: { step: string; title: string; desc: string; isLast?: boolean }) {
   return (
-    <div className="text-center p-4 bg-[#FAFAF7] rounded-lg">
-      <div className="w-8 h-8 rounded-full bg-[#B8953F] text-white text-sm font-bold flex items-center justify-center mx-auto mb-2">
-        {step}
+    <div className="flex gap-4">
+      {/* Left: circle + connector line */}
+      <div className="flex flex-col items-center">
+        <div className="w-8 h-8 rounded-full bg-[#B8953F] text-white text-sm font-bold flex items-center justify-center shrink-0">
+          {step}
+        </div>
+        {!isLast && <div className="w-px flex-1 bg-[#E8E5DE] my-1" />}
       </div>
-      <p className="font-medium text-sm text-neutral-900 mb-1">{title}</p>
-      <p className="text-xs text-neutral-500">{desc}</p>
+      {/* Right: content */}
+      <div className="pb-5">
+        <p className="font-medium text-sm text-neutral-900">{title}</p>
+        <p className="text-xs text-neutral-500 mt-0.5">{desc}</p>
+      </div>
     </div>
   );
 }

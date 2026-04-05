@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS chatbot_inquiries (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   webinar_id TEXT,
   name TEXT NOT NULL DEFAULT '',
-  whatsapp TEXT NOT NULL,
+  email TEXT NOT NULL,
   question TEXT NOT NULL,
   page_source TEXT NOT NULL DEFAULT 'unknown',  -- 'live' | 'checkout' | 'end'
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL
