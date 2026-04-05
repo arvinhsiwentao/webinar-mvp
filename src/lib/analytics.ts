@@ -28,6 +28,10 @@ type GA4EventMap = {
   // Landing Page V2 engagement events
   c_external_link_click: { link_type: string; link_position: string }
   c_faq_click: { question_index: number; question_text: string }
+  c_chatbot_open: { page_source: string }
+  c_chatbot_faq_click: { page_source: string; faq_id: string; faq_question: string }
+  c_chatbot_inquiry_submit: { page_source: string }
+  c_chatbot_whatsapp_click: { page_source: string }
   c_nav_click: { nav_item: string }
   c_modal_close: { had_input: boolean; source: string }
   c_schedule_card_click: { slot_index: number; slot_type: string; remaining_seats: number }
@@ -46,6 +50,7 @@ const CONVERSION_EVENTS: ReadonlySet<string> = new Set([
   'c_enter_live',
   'c_webinar_complete',
   'c_end_page_cta_click',
+  'c_chatbot_inquiry_submit',
 ])
 
 function getCookie(name: string): string | null {

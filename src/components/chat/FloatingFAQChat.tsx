@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { faqItems, WHATSAPP_LINK, WHATSAPP_NUMBER, type FAQItem } from '@/lib/faq-data';
+import { trackGA4 } from '@/lib/analytics';
 
 interface FloatingFAQChatProps {
   webinarId?: string;
@@ -76,7 +77,12 @@ export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, c
   if (!visible) return null;
 
   const toggleFaq = (id: string) => {
-    setExpandedId(prev => (prev === id ? null : id));
+    const willExpand = expandedId !== id;
+    setExpandedId(willExpand ? id : null);
+    if (willExpand) {
+      const item = faqItems.find(f => f.id === id);
+      trackGA4('c_chatbot_faq_click', { page_source: pageSource, faq_id: id, faq_question: item?.question || id });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -104,6 +110,7 @@ export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, c
 
       if (!res.ok) throw new Error('Submit failed');
       setSubmitted(true);
+      trackGA4('c_chatbot_inquiry_submit', { page_source: pageSource });
     } catch {
       setFormError('提交失败，请稍后重试或直接通过 WhatsApp 联系我们');
     } finally {
@@ -210,6 +217,7 @@ export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, c
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackGA4('c_chatbot_whatsapp_click', { page_source: pageSource })}
                 className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[#25D366] hover:bg-[#20BD5A] text-white text-xs font-medium transition-colors"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -225,7 +233,7 @@ export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, c
       {/* Hint tooltip */}
       {showHint && !open && (
         <button
-          onClick={() => { setShowHint(false); setHintDismissed(true); setOpen(true); }}
+          onClick={() => { setShowHint(false); setHintDismissed(true); setOpen(true); trackGA4('c_chatbot_open', { page_source: pageSource }); }}
           className="bg-white border border-[#E8E5DE] rounded-lg shadow-lg px-4 py-2.5 text-sm text-neutral-800 animate-in fade-in slide-in-from-bottom-2 duration-300 cursor-pointer hover:bg-[#FAFAF7] transition-colors flex items-center gap-2"
         >
           <span>有课程问题？点我咨询</span>
@@ -235,7 +243,11 @@ export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, c
 
       {/* Floating trigger button */}
       <button
-        onClick={() => setOpen(prev => !prev)}
+        onClick={() => {
+          const willOpen = !open;
+          setOpen(willOpen);
+          if (willOpen) trackGA4('c_chatbot_open', { page_source: pageSource });
+        }}
         className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 ${
           open
             ? 'bg-neutral-700 hover:bg-neutral-600 rotate-0'
