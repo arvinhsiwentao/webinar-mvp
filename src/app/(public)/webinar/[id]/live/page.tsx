@@ -20,6 +20,7 @@ import { calculateLateJoinPosition } from '@/lib/evergreen';
 import { useViewerSimulator } from '@/lib/viewer-simulator';
 import { useVisibilityResume } from '@/hooks/useVisibilityResume';
 import { usePlaybackTracking } from '@/hooks/usePlaybackTracking';
+import FloatingFAQChat from '@/components/chat/FloatingFAQChat';
 import type Player from 'video.js/dist/types/player';
 
 // Dynamically import VideoPlayer to avoid SSR issues with video.js
@@ -549,6 +550,14 @@ export default function LiveRoomPage() {
           </div>
         </div>
       </main>
+
+      {/* Floating FAQ Chatbot — appears when first CTA shows */}
+      <FloatingFAQChat
+        webinarId={webinarId}
+        pageSource="live"
+        showAfterSec={webinar.ctaEvents?.[0]?.showAtSec}
+        currentTime={currentTime}
+      />
 
       {/* Footer */}
       <footer className="border-t border-neutral-200 px-4 py-6 mt-8">

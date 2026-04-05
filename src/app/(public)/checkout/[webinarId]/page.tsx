@@ -7,6 +7,7 @@ import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout,
 } from '@stripe/react-stripe-js';
+import FloatingFAQChat from '@/components/chat/FloatingFAQChat';
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
@@ -70,6 +71,7 @@ export default function CheckoutPage() {
             商品启用序号已发送至 {email}，请检查你的邮箱（包括垃圾邮件文件夹）。
           </p>
         </div>
+        <FloatingFAQChat webinarId={webinarId} pageSource="checkout" />
       </div>
     );
   }
@@ -122,6 +124,7 @@ export default function CheckoutPage() {
             </form>
           </div>
         </main>
+        <FloatingFAQChat webinarId={webinarId} pageSource="checkout" />
       </div>
     );
   }
@@ -353,6 +356,9 @@ export default function CheckoutPage() {
           </div>
         </div>
       </main>
+
+      {/* Floating FAQ Chatbot */}
+      <FloatingFAQChat webinarId={webinarId} pageSource="checkout" />
     </div>
   );
 }
