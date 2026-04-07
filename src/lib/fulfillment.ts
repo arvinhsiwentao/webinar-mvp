@@ -75,6 +75,14 @@ export async function fulfillOrder(
       timeZone: 'America/Chicago',
       year: 'numeric', month: '2-digit', day: '2-digit',
     }).replace(/-/g, '/');
+
+    // Check if user is eligible for 1-on-1 bonus (purchased within 2-hour window)
+    let bonusEligible = false;
+    const bonusDeadline = order.metadata?.bonusDeadline;
+    if (bonusDeadline) {
+      bonusEligible = Date.now() < parseInt(bonusDeadline, 10);
+    }
+
     const emailParams = purchaseConfirmationEmail({
       to: order.email,
       name: order.name || order.email,
@@ -82,6 +90,7 @@ export async function fulfillOrder(
       orderDate,
       orderId: resolvedPaymentIntentId || stripeSessionId,
       email: order.email,
+      bonusEligible,
     });
     const emailSent = await sendEmail(emailParams);
     if (!emailSent) {

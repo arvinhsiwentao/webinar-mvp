@@ -263,6 +263,7 @@ export interface PurchaseEmailData {
   orderDate: string;
   orderId: string;
   email: string;
+  bonusEligible?: boolean;
 }
 
 export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams {
@@ -273,6 +274,8 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
   const course2Link = 'https://cmy.tw/00ChKt';
   const serviceEmail = 'csservice@cmoney.com.tw';
   const serviceHours = '北京时间週一到週五 8：30 ~ 17：30';
+  const mikeWhatsApp = 'https://wa.me/15109927777?text=' + encodeURIComponent('我已购买「美股二加一实战组合包」，想与 Mike 老师做一对一持仓分析');
+  const csWhatsApp = 'https://wa.me/886981159288?text=' + encodeURIComponent('你好，我想咨询课程相关问题');
 
   return {
     to: data.to,
@@ -310,10 +313,9 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
         <h3 style="margin: 24px 0 12px 0; font-size: 16px;">启用步骤</h3>
         <ol style="line-height: 2; padding-left: 20px;">
           <li>前往<a href="https://www.cmoney.tw/" style="color: #B8953F;">商品官网</a></li>
-          <li>输入上方商品启用序号</li>
-          <li>点击「启用序号」</li>
-          <li>如您尚未登入或註册理财宝帐号，请您登入或註册</li>
-          <li>登入帐号并启用序号后，即可看到「序号启用成功！」</li>
+          <li>点击右上角「登入 / 註册」，完成登入或註册理财宝帐号</li>
+          <li>登入后，将鼠标移动到右上角，在下拉选单中选择「启用序号」</li>
+          <li>输入上方商品启用序号，点击「启用序号」按钮，即可看到「序号启用成功！」</li>
         </ol>
 
         <!-- Product Links -->
@@ -323,6 +325,30 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
           <li><a href="${course1Link}" style="color: #B8953F;">震盪行情的美股期权操作解析 线上课程观看</a></li>
           <li><a href="${course2Link}" style="color: #B8953F;">ETF 进阶资产放大术 线上课程观看</a></li>
         </ul>
+
+        ${data.bonusEligible ? `
+        <!-- 1-on-1 Portfolio Analysis (bonus) -->
+        <div style="border: 2px solid #B8953F; border-radius: 8px; padding: 24px; margin: 24px 0; background: #FAFAF7;">
+          <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #B8953F;">🎁 直播限定福利：Mike 一对一持仓分析</h3>
+          <p style="margin: 0 0 12px 0; font-size: 14px;">恭喜你获得 Mike 老师亲自为你做一对一持仓分析的机会！请按照以下步骤预约：</p>
+          <ol style="line-height: 2; padding-left: 20px; margin: 0 0 16px 0;">
+            <li><strong>截图保存此封确认邮件</strong>作为购买凭证</li>
+            <li>点击下方 WhatsApp 链接联系 Mike 老师</li>
+            <li>发送截图并预约一对一分析时间</li>
+          </ol>
+          <p style="text-align: center; margin: 16px 0 8px 0;">
+            <a href="${mikeWhatsApp}" style="display: inline-block; background: #25D366; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">📱 WhatsApp 联系 Mike 老师预约</a>
+          </p>
+        </div>
+        ` : ''}
+
+        <!-- Customer Service WhatsApp -->
+        <div style="background: #F5F5F0; border-radius: 8px; padding: 16px; margin: 24px 0; text-align: center;">
+          <p style="margin: 0 0 8px 0; font-size: 14px; color: #1A1A1A;">课程使用有任何问题？</p>
+          <p style="margin: 0 0 12px 0;">
+            <a href="${csWhatsApp}" style="display: inline-block; background: #25D366; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px;">💬 WhatsApp 咨询客服</a>
+          </p>
+        </div>
 
         <!-- Footer -->
         <hr style="border: none; border-top: 1px solid #E8E5DE; margin: 32px 0 16px 0;" />

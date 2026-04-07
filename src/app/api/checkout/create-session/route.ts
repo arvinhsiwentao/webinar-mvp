@@ -5,7 +5,7 @@ import { getWebinarById, getOrdersByEmail, createOrder } from '@/lib/db';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { webinarId, email, name, source } = body;
+    const { webinarId, email, name, source, bonusDeadline } = body;
 
     if (!webinarId || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       status: 'pending',
       amount: session.amount_total || 0,
       currency: session.currency || 'usd',
-      metadata: { source: source || 'direct', order_source: 'mike_webinar' },
+      metadata: { source: source || 'direct', order_source: 'mike_webinar', ...(bonusDeadline ? { bonusDeadline } : {}) },
     });
 
     return NextResponse.json({ clientSecret: session.client_secret });

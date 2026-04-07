@@ -72,7 +72,10 @@ export default function CheckoutPage() {
     const res = await fetch('/api/checkout/create-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ webinarId, email, name, source }),
+      body: JSON.stringify({
+        webinarId, email, name, source,
+        bonusDeadline: (() => { try { return localStorage.getItem(storageKey) || ''; } catch { return ''; } })(),
+      }),
     });
 
     if (!res.ok) {
