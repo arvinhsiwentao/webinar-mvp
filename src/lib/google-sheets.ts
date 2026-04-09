@@ -2,7 +2,8 @@ import { google } from 'googleapis';
 import { Order } from './types';
 
 const SPREADSHEET_ID = '1W9tK97n004XI7UbN_VuECcb_ZVVWmwa31sWRadBxZOQ';
-const SHEET_RANGE = 'A:E';
+const DEFAULT_SHEET_NAME = '工作表1';
+const SHEET_COLUMNS = 'A:E';
 const MAX_RETRIES = 3;
 
 const ORDERS_SPREADSHEET_ID = '1sba5HDJav8aUO5L59-JmkeV2QXp8F6gpR4PUOLXMqD8';
@@ -27,7 +28,8 @@ function getAuth() {
  */
 export async function claimActivationCode(
   orderId: string,
-  orderEmail: string
+  orderEmail: string,
+  sheetName?: string
 ): Promise<string> {
   const auth = getAuth();
 
@@ -38,12 +40,14 @@ export async function claimActivationCode(
   }
 
   const sheets = google.sheets({ version: 'v4', auth });
+  const tab = sheetName || DEFAULT_SHEET_NAME;
+  const sheetRange = `${tab}!${SHEET_COLUMNS}`;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     // 1. Read all rows
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: SHEET_RANGE,
+      range: sheetRange,
     });
 
     const rows = res.data.values;
@@ -74,7 +78,7 @@ export async function claimActivationCode(
     // 3. Write: mark as used with order details (columns B-E)
     await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID,
-      range: `B${sheetRow}:E${sheetRow}`,
+      range: `${tab}!B${sheetRow}:E${sheetRow}`,
       valueInputOption: 'RAW',
       requestBody: {
         values: [['TRUE', orderId, orderEmail, today]],
@@ -84,7 +88,7 @@ export async function claimActivationCode(
     // 4. Race condition check: re-read the row and verify our orderId persisted
     const verifyRes = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `A${sheetRow}:E${sheetRow}`,
+      range: `${tab}!A${sheetRow}:E${sheetRow}`,
     });
 
     const verifiedRow = verifyRes.data.values?.[0];

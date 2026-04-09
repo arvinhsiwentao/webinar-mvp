@@ -259,7 +259,10 @@ export function followUpEmail(to: string, name: string, title: string, replayUrl
 export interface PurchaseEmailData {
   to: string;
   name: string;
-  activationCode: string;
+  /** Legacy single code (backward compat) */
+  activationCode?: string;
+  /** Multi-product codes */
+  activationCodes?: { productId: string; productName: string; code: string }[];
   orderDate: string;
   orderId: string;
   email: string;
@@ -267,22 +270,50 @@ export interface PurchaseEmailData {
 }
 
 export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams {
-  const productName = '美股二加一实战组合包';
   const codeExpiry = '2026/12/31';
   const appLink = 'https://cmoneymike.onelink.me/ZEaW/kkyo4oqs';
   const course1Link = 'https://cmy.tw/00CKIq';
   const course2Link = 'https://cmy.tw/00ChKt';
-  const serviceEmail = 'csservice@cmoney.com.tw';
+  const serviceEmail = 'cmoney_overseas@cmoney.com.tw';
   const serviceHours = '北京时间週一到週五 8：30 ~ 17：30';
-  const mikeWhatsApp = 'https://wa.me/15109927777?text=' + encodeURIComponent('我已购买「美股二加一实战组合包」，想与 Mike 老师做一对一持仓分析');
+  const mikeWhatsApp = 'https://wa.me/15109927777?text=' + encodeURIComponent('我已购买课程套餐，想与 Mike 老师做一对一持仓分析');
   const csWhatsApp = 'https://wa.me/886981159288?text=' + encodeURIComponent('你好，我想咨询课程相关问题');
+
+  // Build product display name from codes
+  const codes = data.activationCodes || (data.activationCode
+    ? [{ productId: 'bundle', productName: '美股二加一实战组合包', code: data.activationCode }]
+    : []);
+  const productDisplayName = codes.length === 1
+    ? codes[0].productName
+    : codes.map(c => c.productName).join(' + ');
+
+  // Build activation codes HTML
+  const codesHtml = codes.map(c => `
+    <div style="border: 2px solid #B8953F; border-radius: 8px; padding: 20px; text-align: center; margin: 16px 0;">
+      <p style="margin: 0 0 4px 0; font-size: 13px; color: #6B6B6B;">${c.productName}</p>
+      <p style="margin: 0 0 8px 0; font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #B8953F;">${c.code}</p>
+      <p style="margin: 0; font-size: 12px; color: #B8953F;">仅限单次使用 · 到期日：${codeExpiry}</p>
+    </div>
+  `).join('');
+
+  // Build product links based on what was purchased
+  const productIds = codes.map(c => c.productId);
+  const hasOptions = productIds.some(id => id === 'options' || id === 'etf-options' || id === 'bundle');
+  const hasEtf = productIds.some(id => id === 'etf-options' || id === 'bundle');
+  const hasApp = productIds.some(id => id === 'app-quarterly' || id === 'bundle' || id === 'options' || id === 'etf-options');
+
+  const productLinksHtml = [
+    hasApp ? `<li><a href="${appLink}" style="color: #B8953F;">Mike是麦克 美股财富导航 App 下载</a></li>` : '',
+    hasOptions ? `<li><a href="${course1Link}" style="color: #B8953F;">震荡行情的美股期权操作解析 线上课程观看</a></li>` : '',
+    hasEtf ? `<li><a href="${course2Link}" style="color: #B8953F;">ETF 进阶资产放大术 线上课程观看</a></li>` : '',
+  ].filter(Boolean).join('\n');
 
   return {
     to: data.to,
-    subject: `感谢您购买【${productName}】，请查收您的商品启用序号`,
+    subject: `感谢您购买【${productDisplayName}】，请查收您的商品启用序号`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1A1A1A; line-height: 1.8;">
-        <p style="font-size: 16px;">${data.name} 用户您好，感谢您购买【${productName}｜Mike 是麦克】，以下是您的订单资讯与商品启用序号，请妥善保存此邮件。</p>
+        <p style="font-size: 16px;">${data.name} 用户您好，感谢您购买【${productDisplayName}｜Mike 是麦克】，以下是您的订单资讯与商品启用序号，请妥善保存此邮件。</p>
 
         <!-- Order Info Table -->
         <table style="width: 100%; border-collapse: collapse; margin: 24px 0; border: 1px solid #E8E5DE; background: #FAFAF7;">
@@ -294,36 +325,32 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
           <tr>
             <td style="border: 1px solid #E8E5DE; padding: 10px 14px;">${data.orderDate}</td>
             <td style="border: 1px solid #E8E5DE; padding: 10px 14px; font-size: 13px; word-break: break-all;">${data.orderId}</td>
-            <td style="border: 1px solid #E8E5DE; padding: 10px 14px;">${productName}</td>
+            <td style="border: 1px solid #E8E5DE; padding: 10px 14px;">${productDisplayName}</td>
           </tr>
           <tr>
             <td colspan="3" style="border: 1px solid #E8E5DE; padding: 10px 14px;"><strong>订购人 Email：</strong>${data.email}</td>
           </tr>
         </table>
 
-        <!-- Activation Code Box -->
-        <div style="border: 2px solid #B8953F; border-radius: 8px; padding: 24px; text-align: center; margin: 24px 0;">
-          <p style="margin: 0 0 8px 0; font-size: 15px; color: #1A1A1A;">商品启用序号</p>
-          <p style="margin: 0 0 12px 0; font-size: 28px; font-weight: bold; letter-spacing: 4px; color: #B8953F;">${data.activationCode}</p>
-          <p style="margin: 0 0 4px 0; font-size: 13px; color: #B8953F;">※ 此序号仅限单次使用，启用后即失效，请勿分享给他人</p>
-          <p style="margin: 0; font-size: 13px; color: #B8953F;">※ 序号到期日：${codeExpiry}</p>
-        </div>
+        <!-- Activation Code(s) -->
+        <h3 style="margin: 24px 0 12px 0; font-size: 16px;">商品启用序号</h3>
+        ${codesHtml}
+        <p style="font-size: 13px; color: #B8953F; text-align: center;">※ 每个序号仅限单次使用，启用后即失效，请勿分享给他人</p>
 
         <!-- Instructions -->
         <h3 style="margin: 24px 0 12px 0; font-size: 16px;">启用步骤</h3>
+        <p style="font-size: 13px; color: #6B6B6B; margin-bottom: 8px;">每个商品需分别启用序号：</p>
         <ol style="line-height: 2; padding-left: 20px;">
           <li>前往<a href="https://www.cmoney.tw/" style="color: #B8953F;">商品官网</a></li>
-          <li>点击右上角「登入 / 註册」，完成登入或註册理财宝帐号</li>
+          <li>点击右上角「登入 / 注册」，完成登入或注册理财宝帐号</li>
           <li>登入后，将鼠标移动到右上角，在下拉选单中选择「启用序号」</li>
           <li>输入上方商品启用序号，点击「启用序号」按钮，即可看到「序号启用成功！」</li>
         </ol>
 
         <!-- Product Links -->
-        <h3 style="margin: 24px 0 12px 0; font-size: 16px;">商品启用后，可前往三个商品各自页面，并确保已登入您的帐号后，方可享有以下商品权限：</h3>
+        <h3 style="margin: 24px 0 12px 0; font-size: 16px;">商品启用后，可前往以下页面使用权限：</h3>
         <ul style="line-height: 2; padding-left: 20px;">
-          <li><a href="${appLink}" style="color: #B8953F;">Mike是麦克 美股财富导航 App 下载</a></li>
-          <li><a href="${course1Link}" style="color: #B8953F;">震盪行情的美股期权操作解析 线上课程观看</a></li>
-          <li><a href="${course2Link}" style="color: #B8953F;">ETF 进阶资产放大术 线上课程观看</a></li>
+          ${productLinksHtml}
         </ul>
 
         ${data.bonusEligible ? `

@@ -29,14 +29,28 @@ export async function GET(request: NextRequest) {
       }
 
       if (order) {
+        // Build product-code pairs for multi-product orders
+        const productIdsStr = order.metadata?.productIds || '';
+        const productNamesStr = order.metadata?.productNames || '';
+        const productIds = productIdsStr ? productIdsStr.split(',') : [];
+        const productNames = productNamesStr ? productNamesStr.split(',') : [];
+        const codes = order.activationCode ? order.activationCode.split(',') : [];
+
+        const activationCodes = codes.map((code, i) => ({
+          productId: productIds[i] || '',
+          productName: productNames[i] || '',
+          code: code.trim(),
+        }));
+
         return NextResponse.json({
           status: session.status,
           orderStatus: order.status,
           activationCode: order.status === 'fulfilled' ? order.activationCode : undefined,
+          activationCodes: order.status === 'fulfilled' ? activationCodes : undefined,
           customerEmail: session.customer_details?.email || session.customer_email,
           amountTotal: session.amount_total,
           currency: session.currency,
-          productName: session.metadata?.webinar_title || 'Webinar Course',
+          productName: productNames.join(' + ') || session.metadata?.webinar_title || 'Webinar Course',
         });
       }
     }

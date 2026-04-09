@@ -21,7 +21,8 @@ export default function CheckoutReturnPage() {
   const [status, setStatus] = useState<PageStatus>('loading');
   const [customerEmail, setCustomerEmail] = useState('');
   const [activationCode, setActivationCode] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [activationCodes, setActivationCodes] = useState<{ productId: string; productName: string; code: string }[]>([]);
+  const [copied, setCopied] = useState<string | false>(false);
 
   useEffect(() => {
     if (!sessionId) {
@@ -77,6 +78,7 @@ export default function CheckoutReturnPage() {
           // Check if order is fulfilled with activation code
           if (data.orderStatus === 'fulfilled' && data.activationCode) {
             setActivationCode(data.activationCode);
+            if (data.activationCodes) setActivationCodes(data.activationCodes);
             setCustomerEmail(data.customerEmail || '');
             setStatus('fulfilled');
             stopPolling();
@@ -200,31 +202,67 @@ export default function CheckoutReturnPage() {
           恭喜你，迈出了最重要的一步！
         </h1>
 
-        {/* Activation code box */}
-        <div className="border-2 border-[#B8953F] rounded-lg p-6 text-center my-6">
-          <p className="text-sm text-neutral-500 mb-2">商品启用序号</p>
-          <p className="text-2xl font-bold tracking-[4px] text-[#B8953F]">{activationCode}</p>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(activationCode);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
-            }}
-            className="mt-3 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-[#B8953F] text-white hover:bg-[#A6842F]"
-          >
-            {copied ? (
-              <>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                已复制
-              </>
-            ) : (
-              <>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-                一键复制
-              </>
-            )}
-          </button>
-          <p className="text-xs text-[#B8953F] mt-3">※ 此序号仅限单次使用，启用后即失效，请勿分享给他人</p>
+        {/* Activation code box(es) */}
+        <div className="my-6 space-y-4">
+          {activationCodes.length > 1 ? (
+            // Multi-product: show each code with product name
+            activationCodes.map((item, idx) => (
+              <div key={`${item.productId}-${idx}`} className="border-2 border-[#B8953F] rounded-lg p-5 text-center">
+                <p className="text-xs text-neutral-400 mb-1">{item.productName}</p>
+                <p className="text-xl font-bold tracking-[4px] text-[#B8953F] mb-2">{item.code}</p>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(item.code);
+                    setCopied(item.code);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-[#B8953F] text-white hover:bg-[#A6842F]"
+                >
+                  {copied === item.code ? (
+                    <>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                      已复制
+                    </>
+                  ) : (
+                    <>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+                      复制
+                    </>
+                  )}
+                </button>
+              </div>
+            ))
+          ) : (
+            // Single product or legacy
+            <div className="border-2 border-[#B8953F] rounded-lg p-6 text-center">
+              {activationCodes.length === 1 && activationCodes[0].productName && (
+                <p className="text-xs text-neutral-400 mb-1">{activationCodes[0].productName}</p>
+              )}
+              <p className="text-sm text-neutral-500 mb-2">商品启用序号</p>
+              <p className="text-2xl font-bold tracking-[4px] text-[#B8953F]">{activationCode}</p>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(activationCode);
+                  setCopied('single');
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="mt-3 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-[#B8953F] text-white hover:bg-[#A6842F]"
+              >
+                {copied === 'single' ? (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                    已复制
+                  </>
+                ) : (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+                    一键复制
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+          <p className="text-xs text-[#B8953F] text-center">※ 每个序号仅限单次使用，启用后即失效，请勿分享给他人</p>
         </div>
 
         <p className="text-neutral-500 leading-relaxed mb-2">
@@ -256,39 +294,45 @@ export default function CheckoutReturnPage() {
           </div>
         </div>
 
-        {/* Product access links */}
+        {/* Product access links — dynamic based on purchase */}
         <div className="bg-white rounded-xl border border-[#E8E5DE] p-8 text-left mt-4">
           <p className="text-sm font-semibold text-neutral-800 mb-4 tracking-wide">商品启用后，可前往以下页面使用权限</p>
           <p className="text-xs text-neutral-400 mb-4">请确保已登入您的帐号</p>
           <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <span className="text-[#B8953F] mt-0.5">•</span>
-              <span className="text-sm text-neutral-600">
-                Mike是麦克 美股财富导航 App 下载：
-                <a href="https://cmoneymike.onelink.me/ZEaW/kkyo4oqs" target="_blank" rel="noopener noreferrer" className="text-[#B8953F] underline underline-offset-2 break-all">点此下载</a>
-              </span>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-[#B8953F] mt-0.5">•</span>
-              <span className="text-sm text-neutral-600">
-                震荡行情的美股期权操作解析 线上课程观看：
-                <a href="https://cmy.tw/00CKIq" target="_blank" rel="noopener noreferrer" className="text-[#B8953F] underline underline-offset-2">点此观看</a>
-              </span>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-[#B8953F] mt-0.5">•</span>
-              <span className="text-sm text-neutral-600">
-                ETF 进阶资产放大术 线上课程观看：
-                <a href="https://cmy.tw/00ChKt" target="_blank" rel="noopener noreferrer" className="text-[#B8953F] underline underline-offset-2">点此观看</a>
-              </span>
-            </div>
+            {(() => {
+              const pids = activationCodes.map(c => c.productId);
+              const hasApp = pids.some(id => ['app-quarterly', 'bundle', 'options', 'etf-options'].includes(id));
+              const hasOptions = pids.some(id => ['options', 'etf-options', 'bundle'].includes(id));
+              const hasEtf = pids.some(id => ['etf-options', 'bundle'].includes(id));
+              const links = [];
+              if (hasApp) links.push({ name: 'Mike是麦克 美股财富导航 App 下载', url: 'https://cmoneymike.onelink.me/ZEaW/kkyo4oqs' });
+              if (hasOptions) links.push({ name: '震荡行情的美股期权操作解析 线上课程观看', url: 'https://cmy.tw/00CKIq' });
+              if (hasEtf) links.push({ name: 'ETF 进阶资产放大术 线上课程观看', url: 'https://cmy.tw/00ChKt' });
+              // Fallback: if no codes matched (legacy), show all
+              if (links.length === 0) {
+                links.push({ name: 'Mike是麦克 美股财富导航 App 下载', url: 'https://cmoneymike.onelink.me/ZEaW/kkyo4oqs' });
+                links.push({ name: '震荡行情的美股期权操作解析 线上课程观看', url: 'https://cmy.tw/00CKIq' });
+                links.push({ name: 'ETF 进阶资产放大术 线上课程观看', url: 'https://cmy.tw/00ChKt' });
+              }
+              return links.map((link) => (
+                <div key={link.url} className="flex items-start gap-3">
+                  <span className="text-[#B8953F] mt-0.5">•</span>
+                  <span className="text-sm text-neutral-600">
+                    {link.name}：
+                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-[#B8953F] underline underline-offset-2 break-all">
+                      {link.url.includes('onelink') ? '点此下载' : '点此观看'}
+                    </a>
+                  </span>
+                </div>
+              ));
+            })()}
           </div>
         </div>
 
         {/* Customer support */}
         <div className="bg-[#FAFAF7] rounded-xl border border-[#E8E5DE] p-6 text-center mt-4">
           <p className="text-sm text-neutral-500 mb-3">※ 如您遇到任何问题，欢迎联系客服</p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-3">
+          <div className="flex flex-col items-center gap-3 mb-3">
             <a
               href="https://wa.me/886981159288?text=%E4%BD%A0%E5%A5%BD%EF%BC%8C%E6%88%91%E6%83%B3%E5%92%A8%E8%AF%A2%E8%AF%BE%E7%A8%8B%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98"
               target="_blank"
@@ -300,15 +344,12 @@ export default function CheckoutReturnPage() {
               </svg>
               WhatsApp 咨询客服
             </a>
-            <a
-              href="mailto:csservice@cmoney.com.tw"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md border border-[#E8E5DE] bg-white hover:bg-neutral-50 text-neutral-700 text-sm font-medium transition-colors"
-            >
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md border border-[#E8E5DE] bg-white text-neutral-700 text-sm">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
               </svg>
-              Email 客服
-            </a>
+              <a href="mailto:cmoney_overseas@cmoney.com.tw" className="text-[#B8953F] underline underline-offset-2">cmoney_overseas@cmoney.com.tw</a>
+            </div>
           </div>
           <p className="text-xs text-neutral-400">服务时间：北京时间周一到周五 8:30 ~ 17:30</p>
         </div>
