@@ -73,9 +73,13 @@ export const NAME_POOL: string[] = [
 /**
  * Calculate target viewer count at a given video timestamp.
  *
- * Phase 1 (Ramp-up):   0 → rampSec        → baseCount → peakTarget (easeOutQuad)
- * Phase 2 (Plateau):    rampSec → 80% dur   → peakTarget (stable)
- * Phase 3 (Decline):    80% dur → 100% dur  → peakTarget → 60% of peak (floored at 30%)
+/** Decline phase starts at 70% of duration (was 80%) — gives more "settling down" time */
+const DECLINE_START_RATIO = 0.7;
+
+/**
+ * Phase 1 (Ramp-up):   0 → rampSec              → baseCount → peakTarget
+ * Phase 2 (Plateau):   rampSec → 70% duration   → peakTarget (stable)
+ * Phase 3 (Decline):   70% duration → end       → peakTarget → 60% (floored at 30%)
  */
 export function getTargetCount(
   timeSec: number,
@@ -91,13 +95,13 @@ export function getTargetCount(
     const progress = rampSec > 0 ? t / rampSec : 1;
     const eased = progress * (2 - progress); // easeOutQuad
     return Math.round(baseCount + (peakTarget - baseCount) * eased);
-  } else if (t <= durationSec * 0.8) {
+  } else if (t <= durationSec * DECLINE_START_RATIO) {
     // Phase 2 — Plateau at peak
     return peakTarget;
   } else {
     // Phase 3 — Linear decline to 60 % of peak (floored at 30%)
-    const declineStart = durationSec * 0.8;
-    const declineDuration = durationSec * 0.2;
+    const declineStart = durationSec * DECLINE_START_RATIO;
+    const declineDuration = durationSec * (1 - DECLINE_START_RATIO);
     const progress =
       declineDuration > 0 ? (t - declineStart) / declineDuration : 1;
     const declined = Math.round(peakTarget * (1 - 0.4 * Math.min(progress, 1)));
@@ -296,8 +300,10 @@ export function useViewerSimulator(
 
       let nextViewers = currentViewers;
 
-      if (delta > 2) {
-        // ── ADD viewers ──────────────────────────────────────────
+      const isDeclinePhase = now > duration * 0.7;
+
+      if (delta > 2 && !isDeclinePhase) {
+        // ── ADD viewers (suppressed during decline phase) ────────
         const addCount = Math.min(delta, Math.ceil(peak * 0.05));
         const toAdd: string[] = [];
 
@@ -341,7 +347,7 @@ export function useViewerSimulator(
           Math.abs(delta),
           Math.ceil(peak * 0.02),
         );
-        const isDecline = now > duration * 0.8;
+        const isDecline = now > duration * 0.7;
 
         // Determine which viewers are protected
         // Protected = in autoChatNames set AND not in decline phase
@@ -373,9 +379,11 @@ export function useViewerSimulator(
             cooldownRef.current.set(name, now);
           }
         }
-      } else if (Math.abs(delta) <= 2 && Math.random() < 0.15) {
+      } else if (Math.abs(delta) <= 2 && Math.random() < (now > duration * 0.7 ? 0.03 : 0.15)) {
         // ── SWAP: remove 1 non-protected + add 1 new ────────────
-        const isDecline = now > duration * 0.8;
+        // Decline phase (last 20%): 3% swap rate (rare latecomers)
+        // Plateau phase: 15% swap rate (normal churn)
+        const isDecline = now > duration * 0.7;
 
         // Find a removable viewer (from middle, not protected)
         const removable = currentViewers.filter((name, idx) => {
