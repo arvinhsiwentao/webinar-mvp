@@ -87,21 +87,59 @@ export default function ChatRoom({
 
   // Pre-compute randomized trigger times on first render
   const randomizedTimes = useRef<Map<number, number>>(new Map());
+  // Pre-compute join times: 8-15 seconds before each name's first message
+  const joinTimes = useRef<Map<string, number>>(new Map());
+  const joinedFiredRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     if (randomizedTimes.current.size === 0 && autoMessages.length > 0) {
       autoMessages.forEach((msg, idx) => {
         const variance = (Math.random() * 2 - 1) * timeVariance;
         randomizedTimes.current.set(idx, Math.max(0, msg.timeSec + variance));
       });
+
+      // Compute join time for each unique name (8-15s before their first message)
+      const firstMessageByName = new Map<string, number>();
+      autoMessages.forEach((msg, idx) => {
+        const triggerTime = randomizedTimes.current.get(idx) ?? msg.timeSec;
+        if (!firstMessageByName.has(msg.name)) {
+          firstMessageByName.set(msg.name, triggerTime);
+        }
+      });
+      firstMessageByName.forEach((triggerTime, name) => {
+        const joinDelay = 10 + Math.random() * 10; // 10-20 seconds
+        joinTimes.current.set(name, Math.max(0, triggerTime - joinDelay));
+      });
     }
   }, [autoMessages, timeVariance]);
 
   // Fire auto-chat messages based on video time.
+  // Join notifications fire 8-15s BEFORE the message (so it doesn't look like
+  // the user joined and immediately typed).
   // Includes gap detection: if currentTime jumps forward (background tab resume),
   // bulk-insert all missed messages with slot-anchored timestamps.
   useEffect(() => {
     const newMsgs: ChatMessage[] = [];
 
+    // Step 1: Fire join notifications (separate from messages)
+    joinTimes.current.forEach((joinTime, name) => {
+      if (joinedFiredRef.current.has(name)) return;
+      if (currentTime >= joinTime) {
+        joinedFiredRef.current.add(name);
+        joinedNamesRef.current.add(name);
+        const joinWallTime = slotStartMs ? slotStartMs + joinTime * 1000 : Date.now();
+        newMsgs.push({
+          id: nextId(),
+          name: '',
+          message: `${name} 进入直播`,
+          timestamp: joinTime,
+          wallTime: joinWallTime,
+          isSystem: true,
+        });
+      }
+    });
+
+    // Step 2: Fire auto-chat messages
     autoMessages.forEach((msg, idx) => {
       if (firedAutoIds.current.has(idx)) return;
       const triggerTime = randomizedTimes.current.get(idx) ?? msg.timeSec;
@@ -109,9 +147,10 @@ export default function ChatRoom({
         firedAutoIds.current.add(idx);
         // Slot-anchored wallTime: deterministic from session start + video position
         const msgWallTime = slotStartMs ? slotStartMs + msg.timeSec * 1000 : Date.now();
-        // Inject join message if this name hasn't joined yet
+        // Fallback: if join wasn't fired yet (e.g. very early message), inject it now
         if (!joinedNamesRef.current.has(msg.name)) {
           joinedNamesRef.current.add(msg.name);
+          joinedFiredRef.current.add(msg.name);
           newMsgs.push({
             id: nextId(),
             name: '',
@@ -126,7 +165,7 @@ export default function ChatRoom({
           name: msg.name,
           message: msg.message,
           timestamp: msg.timeSec,
-          wallTime: msgWallTime + 1, // +1ms to ensure join sorts before chat
+          wallTime: msgWallTime + 1,
           isAuto: true,
         });
       }
