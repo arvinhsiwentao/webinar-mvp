@@ -14,6 +14,8 @@ export interface ProductConfig {
   originalPrice?: number; // USD — official website price for comparison
   stripePriceId: string;
   sheetName: string; // Google Sheet tab name for activation codes
+  productPackageId: string; // 商品包編號 — for fulfillment tracking
+  salesCode: string; // 銷售代碼 — for fulfillment tracking
   description: string;
   includes: string[]; // What's included (for display)
   bonus?: string; // e.g., "送1个月APP权限"
@@ -42,6 +44,8 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     price: 99,
     stripePriceId: process.env.STRIPE_PRICE_OPTIONS || 'price_1TKLLiGXZySy2dKhqUbjD9h4',
     sheetName: '期權+App(月)',
+    productPackageId: '8892',
+    salesCode: '13198',
     description: '震荡行情的美股期权操作解析',
     includes: ['期权策略课程（无期限回看）', 'Sell Put / Sell Call 完整教学'],
     bonus: '送1个月APP权限',
@@ -54,6 +58,8 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     price: 249,
     stripePriceId: process.env.STRIPE_PRICE_ETF_OPTIONS || 'price_1TKLLiGXZySy2dKh7DKleiYU',
     sheetName: '期權+ETF+App(月)',
+    productPackageId: '8891',
+    salesCode: '13196',
     description: 'ETF 进阶资产放大术 + 期权操作解析',
     includes: ['ETF 实战课程（无期限回看）', '期权策略课程（无期限回看）', '攻守框架完整教学'],
     bonus: '送1个月APP权限',
@@ -66,6 +72,8 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     price: 249,
     stripePriceId: process.env.STRIPE_PRICE_APP_QUARTERLY || 'price_1TKLLjGXZySy2dKhHUDFHsIz',
     sheetName: 'App(季)',
+    productPackageId: '8893',
+    salesCode: '13199',
     description: 'APP 3个月完整权限',
     includes: ['价值灯号', 'Mike 关注清单', '语音直播', '学员聊天室', '付费内容文章'],
     isBundle: false,
@@ -78,6 +86,8 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     originalPrice: 1696,
     stripePriceId: process.env.STRIPE_PRICE_BUNDLE || 'price_1TKLLjGXZySy2dKhfTh6ojrv',
     sheetName: '工作表1',
+    productPackageId: '8764',
+    salesCode: '12991',
     description: 'ETF课程 + 期权课程 + APP一年权限',
     includes: ['ETF 实战课程（无期限回看）', '期权策略课程（无期限回看）', 'APP 一年完整权限'],
     isBundle: true,

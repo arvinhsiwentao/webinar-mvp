@@ -86,11 +86,19 @@ export async function fulfillOrder(
       throw new Error('No activation codes claimed');
     }
 
-    // Load webinar to get product config
+    // Load webinar (kept for backward compat / legacy orders)
     const webinar = await getWebinarById(order.webinarId);
 
     // Store all codes as comma-separated (primary code = first one)
     const allCodes = activationCodes.map(c => c.code).join(',');
+
+    // Build per-product fulfillment fields from products.ts
+    // For multi-product orders, join with comma so all products are tracked
+    const fulfilledProducts = activationCodes
+      .map(c => getProduct(c.productId))
+      .filter((p): p is NonNullable<typeof p> => p !== undefined);
+    const productPackageIds = fulfilledProducts.map(p => p.productPackageId).join(',');
+    const salesCodes = fulfilledProducts.map(p => p.salesCode).join(',');
 
     const now = new Date().toISOString();
     await updateOrder(order.id, {
@@ -99,8 +107,9 @@ export async function fulfillOrder(
       stripePaymentIntentId: resolvedPaymentIntentId,
       paidAt: now,
       fulfilledAt: now,
-      productPackageId: webinar?.productPackageId,
-      salesCode: webinar?.salesCode,
+      // Use per-product values if available, fall back to webinar level for legacy orders
+      productPackageId: productPackageIds || webinar?.productPackageId,
+      salesCode: salesCodes || webinar?.salesCode,
     });
 
     audit({
