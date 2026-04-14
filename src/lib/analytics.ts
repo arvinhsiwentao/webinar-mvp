@@ -3,7 +3,7 @@ type GA4Item = { item_id: string; item_name: string; price: number; quantity: nu
 type GA4EventMap = {
   // GA4 Recommended events
   sign_up: { method: string; webinar_id: string }
-  begin_checkout: { currency: string; value: number; items: GA4Item[]; cta_id?: string; video_time_sec?: number; source?: string }
+  begin_checkout: { currency: string; value: number; items: GA4Item[]; cta_id?: string; video_time_sec?: number; source?: string; product_ids?: string[]; num_items?: number }
   purchase: { transaction_id: string; value: number; currency: string; items: GA4Item[] }
 
   // Custom events (c_ prefix)
@@ -24,6 +24,16 @@ type GA4EventMap = {
   c_lobby_abandon: { webinar_id: string; duration_sec: number; minutes_until_start: number }
   c_lobby_duration: { webinar_id: string; duration_sec: number; exit_type: 'enter_live' | 'abandon' }
   c_purchase_confirmation: { webinar_id: string; transaction_id: string; order_status: string }
+
+  // Checkout page funnel events
+  c_checkout_page_view: { webinar_id: string; source: string; viewport: 'mobile' | 'desktop' }
+  c_checkout_scroll_depth: { webinar_id: string; percent: 25 | 50 | 75 | 100; time_to_reach_sec: number }
+  c_plan_toggle: { webinar_id: string; product_id: string; action: 'add' | 'remove'; running_total: number; num_selected: number; time_since_view_sec: number }
+  c_plan_swap: { webinar_id: string; removed_id: string; added_id: string }
+  c_remove_from_cart: { webinar_id: string; product_id: string; running_total: number }
+  c_confirm_click: { webinar_id: string; source: 'desktop_summary' | 'mobile_bar'; product_ids: string[]; total: number; time_since_view_sec: number; num_toggles_before_confirm: number }
+  c_countdown_expired: { webinar_id: string }
+  c_checkout_exit: { webinar_id: string; dwell_sec: number; max_scroll_pct: number; did_select: boolean; did_confirm: boolean }
 
   // Landing Page V2 engagement events
   c_external_link_click: { link_type: string; link_position: string }
@@ -49,8 +59,10 @@ const CONVERSION_EVENTS: ReadonlySet<string> = new Set([
   'purchase',
   'c_enter_live',
   'c_webinar_complete',
+  'c_cta_click',
   'c_end_page_cta_click',
   'c_chatbot_inquiry_submit',
+  'c_confirm_click',
 ])
 
 function getCookie(name: string): string | null {

@@ -17,6 +17,8 @@ import {
   type ProductId,
   type ProductConfig,
 } from '@/lib/products';
+import { trackGA4 } from '@/lib/analytics';
+import { useCheckoutTracking } from '@/hooks/useCheckoutTracking';
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
@@ -97,28 +99,95 @@ export default function CheckoutPage() {
     : null;
   const showUpsellHint = upsellDiff !== null && upsellDiff > 0 && upsellDiff <= 350;
 
+  // Analytics
+  const tracking = useCheckoutTracking({ webinarId, source });
+  const numTogglesRef = useRef(0);
+
   // Toggle product selection — soft-switch: click a conflicting item auto-removes conflicts
   const toggleProduct = useCallback((id: ProductId) => {
-    setSelectedIds(prev => {
-      if (prev.includes(id)) {
-        return prev.filter(p => p !== id);
-      }
-      if (id === PRODUCT_IDS.BUNDLE) {
-        return [PRODUCT_IDS.BUNDLE];
-      }
-      const excluded = new Set<ProductId>(getExcludedProducts(id));
-      return [...prev.filter(p => !excluded.has(p)), id];
-    });
-    setCheckoutConfirmed(false);
-  }, []);
+    const isAlreadySelected = selectedIds.includes(id);
+    const action: 'add' | 'remove' = isAlreadySelected ? 'remove' : 'add';
+    let removedForSwap: ProductId[] = [];
+    let newSelectedIds: ProductId[];
 
-  // Confirm selection and render Stripe
-  const handleConfirmCheckout = useCallback(() => {
+    if (isAlreadySelected) {
+      newSelectedIds = selectedIds.filter(p => p !== id);
+    } else if (id === PRODUCT_IDS.BUNDLE) {
+      removedForSwap = selectedIds.filter(p => p !== id);
+      newSelectedIds = [PRODUCT_IDS.BUNDLE];
+    } else {
+      const excluded = new Set<ProductId>(getExcludedProducts(id));
+      removedForSwap = selectedIds.filter(p => excluded.has(p));
+      newSelectedIds = [...selectedIds.filter(p => !excluded.has(p)), id];
+    }
+
+    setSelectedIds(newSelectedIds);
+    setCheckoutConfirmed(false);
+
+    numTogglesRef.current += 1;
+    if (newSelectedIds.length > 0) tracking.markSelected();
+    trackGA4('c_plan_toggle', {
+      webinar_id: webinarId,
+      product_id: id,
+      action,
+      running_total: calculateTotal(newSelectedIds),
+      num_selected: newSelectedIds.length,
+      time_since_view_sec: tracking.timeSinceView(),
+    });
+    for (const removed of removedForSwap) {
+      trackGA4('c_plan_swap', {
+        webinar_id: webinarId,
+        removed_id: removed,
+        added_id: id,
+      });
+    }
+  }, [selectedIds, webinarId, tracking]);
+
+  // Remove from cart (right-column summary "移除" button) — fires dedicated event then toggles off
+  const handleRemoveFromCart = useCallback((pid: ProductId) => {
+    const remaining = selectedIds.filter(p => p !== pid);
+    trackGA4('c_remove_from_cart', {
+      webinar_id: webinarId,
+      product_id: pid,
+      running_total: calculateTotal(remaining),
+    });
+    toggleProduct(pid);
+  }, [selectedIds, webinarId, toggleProduct]);
+
+  // Confirm selection and render Stripe — also fires c_confirm_click + canonical begin_checkout
+  const handleConfirmCheckout = useCallback((confirmSource: 'desktop_summary' | 'mobile_bar') => {
     if (selectedIds.length === 0) return;
-    setConfirmedProductIds([...selectedIds]);
+    const productIds = [...selectedIds];
+    setConfirmedProductIds(productIds);
     setSessionKey(k => k + 1);
     setCheckoutConfirmed(true);
-  }, [selectedIds]);
+    tracking.markConfirmed();
+
+    trackGA4('c_confirm_click', {
+      webinar_id: webinarId,
+      source: confirmSource,
+      product_ids: productIds,
+      total,
+      time_since_view_sec: tracking.timeSinceView(),
+      num_toggles_before_confirm: numTogglesRef.current,
+    });
+    trackGA4('begin_checkout', {
+      currency: 'USD',
+      value: total,
+      items: productIds.map(pid => {
+        const p = allProducts.find(x => x.id === pid);
+        return {
+          item_id: pid,
+          item_name: p?.name || pid,
+          price: p?.price || 0,
+          quantity: 1,
+        };
+      }),
+      source: 'checkout_confirm',
+      product_ids: productIds,
+      num_items: productIds.length,
+    });
+  }, [selectedIds, total, webinarId, tracking, allProducts]);
 
   // Countdown timer — 2 hours, persisted in localStorage so refresh doesn't reset
   const COUNTDOWN_DURATION = 2 * 60 * 60; // 2 hours in seconds
@@ -143,16 +212,24 @@ export default function CheckoutPage() {
   }, [storageKey, COUNTDOWN_DURATION]);
 
   // Tick every second
+  const expiredFiredRef = useRef(false);
   useEffect(() => {
     if (countdown === null || countdown <= 0) return;
     const timer = setInterval(() => {
       setCountdown(prev => {
-        if (prev === null || prev <= 1) { clearInterval(timer); return 0; }
+        if (prev === null || prev <= 1) {
+          clearInterval(timer);
+          if (!expiredFiredRef.current) {
+            expiredFiredRef.current = true;
+            trackGA4('c_countdown_expired', { webinar_id: webinarId });
+          }
+          return 0;
+        }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [countdown !== null && countdown > 0]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [countdown !== null && countdown > 0, webinarId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // fetchClientSecret uses confirmedProductIds (NOT selectedIds)
   const confirmedBundleSelected = confirmedProductIds.includes(PRODUCT_IDS.BUNDLE);
@@ -513,8 +590,8 @@ export default function CheckoutPage() {
                 bonusExpired={bonusExpired}
                 showUpsellHint={showUpsellHint}
                 upsellDiff={upsellDiff}
-                onRemoveProduct={(pid) => toggleProduct(pid)}
-                onConfirmCheckout={handleConfirmCheckout}
+                onRemoveProduct={handleRemoveFromCart}
+                onConfirmCheckout={() => handleConfirmCheckout('desktop_summary')}
                 onChangeEmailClick={() => { setChangingEmail(true); setNewEmail(email); }}
                 onNewEmailChange={setNewEmail}
                 onNewEmailSubmit={(trimmed) => {
@@ -554,7 +631,7 @@ export default function CheckoutPage() {
             </div>
             <button
               onClick={() => {
-                handleConfirmCheckout();
+                handleConfirmCheckout('mobile_bar');
                 requestAnimationFrame(() => {
                   checkoutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 });

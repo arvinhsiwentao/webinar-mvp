@@ -5,7 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card } from '@/components/ui';
 import { Webinar } from '@/lib/types';
-import { trackGA4, DEFAULT_PRODUCT_PRICE } from '@/lib/analytics';
+import { trackGA4 } from '@/lib/analytics';
 import { getStoredUtmParams } from '@/lib/utils';
 
 export default function EndPage() {
@@ -112,12 +112,7 @@ export default function EndPage() {
                   webinar_id: String(webinarId),
                   button_text: buttonText,
                 });
-                trackGA4('begin_checkout', {
-                  currency: 'USD',
-                  value: DEFAULT_PRODUCT_PRICE,
-                  items: [{ item_id: `webinar_${webinarId}`, item_name: webinar.title, price: DEFAULT_PRODUCT_PRICE, quantity: 1 }],
-                  source: 'end',
-                });
+                // begin_checkout intentionally NOT fired here — fires later on checkout page with real product mix.
 
                 // Read email: localStorage first, URL param fallback
                 let email = '';
