@@ -51,8 +51,7 @@ export function useCheckoutTracking({ webinarId, source }: UseCheckoutTrackingOp
     const compute = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
       const viewportH = window.innerHeight;
-      const docH = document.documentElement.scrollHeight;
-      const scrollable = Math.max(docH - viewportH, 1);
+      const docH = Math.max(document.documentElement.scrollHeight, viewportH);
       const pct = Math.min(100, Math.round(((scrollY + viewportH) / docH) * 100));
       if (pct > maxScrollPctRef.current) maxScrollPctRef.current = pct;
 
@@ -68,8 +67,6 @@ export function useCheckoutTracking({ webinarId, source }: UseCheckoutTrackingOp
           });
         }
       }
-      // Avoid unused-var: scrollable was for guard against div-by-zero clamp
-      void scrollable;
     };
 
     // Throttle via rAF

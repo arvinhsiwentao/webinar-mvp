@@ -2,6 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getOrderBySessionId } from '@/lib/db';
 import { fulfillOrder } from '@/lib/fulfillment';
+import { getProduct } from '@/lib/products';
+
+type PurchaseItem = { item_id: string; item_name: string; price: number; quantity: number };
+
+/** Build GA4-shaped items[] from a comma-joined productIds string. */
+function buildPurchaseItems(productIdsStr: string | undefined | null): PurchaseItem[] {
+  if (!productIdsStr) return [];
+  return productIdsStr
+    .split(',')
+    .map(id => id.trim())
+    .filter(Boolean)
+    .map(id => {
+      const product = getProduct(id);
+      return {
+        item_id: id,
+        item_name: product?.name || id,
+        price: product?.price || 0,
+        quantity: 1,
+      };
+    });
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -51,6 +72,7 @@ export async function GET(request: NextRequest) {
           amountTotal: session.amount_total,
           currency: session.currency,
           productName: productNames.join(' + ') || session.metadata?.webinar_title || 'Webinar Course',
+          items: buildPurchaseItems(productIdsStr),
         });
       }
     }
@@ -61,6 +83,7 @@ export async function GET(request: NextRequest) {
       amountTotal: session.amount_total,
       currency: session.currency,
       productName: session.metadata?.webinar_title || 'Webinar Course',
+      items: buildPurchaseItems(session.metadata?.productIds),
     });
   } catch (err) {
     console.error('[Checkout] Session status check failed:', err);

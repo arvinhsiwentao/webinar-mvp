@@ -57,16 +57,20 @@ export default function CheckoutReturnPage() {
                   return DEFAULT_PRODUCT_PRICE;
                 })();
             const purchaseCurrency = (data.currency || 'usd').toUpperCase();
+            // Prefer real per-product items from API; fall back to single-item summary if API is pre-update
+            const purchaseItems = Array.isArray(data.items) && data.items.length > 0
+              ? data.items
+              : [{
+                  item_id: `webinar_${webinarId}`,
+                  item_name: data.productName || 'Webinar Course',
+                  price: purchaseValue,
+                  quantity: 1,
+                }];
             trackGA4('purchase', {
               transaction_id: sessionId || `session_${Date.now()}`,
               value: purchaseValue,
               currency: purchaseCurrency,
-              items: [{
-                item_id: `webinar_${webinarId}`,
-                item_name: data.productName || 'Webinar Course',
-                price: purchaseValue,
-                quantity: 1,
-              }],
+              items: purchaseItems,
             });
             trackGA4('c_purchase_confirmation', {
               webinar_id: webinarId,
