@@ -107,7 +107,7 @@ export default function EndPage() {
               size="lg"
               className="w-full"
               onClick={() => {
-                const buttonText = webinar.endPageCtaText || firstCTA?.buttonText || '了解更多';
+                const buttonText = webinar.endPageCtaText || firstCTA?.buttonText || '立即解锁Mike一对一持仓分析';
                 trackGA4('c_end_page_cta_click', {
                   webinar_id: String(webinarId),
                   button_text: buttonText,
@@ -146,7 +146,7 @@ export default function EndPage() {
                 router.push(`/checkout/${webinarId}?${params.toString()}`);
               }}
             >
-              {webinar.endPageCtaText || firstCTA?.buttonText || '了解更多'}
+              {webinar.endPageCtaText || firstCTA?.buttonText || '立即解锁Mike一对一持仓分析'}
             </Button>
           </div>
         )}

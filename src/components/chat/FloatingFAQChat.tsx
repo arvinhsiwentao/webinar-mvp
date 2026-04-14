@@ -13,11 +13,13 @@ interface FloatingFAQChatProps {
   showAfterSec?: number;
   /** Current video time — required when showAfterSec is set */
   currentTime?: number;
+  /** Override bottom offset class — e.g. 'bottom-24 lg:bottom-5' to avoid sticky mobile bars */
+  bottomOffsetClass?: string;
 }
 
 type View = 'faq' | 'ask';
 
-export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, currentTime }: FloatingFAQChatProps) {
+export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, currentTime, bottomOffsetClass = 'bottom-5' }: FloatingFAQChatProps) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>('faq');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -128,7 +130,7 @@ export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, c
   };
 
   return (
-    <div ref={panelRef} className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+    <div ref={panelRef} className={`fixed ${bottomOffsetClass} right-5 z-50 flex flex-col items-end gap-3`}>
       {/* Chat panel */}
       {open && (
         <div className="w-[340px] max-h-[520px] bg-white rounded-lg border border-[#E8E5DE] shadow-xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">

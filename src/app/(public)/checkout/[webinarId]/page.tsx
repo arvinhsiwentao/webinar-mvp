@@ -11,7 +11,7 @@ import {
 import FloatingFAQChat from '@/components/chat/FloatingFAQChat';
 import {
   getAllProducts,
-  getDisabledProducts,
+  getExcludedProducts,
   calculateTotal,
   PRODUCT_IDS,
   type ProductId,
@@ -46,12 +46,46 @@ export default function CheckoutPage() {
   const [sessionKey, setSessionKey] = useState(0);
 
   // Product selection
-  const [selectedIds, setSelectedIds] = useState<ProductId[]>([PRODUCT_IDS.BUNDLE]);
+  const [selectedIds, setSelectedIds] = useState<ProductId[]>([]);
   const allProducts = useMemo(() => getAllProducts(), []);
-  const disabledIds = useMemo(() => getDisabledProducts(selectedIds), [selectedIds]);
   const total = useMemo(() => calculateTotal(selectedIds), [selectedIds]);
 
+  // Ordered list for individual-product section: OPTIONS → ETF+OPTIONS → APP_QUARTERLY
+  const individualProducts = useMemo(() => {
+    const order: ProductId[] = [PRODUCT_IDS.OPTIONS, PRODUCT_IDS.ETF_OPTIONS, PRODUCT_IDS.APP_QUARTERLY];
+    return order
+      .map(id => allProducts.find(p => p.id === id))
+      .filter((p): p is ProductConfig => !!p);
+  }, [allProducts]);
+  const bundleProduct = useMemo(() => allProducts.find(p => p.isBundle), [allProducts]);
+
   const bundleSelected = selectedIds.includes(PRODUCT_IDS.BUNDLE);
+
+  // Selected product configs (for right-column summary)
+  const selectedProducts = useMemo(
+    () => selectedIds.map(id => allProducts.find(p => p.id === id)).filter((p): p is ProductConfig => !!p),
+    [selectedIds, allProducts]
+  );
+
+  // Testimonial shown inside each product card — one per plan, tied to live script moments
+  const testimonialByProduct: Record<ProductId, { text: string; name: string }> = {
+    [PRODUCT_IDS.OPTIONS]: {
+      text: '学会 Sell Put 后，市场跌的时候也能收保费，心态完全不一样。',
+      name: '陈先生',
+    },
+    [PRODUCT_IDS.ETF_OPTIONS]: {
+      text: '上完课最大的改变不是赚多少，是终于不焦虑了。市场再震荡也能睡好觉。',
+      name: '赵先生',
+    },
+    [PRODUCT_IDS.APP_QUARTERLY]: {
+      text: '通勤路上听 Mike 语音直播，我就知道这周该不该调整。即时互动课程替代不了。',
+      name: '林先生',
+    },
+    [PRODUCT_IDS.BUNDLE]: {
+      text: '一对一持仓分析后，十几支 ETF 砍到六支，逻辑一下子清楚。现在每天 10 分钟搞定。',
+      name: 'Kevin L.',
+    },
+  };
 
   // Stripe confirmation state — CRITICAL: prevents multiple Embedded Checkout objects
   const [checkoutConfirmed, setCheckoutConfirmed] = useState(false);
@@ -63,23 +97,18 @@ export default function CheckoutPage() {
     : null;
   const showUpsellHint = upsellDiff !== null && upsellDiff > 0 && upsellDiff <= 350;
 
-  // Toggle product selection
+  // Toggle product selection — soft-switch: click a conflicting item auto-removes conflicts
   const toggleProduct = useCallback((id: ProductId) => {
     setSelectedIds(prev => {
-      const isBundle = id === PRODUCT_IDS.BUNDLE;
       if (prev.includes(id)) {
-        // Deselect
         return prev.filter(p => p !== id);
       }
-      if (isBundle) {
-        // Bundle is exclusive: select only bundle
+      if (id === PRODUCT_IDS.BUNDLE) {
         return [PRODUCT_IDS.BUNDLE];
       }
-      // Non-bundle: add it, remove bundle if present
-      const next = prev.filter(p => p !== PRODUCT_IDS.BUNDLE);
-      return [...next, id];
+      const excluded = new Set<ProductId>(getExcludedProducts(id));
+      return [...prev.filter(p => !excluded.has(p)), id];
     });
-    // Selection changed — invalidate Stripe confirmation
     setCheckoutConfirmed(false);
   }, []);
 
@@ -254,7 +283,7 @@ export default function CheckoutPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8 lg:py-12">
+      <main className="max-w-6xl mx-auto px-4 py-8 lg:py-12 pb-36 lg:pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-8 lg:gap-12">
 
           {/* ============ Left column — Content ============ */}
@@ -263,10 +292,10 @@ export default function CheckoutPage() {
             {/* ==================== Section 1: Headline ==================== */}
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900 mb-2">
-                一套学得会、用得上的美股攻守系统
+                从听懂美股，到真的每月有收益
               </h1>
               <p className="text-neutral-500">
-                不再凭感觉操作美股，从「听懂了」到「能执行」— ETF 配置做进攻、期权收保费做防守
+                5 分钟扫市场代替两三小时盯盘，期权月月收保费、ETF 放大报酬 — Mike 用万美金学费换来的 SOP，你直接照做
               </p>
             </div>
 
@@ -295,11 +324,10 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                   <ul className="space-y-2.5 ml-[52px]">
-                    <FeatureItem text="价值灯号 — 基于本益比、营收增长、现金流算出红 / 黄 / 绿灯，5 分钟扫完，不用花两三个小时看盘" />
-                    <FeatureItem text="Mike 关注清单 — Mike 正在研究、追踪的股票即时更新，作为你自己选股的起点" />
-                    <FeatureItem text="语音直播 — 约每两周一场，至少一小时，聊最新市场趋势，可直接提问交流" />
-                    <FeatureItem text="学员 & Mike 即时文字聊天室 — 随时提问，分享持仓、讨论操作逻辑、互相提醒机会和风险" />
-                    <FeatureItem text="APP 专属付费内容文章 — 解锁 Mike 对最新趋势的深度分析与即时分享" />
+                    <FeatureItem text="价值灯号 — 本益比 / 营收 / 现金流算出红 / 黄 / 绿灯，5 分钟扫完市场，不用花两三小时盯盘" />
+                    <FeatureItem text="Mike 每日观点 & 关注清单 — 每天在 APP 更新他真的在盯什么股、怎么看最新行情，不是隔靴搔痒" />
+                    <FeatureItem text="双周语音直播 — 每两周一场、至少一小时，聊最新趋势，可直接提问交流" />
+                    <FeatureItem text="学员社群 + 付费文章 — 跟 Mike 和学员讨论持仓、读他的深度分析，波动时不用一个人扛" />
                   </ul>
                 </div>
 
@@ -307,24 +335,24 @@ export default function CheckoutPage() {
 
                 {/* Item 2: Options course */}
                 <div>
-                  <div className="flex items-center gap-3 mb-1">
+                  <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-lg bg-[rgba(184,149,63,0.08)] flex items-center justify-center shrink-0">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B8953F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
                       </svg>
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-bold text-neutral-900">期权策略课程</h3>
                         <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">线上课程</span>
+                        <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">无期限 · 无限次数观看</span>
                       </div>
                     </div>
                   </div>
-                  <p className="text-xs text-neutral-400 ml-[52px] mb-3">无期限 · 无限次数观看</p>
                   <ul className="space-y-2.5 ml-[52px]">
-                    <FeatureItem text="Sell Put 低接收保费 — 学会像「等房价跌到理想价才买，等待期间还能收租」一样操作期权，市场越跌你越从容" />
-                    <FeatureItem text="Sell Call 持仓收租 — 手上有 ETF 就能额外收保费，不卖股票也有现金流，波动月份反而赚更多" />
-                    <FeatureItem text="风险控制 SOP — 保证金怎么算、什么时候该做什么时候不该做、小白跟着步骤走就行，避开 Mike 自己踩过的上万美金学费的坑" />
+                    <FeatureItem text="Sell Put 低接收保费 — 像「挂低价等买房，等待期间还能收租」，市场越跌你越从容" />
+                    <FeatureItem text="Sell Call 持仓收租 — 手上有 ETF 就能额外收保费，不卖股票也有现金流" />
+                    <FeatureItem text="风险控制 SOP — 保证金怎么算、什么该做什么不该做。Mike 踩过上万美金学费的坑，你直接跳过" />
                   </ul>
                 </div>
 
@@ -332,24 +360,24 @@ export default function CheckoutPage() {
 
                 {/* Item 3: ETF course */}
                 <div>
-                  <div className="flex items-center gap-3 mb-1">
+                  <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-lg bg-[rgba(184,149,63,0.08)] flex items-center justify-center shrink-0">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B8953F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
                       </svg>
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-bold text-neutral-900">ETF 实战课程</h3>
                         <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">线上课程</span>
+                        <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">无期限 · 无限次数观看</span>
                       </div>
                     </div>
                   </div>
-                  <p className="text-xs text-neutral-400 ml-[52px] mb-3">无期限 · 无限次数观看</p>
                   <ul className="space-y-2.5 ml-[52px]">
-                    <FeatureItem text="四类 ETF 组合配置 — 成长型做加速、防御型做安全垫、收益型提供现金流、进阶型博超额回报，像逛 Costco 一样有系统地装满你的推车" />
-                    <FeatureItem text="从退休目标倒推配比 — 你想几岁退休、需要多少钱、现在有多少本金，三个数字算出你该偏攻还是偏守，不是照搬别人的比例" />
-                    <FeatureItem text="长短线账户策略 + 动态再平衡 — 退休账户做长线、一般账户做短线，每季度花十分钟调整配比，用纪律替代情绪" />
+                    <FeatureItem text="四类 ETF 推车配置 — 成长做加速、防御做安全垫、收益做现金流、进阶博超额回报，像逛 Costco 装满推车" />
+                    <FeatureItem text="从退休目标倒推配比 — 几岁退休、每年要多少钱、现在多少本金，三个数字算出你该偏攻还是偏守" />
+                    <FeatureItem text="长短账户策略 + 季度再平衡 — 退休账户做长线、一般账户做短线，每季 10 分钟，用纪律替代情绪" />
                   </ul>
                 </div>
               </div>
@@ -359,7 +387,7 @@ export default function CheckoutPage() {
             <div className="space-y-4">
               <h2 className="text-lg font-bold text-neutral-900">选择你的方案</h2>
 
-              {/* Countdown timer — above bundle card */}
+              {/* Countdown timer */}
               {countdownDisplay && (
                 <div className="flex items-center justify-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -370,20 +398,33 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {/* Bundle card */}
-              {allProducts.filter(p => p.isBundle).map(product => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  selected={selectedIds.includes(product.id as ProductId)}
-                  disabled={disabledIds.has(product.id as ProductId) && !selectedIds.includes(product.id as ProductId)}
-                  disabledReason="已包含在所选商品中"
-                  onToggle={() => toggleProduct(product.id as ProductId)}
-                  bonusExpired={bonusExpired}
-                />
-              ))}
+              {/* Individual product cards — ordered: OPTIONS → ETF+OPTIONS → APP_QUARTERLY */}
+              {individualProducts.map(product => {
+                const pid = product.id as ProductId;
+                return (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    selected={selectedIds.includes(pid)}
+                    disabled={false}
+                    disabledReason=""
+                    onToggle={() => toggleProduct(pid)}
+                    bonusExpired={bonusExpired}
+                    testimonial={testimonialByProduct[pid]}
+                  />
+                );
+              })}
 
-              {/* 1-on-1 bonus card — always visible to drive bundle conversion */}
+              {/* Separator — leads into bundle */}
+              <div className="py-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 border-t border-[#E8E5DE]" />
+                  <span className="text-xs text-neutral-400 whitespace-nowrap">── 或选择完整组合包（含额外福利）──</span>
+                  <div className="flex-1 border-t border-[#E8E5DE]" />
+                </div>
+              </div>
+
+              {/* 1-on-1 bonus card — teaser above Bundle */}
               <div className={`rounded-lg p-5 relative ${bonusExpired ? 'bg-neutral-50 border border-neutral-200' : 'bg-[#B8953F]/5 border border-[#B8953F]/20'}`}>
                 <div className={`absolute -top-3 left-4 text-white text-xs font-bold px-3 py-1 rounded ${bonusExpired ? 'bg-neutral-400' : 'bg-[#B8953F]'}`}>
                   {bonusExpired ? '此福利已过期' : '直播限定加赠'}
@@ -406,113 +447,18 @@ export default function CheckoutPage() {
                 )}
               </div>
 
-              {/* Separator */}
-              <div className="py-2">
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 border-t border-[#E8E5DE]" />
-                  <span className="text-xs text-neutral-400 whitespace-nowrap">── 或单独选择 ──</span>
-                  <div className="flex-1 border-t border-[#E8E5DE]" />
-                </div>
-                <p className="text-xs text-neutral-400 text-center mt-2">
-                  预算有限？可以先取消上方组合包，再勾选以下单项商品
-                </p>
-              </div>
-
-              {/* Individual product cards */}
-              {allProducts.filter(p => !p.isBundle).map(product => {
-                const pid = product.id as ProductId;
-                const isDisabled = disabledIds.has(pid) && !selectedIds.includes(pid);
-                let disabledReason = '';
-                if (isDisabled) {
-                  if (bundleSelected) {
-                    disabledReason = '已包含在组合包中';
-                  } else if (pid === PRODUCT_IDS.OPTIONS && selectedIds.includes(PRODUCT_IDS.ETF_OPTIONS)) {
-                    disabledReason = '已包含在 ETF+期权课程中';
-                  } else if (pid === PRODUCT_IDS.ETF_OPTIONS && selectedIds.includes(PRODUCT_IDS.OPTIONS)) {
-                    disabledReason = '与期权课程冲突，请选其一';
-                  } else {
-                    disabledReason = '与当前选择冲突';
-                  }
-                }
-                return (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    selected={selectedIds.includes(pid)}
-                    disabled={isDisabled}
-                    disabledReason={disabledReason}
-                    onToggle={() => toggleProduct(pid)}
-                    bonusExpired={bonusExpired}
-                  />
-                );
-              })}
-
-              {/* Running total */}
-              {selectedIds.length > 0 && (
-                <div className="bg-white rounded-lg border border-[#E8E5DE] p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-neutral-600">
-                      已选 {selectedIds.length} 项
-                    </span>
-                    <span className="text-xl font-bold text-[#B8953F]">${total}</span>
-                  </div>
-                  {/* Upsell hint */}
-                  {showUpsellHint && (
-                    <div className="mt-3 bg-[rgba(184,149,63,0.06)] border border-[#B8953F]/20 rounded-md px-3 py-2">
-                      <p className="text-sm text-[#B8953F]">
-                        只差 <span className="font-bold">${upsellDiff}</span> 就能升级组合包，包含全部课程 + APP 一年 + 一对一持仓分析
-                      </p>
-                    </div>
-                  )}
-                </div>
+              {/* Bundle card — last, to avoid price anchor shock */}
+              {bundleProduct && (
+                <ProductCard
+                  product={bundleProduct}
+                  selected={selectedIds.includes(PRODUCT_IDS.BUNDLE)}
+                  disabled={false}
+                  disabledReason=""
+                  onToggle={() => toggleProduct(PRODUCT_IDS.BUNDLE)}
+                  bonusExpired={bonusExpired}
+                  testimonial={testimonialByProduct[PRODUCT_IDS.BUNDLE]}
+                />
               )}
-              {selectedIds.length === 0 && (
-                <div className="bg-white rounded-lg border border-dashed border-[#E8E5DE] p-4 text-center">
-                  <p className="text-sm text-neutral-400">请至少选择一项商品</p>
-                </div>
-              )}
-
-              {/* Confirm checkout button — CRITICAL: Stripe only renders after this */}
-              {selectedIds.length > 0 && !checkoutConfirmed && (
-                <button
-                  onClick={handleConfirmCheckout}
-                  className="w-full bg-[#B8953F] hover:bg-[#A6842F] text-white font-bold py-4 rounded-lg transition-colors text-lg shadow-md"
-                >
-                  确认并结账
-                </button>
-              )}
-              {checkoutConfirmed && (
-                <div className="text-center text-sm text-green-600 font-medium py-2">
-                  &#10003; 已确认选择，请在右侧完成付款
-                </div>
-              )}
-            </div>
-
-            {/* ==================== Section 5: Testimonials ==================== */}
-            <div>
-              <h2 className="text-lg font-bold text-neutral-900 mb-5">学员真实反馈</h2>
-              <div className="space-y-4">
-                <Testimonial
-                  text="做工程师五年了，投资知识看了一堆，帐户里买了十几支 ETF 但一直不敢动。加入后做了一对一持仓分析，Mike 直接帮我把重叠的砍掉，从十几支精简到六支，每支为什么买、占多少比例，逻辑一下子就清楚了。现在每天看价值灯号十分钟就搞定，反而比以前花三小时看盘绩效更好。"
-                  name="Kevin L."
-                />
-                <Testimonial
-                  text="家里两个小孩，存下来的每一块钱都是血汗钱，之前全放银行定存不敢动。后来从收益型 ETF 开始，每个月多了好几百加币股息。半年后在社群里学会 Sell Put，现在市场跌的时候也能收保费，心态完全不一样。老婆看我赚钱了也加入一起学。"
-                  name="陈先生"
-                />
-                <Testimonial
-                  text="刚毕业没什么本金，每个月只能定投 300 块。一开始跌 5% 就慌得想卖，在社群里看到其他学员也经历过一样的波动都在坚持，就安心了。有次直播直接问 Mike 要不要卖，他说回去看配比框架，基本面没变就不动。三个月后我不再觉得只能靠打工了。"
-                  name="Sarah W."
-                />
-                <Testimonial
-                  text="上班族没时间整天盯盘，App 语音直播通勤路上就能听，Mike 分析完我就知道这周该不该调整。有一次问 Sell Put 的履约价怎么选，Mike 隔天直播还专门花十分钟讲这个。这种即时互动是课程没办法替代的。"
-                  name="林先生"
-                />
-                <Testimonial
-                  text="以前什么都懂一点，ETF、期权、AI 股票都买过，但从来没有一套完整的系统。上完课最大的改变不是赚多少，是终于不焦虑了。框架告诉你什么时候该动、什么时候不动，市场再怎么震荡也能睡好觉。"
-                  name="赵先生"
-                />
-              </div>
             </div>
 
             {/* ==================== Section 6: How it works ==================== */}
@@ -550,9 +496,9 @@ export default function CheckoutPage() {
 
           </div>
 
-          {/* ============ Right column — Stripe Checkout ============ */}
+          {/* ============ Right column — Summary + Stripe Checkout ============ */}
           <div ref={checkoutRef}>
-            <div className="lg:sticky lg:top-20 space-y-4">
+            <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto space-y-4 lg:pr-1">
               <CheckoutSection
                 email={email}
                 error={error}
@@ -562,6 +508,14 @@ export default function CheckoutPage() {
                 sessionKey={sessionKey}
                 checkoutConfirmed={checkoutConfirmed}
                 hasSelection={selectedIds.length > 0}
+                selectedProducts={selectedProducts}
+                total={total}
+                bundleSelected={bundleSelected}
+                bonusExpired={bonusExpired}
+                showUpsellHint={showUpsellHint}
+                upsellDiff={upsellDiff}
+                onRemoveProduct={(pid) => toggleProduct(pid)}
+                onConfirmCheckout={handleConfirmCheckout}
                 onChangeEmailClick={() => { setChangingEmail(true); setNewEmail(email); }}
                 onNewEmailChange={setNewEmail}
                 onNewEmailSubmit={(trimmed) => {
@@ -580,7 +534,49 @@ export default function CheckoutPage() {
         </div>
       </main>
 
-      <FloatingFAQChat webinarId={webinarId} pageSource="checkout" />
+      {/* Mobile sticky checkout bar — visible when selection made but not yet confirmed */}
+      {selectedIds.length > 0 && !checkoutConfirmed && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E8E5DE] shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+          {/* Trust strip */}
+          <div className="flex items-center justify-center gap-1.5 bg-green-50 border-b border-green-200 px-3 py-1.5 text-xs text-green-700">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <polyline points="9 12 11 14 15 10" />
+            </svg>
+            <span className="font-semibold">30 天无理由退款保证</span>
+            <span className="text-green-600">· 零风险</span>
+          </div>
+          <div className="flex items-center gap-3 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className="flex-1 min-w-0">
+              <div className="text-xs text-neutral-500">已选 {selectedIds.length} 项</div>
+              <div className="text-lg font-bold text-[#B8953F] leading-tight">
+                ${total} <span className="text-xs font-medium">USD</span>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                handleConfirmCheckout();
+                requestAnimationFrame(() => {
+                  checkoutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+              }}
+              className="bg-[#B8953F] hover:bg-[#A6842F] text-white font-bold px-6 py-3 rounded-lg transition-colors shadow-md whitespace-nowrap"
+            >
+              确认并结账
+            </button>
+          </div>
+        </div>
+      )}
+
+      <FloatingFAQChat
+        webinarId={webinarId}
+        pageSource="checkout"
+        bottomOffsetClass={
+          selectedIds.length > 0 && !checkoutConfirmed
+            ? 'bottom-32 lg:bottom-5'
+            : 'bottom-5'
+        }
+      />
     </div>
   );
 }
@@ -597,6 +593,7 @@ function ProductCard({
   disabledReason,
   onToggle,
   bonusExpired,
+  testimonial,
 }: {
   product: ProductConfig;
   selected: boolean;
@@ -604,6 +601,7 @@ function ProductCard({
   disabledReason: string;
   onToggle: () => void;
   bonusExpired: boolean;
+  testimonial?: { text: string; name: string };
 }) {
   const isBundle = product.isBundle;
 
@@ -661,9 +659,9 @@ function ProductCard({
             {isBundle ? (
               <ul className="space-y-1.5">
                 {[
-                  { name: 'ETF 实战课程（无期限回看）', origPrice: '$384' },
-                  { name: '期权策略课程（无期限回看）', origPrice: '$312' },
-                  { name: 'APP 一年完整权限', origPrice: '$1,000/年' },
+                  { name: 'ETF 实战课程（无期限回看）', origPrice: '$384 USD' },
+                  { name: '期权策略课程（无期限回看）', origPrice: '$312 USD' },
+                  { name: 'APP 一年完整权限', origPrice: '$1,000 USD/年' },
                 ].map((item, i) => (
                   <li key={i} className="flex items-start justify-between gap-2 text-xs">
                     <div className="flex items-start gap-1.5 text-neutral-600">
@@ -685,12 +683,22 @@ function ProductCard({
               </ul>
             )}
 
+            {/* Testimonial — student social proof tied to this plan */}
+            {testimonial && (
+              <div className="mt-3 border-l-2 border-[#B8953F]/40 bg-[#FAFAF7] px-3 py-2 rounded-r">
+                <p className="text-xs italic text-neutral-600 leading-relaxed">
+                  <span className="text-[#B8953F] mr-1">&ldquo;</span>{testimonial.text}<span className="text-[#B8953F] ml-1">&rdquo;</span>
+                </p>
+                <p className="text-[11px] text-neutral-400 mt-1">&mdash; 学员 {testimonial.name}</p>
+              </div>
+            )}
+
             {/* Price — bottom right */}
             <div className={`flex flex-wrap items-baseline justify-end gap-2 ${isBundle ? 'mt-3' : 'mt-1'}`}>
-              <span className="text-2xl font-bold text-[#B8953F]">${product.price}</span>
+              <span className="text-2xl font-bold text-[#B8953F]">${product.price} <span className="text-base font-semibold">USD</span></span>
               {product.originalPrice && (
                 <>
-                  <span className="text-sm text-neutral-400 line-through">${product.originalPrice}+</span>
+                  <span className="text-sm text-neutral-400 line-through">${product.originalPrice}+ USD</span>
                   <span className="text-xs text-white bg-red-500 px-1.5 py-0.5 rounded font-bold">
                     {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
                   </span>
@@ -719,6 +727,14 @@ function CheckoutSection({
   sessionKey,
   checkoutConfirmed,
   hasSelection,
+  selectedProducts,
+  total,
+  bundleSelected,
+  bonusExpired,
+  showUpsellHint,
+  upsellDiff,
+  onRemoveProduct,
+  onConfirmCheckout,
   onChangeEmailClick,
   onNewEmailChange,
   onNewEmailSubmit,
@@ -735,6 +751,14 @@ function CheckoutSection({
   sessionKey: number;
   checkoutConfirmed: boolean;
   hasSelection: boolean;
+  selectedProducts: ProductConfig[];
+  total: number;
+  bundleSelected: boolean;
+  bonusExpired: boolean;
+  showUpsellHint: boolean;
+  upsellDiff: number | null;
+  onRemoveProduct: (id: ProductId) => void;
+  onConfirmCheckout: () => void;
   onChangeEmailClick: () => void;
   onNewEmailChange: (v: string) => void;
   onNewEmailSubmit: (trimmed: string) => void;
@@ -807,7 +831,7 @@ function CheckoutSection({
               重新结账
             </button>
           </div>
-        ) : !checkoutConfirmed || !hasSelection ? (
+        ) : !hasSelection ? (
           <div className="p-6 text-center flex flex-col items-center justify-center min-h-[400px]">
             <div className="w-16 h-16 rounded-full bg-[rgba(184,149,63,0.08)] flex items-center justify-center mb-4">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B8953F" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -815,7 +839,66 @@ function CheckoutSection({
               </svg>
             </div>
             <p className="text-neutral-500 text-sm font-medium mb-1">请先选择商品方案</p>
-            <p className="text-neutral-400 text-xs">在左侧选择课程后，点击「确认并结账」即可付款</p>
+            <p className="text-neutral-400 text-xs">在左侧选择商品后，这里会显示订单摘要</p>
+          </div>
+        ) : !checkoutConfirmed ? (
+          <div className="p-5">
+            <h3 className="text-base font-bold text-neutral-900 mb-4">订单摘要</h3>
+            <ul className="space-y-3 mb-4">
+              {selectedProducts.map(p => (
+                <li key={p.id} className="flex items-start justify-between gap-3 text-sm">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-neutral-900">{p.shortName}</div>
+                    <div className="text-xs text-neutral-500 line-clamp-2">{p.description}</div>
+                    <button
+                      type="button"
+                      onClick={() => onRemoveProduct(p.id as ProductId)}
+                      className="text-xs text-neutral-400 hover:text-red-500 transition-colors mt-1"
+                    >
+                      移除
+                    </button>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="font-bold text-neutral-900">${p.price} <span className="text-xs font-medium text-neutral-500">USD</span></div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="border-t border-[#E8E5DE] pt-3 mb-4 flex items-center justify-between">
+              <span className="text-sm text-neutral-600">合计 · 已选 {selectedProducts.length} 项</span>
+              <span className="text-2xl font-bold text-[#B8953F]">${total} <span className="text-base font-semibold">USD</span></span>
+            </div>
+            {bundleSelected && !bonusExpired && (
+              <div className="mb-4 bg-[rgba(184,149,63,0.06)] border border-[#B8953F]/20 rounded-md px-3 py-2">
+                <p className="text-xs text-[#B8953F]">
+                  <span className="font-bold">&#x2726; 含直播限定加赠：</span>Mike 一对一持仓分析
+                </p>
+              </div>
+            )}
+            {showUpsellHint && upsellDiff !== null && (
+              <div className="mb-4 bg-[rgba(184,149,63,0.06)] border border-[#B8953F]/20 rounded-md px-3 py-2">
+                <p className="text-xs text-[#B8953F]">
+                  只差 <span className="font-bold">${upsellDiff} USD</span> 就能升级组合包，包含全部课程 + APP 一年 + 一对一持仓分析
+                </p>
+              </div>
+            )}
+            <button
+              onClick={onConfirmCheckout}
+              className="w-full bg-[#B8953F] hover:bg-[#A6842F] text-white font-bold py-3 rounded-lg transition-colors shadow-md"
+            >
+              确认并结账
+            </button>
+            {/* Refund guarantee — reinforces trust at decision moment */}
+            <div className="mt-3 flex items-start gap-2 bg-green-50 border border-green-200 rounded-md px-3 py-2.5">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <polyline points="9 12 11 14 15 10" />
+              </svg>
+              <div className="text-xs leading-relaxed">
+                <span className="font-bold text-green-700">30 天无理由退款保证</span>
+                <span className="text-green-600"> · 不满意全额退款，零风险体验</span>
+              </div>
+            </div>
           </div>
         ) : (
           <EmbeddedCheckoutProvider
@@ -867,16 +950,6 @@ function FeatureItem({ text }: { text: string }) {
         <span>{text}</span>
       )}
     </li>
-  );
-}
-
-/** Testimonial card */
-function Testimonial({ text, name }: { text: string; name: string }) {
-  return (
-    <div className="border-l-4 border-[#B8953F] bg-white rounded-r-lg p-5">
-      <p className="text-sm text-neutral-600 italic mb-2">&ldquo;{text}&rdquo;</p>
-      <p className="text-xs text-neutral-400">&mdash; 学员 {name}</p>
-    </div>
   );
 }
 
