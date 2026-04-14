@@ -387,17 +387,6 @@ export default function CheckoutPage() {
             <div className="space-y-4">
               <h2 className="text-lg font-bold text-neutral-900">选择你的方案</h2>
 
-              {/* Countdown timer */}
-              {countdownDisplay && (
-                <div className="flex items-center justify-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-                  </svg>
-                  <span className="text-sm text-red-600 font-medium">直播限定优惠剩余</span>
-                  <span className="font-mono font-bold text-red-600 text-lg">{countdownDisplay}</span>
-                </div>
-              )}
-
               {/* Individual product cards — ordered: OPTIONS → ETF+OPTIONS → APP_QUARTERLY */}
               {individualProducts.map(product => {
                 const pid = product.id as ProductId;
@@ -423,6 +412,17 @@ export default function CheckoutPage() {
                   <div className="flex-1 border-t border-[#E8E5DE]" />
                 </div>
               </div>
+
+              {/* Countdown timer — tied to bundle bonus, shown above Bundle section */}
+              {countdownDisplay && (
+                <div className="flex items-center justify-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  <span className="text-sm text-red-600 font-medium">直播限定加赠剩余</span>
+                  <span className="font-mono font-bold text-red-600 text-lg">{countdownDisplay}</span>
+                </div>
+              )}
 
               {/* 1-on-1 bonus card — teaser above Bundle */}
               <div className={`rounded-lg p-5 relative ${bonusExpired ? 'bg-neutral-50 border border-neutral-200' : 'bg-[#B8953F]/5 border border-[#B8953F]/20'}`}>
