@@ -44,3 +44,26 @@ next-env.d.ts
 .claude/settings.local.json
 .playwright-mcp/
 nul
+
+# secrets / API keys
+gemini金钥.txt
+gemini金鑰.txt
+*.key
+
+# webinar working files (transcripts, scripts — not source code)
+*直播腳本*
+*直播脚本*
+*直播影片*
+*逐字稿*
+
+# slide generation tooling (standalone Python, outside Next.js app)
+generate_*.py
+regenerate_*.py
+test_slide.py
+slide_generation_prompt.md
+
+# generated slide / video assets
+slide_*.png
+/slides/
+/streamlive_videos/
+/streamlive_videos_v3/
