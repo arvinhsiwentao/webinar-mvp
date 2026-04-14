@@ -292,10 +292,10 @@ export default function CheckoutPage() {
             {/* ==================== Section 1: Headline ==================== */}
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900 mb-2">
-                从听懂美股，到真的每月有收益
+                每天 10 分钟，让系统告诉你今天该不该动
               </h1>
               <p className="text-neutral-500">
-                5 分钟扫市场代替两三小时盯盘，期权月月收保费、ETF 放大报酬 — Mike 用万美金学费换来的 SOP，你直接照做
+                不用盯盘、不靠感觉 —— 灯号亮了就做，灯号没亮就休息，Mike 用万美金学费换来的 SOP，你直接照做
               </p>
             </div>
 
@@ -324,10 +324,10 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                   <ul className="space-y-2.5 ml-[52px]">
-                    <FeatureItem text="价值灯号 — 本益比 / 营收 / 现金流算出红 / 黄 / 绿灯，5 分钟扫完市场，不用花两三小时盯盘" />
-                    <FeatureItem text="Mike 每日观点 & 关注清单 — 每天在 APP 更新他真的在盯什么股、怎么看最新行情，不是隔靴搔痒" />
-                    <FeatureItem text="双周语音直播 — 每两周一场、至少一小时，聊最新趋势，可直接提问交流" />
-                    <FeatureItem text="学员社群 + 付费文章 — 跟 Mike 和学员讨论持仓、读他的深度分析，波动时不用一个人扛" />
+                    <FeatureItem text="价值灯号 — 早上打开 APP 看一眼灯号颜色，绿灯加仓、黄灯观望、红灯不动，5 分钟决策，不用看财报" />
+                    <FeatureItem text="Mike 每日观点 & 关注清单 — 不用自己选股，Mike 即时更新他在看什么，你跟着名单研究就好" />
+                    <FeatureItem text="双周语音直播 — 通勤路上听完一场直播，就知道这周市场要注意什么、要不要调整，不需要自己解读新闻" />
+                    <FeatureItem text="学员社群 + 付费文章 — 市场暴跌时最怕的不是亏损，是不知道现在该动还是不动。社群里 Mike 和学员都在，五分钟之内你就有答案" />
                   </ul>
                 </div>
 
@@ -350,9 +350,8 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                   <ul className="space-y-2.5 ml-[52px]">
-                    <FeatureItem text="Sell Put 低接收保费 — 像「挂低价等买房，等待期间还能收租」，市场越跌你越从容" />
-                    <FeatureItem text="Sell Call 持仓收租 — 手上有 ETF 就能额外收保费，不卖股票也有现金流" />
-                    <FeatureItem text="风险控制 SOP — 保证金怎么算、什么该做什么不该做。Mike 踩过上万美金学费的坑，你直接跳过" />
+                    <FeatureItem text="不用猜涨跌，照 SOP 做就行 — 市场跌就挂 Sell Put 收保费、手上有 ETF 就 Sell Call 收租，每月多一笔现金流，不需要额外盯盘" />
+                    <FeatureItem text="风险控制 SOP — 保证金怎么算、什么该做什么不该做都有 SOP，Mike 踩过万美金的坑帮你铺平，你跟着步骤走就行" />
                   </ul>
                 </div>
 
@@ -375,9 +374,9 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                   <ul className="space-y-2.5 ml-[52px]">
-                    <FeatureItem text="四类 ETF 推车配置 — 成长做加速、防御做安全垫、收益做现金流、进阶博超额回报，像逛 Costco 装满推车" />
-                    <FeatureItem text="从退休目标倒推配比 — 几岁退休、每年要多少钱、现在多少本金，三个数字算出你该偏攻还是偏守" />
-                    <FeatureItem text="长短账户策略 + 季度再平衡 — 退休账户做长线、一般账户做短线，每季 10 分钟，用纪律替代情绪" />
+                    <FeatureItem text="四类 ETF 配置 — 像装购物车一样，成长型、防御型、收益型各放几支，配好就不用每天调" />
+                    <FeatureItem text="从退休目标倒推配比 — 三个数字：几岁退休、需要多少钱、现在有多少本金 — 算出来之后，你就知道今天该偏攻还是偏守，不用靠感觉" />
+                    <FeatureItem text="长短账户 + 季度再平衡 — 每季花 10 分钟调一次比例，剩下的时间市场自己跑 — 用纪律替代情绪，不需要天天看账户" />
                   </ul>
                 </div>
               </div>
@@ -442,7 +441,7 @@ export default function CheckoutPage() {
                   </p>
                 ) : (
                   <p className="text-sm text-neutral-600 ml-8">
-                    Mike 亲自检视你的投资账户，告诉你哪里配得好、哪里可以优化。就像直播中 A 同学那样，15 支 ETF 精简到 6 支，思路立刻清晰。<span className="text-[#B8953F] font-medium">购买组合包即可获得此福利。</span>
+                    这项服务通常只对亲赴现场、参加 <span className="text-[#B8953F] font-bold">$6,000+ USD</span> 海外财富之旅的学员开放。<span className="text-[#B8953F] font-medium">现在购买组合包，无需出发</span> — Mike 直接检视你的持仓，告诉你哪里配得好、哪里该调整。直播中 A 同学就这样把 15 支 ETF 精简到 6 支，思路立刻清晰。
                   </p>
                 )}
               </div>
