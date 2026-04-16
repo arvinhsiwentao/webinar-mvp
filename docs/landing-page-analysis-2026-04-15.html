@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<title>Landing Page 數據分析與優化建議 — 2026-04-15</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #FAFAF7; --card: #fff; --border: #E8E5DE; --gold: #B8953F;
+    --text: #1A1A1A; --muted: #6b7280; --danger: #ef4444; --success: #16a34a;
+    --warn: #f59e0b; --info: #3b82f6;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg); color: var(--text); margin: 0; padding: 32px 16px; line-height: 1.6; }
+  .container { max-width: 1080px; margin: 0 auto; }
+  header { margin-bottom: 32px; }
+  h1 { font-size: 28px; margin: 0 0 8px; }
+  .meta { color: var(--muted); font-size: 14px; }
+  h2 { font-size: 20px; border-left: 4px solid var(--gold); padding-left: 12px; margin: 36px 0 16px; }
+  h3 { font-size: 16px; margin: 20px 0 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 20px; margin-bottom: 16px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+  .kpi { display: flex; flex-direction: column; gap: 4px; }
+  .kpi .num { font-size: 32px; font-weight: 700; color: var(--gold); }
+  .kpi .num.danger { color: var(--danger); }
+  .kpi .num.success { color: var(--success); }
+  .kpi .label { font-size: 13px; color: var(--muted); }
+  .kpi .delta { font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+  th { background: #f8f7f3; font-weight: 600; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .p-danger { background: #fee2e2; color: #b91c1c; }
+  .p-warn { background: #fef3c7; color: #92400e; }
+  .p-info { background: #dbeafe; color: #1d4ed8; }
+  .p-success { background: #dcfce7; color: #15803d; }
+  .p-muted { background: #f3f4f6; color: #4b5563; }
+  ol.problems li { margin-bottom: 14px; }
+  .alert { background: #fef3c7; border-left: 4px solid var(--warn); padding: 12px 16px;
+    border-radius: 4px; margin: 12px 0; font-size: 14px; }
+  .alert.danger { background: #fee2e2; border-left-color: var(--danger); }
+  .alert.success { background: #dcfce7; border-left-color: var(--success); }
+  .note { color: var(--muted); font-size: 13px; font-style: italic; }
+  .funnel-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+  .funnel-bar { background: linear-gradient(90deg, var(--gold), #d4a956); height: 28px;
+    border-radius: 4px; display: flex; align-items: center; padding: 0 12px;
+    color: white; font-weight: 600; font-size: 13px; }
+  .funnel-label { width: 140px; font-size: 14px; flex-shrink: 0; }
+  .funnel-value { width: 110px; text-align: right; font-variant-numeric: tabular-nums;
+    font-size: 13px; color: var(--muted); }
+  .chart-wrap { height: 280px; margin: 12px 0; }
+  .chart-wrap.tall { height: 340px; }
+  code { background: #f3f4f6; padding: 1px 6px; border-radius: 3px; font-size: 13px; }
+  .badge-fire { background: var(--danger); color: white; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Landing Page 數據分析與優化建議 <span class="note" style="font-style:normal;font-size:14px;font-weight:normal;">v2 (修正版)</span></h1>
+  <div class="meta">資料區間：2026-03-16 ~ 2026-04-14（近 30 天） · 來源：BigQuery <code>analytics_527332244</code> + <code>ads_agent.mike_juejin_ga4_daily_events</code></div>
+</header>
+
+<!-- ============= TL;DR ============= -->
+<section class="card" style="background: linear-gradient(135deg, #fff8e7, #fff);">
+  <h2 style="margin-top: 0;">⚡ 一頁總結</h2>
+  <ul>
+    <li><span class="badge-fire">最大發現</span> <strong>手機 CPA 是桌機的 7.6 倍</strong>（NT$4,209 vs NT$554）— 流量便宜但 UI 把錢都浪費掉</li>
+    <li>手機流量占 76% 但只貢獻 38% 註冊；77% 的廣告預算砸在手機 — 漏最快的桶</li>
+    <li><strong>裝置 conversion 差距已交叉驗證</strong>：user-level 純 GA4 算出 Desktop 比 Mobile 高 <strong>6.1 倍</strong>（5.7% vs 0.93%）— 產業基線能解釋 1.5-3x，<strong>剩下 2-3x 超額差距指向手機 UI</strong></li>
+    <li>整體 <strong>1.7% PV → Signup 轉換率</strong>（業界 2-5%），主因被手機拖累</li>
+    <li>表單漏斗其實很健康（modal 開啟 → 填表 91% → 完成 65%）— 瓶頸不在 form，在「點 CTA → 開 modal」之前</li>
+    <li><strong>反事實</strong>：手機 UI 改到桌機水準（1 個改動），同樣預算每月註冊量 122 → ~325（增 2.7 倍）</li>
+    <li><span class="badge-fire">個案觀察</span> 唯一購買者：美國 Mobile 用戶，Google DGC 廣告進站，<strong>完整看完 36 分鐘直播</strong>，56 分鐘完成全程。Chatbot + WhatsApp 在付款當下被使用（是 reassurance 不是觸發器）— 保留這支援管道重要</li>
+  </ul>
+</section>
+
+<!-- ============= 整體 KPI ============= -->
+<h2>核心 KPI（30 天彙總）</h2>
+<div class="grid-2">
+  <div class="card kpi">
+    <span class="label">Landing PV</span>
+    <span class="num">5,812</span>
+    <span class="delta">5,446 unique users · 76% 來自手機</span>
+  </div>
+  <div class="card kpi">
+    <span class="label">PV → 註冊完成 轉換率</span>
+    <span class="num">1.7%</span>
+    <span class="delta">桌機 4.1% / 手機 0.77%（5x 落差）</span>
+  </div>
+  <div class="card kpi">
+    <span class="label">所有 CTA 點擊</span>
+    <span class="num">1,037</span>
+    <span class="delta">7 個觸發位置加總</span>
+  </div>
+  <div class="card kpi">
+    <span class="label">完成註冊人數</span>
+    <span class="num">98</span>
+    <span class="delta">→ 進直播 83 → 進結帳 28 → 購買 1</span>
+  </div>
+</div>
+
+<!-- ============= 🚨 手機 vs 桌機 ============= -->
+<h2>🚨 最大發現：手機 vs 桌機 5x 落差</h2>
+<div class="card">
+  <div class="alert danger">
+    <strong>手機流量占絕對多數，但被嚴重浪費。</strong>76% PV、卻只有 38% 註冊。
+  </div>
+  <div class="grid-3">
+    <div class="card kpi" style="margin: 0;">
+      <span class="label">📱 Mobile</span>
+      <span class="num danger">0.77%</span>
+      <span class="delta">PV 6,086 → sign_up 47</span>
+    </div>
+    <div class="card kpi" style="margin: 0;">
+      <span class="label">💻 Desktop</span>
+      <span class="num success">4.1%</span>
+      <span class="delta">PV 1,787 → sign_up 74</span>
+    </div>
+    <div class="card kpi" style="margin: 0;">
+      <span class="label">📟 Tablet</span>
+      <span class="num">0.6%</span>
+      <span class="delta">PV 162 → sign_up 1</span>
+    </div>
+  </div>
+
+  <h3>分階段拆解（event-level）</h3>
+  <table>
+    <thead><tr><th>裝置</th><th class="num">PV</th><th class="num">modal 開啟</th><th class="num">form_start</th><th class="num">sign_up</th><th class="num">PV→Signup</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>📱 Mobile</td>
+        <td class="num">6,086</td>
+        <td class="num">87 (1.4% of PV)</td>
+        <td class="num">67 (77% of open)</td>
+        <td class="num">47 (54% of open)</td>
+        <td class="num"><strong style="color:#b91c1c">0.77%</strong></td>
+      </tr>
+      <tr>
+        <td>💻 Desktop</td>
+        <td class="num">1,787</td>
+        <td class="num">116 (6.5% of PV)</td>
+        <td class="num">119 (103% of open)</td>
+        <td class="num">74 (64% of open)</td>
+        <td class="num"><strong style="color:#15803d">4.1%</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>✅ 交叉驗證（user-level，避開跨裝置歸因）</h3>
+  <p class="note">用「每個 unique user 第一個 session 的裝置」分組計算，<strong>同一個人不會被算進兩個裝置</strong>，純 GA4 資料、不依賴廣告歸因。</p>
+  <table>
+    <thead><tr><th>裝置</th><th class="num">unique users</th><th class="num">完成註冊</th><th class="num">User-level 轉換率</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>📱 Mobile</td>
+        <td class="num">4,501</td>
+        <td class="num">42</td>
+        <td class="num"><strong style="color:#b91c1c">0.93%</strong></td>
+      </tr>
+      <tr>
+        <td>💻 Desktop</td>
+        <td class="num">913</td>
+        <td class="num">52</td>
+        <td class="num"><strong style="color:#15803d">5.7%</strong></td>
+      </tr>
+      <tr>
+        <td>📟 Tablet</td>
+        <td class="num">68</td>
+        <td class="num">1</td>
+        <td class="num">1.47%</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="alert">
+    <strong>結論強化</strong>：user-level 算出 Desktop 轉換率是 Mobile 的 <strong>6.1 倍</strong>（甚至比 event-level 的 5.3 倍更顯著）。這不是廣告歸因雜訊。
+  </div>
+
+  <h3>🔍 為什麼指向 UI 而非投放品質？</h3>
+  <p>6 倍差距有三種可能解釋：</p>
+  <table>
+    <thead><tr><th>可能原因</th><th>說明</th><th>判讀</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>A. 投放品質差</strong></td>
+        <td>Google Ads 把低意圖流量塞給手機</td>
+        <td><span class="pill p-muted">可能性低</span></td>
+      </tr>
+      <tr>
+        <td><strong>B. 手機用戶天生意圖較低</strong></td>
+        <td>產業通識：高決策門檻產品，手機轉換天生比桌機低 1.5-3 倍</td>
+        <td><span class="pill p-warn">一定有（但無法解釋全部）</span></td>
+      </tr>
+      <tr>
+        <td><strong>C. 手機 UI 體驗差</strong></td>
+        <td>用戶有意圖但被 UI 擋下來</td>
+        <td><span class="pill p-danger">最可能的主因</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>先解釋一個關鍵詞：「UI 發現/點擊」是什麼</h4>
+  <p>= 用戶「<strong>看見 CTA 並按下去</strong>」這個動作本身（對應漏斗的「PV → 點時段卡」）。拆成兩件事：</p>
+  <table>
+    <thead><tr><th>關鍵字</th><th>意思</th><th>失敗的情況</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>發現</strong> (visibility)</td>
+        <td>用戶有沒有注意到 CTA 存在</td>
+        <td>CTA 在 fold 以下、被大圖蓋住、動畫太多分散注意力、看起來不像按鈕</td>
+      </tr>
+      <tr>
+        <td><strong>點擊</strong> (tapability)</td>
+        <td>有沒有能力順利點下去</td>
+        <td>按鈕太小、被 sticky 元件擋住、誤觸相鄰元素、手機鍵盤遮住、載入延遲</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="note">兩件事都是 UI 設計決定的，跟用戶「要不要買」的意圖無關 — 這是為什麼差距集中在這一步特別指向 UI。</p>
+
+  <p style="margin-top: 16px;">把漏斗三個階段依性質分類：</p>
+  <table>
+    <thead><tr><th>階段</th><th>性質</th><th>主要受什麼影響</th></tr></thead>
+    <tbody>
+      <tr><td>PV → 點時段卡</td><td><strong>UI 發現/點擊</strong></td><td>視覺設計、按鈕可見性、頁面長度</td></tr>
+      <tr><td>開 modal → form_start</td><td>有意願開始填</td><td>過半是用戶意圖，少部分是 modal 設計</td></tr>
+      <tr><td>form_start → sign_up</td><td>有意願填完送出</td><td>主要是意圖 + 表單欄位友善度</td></tr>
+    </tbody>
+  </table>
+  <div class="alert" style="background: #dbeafe; border-left-color: #3b82f6;">
+    <strong>一句話總結</strong>：手機用戶如果能走到 form_start，他們的完成率跟桌機一樣好甚至更好（70% vs 62%）。問題是<strong>絕大多數手機用戶連「找到並按 CTA」這關都過不去</strong>。
+  </div>
+
+  <h4>三個支持 C（而非 A）的證據</h4>
+  <ol>
+    <li><strong>手機 CPC 很便宜（NT$8）</strong> — Google Ads quality score 機制會把品質差的流量 CPC 拉高。手機 CPC 這麼低，代表至少不是 Google 認為品質很差的那批。</li>
+    <li><strong>差距位置集中在「UI 發現/點擊」階段</strong>：
+      <table style="margin-top: 8px;">
+        <thead><tr><th>漏斗步驟</th><th class="num">Mobile</th><th class="num">Desktop</th><th class="num">差距倍數</th><th>意涵</th></tr></thead>
+        <tbody>
+          <tr style="background: #fee2e2;">
+            <td>PV → 點時段卡</td>
+            <td class="num">1.4%</td>
+            <td class="num">6.5%</td>
+            <td class="num"><strong>4.6x</strong></td>
+            <td>UI 影響最大 — 差距集中在這</td>
+          </tr>
+          <tr>
+            <td>開 modal → form_start</td>
+            <td class="num">77%</td>
+            <td class="num">103%*</td>
+            <td class="num">1.3x</td>
+            <td>小幅差距</td>
+          </tr>
+          <tr>
+            <td>form_start → sign_up</td>
+            <td class="num">70%</td>
+            <td class="num">62%</td>
+            <td class="num">—</td>
+            <td>手機反而略高</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">* Desktop 103% = 有用戶沒走完整 modal 流程但觸發 form_start（e.g. 直接從 schedule anchor 進）。<br>
+      如果是純意圖差異，差距應該全漏斗均勻。但實際上 <strong>差距高度集中在「CTA 發現/點擊」階段</strong>，這正是 UI 影響最大的地方。</p>
+    </li>
+    <li><strong>程式碼層具體可見的 UI 缺陷</strong> — Hero 大圖佔滿手機 viewport、CTA 在 fold 之下；sticky bar 文案太被動；多個動畫同時跑分散注意力。詳見下方「📱 手機 UI 具體 friction 點」一節。</li>
+  </ol>
+
+  <h4>更謹慎的結論表述</h4>
+  <div class="alert" style="background: #dbeafe; border-left-color: #3b82f6;">
+    6.1 倍差距裡，產業基線能解釋 1.5-3 倍（手機意圖天生較低），<strong>剩下的 2-3 倍超額差距主要歸咎於手機 UI</strong>。<br><br>
+    反過來說：即使悲觀假設手機意圖只有桌機的一半，現在也應該拿到 2-3% 的 conversion，而不是 0.93%。<strong>中間差的那 1.5 倍以上，就是手機 UI 可以拿回來的機會</strong>。
+  </div>
+
+  <h3>關鍵洞察：手機問題在「點 CTA → 開 modal」之前</h3>
+  <ul>
+    <li><strong>手機只有 1.4% PV 點到 CTA / 桌機 6.5%</strong> — 手機用戶根本沒被頁面說服按下任何按鈕，差距 4.6x</li>
+    <li><strong>手機開了 modal 又有 23% 不填表</strong>（vs 桌機 form_start > 開啟，幾乎全填）— 可能 modal 在手機上太擠或 first impression 不友好</li>
+    <li>填了之後完成率（form_start → sign_up）兩邊接近 — 表單本身在手機上 OK</li>
+  </ul>
+
+  <h3>可能的手機 friction 源（待逐項驗證）</h3>
+  <ul>
+    <li>Hero 大圖在手機上佔據絕大部分視覺，CTA 按鈕被擠下去</li>
+    <li>Sticky bar 文案不夠「行動感」或被瀏覽器底部 UI 擋住</li>
+    <li>Schedule 卡在手機上難點（觸控目標太小？卡片太多需要捲動？）</li>
+    <li>Modal 開啟後手機鍵盤彈出佔半屏，用戶看不到所有欄位</li>
+    <li>整體頁面長度過長，手機滑到 schedule 卡之前已疲勞離開</li>
+  </ul>
+</div>
+
+<!-- ============= 💰 廣告成本對照 ============= -->
+<h2>💰 廣告成本對照（CPA）— 確認問題在 UI 不在流量品質</h2>
+<div class="card">
+  <div class="alert danger">
+    <strong>結論先說</strong>：手機 CPA <strong>比桌機貴 7.6 倍</strong>。問題不在流量品質，是 landing UI 把便宜的手機點擊都浪費掉了。
+  </div>
+
+  <table>
+    <thead><tr><th>裝置</th><th class="num">廣告花費（30d, TWD）</th><th class="num">預算占比</th><th class="num">CPC</th><th class="num">註冊數</th><th class="num">CPA（每註冊成本）</th></tr></thead>
+    <tbody>
+      <tr style="background: #fee2e2;">
+        <td>📱 Mobile</td>
+        <td class="num">NT$ 197,841</td>
+        <td class="num">77%</td>
+        <td class="num">NT$ 8</td>
+        <td class="num">47</td>
+        <td class="num"><strong style="color:#b91c1c">NT$ 4,209</strong></td>
+      </tr>
+      <tr style="background: #dcfce7;">
+        <td>💻 Desktop</td>
+        <td class="num">NT$ 40,981</td>
+        <td class="num">16%</td>
+        <td class="num">NT$ 46</td>
+        <td class="num">74</td>
+        <td class="num"><strong style="color:#15803d">NT$ 554</strong></td>
+      </tr>
+      <tr>
+        <td>📟 Tablet</td>
+        <td class="num">NT$ 13,075</td>
+        <td class="num">5%</td>
+        <td class="num">NT$ 16</td>
+        <td class="num">1</td>
+        <td class="num">NT$ 13,075</td>
+      </tr>
+      <tr>
+        <td>📺 Connected TV</td>
+        <td class="num">NT$ 5,760</td>
+        <td class="num">2%</td>
+        <td class="num">—</td>
+        <td class="num">0</td>
+        <td class="num">無註冊</td>
+      </tr>
+      <tr style="border-top: 2px solid #1A1A1A; font-weight: 600;">
+        <td>合計</td>
+        <td class="num">NT$ 257,657</td>
+        <td class="num">100%</td>
+        <td class="num">avg NT$ 9.85</td>
+        <td class="num">122</td>
+        <td class="num">NT$ 2,112</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>關鍵洞察</h3>
+  <ul>
+    <li><strong>手機點擊很便宜（NT$8/click，比桌機便宜 5.7x）</strong> — 流量本身物美價廉</li>
+    <li><strong>但手機 UI 把便宜流量都浪費了</strong> — CPA 反而比桌機貴 7.6 倍</li>
+    <li><strong>77% 預算砸在手機，這也是漏最快的桶</strong></li>
+  </ul>
+
+  <h3>反事實計算（What If）</h3>
+  <div class="card" style="background: #fff8e7; margin: 12px 0;">
+    <p style="margin: 0 0 8px;"><strong>如果手機 UI 改到桌機水準（轉換率 0.77% → 4.1%）：</strong></p>
+    <ul style="margin: 0;">
+      <li>同樣 NT$197,841 預算 → 註冊從 47 拉到 ~250 個</li>
+      <li>手機 CPA 從 NT$4,209 → NT$791（降 81%）</li>
+      <li>整體月註冊量從 122 → ~325（增 2.7 倍），<strong>不用多花一塊錢</strong></li>
+    </ul>
+  </div>
+
+  <p class="note">數據說明：成本來自 Google Ads transfer 的 <code>ads_AdBasicStats_4581920893</code>；註冊數來自 GA4 raw event。CPA 是「廣告花費 ÷ 該裝置的 GA4 sign_up」，未排除 organic，所以是高估上限。實際歸因 CPA 會比這更低，但裝置間倍率關係不變。</p>
+</div>
+
+<!-- ============= 🎯 唯一購買者深度分析 ============= -->
+<h2>🎯 唯一購買者深度分析 — 從 1 個成功 sample 反推</h2>
+<div class="card">
+  <div class="alert" style="background: #dbeafe; border-left-color: #3b82f6;">
+    <strong>為什麼這個 sample 重要</strong>：30 天內唯一完成購買的真實用戶，可以逆向工程出「什麼觸發了購買」，找出被忽略的成功模式。
+  </div>
+
+  <h3>用戶 Profile</h3>
+  <table>
+    <thead><tr><th>維度</th><th>值</th></tr></thead>
+    <tbody>
+      <tr><td>地點</td><td>美國明尼蘇達 Saint Paul</td></tr>
+      <tr><td>裝置</td><td>Samsung Galaxy A16（中低階 Android 手機）</td></tr>
+      <tr><td>進站來源</td><td>Google DGC 廣告，<code>utm_campaign=2603_mike_dgc_A1</code></td></tr>
+      <tr><td>轉換總耗時</td><td><strong>56 分 5 秒</strong>（landing → purchase）</td></tr>
+    </tbody>
+  </table>
+  <p class="note">關鍵事實：是<strong>手機用戶</strong>。證明手機不是死局，UI 改好確實能轉換。</p>
+
+  <h3>完整路徑 Timeline</h3>
+  <table>
+    <thead><tr><th>時間</th><th>事件</th><th>備註</th></tr></thead>
+    <tbody>
+      <tr><td>10:58:39</td><td>從 Google DGC 廣告進 landing</td><td>campaign 2603_mike_dgc_A1</td></tr>
+      <tr><td>+ 76 秒</td><td>點 <strong>sticky bar CTA</strong></td><td>沒看完頁面就按（手機場景合理）</td></tr>
+      <tr><td>+ 105 秒</td><td><strong>完成註冊</strong></td><td>landing 後不到 2 分鐘 — 超快決策</td></tr>
+      <tr><td>同秒</td><td>自動進 lobby → live</td><td></td></tr>
+      <tr style="background: #dcfce7;"><td>10:59 – 11:36</td><td><strong>完整看完 36 分鐘直播</strong></td><td>watch_duration_sec = 2157</td></tr>
+      <tr><td>11:36:28</td><td>點直播內 CTA → begin_checkout 事件</td><td></td></tr>
+      <tr><td>11:36 – 11:53</td><td>在 checkout 頁考慮 18 分鐘</td><td>含多次 form_start 嘗試、多次 page_view</td></tr>
+      <tr><td>11:53:50</td><td>在 checkout 頁開啟 chatbot</td><td>推測：Stripe 表單互動期間</td></tr>
+      <tr><td>11:54:13</td><td>點 WhatsApp（chatbot 裡的聯繫連結）</td><td>推測：Stripe 處理期間問啟用序號 / reassurance</td></tr>
+      <tr style="background: #dcfce7;"><td><strong>11:54:44</strong></td><td><strong>✅ 跳轉到 /return 頁 + purchase 事件觸發</strong></td><td>Stripe 付款完成 + session-status 首次 complete</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert" style="background: #fef3c7; border-left-color: #f59e0b;">
+    <strong>⚠️ WhatsApp 點擊的正確解讀（已修正）</strong>：原本以為 WhatsApp 點擊是購買觸發器（31 秒內完成付款），但仔細看時間線發現這 31 秒內根本來不及有 WhatsApp 對話。更合理的解讀是：<strong>用戶已經在 Stripe 表單裡按下付款，在等 Stripe 3DS / processing 期間，出於焦慮或想問啟用序號開了 chatbot + WhatsApp</strong>。WhatsApp 點擊是<strong>付款決定之後的 support interaction，不是決策觸發器</strong>。
+  </div>
+
+  <h3>🔑 這個 sample 真正能學到的 5 件事</h3>
+  <ol>
+    <li><strong>完整看完直播 = 購買的強指標</strong>：91 signed_up → 27 完整看完直播 → 1 購買。看完組購買率 1/27 = 3.7%，沒看完的 ≈ 0%。對看完組追擊（email/push）ROI 最高。</li>
+    <li><strong>這位用戶超快做決定</strong>：landing → signup 僅 105 秒、完整看完直播、直播中直接點 CTA 進 checkout。高意圖用戶的路徑很線性 — 不在頁面上來回游移。這表示頁面上為「猶豫用戶」多放的說服元件（證言、FAQ、多個 CTA），對最能轉換的高意圖族群可能反而是噪音。</li>
+    <li><strong>在 checkout 頁考慮 18 分鐘，且在付款當下焦慮尋求支援</strong>：即使是高意圖用戶，付款那一刻還是會焦慮想找人確認。Chatbot + WhatsApp 在這個時點被用到了 — 不是決策觸發，但是 <strong>reassurance</strong> 機制。沒這個管道可能會讓焦慮用戶中途放棄。</li>
+    <li><strong>手機能轉換，關鍵是體驗流暢</strong>：這位用戶是 Samsung 中低階 Android 手機，卻 56 分鐘內完成整條漏斗。問題不是「手機使用者不會買」，是「大多數手機使用者卡在前面 UI 那一步」。</li>
+    <li><strong>Campaign <code>2603_mike_dgc_A1</code> 值得研究</strong>：這組素材帶來了唯一購買者（還 2 次回訪）。可到 ads_agent 表看這個 campaign 的 CTR / VScore / CPA，跟其他素材對比找成功模式。</li>
+  </ol>
+
+  <h3>🚀 基於此 sample 的優化建議（已重新校準）</h3>
+  <table>
+    <thead><tr><th>優先級</th><th>動作</th><th>理由</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill p-warn">📈 P1</span></td>
+        <td><strong>完整看完直播的人加強後續追擊</strong> — 直播結束觸發 email：「Mike 親自幫你分析持倉」，24-48 小時再寄一次提醒</td>
+        <td>完整看完組購買率 3.7% vs 全體 0.02%，是最肥沃的池子</td>
+      </tr>
+      <tr>
+        <td><span class="pill p-warn">📈 P1</span></td>
+        <td><strong>確保 checkout 頁的「付款期間 reassurance」機制可見</strong> — chatbot + WhatsApp 入口（可能是這位用戶完成付款的穩定因素之一）。<strong>不是</strong>當作銷售觸發拉出來，而是當作「付款焦慮期的支援」維持曝光。</td>
+        <td>這位用戶在付款當下使用了這條管道；移除可能讓焦慮用戶中途放棄</td>
+      </tr>
+      <tr>
+        <td><span class="pill p-info">💡 P2</span></td>
+        <td><strong>分析 campaign <code>2603_mike_dgc_A1</code> 的素材特徵，考慮放大預算</strong></td>
+        <td>唯一購買者來自這組，且用戶重訪 3 次 — 是有效的 creative</td>
+      </tr>
+      <tr>
+        <td><span class="pill p-info">💡 P2</span></td>
+        <td><strong>量化「完整看完 + checkout」族群的流失原因</strong>（N=23 其他 checkout 未購買者）— 追蹤他們在 checkout 頁的最後動作是什麼，才知道要補什麼</td>
+        <td>現在只有 1 purchaser 無法形成 pattern，需要更多 sample</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert" style="background: #dbeafe; border-left-color: #3b82f6;">
+    <strong>樣本數警語</strong>：N=1 的 case study 能啟發假設，<strong>不能當成統計結論</strong>。WhatsApp 點擊 / 完整看完直播 / DGC 廣告這些模式，都要累積更多 purchasers 才能確認。目前 checkout 頁剛大改版 + 追擊機制還沒建立，等下個週期累積 5-10 個購買樣本再回來重做這類分析，conclusion 會穩健很多。
+  </div>
+</div>
+
+<!-- ============= 手機 UI 具體問題 ============= -->
+<h2>📱 手機 UI 具體 friction 點（程式碼層面觀察）</h2>
+<div class="card">
+  <p>讀了 <code>src/app/(public)/page.tsx</code> 的 hero 和 sticky bar 實作後，幾個直接看得到的問題：</p>
+
+  <table>
+    <thead><tr><th>位置</th><th>問題</th><th>嚴重度</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Hero 圖片</td>
+        <td>使用 <code>&lt;picture&gt;</code> 載入 <code>hero-v2-mobile.webp</code>（65KB），圖片佔據全屏視覺，<strong>CTA 按鈕在圖片下方</strong>。手機用戶第一眼只看到圖，要滑才看到按鈕。</td>
+        <td><span class="pill p-danger">高</span></td>
+      </tr>
+      <tr>
+        <td>Hero CTA 動畫</td>
+        <td>同時跑 3 個動畫：<code>ctaGlow</code>（持續發光）+ <code>ctaShimmer</code>（光掃）+ <code>giftBounce</code>（贈品標籤跳）。視覺資訊量過大，反而不知道焦點在哪。</td>
+        <td><span class="pill p-warn">中</span></td>
+      </tr>
+      <tr>
+        <td>Hero CTA 文字</td>
+        <td>「【限量报名】免费直播课」— 方括號加重視覺密度，「直播课」三字較弱。可改成「免费观看 60 分钟直播」或「立即报名」。</td>
+        <td><span class="pill p-info">低</span></td>
+      </tr>
+      <tr>
+        <td>Sticky bar 文案</td>
+        <td>「免费报名讲座」太被動。沒時間鎖、沒席次提示、沒利益點。手機用戶 sticky bar 是最後機會，這裡應該推得更狠。</td>
+        <td><span class="pill p-warn">中</span></td>
+      </tr>
+      <tr>
+        <td>Modal 在手機上</td>
+        <td>需要實機跑才能驗證 — 重點看：(a) 鍵盤彈出後欄位是否被覆蓋 (b) 三欄位（姓名/email/電話）是否一頁裝得下 (c) 電話 input 是否觸發 numeric keyboard。</td>
+        <td><span class="pill p-warn">待驗證</span></td>
+      </tr>
+      <tr>
+        <td>頁面總長度</td>
+        <td>10 個 section（Hero / Pain / Benefits / Outline / Bio / Testimonials / Schedule / FAQ / Final CTA / Footer），手機要滑很久才到 schedule 卡。前面任何一段失去吸引力就掉人。</td>
+        <td><span class="pill p-warn">中</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============= 漏斗 ============= -->
+<h2>核心漏斗（整體）</h2>
+<div class="card">
+  <p class="note">階段轉換率以「上一階段」為分母</p>
+  <div class="funnel-row">
+    <span class="funnel-label">Landing PV</span>
+    <div class="funnel-bar" style="width: 100%;">5,812</div>
+    <span class="funnel-value">100%</span>
+  </div>
+  <div class="funnel-row">
+    <span class="funnel-label">CTA 點擊</span>
+    <div class="funnel-bar" style="width: 18%; min-width: 80px;">1,037</div>
+    <span class="funnel-value">17.8% of PV</span>
+  </div>
+  <div class="funnel-row">
+    <span class="funnel-label">Modal 開啟</span>
+    <div class="funnel-bar" style="width: 4%; min-width: 60px;">213</div>
+    <span class="funnel-value">3.7% of PV</span>
+  </div>
+  <div class="funnel-row">
+    <span class="funnel-label">開始填表</span>
+    <div class="funnel-bar" style="width: 3.5%; min-width: 60px;">187</div>
+    <span class="funnel-value">88% of open</span>
+  </div>
+  <div class="funnel-row">
+    <span class="funnel-label">完成註冊</span>
+    <div class="funnel-bar" style="width: 2%; min-width: 60px;">122</div>
+    <span class="funnel-value">65% of start</span>
+  </div>
+  <div class="funnel-row">
+    <span class="funnel-label">進等候室</span>
+    <div class="funnel-bar" style="width: 1.9%; min-width: 60px;">109</div>
+    <span class="funnel-value">含 direct 進入</span>
+  </div>
+  <div class="funnel-row">
+    <span class="funnel-label">進入直播</span>
+    <div class="funnel-bar" style="width: 1.4%; min-width: 60px;">83</div>
+    <span class="funnel-value">76% of lobby</span>
+  </div>
+  <div class="funnel-row">
+    <span class="funnel-label">進入 Checkout</span>
+    <div class="funnel-bar" style="width: 0.5%; min-width: 60px;">28</div>
+    <span class="funnel-value">34% of live</span>
+  </div>
+  <div class="funnel-row">
+    <span class="funnel-label">完成購買</span>
+    <div class="funnel-bar" style="width: 0.05%; min-width: 30px;">1</div>
+    <span class="funnel-value">3.6% of checkout</span>
+  </div>
+
+  <div class="alert">
+    <strong>注意</strong>：Checkout → Purchase = 3.6%（僅 1/28）樣本太小無法代表趨勢。Checkout 頁剛大改版 + 加新文案 + 加證言，下個週期數據才能準確衡量。<br>
+    Signup 與 sign_up 兩欄差異是因為 raw event 計數（122）含同一用戶多次提交；唯一用戶 = 98。
+  </div>
+</div>
+
+<!-- ============= ✅ 表單漏斗（修正版） ============= -->
+<h2>表單漏斗（修正版）— 其實沒那麼糟</h2>
+<div class="card">
+  <div class="alert success">
+    <strong>原本以為「76% 表單流失」是錯的</strong>（把所有 CTA 點擊當分母）。實際漏斗用既有事件就能拼起來，<strong>不需要新增 modal_open 事件</strong>。
+  </div>
+
+  <table>
+    <thead><tr><th>階段</th><th>事件名</th><th class="num">人次</th><th class="num">% 從上一階段</th></tr></thead>
+    <tbody>
+      <tr><td>點擊時段卡 ≈ 開啟 modal</td><td><code>c_schedule_card_click</code></td><td class="num">206</td><td class="num">100%</td></tr>
+      <tr><td>開始填表（任一欄位 focus）</td><td><code>form_start</code> ⓘ GA4 enhanced 自動收</td><td class="num">187</td><td class="num"><strong>91%</strong> 👍</td></tr>
+      <tr><td>完成送出</td><td><code>sign_up</code></td><td class="num">122</td><td class="num"><strong>65%</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>解讀</h3>
+  <ul>
+    <li><strong>91% 開了 modal 就動手填</strong> — 視覺/可用性沒問題</li>
+    <li><strong>35% 在填表中途放棄</strong>（187→122）— 這才是真正的 form friction</li>
+    <li>桌機完成率比手機高（64% vs 54%），但兩邊都還行；form 本身的問題不大</li>
+  </ul>
+
+  <h3>填表階段可能的 friction（待 field-level event 驗證）</h3>
+  <ul>
+    <li><strong>北美電話 10 位數驗證太嚴</strong> — 用戶輸入 +1 / dash / 括號可能被擋</li>
+    <li>三個欄位（姓名 / email / 電話）對「免費註冊」來說稍多 — 電話可考慮選填或第二步收</li>
+    <li>沒有即時驗證提示，用戶送出才看到錯誤訊息</li>
+  </ul>
+</div>
+
+<!-- ============= 問題 1：Scroll Depth ============= -->
+<h2>Scroll 深度：70%→80% 大流失（-27%）</h2>
+<div class="card">
+  <div class="chart-wrap tall"><canvas id="scrollChart"></canvas></div>
+  <table>
+    <thead><tr><th>滾動深度</th><th class="num">事件數</th><th class="num">% 從 10%</th><th>對應 section（推估）</th></tr></thead>
+    <tbody>
+      <tr><td>10%</td><td class="num">1,316</td><td class="num">100%</td><td>Hero / 首屏</td></tr>
+      <tr><td>30%</td><td class="num">983</td><td class="num">75%</td><td>Pain Points / Benefits 區</td></tr>
+      <tr><td>50%</td><td class="num">818</td><td class="num">62%</td><td>Course Outline / Speaker Bio</td></tr>
+      <tr><td>70%</td><td class="num">689</td><td class="num">52%</td><td>Speaker Bio 末段 / Testimonials</td></tr>
+      <tr style="background: #fee2e2;"><td><strong>80%</strong> ← 流失峰值</td><td class="num"><strong>506</strong></td><td class="num"><strong>38%</strong></td><td><strong>Schedule 時段卡區</strong></td></tr>
+      <tr><td>90%</td><td class="num">432</td><td class="num">33%</td><td>FAQ</td></tr>
+      <tr><td>100%</td><td class="num">385</td><td class="num">29%</td><td>Footer 最終 CTA</td></tr>
+    </tbody>
+  </table>
+  <div class="alert">
+    <strong>為什麼這裡很痛</strong>：Schedule 時段卡是<strong>主要 conversion 入口</strong>（只有點時段卡才會開 modal）。每流失一個人在這裡 = 直接損失轉換機會。
+  </div>
+  <h3>可能原因（待驗證）</h3>
+  <ul>
+    <li>時段卡是 async 載入（<code>useEffect</code> 抓 evergreen API），載入慢/失敗 → 用戶看到空白就走</li>
+    <li>時區邏輯 edge case 讓用戶看不到適合場次</li>
+    <li>讀完 testimonials 情緒高峰過了，FAQ 之前沒鉤子重新拉住</li>
+  </ul>
+</div>
+
+<!-- ============= CTA 分布 ============= -->
+<h2>CTA 點擊分布</h2>
+<div class="card">
+  <div class="chart-wrap"><canvas id="ctaChart"></canvas></div>
+  <table>
+    <thead><tr><th>位置</th><th class="num">點擊</th><th class="num">獨立用戶</th><th class="num">%</th><th>說明</th></tr></thead>
+    <tbody>
+      <tr><td><strong>hero</strong></td><td class="num">341</td><td class="num">189</td><td class="num">42.4%</td><td>主力，影響最大流量</td></tr>
+      <tr><td>sticky</td><td class="num">218</td><td class="num">123</td><td class="num">27.1%</td><td>手機底部，穩定貢獻</td></tr>
+      <tr><td><strong>schedule_card</strong></td><td class="num">213</td><td class="num">131</td><td class="num">26.5%</td><td>唯一直接開 modal 的 CTA</td></tr>
+      <tr style="background: #fef3c7;"><td>floating</td><td class="num">148</td><td class="num">52</td><td class="num">18.4%</td><td>1 人平均點 2.8 次 — 重複點擊或誤觸</td></tr>
+      <tr><td>nav</td><td class="num">51</td><td class="num">22</td><td class="num">6.3%</td><td>頂部 nav bar</td></tr>
+      <tr><td>footer</td><td class="num">41</td><td class="num">31</td><td class="num">5.1%</td><td>滑到底部的人本來就少</td></tr>
+      <tr style="background: #fee2e2;"><td><strong>benefits</strong></td><td class="num">25</td><td class="num">24</td><td class="num">3.1%</td><td>幾乎無人點，視為無效 CTA</td></tr>
+    </tbody>
+  </table>
+  <div class="alert">
+    <strong>關鍵理解</strong>：<code>hero</code> / <code>sticky</code> / <code>floating</code> / <code>nav</code> / <code>footer</code> / <code>benefits</code> 點擊都只是 <code>scrollToSchedule()</code>，把用戶滾到時段卡區。<br>
+    <strong>只有 <code>schedule_card</code> 點擊會直接開註冊 modal</strong>。所以實際進到表單階段的人 ≈ 213，這也是為什麼 schedule 區流失特別痛 — 前面 6 個 CTA 把人推到這裡，這裡漏水就全前功盡棄。
+  </div>
+</div>
+
+<!-- ============= 優化建議（重排版）============= -->
+<h2>優化建議（按 ROI 重新排序）</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>優先級</th><th>動作</th><th>預期影響</th><th>實作成本</th></tr></thead>
+    <tbody>
+      <tr style="background: #fff8e7;">
+        <td><span class="pill p-danger">🚨 P0</span></td>
+        <td><strong>手機 UX 全面審視</strong><br>
+          <span class="note">76% 流量、5x 轉換差距，是最大的單一機會。先實機跑一遍：iPhone Safari + Android Chrome，重點看 hero CTA 是否被擠出 viewport、sticky bar 是否被瀏覽器底部 UI 擋、modal 開啟後鍵盤覆蓋情況、schedule 卡能不能輕鬆點。</span></td>
+        <td>手機 0.77% → 1.5%+ 即多救 40-50 個註冊/月<br>整體 PV→Signup 從 1.7% 拉到 2.5%+</td>
+        <td>低-中（先實機檢查再決定改哪）</td>
+      </tr>
+      <tr>
+        <td><span class="pill p-danger">🔥 P1</span></td>
+        <td><strong>Hero 改造成 video-first + 強化 CTA 主角</strong><br>
+          <span class="note">嵌 30 秒精華影片 + 簡化 H1/副標 + 大 CTA + 緊鄰時段提示。Hero 影響 42% 點擊量；對手機尤其重要（手機現在被 hero 大圖塞滿）。</span></td>
+        <td>Hero CTA 點擊 +20~40%<br>整體 PV→Signup 提升 0.3-0.7pt</td>
+        <td>中（要拍 30 秒影片）</td>
+      </tr>
+      <tr>
+        <td><span class="pill p-danger">🔥 P1</span></td>
+        <td><strong>Schedule 區 loading 優化 + 加情緒鉤子</strong><br>
+          <span class="note">先抓 evergreen API 回應時間；空白期顯示 skeleton；時段卡上方加一句「直播限定加贈」之類的鉤子，避免讀完 bio/testimonials 直接離開。對手機尤其重要（手機到這裡前已經滑很久）。</span></td>
+        <td>挽回 70→80% 流失中的 5-15%<br>多救 30-80 個進到表單的機會</td>
+        <td>中（先抓 API 數據再判斷修法）</td>
+      </tr>
+      <tr>
+        <td><span class="pill p-warn">📈 P2</span></td>
+        <td><strong>移除或重設計 <code>benefits</code> CTA</strong><br>
+          <span class="note">25 點擊量太少，視為無效 CTA。直接拿掉減少視覺噪音，或換成 anchor link 跳到 schedule。</span></td>
+        <td>清理視覺，可能讓主 CTA 更突出</td>
+        <td>低（5 分鐘）</td>
+      </tr>
+      <tr>
+        <td><span class="pill p-warn">📈 P2</span></td>
+        <td><strong>表單欄位 friction 檢查</strong><br>
+          <span class="note">35% 在 form_start → sign_up 流失。先加 field-level error event（哪個欄位最常驗證失敗）；考慮把電話改選填或拆兩步；放寬電話驗證接受常見格式（+1/dash/括號）。</span></td>
+        <td>表單完成率 65% → 75-80%<br>多 10-20 個註冊/月</td>
+        <td>低（驗證放寬）+ 中（A/B test 欄位精簡）</td>
+      </tr>
+      <tr>
+        <td><span class="pill p-info">💡 P3</span></td>
+        <td><strong>檢查 floating CTA 行為</strong><br>
+          <span class="note">52 人點 148 次（人均 2.8）— 是 modal 互動正常還是誤觸？開 GA4 path exploration 看序列。</span></td>
+        <td>視結果而定</td>
+        <td>低（30 分鐘調研）</td>
+      </tr>
+      <tr>
+        <td><span class="pill p-muted">📝 之後</span></td>
+        <td><strong>Checkout 漏斗評估</strong><br>
+          <span class="note">本次 checkout 大改版剛上線，sample 太小（28 人）無法判斷。等 2 週累積資料再看。</span></td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============= 短期 vs 長期 ============= -->
+<h2>建議執行順序</h2>
+<div class="card">
+  <h3>本週做（低成本、高影響）</h3>
+  <ol>
+    <li><strong>實機跑手機 UX 測試</strong>（iPhone + Android 各 1 小時）— 找出 hero CTA / sticky bar / modal 鍵盤覆蓋 / schedule 卡點按性的 bug</li>
+    <li>Schedule 區 loading 行為檢查 + 加 skeleton（半天）</li>
+    <li>移除 benefits CTA + 放寬電話驗證（半天）</li>
+  </ol>
+
+  <h3>本月做（中成本、高影響）</h3>
+  <ol>
+    <li>拍 30 秒精華影片（直播片段剪輯 or HeyGen 重錄）</li>
+    <li>Hero 改造成 video-first 結構（手機優先設計）</li>
+    <li>表單欄位精簡 A/B test（電話選填 vs 必填）</li>
+    <li>等 2 週數據看 conversion lift</li>
+  </ol>
+
+  <h3>下個月評估</h3>
+  <ol>
+    <li>Checkout 漏斗回顧（樣本累積後）</li>
+    <li>分流量來源（Google Ads / EDM / Direct）跑同樣分析，可能不同來源優化重點不同</li>
+    <li>場次顯示策略檢討（是否該按時區自動篩選）</li>
+  </ol>
+</div>
+
+<!-- ============= 數據附錄 ============= -->
+<h2 style="margin-top: 48px;">附錄：原始數據查詢</h2>
+<div class="card">
+  <p class="note">所有數據來自 <code>overseas-author</code> project，<code>analytics_527332244</code> 為 GA4 export raw 資料，<code>ads_agent.mike_juejin_ga4_daily_events</code> 為預聚合 daily rollup。本報告查詢區間 2026-03-16 至 2026-04-14。</p>
+  <details>
+    <summary>scroll_depth 查詢</summary>
+    <pre style="background: #f3f4f6; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 12px;">SELECT
+  (SELECT value.int_value FROM UNNEST(event_params) WHERE key='percent') AS percent,
+  COUNT(*) AS events
+FROM `overseas-author.analytics_527332244.events_*`
+WHERE _TABLE_SUFFIX BETWEEN ... AND ...
+  AND event_name = 'c_scroll_depth'
+  AND EXISTS(SELECT 1 FROM UNNEST(event_params) WHERE key='page' AND value.string_value='landing')
+GROUP BY percent ORDER BY percent</pre>
+  </details>
+  <details>
+    <summary>device 漏斗查詢</summary>
+    <pre style="background: #f3f4f6; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 12px;">SELECT
+  device.category AS device_cat,
+  COUNTIF(event_name='c_schedule_card_click') AS modal_open,
+  COUNTIF(event_name='form_start') AS form_start,
+  COUNTIF(event_name='sign_up') AS sign_up
+FROM `overseas-author.analytics_527332244.events_*`
+WHERE _TABLE_SUFFIX BETWEEN ... AND ...
+  AND device.category IN ('mobile','desktop','tablet')
+GROUP BY device_cat</pre>
+  </details>
+  <details>
+    <summary>signup_button_click 查詢</summary>
+    <pre style="background: #f3f4f6; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 12px;">SELECT
+  (SELECT value.string_value FROM UNNEST(event_params) WHERE key='button_position') AS button_position,
+  COUNT(*) AS clicks,
+  COUNT(DISTINCT user_pseudo_id) AS unique_users
+FROM `overseas-author.analytics_527332244.events_*`
+WHERE _TABLE_SUFFIX BETWEEN ... AND ...
+  AND event_name = 'c_signup_button_click'
+GROUP BY button_position ORDER BY clicks DESC</pre>
+  </details>
+  <details>
+    <summary>廣告成本 by device 查詢</summary>
+    <pre style="background: #f3f4f6; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 12px;">SELECT
+  segments_device,
+  SUM(metrics_cost_micros)/1e6 AS cost_twd,
+  SUM(metrics_clicks) AS clicks,
+  SAFE_DIVIDE(SUM(metrics_cost_micros)/1e6, SUM(metrics_clicks)) AS cpc
+FROM `overseas-author.authors_google_ads_dataset.ads_AdBasicStats_4581920893`
+WHERE _DATA_DATE BETWEEN ... AND ...
+GROUP BY segments_device
+ORDER BY cost_twd DESC</pre>
+  </details>
+  <details>
+    <summary>User-level 交叉驗證查詢（避開跨裝置歸因）</summary>
+    <pre style="background: #f3f4f6; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 12px;">WITH user_device AS (
+  SELECT
+    user_pseudo_id,
+    ARRAY_AGG(device.category ORDER BY event_timestamp LIMIT 1)[OFFSET(0)] AS first_device,
+    MAX(CASE WHEN event_name='page_view' THEN 1 ELSE 0 END) AS had_pv,
+    MAX(CASE WHEN event_name='sign_up' THEN 1 ELSE 0 END) AS signed_up
+  FROM `overseas-author.analytics_527332244.events_*`
+  WHERE _TABLE_SUFFIX BETWEEN ... AND ...
+  GROUP BY user_pseudo_id
+)
+SELECT first_device, COUNT(*) AS users,
+  SUM(signed_up) AS signed_up_users,
+  ROUND(100*SUM(signed_up)/COUNT(*), 2) AS conversion_pct
+FROM user_device
+WHERE had_pv = 1
+GROUP BY first_device</pre>
+  </details>
+</div>
+
+<footer style="margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; text-align: center;">
+  Generated 2026-04-15 · v8 (修正購買者解讀 — WhatsApp 是付款期間 reassurance，不是決策觸發) · Claude Code analysis
+</footer>
+
+</div>
+
+<script>
+new Chart(document.getElementById('scrollChart'), {
+  type: 'bar',
+  data: {
+    labels: ['10%','20%','30%','40%','50%','60%','70%','80%','90%','100%'],
+    datasets: [{
+      label: '事件數',
+      data: [1316, 1086, 983, 902, 818, 757, 689, 506, 432, 385],
+      backgroundColor: ['#B8953F','#B8953F','#B8953F','#B8953F','#B8953F','#B8953F','#B8953F','#ef4444','#d4a956','#d4a956'],
+      borderRadius: 4
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: '滾動深度 — 紅色標記流失峰值（70%→80% -27%）', font: { size: 13 } }
+    },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+
+new Chart(document.getElementById('ctaChart'), {
+  type: 'bar',
+  data: {
+    labels: ['hero','sticky','schedule_card','floating','nav','footer','benefits'],
+    datasets: [{
+      label: '點擊量',
+      data: [341, 218, 213, 148, 51, 41, 25],
+      backgroundColor: ['#B8953F','#d4a956','#d4a956','#f59e0b','#9ca3af','#9ca3af','#ef4444'],
+      borderRadius: 4
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: 'Sign-up CTA 點擊分布（紅 = 應該移除/重設計，黃 = 待調研）', font: { size: 13 } }
+    },
+    scales: { x: { beginAtZero: true } }
+  }
+});
+</script>
+
+</body>
+</html>

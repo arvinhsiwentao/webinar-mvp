@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { trackGA4 } from '@/lib/analytics';
 
@@ -19,11 +19,13 @@ const NAV_ITEMS: NavItem[] = [
 
 interface StickyNavProps {
   onCtaClick: () => void;
-  logoSrc?: string; // 留空時顯示 placeholder
+  logoSrc?: string;
 }
 
 export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
   const [activeId, setActiveId] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Track active section via IntersectionObserver
   useEffect(() => {
@@ -34,10 +36,8 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Find the topmost visible section
         const visibleEntries = entries.filter(e => e.isIntersecting);
         if (visibleEntries.length > 0) {
-          // Pick the one closest to top of viewport
           const sorted = visibleEntries.sort(
             (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
           );
@@ -45,7 +45,7 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
         }
       },
       {
-        rootMargin: '-80px 0px -60% 0px', // offset for sticky nav height
+        rootMargin: '-80px 0px -60% 0px',
         threshold: 0,
       }
     );
@@ -54,6 +54,18 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
     return () => observer.disconnect();
   }, []);
 
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, [menuOpen]);
+
   const scrollTo = useCallback((id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -61,6 +73,7 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
     const navHeight = 56;
     const top = el.getBoundingClientRect().top + window.scrollY - navHeight;
     window.scrollTo({ top, behavior: 'smooth' });
+    setMenuOpen(false);
   }, []);
 
   return (
@@ -81,9 +94,9 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
             </span>
           </div>
 
-          {/* Nav items — horizontally scrollable on mobile */}
-          <div className="flex-1 overflow-x-auto no-scrollbar">
-            <div className="flex items-center gap-1 md:gap-2 min-w-max">
+          {/* Desktop: horizontal nav items */}
+          <div className="hidden md:flex flex-1 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-2 min-w-max">
               {NAV_ITEMS.map((item) => {
                 const isActive = activeId === item.id;
                 return (
@@ -91,17 +104,16 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
                     key={item.id}
                     onClick={() => scrollTo(item.id)}
                     className={`
-                      relative px-3 md:px-4 py-2 text-sm md:text-[15px] font-semibold rounded-md
+                      relative px-4 py-2 text-[15px] font-semibold rounded-md
                       transition-colors duration-200 whitespace-nowrap cursor-pointer
                       ${isActive
                         ? 'text-[#C9A962]'
                         : 'text-neutral-500 hover:text-neutral-300'
                       }
                     `}
-                  style={{ fontFamily: '"Noto Serif SC", "Songti SC", "SimSun", serif' }}
+                    style={{ fontFamily: '"Noto Serif SC", "Songti SC", "SimSun", serif' }}
                   >
                     {item.label}
-                    {/* Active indicator — gold underline */}
                     <span
                       className="absolute bottom-0 left-3 right-3 h-0.5 bg-[#C9A962] rounded-full transition-all duration-300"
                       style={{
@@ -115,7 +127,51 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
             </div>
           </div>
 
-          {/* CTA button — hidden on mobile (sticky bottom CTA handles it) */}
+          {/* Mobile: hamburger button */}
+          <div className="md:hidden flex-1 flex justify-end" ref={menuRef}>
+            <button
+              onClick={() => setMenuOpen(prev => !prev)}
+              className="p-2 text-neutral-400 hover:text-[#C9A962] transition-colors"
+              aria-label="选单"
+            >
+              {menuOpen ? (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+              )}
+            </button>
+
+            {/* Dropdown menu */}
+            {menuOpen && (
+              <div className="absolute top-14 right-4 bg-[#0a0a08]/95 backdrop-blur-md border border-[#C9A962]/20 rounded-lg shadow-xl py-2 min-w-[160px] animate-in fade-in slide-in-from-top-2 duration-200">
+                {NAV_ITEMS.map((item) => {
+                  const isActive = activeId === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => scrollTo(item.id)}
+                      className={`
+                        w-full text-left px-4 py-2.5 text-sm font-medium transition-colors
+                        ${isActive
+                          ? 'text-[#C9A962] bg-[#C9A962]/10'
+                          : 'text-neutral-400 hover:text-neutral-200 hover:bg-white/5'
+                        }
+                      `}
+                      style={{ fontFamily: '"Noto Serif SC", "Songti SC", "SimSun", serif' }}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop CTA button */}
           <div className="hidden md:block flex-shrink-0 ml-4">
             <button
               onClick={onCtaClick}

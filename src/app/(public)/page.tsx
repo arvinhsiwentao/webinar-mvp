@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Webinar } from '@/lib/types';
@@ -25,39 +25,35 @@ const FAQ_ITEMS = [
     answer: '完全可以。这场讲座从零基础出发，用最简单的方式讲解核心策略。不需要任何金融背景，只要你想改善财务状况，就能从中获益。',
   },
   {
-    question: '免费讲座，会不会一直推销？',
-    answer: '讲座以干货分享为主，Mike 会完整讲解他的投资框架和策略逻辑。讲座最后会介绍进一步学习的机会，自由选择，没有任何压力。',
+    question: '讲座是中文还是英文？',
+    answer: '全程中文（普通话）。Mike 是北美华人，讲解方式接地气，零基础也能听懂。',
   },
   {
-    question: '错过直播时间怎么办？',
-    answer: '注册后系统会发送提醒邮件。如果错过了，你可以选择下一个可用场次重新参加。',
+    question: '免费讲座，会不会一直推销？',
+    answer: '讲座以干货分享为主，Mike 会完整讲解他的投资框架和策略逻辑。讲座最后会介绍进一步学习的机会，自由选择，没有任何压力。',
   },
   {
     question: '我的个人信息安全吗？',
     answer: '我们严格保护你的隐私，不会将你的信息出售给任何第三方。注册信息仅用于发送讲座相关通知。',
   },
   {
-    question: '我已经在投资美股了，这场讲座对我还有帮助吗？',
-    answer: '非常有帮助。很多学员本身已有投资经验，但缺少一套系统化的框架来整合碎片知识。Mike 会讲解完整的配置逻辑和进出场判断系统，帮你从「凭感觉操作」升级到「有纪律地执行」。',
+    question: '错过直播时间怎么办？',
+    answer: '注册后系统会发送提醒邮件。如果错过了，你可以选择下一个可用场次重新参加。',
   },
   {
-    question: '讲座是中文还是英文？',
-    answer: '全程中文（普通话）。Mike 是北美华人，讲解方式接地气，零基础也能听懂。',
+    question: '我已经在投资美股了，这场讲座对我还有帮助吗？',
+    answer: '非常有帮助。很多学员本身已有投资经验，但缺少一套系统化的框架来整合碎片知识。Mike 会讲解完整的配置逻辑和进出场判断系统，帮你从「凭感觉操作」升级到「有纪律地执行」。',
   },
 ];
 
 // ─── Pain points（覆盖 P1–P5 全部受众） ───
 const PAIN_POINTS = [
-  { text: '想投资，但不知道该买什么、什么时候买？',              // P1, P2
-    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01" /> },
-  { text: '看了很多财经内容，越看越乱，还是不敢下手？',            // P4
-    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /> },
-  { text: '有家庭责任，投资不能犯错，但也不能什么都不做？',          // P3
-    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" /> },
-  { text: 'AI 股票涨涨跌跌，怕错过又怕追在高点？',               // P5
-    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /> },
-  { text: '收入还行，但光靠工作存钱，感觉永远追不上通胀？',          // P2
+  { text: '年薪十万，扣完房租、保险、孩子教育，每月真正存下来的不到两千——你知道不能光靠薪水，但不知道从哪开始',
     icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /> },
+  { text: 'YouTube 看了上百个视频，ETF、期权、AI 什么都懂一点，但打开帐户还是不知道怎么配——信息越多反而越不敢动',
+    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /> },
+  { text: '看到 AI 股票涨就想追，跌了又怕套在高点——没有框架，每一次操作都像在赌',
+    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /> },
 ];
 
 // ─── Testimonials（对应 Campaign A/B/C 受众） ───
@@ -125,6 +121,29 @@ export default function HomePageV2() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [slotSeats, setSlotSeats] = useState<Record<string, number>>({});
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const [showAllSlots, setShowAllSlots] = useState(false);
+  const heroCTARef = useRef<HTMLButtonElement>(null);
+  const scheduleRef = useRef<HTMLElement>(null);
+
+  // Sticky bar: 顯示條件 = hero CTA 不可見 AND schedule 區不可見
+  useEffect(() => {
+    const onScroll = () => {
+      if (!heroCTARef.current) return;
+      const heroRect = heroCTARef.current.getBoundingClientRect();
+      const heroGone = heroRect.bottom < 0;
+
+      let scheduleVisible = false;
+      if (scheduleRef.current) {
+        const schedRect = scheduleRef.current.getBoundingClientRect();
+        scheduleVisible = schedRect.top < window.innerHeight && schedRect.bottom > 0;
+      }
+
+      setShowStickyBar(heroGone && !scheduleVisible);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // 剩余名额 — localStorage 持久化，每次载入有小机率递减
   useEffect(() => {
@@ -324,8 +343,8 @@ export default function HomePageV2() {
           Section 1: HERO — Full-bleed background image with CTA
           ================================================================ */}
       {/* Hero — 图片 + CTA 一体化，底部渐层融入下方区块 */}
-      <section className="w-full bg-gradient-to-b from-[#0a0a08] to-[#0f0f0d]">
-        {/* 图片容器 + 底部渐层遮罩 */}
+      <section className="w-full bg-gradient-to-b from-[#0a0a08] to-[#0f0f0d] h-[calc(100dvh-56px)] md:h-auto flex flex-col md:block">
+        {/* 图片容器 + 底部渐层遮罩 — mobile: 图片缩放到 max-h-[60vh]，不裁切 */}
         <div className="relative">
           <picture>
             {/* V2 hero banners */}
@@ -333,7 +352,7 @@ export default function HomePageV2() {
             <img
               src="/images/hero-v2-mobile.webp"
               alt="AI时代，普通人最好的美股机会来了 — 一套不用盯盘、可复制的高胜率投资策略"
-              className="w-full h-auto block"
+              className="w-full h-auto block max-h-[60vh] md:max-h-none object-cover object-top"
               fetchPriority="high"
             />
           </picture>
@@ -341,12 +360,16 @@ export default function HomePageV2() {
           <div className="absolute bottom-0 left-0 right-0 h-32 md:h-40 bg-gradient-to-t from-[#0f0f0d] to-transparent pointer-events-none" />
         </div>
 
+        {/* 上方弹性间距 — 图片与 CTA 之间 */}
+        <div className="flex-[2] md:hidden" />
+
         {/* CTA 区块 */}
-        <div className="pt-6 md:pt-10 relative z-10 pb-8 md:pb-12">
+        <div className="md:pt-10 relative z-10 md:pb-12">
         <div className="max-w-xl mx-auto text-center px-6 animate-[heroFadeIn_0.8s_ease-out_0.3s_both]">
           <button
+            ref={heroCTARef}
             onClick={() => scrollToSchedule('hero')}
-            className="hero-cta group relative overflow-hidden px-12 py-4 md:px-16 md:py-4.5 lg:px-20 lg:py-5 rounded-2xl border border-[#C9A962] bg-gradient-to-r from-[#1a1508]/80 to-[#0f1a2e]/80 backdrop-blur-sm text-[#E8D5A3] text-lg md:text-xl lg:text-2xl font-bold tracking-widest cursor-pointer whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_15px_rgba(201,169,98,0.4),0_0_40px_rgba(201,169,98,0.2),0_0_80px_rgba(184,149,63,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(201,169,98,0.7),0_0_60px_rgba(201,169,98,0.4),0_0_120px_rgba(37,99,235,0.2),inset_0_1px_2px_rgba(255,255,255,0.2)] hover:border-[#E8D5A3] hover:scale-105 active:scale-95 animate-[ctaGlow_3s_ease-in-out_infinite]"
+            className="hero-cta group relative overflow-hidden px-14 py-5 md:px-16 md:py-4.5 lg:px-20 lg:py-5 rounded-2xl border border-[#C9A962] bg-gradient-to-r from-[#1a1508]/80 to-[#0f1a2e]/80 backdrop-blur-sm text-[#E8D5A3] text-xl md:text-xl lg:text-2xl font-bold tracking-widest cursor-pointer whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_15px_rgba(201,169,98,0.4),0_0_40px_rgba(201,169,98,0.2),0_0_80px_rgba(184,149,63,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(201,169,98,0.7),0_0_60px_rgba(201,169,98,0.4),0_0_120px_rgba(37,99,235,0.2),inset_0_1px_2px_rgba(255,255,255,0.2)] hover:border-[#E8D5A3] hover:scale-105 active:scale-95 md:animate-[ctaGlow_3s_ease-in-out_infinite]"
           >
             {/* 顶部玻璃高光 */}
             <span className="absolute inset-x-0 top-0 h-[45%] pointer-events-none rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" />
@@ -360,16 +383,27 @@ export default function HomePageV2() {
             </span>
             {/* 底部蓝色科技光边 — hover 时显现 */}
             <span className="absolute bottom-0 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-[#2563eb]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <span className="relative z-10">【限量报名】免费直播课</span>
+            <span className="relative z-10">免费观看直播 →</span>
           </button>
-          <p className="mt-4 inline-flex items-center gap-2 text-sm md:text-base font-medium tracking-wide text-[#E8D5A3] animate-[giftBounce_2s_ease-in-out_infinite]">
-            <svg className="w-5 h-5 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-            </svg>
-            报名即有机会获得 Mike 一对一持仓分析
-          </p>
+          {(() => {
+            const firstSlot = evergreenSlots[0];
+            const seats = firstSlot ? slotSeats[firstSlot.slotTime] : null;
+            return seats ? (
+              <p className="mt-3 text-xs text-red-400 flex items-center justify-center gap-1.5">
+                <span className="relative flex h-2 w-2 flex-shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                </span>
+                仅剩 <span className="font-bold text-red-300">{seats}</span> 个免费名额
+              </p>
+            ) : (
+              <p className="mt-3 text-xs text-neutral-500">免费 · 名额有限</p>
+            );
+          })()}
         </div>
       </div>
+        {/* 下方弹性间距 — CTA 与 fold 之间 */}
+        <div className="flex-[3] md:hidden" />
       </section>
 
       {/* ================================================================
@@ -382,7 +416,7 @@ export default function HomePageV2() {
               你是不是也卡在这里？
             </h2>
             <p className="text-neutral-400 text-center mb-10 text-sm md:text-base">
-              如果下面有任何一条说中了你，这场讲座就是为你准备的
+              不是你不够聪明，是少了一张地图
             </p>
           </ScrollReveal>
 
@@ -410,7 +444,7 @@ export default function HomePageV2() {
         <div className="max-w-2xl mx-auto">
           <ScrollReveal>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-              60 分钟，你将带走这些
+              40 分钟，你将带走这些
             </h2>
             <p className="text-neutral-400 text-center mb-10 text-sm md:text-base">
               不是鸡汤，是一套你听完就能开始执行的策略
@@ -419,11 +453,9 @@ export default function HomePageV2() {
 
           <div className="space-y-5">
             {[
-              'Mike 从负债到财务自由的完整路径与核心逻辑',                      // P2 故事 hook
-              '一套可执行的美股投资框架 — 什么时候买、买什么、怎么配',              // P1, P3
-              'AI 产业链拆解 — 哪些才是真正值得长期关注的标的',                  // P5
-              '不用每天盯盘的投资节奏 — 每月定投、每季复盘、每年优化',              // P1, P3, P4
-              '普通人如何用最少时间建立被动收入系统',                            // P2, P4
+              '2026 三重机会窗口（AI + 降息 + 川普 2.0）— 钱现在在哪一层、接下来往哪流',
+              '一套你能立刻执行的攻守框架 — 什么时候买、怎么配、什么时候不动',
+              'Mike 从负债 50 万到 43 岁财务自由，他做对了什么',
             ].map((item, idx) => (
               <ScrollReveal key={idx} delay={idx * 80}>
                 <div className="flex items-start gap-4">
@@ -457,9 +489,9 @@ export default function HomePageV2() {
             </div>
           </ScrollReveal>
 
-          {/* Mid-page CTA */}
+          {/* Mid-page CTA — 桌机保留，手机有 sticky bar 不需要 */}
           <ScrollReveal delay={500}>
-            <div className="mt-10 text-center">
+            <div className="mt-10 text-center hidden md:block">
               <button
                 onClick={() => scrollToSchedule('benefits')}
                 className="group relative inline-block overflow-hidden px-10 py-4 text-lg font-semibold tracking-wide rounded-xl border border-[#C9A962] bg-gradient-to-r from-[#1a1508]/80 to-[#0f1a2e]/80 text-[#E8D5A3] hover:border-[#E8D5A3] hover:shadow-[0_0_20px_rgba(201,169,98,0.5),0_0_60px_rgba(201,169,98,0.2)] hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer"
@@ -467,7 +499,7 @@ export default function HomePageV2() {
                 <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[ctaShimmer_1.5s_ease-in-out_infinite]" />
                 </span>
-                <span className="relative z-10">免费报名讲座</span>
+                <span className="relative z-10">免费观看直播 →</span>
               </button>
             </div>
           </ScrollReveal>
@@ -484,7 +516,7 @@ export default function HomePageV2() {
               直播课大纲
             </h2>
             <p className="text-neutral-400 text-center mb-12 text-sm md:text-base">
-              60 分钟，从「为什么要行动」到「具体怎么做」，完整走一遍
+              40 分钟，从「为什么要行动」到「具体怎么做」，完整走一遍
             </p>
           </ScrollReveal>
 
@@ -492,7 +524,7 @@ export default function HomePageV2() {
             {/* 左侧时间线 */}
             <div className="absolute left-5 md:left-6 top-0 bottom-6 w-px bg-[#C9A962]/30" />
 
-            <div className="space-y-8">
+            <div className="space-y-4 md:space-y-8">
               {[
                 {
                   num: '01',
@@ -529,7 +561,7 @@ export default function HomePageV2() {
                     {/* 内容 */}
                     <div className="pt-1 pb-2">
                       <h3 className="text-base md:text-lg font-bold text-neutral-200 mb-1.5">{item.title}</h3>
-                      <p className="text-sm md:text-base text-neutral-500 leading-relaxed">{item.desc}</p>
+                      <p className="hidden md:block text-sm md:text-base text-neutral-500 leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
                 </ScrollReveal>
@@ -549,11 +581,11 @@ export default function HomePageV2() {
               {/* Avatar — 放大 + 金色光环动画 */}
               <div className="flex-shrink-0 relative">
                 {/* 外圈旋转光环 */}
-                <div className="absolute -inset-3 rounded-full border border-[#C9A962]/20 animate-[speakerRingSpin_12s_linear_infinite]" />
-                <div className="absolute -inset-6 rounded-full border border-[#C9A962]/10 animate-[speakerRingSpin_20s_linear_infinite_reverse]" />
+                <div className="absolute -inset-3 rounded-full border border-[#C9A962]/20 md:animate-[speakerRingSpin_12s_linear_infinite]" />
+                <div className="absolute -inset-6 rounded-full border border-[#C9A962]/10 md:animate-[speakerRingSpin_20s_linear_infinite_reverse]" />
                 {/* 背景光晕 */}
                 <div className="absolute -inset-4 rounded-full bg-[#C9A962]/5 blur-xl" />
-                <div className="relative w-56 h-56 md:w-64 md:h-64 rounded-full overflow-hidden border-2 border-[#C9A962]/40 shadow-[0_0_30px_rgba(201,169,98,0.2)]">
+                <div className="relative w-36 h-36 md:w-64 md:h-64 rounded-full overflow-hidden border-2 border-[#C9A962]/40 shadow-[0_0_30px_rgba(201,169,98,0.2)]">
                   <Image
                     src="/images/mike-profile.jpg"
                     alt="Mike是麦克"
@@ -573,15 +605,9 @@ export default function HomePageV2() {
                   {webinar.speakerTitle || '美股投资人 / YouTube 创作者'}
                 </p>
 
-                <div className="space-y-4 text-sm md:text-base text-neutral-400 leading-relaxed">
+                <div className="space-y-4 text-base text-neutral-400 leading-relaxed">
                   <p>
-                    你现在经历的迷茫，Mike 全都经历过 —
-                    看了一堆资讯不知道怎么做、怕买错怕亏钱、光靠薪水看不到尽头。
-                  </p>
-                  <p>
-                    32 岁负债 50 万美金，没有背景、没有人脉。
-                    靠着自己摸索出一套投资框架，在 43 岁实现财务自由。
-                    走过的每一个弯路，都变成了现在能教给你的方法。
+                    32 岁负债 50 万美金，没有背景、没有人脉。你现在经历的迷茫——怕买错、怕亏钱、光靠薪水看不到尽头——Mike 全都经历过。靠着自己摸索出的投资框架，43 岁实现财务自由。走过的每一个弯路，都变成了现在能教给你的方法。
                   </p>
                   <p>
                     著有投资畅销书《人生重启》，曾受邀电视财经节目分享投资策略，
@@ -593,7 +619,7 @@ export default function HomePageV2() {
                 </div>
 
                 {/* 第三方背书标签 */}
-                <div className="mt-5 flex flex-wrap items-center gap-2 justify-center md:justify-start">
+                <div className="mt-5 hidden md:flex flex-wrap items-center gap-2 justify-center md:justify-start">
                   <a
                     href="https://www.amazon.in/%E4%BA%BA%E7%94%9F%E9%87%8D%E5%95%9F%EF%BC%9A%E7%A7%BB%E6%B0%91%E7%BE%8E%E5%9C%8B%E8%B7%A8%E8%B6%8A%E8%B2%A1%E5%AF%8C%E9%AB%98%E7%89%86%EF%BC%8C%E5%BE%9E%E6%99%AE%E9%80%9A%E4%BA%BA%E5%88%B0%E4%B8%80%E5%80%8B%E6%9C%89%E9%8C%A2%E7%9A%84%E6%99%AE%E9%80%9A%E4%BA%BA-Traditional-Chinese-Mike-ebook/dp/B0FQRN9YKD"
                     target="_blank"
@@ -776,7 +802,7 @@ export default function HomePageV2() {
                   </div>
 
                   {/* Quote */}
-                  <p className="text-sm md:text-base text-neutral-400 leading-relaxed flex-1 mb-4">
+                  <p className="text-base text-neutral-400 leading-relaxed flex-1 mb-4">
                     {t.quote}
                   </p>
 
@@ -795,13 +821,17 @@ export default function HomePageV2() {
       {/* ================================================================
           Section 7: DATE SCHEDULE + COUNTDOWN
           ================================================================ */}
-      <section id="schedule" className="py-16 md:py-24 px-6 lg:px-12 bg-[#111318]">
+      <section id="schedule" ref={scheduleRef} className="py-16 md:py-24 px-6 lg:px-12 bg-[#111318]">
         <div className="max-w-3xl mx-auto flex flex-col items-center">
           <ScrollReveal>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-10 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-              选择你的讲座时间
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
+              免费名额有限 · 选择你的场次
             </h2>
+            <p className="text-xs text-[#C9A962] text-center mb-6">
+              🎁 报名即有机会获得 Mike 一对一持仓分析（价值 $6,000+ USD）
+            </p>
           </ScrollReveal>
+
 
           {/* 提示选择场次 */}
           <div
@@ -815,7 +845,7 @@ export default function HomePageV2() {
             </div>
           </div>
 
-          {/* Slot cards — 过滤凌晨场次，保留合理时段，确保至少显示 3 场 */}
+          {/* Slot cards — 手機預設只顯示第一場，可展開更多 */}
           <div className="space-y-5 mb-14 w-full max-w-xl">
             {(() => {
               const isReasonableTime = (slotTime: string) => {
@@ -824,11 +854,13 @@ export default function HomePageV2() {
                 const etHour = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', hourCycle: 'h23' }).format(d));
                 return ptHour >= 8 && ptHour <= 23 && etHour >= 8 && etHour <= 23;
               };
-              // immediate/stored 永远保留，anchor 只保留合理时段
-              return evergreenSlots.filter((item) =>
+              const filtered = evergreenSlots.filter((item) =>
                 item.type === 'immediate' || item.type === 'stored' || isReasonableTime(item.slotTime)
               );
+              return filtered;
             })().map((item, idx) => {
+              // 手機：預設只顯示第一張，展開後全部顯示
+              const hideOnMobile = idx > 1 && !showAllSlots;
               const dateStr = item.slotTime;
               const { date: fullDate } = formatInTimezone(dateStr, evergreenTimezone);
               const dateObj = new Date(dateStr);
@@ -838,7 +870,7 @@ export default function HomePageV2() {
 
               return (
                 <ScrollReveal key={idx} delay={idx * 100}>
-                  <div className="bg-white/[0.04] rounded-xl border border-[#C9A962]/20 hover:border-[#C9A962]/40 transition-all duration-300 overflow-hidden">
+                  <div className={`bg-white/[0.04] rounded-xl border border-[#C9A962]/20 hover:border-[#C9A962]/40 transition-all duration-300 overflow-hidden ${hideOnMobile ? 'hidden md:block' : ''}`}>
                     <div className="flex items-center gap-5 px-6 py-5">
                       {/* 日期信息 */}
                       <div className="flex-1">
@@ -896,6 +928,18 @@ export default function HomePageV2() {
                 </ScrollReveal>
               );
             })}
+            {/* 展開更多場次 — 手機預設收起 */}
+            {!showAllSlots && evergreenSlots.length > 2 && (
+              <button
+                onClick={() => setShowAllSlots(true)}
+                className="w-full py-4 text-base font-medium text-neutral-300 hover:text-[#C9A962] transition-colors flex md:hidden items-center justify-center gap-2 bg-white/[0.03] rounded-xl border border-white/10 hover:border-[#C9A962]/30"
+              >
+                查看更多场次
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+            )}
           </div>
 
         </div>
@@ -924,27 +968,26 @@ export default function HomePageV2() {
       <section className="py-16 md:py-20 px-6 lg:px-12 bg-[#0a0a08] border-t border-[#C9A962]/30">
         <div className="max-w-2xl mx-auto text-center">
           <ScrollReveal>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-              你不需要很厉害才开始，但你需要现在就开始
+            <h2 className="text-xl md:text-3xl font-bold text-white mb-4" style={{ fontFamily: '"Noto Serif SC", serif' }}>
+              你不需要很厉害才开始<br className="md:hidden" />但你需要现在就开始
             </h2>
-            <p className="text-base text-neutral-400 mb-4 leading-relaxed max-w-lg mx-auto break-keep">
+            <p className="text-base text-neutral-400 mb-6 leading-relaxed max-w-lg mx-auto">
               AI 时代的投资机会不会等人。这场讲座限时免费公开，Mike 将完整分享他的投资框架，听完你就能开始行动。
-            </p>
-            <p className="text-sm font-semibold text-[#C9A962] mb-8">
-              报名即有机会获得 Mike 限额一对一持仓分析
             </p>
           </ScrollReveal>
 
           <ScrollReveal delay={150}>
-            <button
-              onClick={() => scrollToSchedule('footer')}
-              className="group relative inline-block overflow-hidden px-12 py-4 text-lg font-semibold tracking-wide rounded-xl border border-[#C9A962] bg-gradient-to-r from-[#1a1508]/80 to-[#0f1a2e]/80 text-[#E8D5A3] hover:border-[#E8D5A3] hover:shadow-[0_0_20px_rgba(201,169,98,0.5),0_0_60px_rgba(201,169,98,0.2)] hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer"
-            >
-              <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[ctaShimmer_1.5s_ease-in-out_infinite]" />
-              </span>
-              <span className="relative z-10">免费报名，观看讲座</span>
-            </button>
+            <div className="hidden md:block">
+              <button
+                onClick={() => scrollToSchedule('footer')}
+                className="group relative inline-block overflow-hidden px-12 py-4 text-lg font-semibold tracking-wide rounded-xl border border-[#C9A962] bg-gradient-to-r from-[#1a1508]/80 to-[#0f1a2e]/80 text-[#E8D5A3] hover:border-[#E8D5A3] hover:shadow-[0_0_20px_rgba(201,169,98,0.5),0_0_60px_rgba(201,169,98,0.2)] hover:scale-105 active:scale-95 transition-all duration-500 cursor-pointer"
+              >
+                <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[ctaShimmer_1.5s_ease-in-out_infinite]" />
+                </span>
+                <span className="relative z-10">免费报名，观看讲座</span>
+              </button>
+            </div>
           </ScrollReveal>
 
           <ScrollReveal delay={300}>
@@ -1002,12 +1045,30 @@ export default function HomePageV2() {
       {/* ================================================================
           Sticky Mobile CTA — 手机版底部常驻按钮
           ================================================================ */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#0a0a08]/95 backdrop-blur-sm border-t border-[#C9A962]/20 px-4 py-3 safe-area-pb">
+      <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#1a1815] border-t border-[#C9A962]/40 shadow-[0_-4px_20px_rgba(0,0,0,0.6)] px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] transition-all duration-300 ${showStickyBar ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
+        {/* Scarcity 指標 */}
+        {(() => {
+          const firstSlot = evergreenSlots[0];
+          const seats = firstSlot ? slotSeats[firstSlot.slotTime] : null;
+          return seats ? (
+            <p className="text-xs text-red-400 flex items-center justify-center gap-1.5 mb-2">
+              <span className="relative flex h-2 w-2 flex-shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+              </span>
+              仅剩 <span className="font-bold text-red-300">{seats}</span> 个免费名额
+            </p>
+          ) : null;
+        })()}
+        {/* CTA 按鈕 — 發光 + shimmer */}
         <button
           onClick={() => scrollToSchedule('sticky')}
-          className="w-full bg-[#B8953F] text-white py-3.5 text-base font-semibold rounded-lg hover:bg-[#A6842F] transition-colors"
+          className="w-full relative overflow-hidden bg-[#B8953F] text-white py-3.5 text-base font-bold rounded-lg shadow-[0_0_20px_rgba(184,149,63,0.5)] hover:shadow-[0_0_30px_rgba(184,149,63,0.7)] hover:bg-[#A6842F] transition-all"
         >
-          免费报名讲座
+          <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-[ctaShimmer_3s_ease-in-out_infinite]" />
+          </span>
+          <span className="relative z-10">免费报名 · 立即观看 →</span>
         </button>
       </div>
 

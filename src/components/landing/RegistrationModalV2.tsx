@@ -83,16 +83,16 @@ export default function RegistrationModalV2({
     : null;
 
   return (
-    <div className="fixed inset-0 z-[2147483646] flex items-center justify-center">
+    <div className="fixed inset-0 z-[2147483646] flex items-end md:items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={handleClose}
       />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md mx-4 bg-[#111318] border border-[#C9A962]/20 rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-300">
-        {/* Close button */}
+      {/* Modal — 手機: bottom sheet；桌機: 居中 */}
+      <div className="relative w-full md:max-w-md md:mx-4 bg-[#111318] border border-[#C9A962]/20 rounded-t-2xl md:rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom md:zoom-in-95 duration-300">
+        {/* 關閉按鈕 */}
         <button
           onClick={handleClose}
           className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-neutral-500 hover:text-neutral-300 transition-colors cursor-pointer"
@@ -103,14 +103,11 @@ export default function RegistrationModalV2({
           </svg>
         </button>
 
-        <div className="px-8 md:px-10 pt-8 pb-6">
+        <div className="px-6 md:px-10 pt-4 md:pt-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {/* Heading */}
-          <h2 className="text-xl md:text-2xl font-bold text-center text-white mb-2" style={{ fontFamily: '"Noto Serif SC", serif' }}>
+          <h2 className="text-xl md:text-2xl font-bold text-center text-white mb-5" style={{ fontFamily: '"Noto Serif SC", serif' }}>
             锁定你的免费席位
           </h2>
-          <p className="text-sm text-neutral-400 text-center mb-6">
-            完全免费，名额有限
-          </p>
 
           {/* 已选场次提示 */}
           {hideSlotSelector && selectedSlotDisplay && (
@@ -157,7 +154,6 @@ export default function RegistrationModalV2({
                 </svg>
               </span>
             </div>
-            <p className="text-xs text-neutral-500 -mt-2">仅用于发送直播提醒，不会收到任何销售邮件。</p>
 
             {/* Slot selector — 只在非预选模式显示 */}
             {!hideSlotSelector && evergreenSlots && evergreenSlots.length > 0 && (
@@ -223,7 +219,7 @@ export default function RegistrationModalV2({
 
           {/* Privacy notice */}
           <p className="text-xs text-neutral-500 text-center mt-4">
-            我们不会发送垃圾信息，也不会出售你的个人信息。
+            仅用于发送直播提醒，不会发送垃圾信息或出售个人信息。
           </p>
         </div>
       </div>

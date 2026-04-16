@@ -26,12 +26,12 @@ type GA4EventMap = {
   c_purchase_confirmation: { webinar_id: string; transaction_id: string; order_status: string }
 
   // Checkout page funnel events
-  c_checkout_page_view: { webinar_id: string; source: string; viewport: 'mobile' | 'desktop' }
+  c_checkout_page_view: { webinar_id: string; entry_source: string; viewport: 'mobile' | 'desktop' }
   c_checkout_scroll_depth: { webinar_id: string; percent: 25 | 50 | 75 | 100; time_to_reach_sec: number }
   c_plan_toggle: { webinar_id: string; product_id: string; action: 'add' | 'remove'; running_total: number; num_selected: number; time_since_view_sec: number }
   c_plan_swap: { webinar_id: string; removed_id: string; added_id: string }
   c_remove_from_cart: { webinar_id: string; product_id: string; running_total: number }
-  c_confirm_click: { webinar_id: string; source: 'desktop_summary' | 'mobile_bar'; product_ids: string[]; total: number; time_since_view_sec: number; num_toggles_before_confirm: number }
+  c_confirm_click: { webinar_id: string; button_location: 'desktop_summary' | 'mobile_bar'; product_ids: string[]; cart_value: number; time_since_view_sec: number; num_toggles_before_confirm: number }
   c_countdown_expired: { webinar_id: string }
   c_checkout_exit: { webinar_id: string; dwell_sec: number; max_scroll_pct: number; did_select: boolean; did_confirm: boolean }
 

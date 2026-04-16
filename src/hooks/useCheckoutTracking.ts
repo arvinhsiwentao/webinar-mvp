@@ -39,7 +39,7 @@ export function useCheckoutTracking({ webinarId, source }: UseCheckoutTrackingOp
     const viewport: 'mobile' | 'desktop' = window.matchMedia('(min-width: 1024px)').matches ? 'desktop' : 'mobile';
     trackGA4('c_checkout_page_view', {
       webinar_id: webinarId,
-      source: source || 'direct',
+      entry_source: source || 'direct',
       viewport,
     });
   }, [webinarId, source]);

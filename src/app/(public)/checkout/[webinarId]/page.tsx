@@ -165,9 +165,9 @@ export default function CheckoutPage() {
 
     trackGA4('c_confirm_click', {
       webinar_id: webinarId,
-      source: confirmSource,
+      button_location: confirmSource,
       product_ids: productIds,
-      total,
+      cart_value: total,
       time_since_view_sec: tracking.timeSinceView(),
       num_toggles_before_confirm: numTogglesRef.current,
     });
