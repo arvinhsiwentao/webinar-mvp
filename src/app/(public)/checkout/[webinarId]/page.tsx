@@ -91,6 +91,8 @@ export default function CheckoutPage() {
 
   // Stripe confirmation state — CRITICAL: prevents multiple Embedded Checkout objects
   const [checkoutConfirmed, setCheckoutConfirmed] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [mobileExpandedPlan, setMobileExpandedPlan] = useState<string | null>(null);
   const [confirmedProductIds, setConfirmedProductIds] = useState<ProductId[]>([]);
 
   // Upsell hint: when total of non-bundle items approaches bundle price
@@ -260,6 +262,18 @@ export default function CheckoutPage() {
   }, [webinarId, email, name, source, confirmedProductIds, confirmedBundleSelected, storageKey]);
 
   const checkoutRef = useRef<HTMLDivElement>(null);
+  const [checkoutVisible, setCheckoutVisible] = useState(false);
+
+  // Hide mobile sticky bar when checkout/Stripe section is visible
+  useEffect(() => {
+    if (!checkoutRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setCheckoutVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(checkoutRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   /* --- Already purchased --- */
   if (alreadyPurchased) {
@@ -368,117 +382,108 @@ export default function CheckoutPage() {
 
             {/* ==================== Section 1: Headline ==================== */}
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900 mb-2">
+              <h1 className="text-lg lg:text-2xl font-bold text-neutral-900 mb-1">
                 每天 10 分钟，让系统告诉你今天该不该动
               </h1>
-              <p className="text-neutral-500">
+              <p className="text-sm text-neutral-500">
                 不用盯盘、不靠感觉 —— 灯号亮了就做，灯号没亮就休息，Mike 用万美金学费换来的 SOP，你直接照做
               </p>
             </div>
 
-            {/* ==================== Section 2: Course content details (pure education, no pricing) ==================== */}
-            <div className="bg-white rounded-lg border border-[#E8E5DE] overflow-hidden">
-              <div className="p-5 lg:p-6">
-                <h2 className="text-lg font-bold text-neutral-900">课程内容介绍</h2>
-              </div>
-              <div className="px-5 lg:px-6 pb-5 lg:pb-6 space-y-8">
-
-                {/* Item 1: APP */}
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <Image
-                      src="/images/app-icon.png"
-                      alt="APP icon"
-                      width={40}
-                      height={40}
-                      className="rounded-lg"
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-neutral-900">MIKE是麦克 APP</h3>
-                        <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">APP 工具</span>
-                      </div>
-                    </div>
-                  </div>
-                  <ul className="space-y-2.5 ml-[52px]">
-                    <FeatureItem text="价值灯号 — 早上打开 APP 看一眼灯号颜色，绿灯加仓、黄灯观望、红灯不动，5 分钟决策，不用看财报" />
-                    <FeatureItem text="Mike 每日观点 & 关注清单 — 不用自己选股，Mike 即时更新他在看什么，你跟着名单研究就好" />
-                    <FeatureItem text="双周语音直播 — 通勤路上听完一场直播，就知道这周市场要注意什么、要不要调整，不需要自己解读新闻" />
-                    <FeatureItem text="学员社群 + 付费文章 — 市场暴跌时最怕的不是亏损，是不知道现在该动还是不动。社群里 Mike 和学员都在，五分钟之内你就有答案" />
-                  </ul>
-                </div>
-
-                <div className="border-t border-[#E8E5DE]" />
-
-                {/* Item 2: Options course */}
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-[rgba(184,149,63,0.08)] flex items-center justify-center shrink-0">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B8953F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-neutral-900">期权策略课程</h3>
-                        <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">线上课程</span>
-                        <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">无期限 · 无限次数观看</span>
-                      </div>
-                    </div>
-                  </div>
-                  <ul className="space-y-2.5 ml-[52px]">
-                    <FeatureItem text="不用猜涨跌，照 SOP 做就行 — 市场跌就挂 Sell Put 收保费、手上有 ETF 就 Sell Call 收租，每月多一笔现金流，不需要额外盯盘" />
-                    <FeatureItem text="风险控制 SOP — 保证金怎么算、什么该做什么不该做都有 SOP，Mike 踩过万美金的坑帮你铺平，你跟着步骤走就行" />
-                  </ul>
-                </div>
-
-                <div className="border-t border-[#E8E5DE]" />
-
-                {/* Item 3: ETF course */}
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-[rgba(184,149,63,0.08)] flex items-center justify-center shrink-0">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B8953F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-neutral-900">ETF 实战课程</h3>
-                        <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">线上课程</span>
-                        <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">无期限 · 无限次数观看</span>
-                      </div>
-                    </div>
-                  </div>
-                  <ul className="space-y-2.5 ml-[52px]">
-                    <FeatureItem text="四类 ETF 配置 — 像装购物车一样，成长型、防御型、收益型各放几支，配好就不用每天调" />
-                    <FeatureItem text="从退休目标倒推配比 — 三个数字：几岁退休、需要多少钱、现在有多少本金 — 算出来之后，你就知道今天该偏攻还是偏守，不用靠感觉" />
-                    <FeatureItem text="长短账户 + 季度再平衡 — 每季花 10 分钟调一次比例，剩下的时间市场自己跑 — 用纪律替代情绪，不需要天天看账户" />
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* ==================== Section 3: Product selector ==================== */}
+            {/* ==================== Section 2: Product selector (moved above course details — users already watched the live) ==================== */}
             <div className="space-y-4">
               <h2 className="text-lg font-bold text-neutral-900">选择你的方案</h2>
 
-              {/* Individual product cards — ordered: OPTIONS → ETF+OPTIONS → APP_QUARTERLY */}
-              {individualProducts.map(product => {
-                const pid = product.id as ProductId;
-                return (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    selected={selectedIds.includes(pid)}
-                    disabled={false}
-                    disabledReason=""
-                    onToggle={() => toggleProduct(pid)}
-                    bonusExpired={bonusExpired}
-                    testimonial={testimonialByProduct[pid]}
-                  />
-                );
-              })}
+              {/* Desktop: full product cards */}
+              <div className="hidden md:block space-y-4">
+                {individualProducts.map(product => {
+                  const pid = product.id as ProductId;
+                  return (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      selected={selectedIds.includes(pid)}
+                      disabled={false}
+                      disabledReason=""
+                      onToggle={() => toggleProduct(pid)}
+                      bonusExpired={bonusExpired}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Mobile: accordion compact view */}
+              <div className="md:hidden space-y-2">
+                {individualProducts.map(product => {
+                  const pid = product.id as ProductId;
+                  const isSelected = selectedIds.includes(pid);
+                  const isExpanded = selectedIds.includes(pid);
+                  const discount = product.originalPrice
+                    ? Math.round((1 - product.price / product.originalPrice) * 100)
+                    : null;
+                  return (
+                    <div key={product.id} className={`bg-white rounded-lg overflow-hidden transition-all ${isSelected ? 'border-2 border-[#B8953F] shadow-md' : 'border border-[#E8E5DE]'}`}>
+                      {/* Collapsed row — always visible */}
+                      <div
+                        className="flex items-center gap-3 px-4 py-3.5 cursor-pointer"
+                        onClick={() => {
+                          toggleProduct(pid);
+                            }}
+                      >
+                        {/* Checkbox */}
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                          isSelected ? 'border-[#B8953F] bg-[#B8953F]' : 'border-neutral-300'
+                        }`}>
+                          {isSelected && (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          )}
+                        </div>
+
+                        {/* Name + price */}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold text-neutral-900 text-sm">{product.name}</div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="text-right">
+                            <div className="font-bold text-[#B8953F] text-base">${product.price} <span className="text-xs">USD</span></div>
+                            {discount && (
+                              <div className="flex items-center justify-end gap-1 mt-0.5">
+                                <span className="text-[10px] text-neutral-400 line-through">${product.originalPrice}</span>
+                                <span className="text-[10px] text-white bg-red-500 px-1 py-0.5 rounded font-bold">{discount}%OFF</span>
+                              </div>
+                            )}
+                          </div>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-neutral-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                            <polyline points="6 9 12 15 18 9" />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Expanded details */}
+                      {isExpanded && (
+                        <div className="px-4 pb-4 pt-1 border-t border-[#E8E5DE]">
+                          <p className="text-sm text-neutral-500 mb-2">{product.description}</p>
+                          <ul className="space-y-1.5 mb-2">
+                            {product.includes.map((item, i) => (
+                              <li key={i} className="flex items-start gap-1.5 text-sm leading-relaxed text-neutral-600">
+                                <span className="text-[#B8953F] shrink-0 mt-0.5">&#10003;</span>
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          {product.bonus && (
+                            <p className="text-sm text-red-500 font-bold">
+                              🎁 直播限定再送 $129 USD APP 权限（1 个月 · 到期不扣款 · 安心体验）
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
 
               {/* Separator — leads into bundle */}
               <div className="py-2">
@@ -489,76 +494,311 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Countdown timer — tied to bundle bonus, shown above Bundle section */}
-              {countdownDisplay && (
-                <div className="flex items-center justify-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-                  </svg>
-                  <span className="text-sm text-red-600 font-medium">直播限定加赠剩余</span>
-                  <span className="font-mono font-bold text-red-600 text-lg">{countdownDisplay}</span>
-                </div>
-              )}
-
-              {/* 1-on-1 bonus card — teaser above Bundle */}
-              <div className={`rounded-lg p-5 relative ${bonusExpired ? 'bg-neutral-50 border border-neutral-200' : 'bg-[#B8953F]/5 border border-[#B8953F]/20'}`}>
-                <div className={`absolute -top-3 left-4 text-white text-xs font-bold px-3 py-1 rounded ${bonusExpired ? 'bg-neutral-400' : 'bg-[#B8953F]'}`}>
-                  {bonusExpired ? '此福利已过期' : '直播限定加赠'}
-                </div>
-                <div className={`flex flex-wrap items-center gap-2 mb-3 mt-1 ${bonusExpired ? 'opacity-50' : ''}`}>
-                  <div className={`w-6 h-6 rounded text-white text-xs font-bold flex items-center justify-center shrink-0 ${bonusExpired ? 'bg-neutral-400' : 'bg-[#B8953F]'}`}>+</div>
-                  <h3 className={`font-bold ${bonusExpired ? 'text-neutral-400 line-through' : 'text-neutral-900'}`}>Mike 一对一持仓分析</h3>
-                  <span className={`text-xs px-2 py-0.5 rounded font-medium ${bonusExpired ? 'text-neutral-400 bg-neutral-200' : 'text-white bg-[#B8953F]'}`}>
-                    {bonusExpired ? '已过期' : '仅限组合包'}
-                  </span>
-                </div>
-                {bonusExpired ? (
-                  <p className="text-sm text-neutral-400 ml-8">
-                    直播限定 2 小时内的福利已过期。课程套餐内容不受影响，仍可正常购买。
-                  </p>
-                ) : (
-                  <p className="text-sm text-neutral-600 ml-8">
-                    这项服务通常只对亲赴现场、参加 <span className="text-[#B8953F] font-bold">$6,000+ USD</span> 海外财富之旅的学员开放。<span className="text-[#B8953F] font-medium">现在购买组合包，无需出发</span> — Mike 直接检视你的持仓，告诉你哪里配得好、哪里该调整。直播中 A 同学就这样把 15 支 ETF 精简到 6 支，思路立刻清晰。
-                  </p>
-                )}
-              </div>
-
-              {/* Bundle card — last, to avoid price anchor shock */}
+              {/* Bundle card — Desktop: full card */}
               {bundleProduct && (
-                <ProductCard
-                  product={bundleProduct}
-                  selected={selectedIds.includes(PRODUCT_IDS.BUNDLE)}
-                  disabled={false}
-                  disabledReason=""
-                  onToggle={() => toggleProduct(PRODUCT_IDS.BUNDLE)}
-                  bonusExpired={bonusExpired}
-                  testimonial={testimonialByProduct[PRODUCT_IDS.BUNDLE]}
-                />
+                <div
+                  className={`hidden md:block bg-white rounded-lg overflow-hidden transition-all cursor-pointer ${
+                    selectedIds.includes(PRODUCT_IDS.BUNDLE)
+                      ? 'border-2 border-[#B8953F] shadow-md'
+                      : 'border-2 border-[#B8953F]/30'
+                  }`}
+                  onClick={() => toggleProduct(PRODUCT_IDS.BUNDLE)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleProduct(PRODUCT_IDS.BUNDLE); } }}
+                  aria-pressed={selectedIds.includes(PRODUCT_IDS.BUNDLE)}
+                >
+                  {/* Top: countdown or expired */}
+                  {countdownDisplay ? (
+                    <div className="flex items-center justify-center gap-2 bg-red-50 px-4 py-2.5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      <span className="text-sm text-red-600 font-medium">直播限定加赠剩余</span>
+                      <span className="font-mono font-bold text-red-600 text-lg">{countdownDisplay}</span>
+                    </div>
+                  ) : bonusExpired ? (
+                    <div className="flex items-center justify-center bg-neutral-100 px-4 py-2">
+                      <span className="text-xs text-neutral-400">直播限定加赠已过期 · 课程内容不受影响</span>
+                    </div>
+                  ) : null}
+
+                  {/* Product info */}
+                  <div className="px-4 py-4 md:p-5">
+                    <div className="flex items-start gap-2.5 md:gap-3">
+                      {/* Checkbox */}
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${
+                        selectedIds.includes(PRODUCT_IDS.BUNDLE) ? 'border-[#B8953F] bg-[#B8953F]' : 'border-neutral-300'
+                      }`}>
+                        {selectedIds.includes(PRODUCT_IDS.BUNDLE) && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <h3 className="font-bold text-neutral-900">{bundleProduct.name}</h3>
+                          <span className="text-xs text-white bg-[#B8953F] px-2 py-0.5 rounded font-bold">最推荐</span>
+                        </div>
+                        <p className="text-sm md:text-base text-neutral-500 mb-2">{bundleProduct.description}</p>
+
+                        {/* Includes with original prices */}
+                        <ul className="space-y-2 md:space-y-1.5">
+                          {[
+                            { name: 'ETF 实战课程（无期限 · 无限次数观看）', origPrice: '$384 USD' },
+                            { name: '期权策略课程（无期限 · 无限次数观看）', origPrice: '$312 USD' },
+                            { name: 'APP 一年完整权限', origPrice: '$1,000 USD/年' },
+                          ].map((item, i) => (
+                            <li key={i} className="flex items-start justify-between gap-2 text-sm leading-relaxed">
+                              <div className="flex items-start gap-1.5 text-neutral-600">
+                                <span className="text-[#B8953F] shrink-0">&#10003;</span>
+                                <span>{item.name}</span>
+                              </div>
+                              <span className="text-neutral-400 shrink-0 text-xs">原价 {item.origPrice}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        {/* Bonus: 一对一持仓分析 */}
+                        {!bonusExpired && (
+                          <div className="mt-3 bg-[#B8953F]/5 border border-[#B8953F]/20 rounded-md px-3 py-3">
+                            <p className="text-sm font-bold text-[#B8953F] mb-1">🎁 购买组合包额外获得：Mike 一对一持仓分析</p>
+                            <p className="text-xs text-neutral-600 leading-relaxed mb-2">
+                              通常只对参加 <span className="font-bold text-[#B8953F]">$6,000+ USD</span> 海外财富之旅的学员开放。A 同学 15 支 ETF 精简到 6 支，思路立刻清晰。
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Price */}
+                        <div className="flex flex-wrap items-baseline justify-end gap-2 mt-3">
+                          <span className="text-2xl font-bold text-[#B8953F]">${bundleProduct.price} <span className="text-base font-semibold">USD</span></span>
+                          {bundleProduct.originalPrice && (
+                            <>
+                              <span className="text-sm text-neutral-400 line-through">${bundleProduct.originalPrice}+ USD</span>
+                              <span className="text-xs text-white bg-red-500 px-1.5 py-0.5 rounded font-bold">
+                                {Math.round((1 - bundleProduct.price / bundleProduct.originalPrice) * 100)}% OFF
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Bundle — Mobile: accordion row */}
+              {bundleProduct && (
+                <div className={`md:hidden bg-white rounded-lg overflow-hidden transition-all ${
+                  selectedIds.includes(PRODUCT_IDS.BUNDLE) ? 'border-2 border-[#B8953F] shadow-md' : 'border-2 border-[#B8953F]/30'
+                }`}>
+                  {/* Countdown strip */}
+                  {countdownDisplay && (
+                    <div className="flex items-center justify-center gap-1.5 bg-red-50 px-3 py-2">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      <span className="text-xs text-red-600 font-medium">加赠剩余</span>
+                      <span className="font-mono font-bold text-red-600 text-sm">{countdownDisplay}</span>
+                    </div>
+                  )}
+                  {/* Collapsed row */}
+                  <div
+                    className="flex items-center gap-3 px-4 py-3.5 cursor-pointer"
+                    onClick={() => toggleProduct(PRODUCT_IDS.BUNDLE)}
+                  >
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      selectedIds.includes(PRODUCT_IDS.BUNDLE) ? 'border-[#B8953F] bg-[#B8953F]' : 'border-neutral-300'
+                    }`}>
+                      {selectedIds.includes(PRODUCT_IDS.BUNDLE) && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-neutral-900 text-sm">{bundleProduct.name}</span>
+                        <span className="text-[10px] text-white bg-[#B8953F] px-1.5 py-0.5 rounded font-bold">最推荐</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="text-right">
+                        <div className="font-bold text-[#B8953F] text-base">${bundleProduct.price} <span className="text-xs">USD</span></div>
+                        {bundleProduct.originalPrice && (
+                          <div className="flex items-center justify-end gap-1 mt-0.5">
+                            <span className="text-[10px] text-neutral-400 line-through">${bundleProduct.originalPrice}</span>
+                            <span className="text-[10px] text-white bg-red-500 px-1 py-0.5 rounded font-bold">{Math.round((1 - bundleProduct.price / bundleProduct.originalPrice) * 100)}%OFF</span>
+                          </div>
+                        )}
+                      </div>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-neutral-400 transition-transform ${selectedIds.includes(PRODUCT_IDS.BUNDLE) ? 'rotate-180' : ''}`}>
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </div>
+                  </div>
+                  {/* Expanded */}
+                  {selectedIds.includes(PRODUCT_IDS.BUNDLE) && (
+                    <div className="px-4 pb-4 pt-1 border-t border-[#E8E5DE]">
+                      <p className="text-sm text-neutral-500 mb-2">{bundleProduct.description}</p>
+                      <ul className="space-y-1.5 mb-3">
+                        {[
+                          { name: 'ETF 实战课程（无期限 · 无限次数观看）', origPrice: '$384' },
+                          { name: '期权策略课程（无期限 · 无限次数观看）', origPrice: '$312' },
+                          { name: 'APP 一年完整权限', origPrice: '$1,000/年' },
+                        ].map((item, i) => (
+                          <li key={i} className="flex items-start justify-between gap-2 text-sm">
+                            <div className="flex items-start gap-1.5 text-neutral-600">
+                              <span className="text-[#B8953F] shrink-0">&#10003;</span>
+                              <span>{item.name}</span>
+                            </div>
+                            <span className="text-xs text-neutral-400 shrink-0">原价 {item.origPrice}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      {!bonusExpired && (
+                        <div className="bg-[#B8953F]/5 border border-[#B8953F]/20 rounded-md px-3 py-2.5">
+                          <p className="text-sm font-bold text-[#B8953F] mb-1">🎁 额外获得：Mike 一对一持仓分析</p>
+                          <p className="text-xs text-neutral-600">通常只对参加 $6,000+ USD 海外财富之旅的学员开放</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
-            {/* ==================== Section 6: How it works ==================== */}
-            <div className="bg-white rounded-lg border border-[#E8E5DE] p-6 lg:p-8">
-              <h2 className="text-lg font-bold text-neutral-900 mb-5">购买后怎么开始？</h2>
-              <div className="space-y-0">
-                <StepRow step="1" title="完成付款" desc="支持信用卡、Apple Pay、Google Pay" />
-                <StepRow step="2" title="取得启用序号" desc="付款成功后页面自动显示，同时发送至你的邮箱" />
-                <StepRow step="3" title="前往商品官网" desc="在官网输入启用序号，登入或注册理财宝帐号" />
-                <StepRow step="4" title="下载 APP" desc="App Store / Google Play 搜索「MIKE是麦克」并登入" />
-                <StepRow step="5" title="开始学习" desc="APP 内观看课程、加入社群、使用全部工具" isLast />
-              </div>
+            {/* ==================== Collapsible sections ==================== */}
+
+            {/* 课程内容介绍 */}
+            <div className="bg-white rounded-lg border border-[#E8E5DE] overflow-hidden">
+              <button
+                onClick={() => setExpandedSections(prev => {
+                  const next = new Set(prev);
+                  next.has('course') ? next.delete('course') : next.add('course');
+                  return next;
+                })}
+                className="w-full flex items-center justify-between p-5 lg:p-6 cursor-pointer hover:bg-neutral-50 transition-colors"
+              >
+                <h2 className="text-lg font-bold text-neutral-900">课程内容介绍</h2>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-neutral-400 transition-transform ${expandedSections.has('course') ? 'rotate-180' : ''}`}>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+              {expandedSections.has('course') && (
+                <div className="px-5 lg:px-6 pb-5 lg:pb-6 space-y-8 border-t border-[#E8E5DE]">
+                  <div>
+                    <div className="flex items-center gap-3 mb-3 mt-5">
+                      <Image src="/images/app-icon.png" alt="APP icon" width={40} height={40} className="rounded-lg" />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-neutral-900">MIKE是麦克 APP</h3>
+                          <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">APP 工具</span>
+                        </div>
+                      </div>
+                    </div>
+                    <ul className="space-y-2.5 ml-[52px]">
+                      <FeatureItem text="价值灯号 — 早上打开 APP 看一眼灯号颜色，绿灯加仓、黄灯观望、红灯不动，5 分钟决策，不用看财报" />
+                      <FeatureItem text="Mike 每日观点 & 关注清单 — 不用自己选股，Mike 即时更新他在看什么，你跟着名单研究就好" />
+                      <FeatureItem text="双周语音直播 — 通勤路上听完一场直播，就知道这周市场要注意什么、要不要调整，不需要自己解读新闻" />
+                      <FeatureItem text="学员社群 + 付费文章 — 市场暴跌时最怕的不是亏损，是不知道现在该动还是不动。社群里 Mike 和学员都在，五分钟之内你就有答案" />
+                    </ul>
+                  </div>
+                  <div className="border-t border-[#E8E5DE]" />
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-[rgba(184,149,63,0.08)] flex items-center justify-center shrink-0">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B8953F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /></svg>
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-bold text-neutral-900">期权策略课程</h3>
+                          <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">线上课程</span>
+                          <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">无期限 · 无限次数观看</span>
+                        </div>
+                      </div>
+                    </div>
+                    <ul className="space-y-2.5 ml-[52px]">
+                      <FeatureItem text="不用猜涨跌，照 SOP 做就行 — 市场跌就挂 Sell Put 收保费、手上有 ETF 就 Sell Call 收租，每月多一笔现金流，不需要额外盯盘" />
+                      <FeatureItem text="风险控制 SOP — 保证金怎么算、什么该做什么不该做都有 SOP，Mike 踩过万美金的坑帮你铺平，你跟着步骤走就行" />
+                    </ul>
+                  </div>
+                  <div className="border-t border-[#E8E5DE]" />
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-[rgba(184,149,63,0.08)] flex items-center justify-center shrink-0">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B8953F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /></svg>
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-bold text-neutral-900">ETF 实战课程</h3>
+                          <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">线上课程</span>
+                          <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">无期限 · 无限次数观看</span>
+                        </div>
+                      </div>
+                    </div>
+                    <ul className="space-y-2.5 ml-[52px]">
+                      <FeatureItem text="四类 ETF 配置 — 像装购物车一样，成长型、防御型、收益型各放几支，配好就不用每天调" />
+                      <FeatureItem text="从退休目标倒推配比 — 三个数字：几岁退休、需要多少钱、现在有多少本金 — 算出来之后，你就知道今天该偏攻还是偏守，不用靠感觉" />
+                      <FeatureItem text="长短账户 + 季度再平衡 — 每季花 10 分钟调一次比例，剩下的时间市场自己跑 — 用纪律替代情绪，不需要天天看账户" />
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* ==================== Section 7: Guarantee ==================== */}
-            <div className="bg-white rounded-lg border border-[#E8E5DE] p-6 lg:p-8">
-              <div className="flex gap-4 items-start">
-                <div className="w-12 h-12 rounded-full bg-[rgba(184,149,63,0.08)] flex items-center justify-center shrink-0">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B8953F" strokeWidth="2">
+            {/* 购买后怎么开始 */}
+            <div className="bg-white rounded-lg border border-[#E8E5DE] overflow-hidden">
+              <button
+                onClick={() => setExpandedSections(prev => {
+                  const next = new Set(prev);
+                  next.has('howto') ? next.delete('howto') : next.add('howto');
+                  return next;
+                })}
+                className="w-full flex items-center justify-between p-5 lg:p-6 cursor-pointer hover:bg-neutral-50 transition-colors"
+              >
+                <h2 className="text-lg font-bold text-neutral-900">购买后怎么开始？</h2>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-neutral-400 transition-transform ${expandedSections.has('howto') ? 'rotate-180' : ''}`}>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+              {expandedSections.has('howto') && (
+                <div className="px-5 lg:px-6 pb-5 lg:pb-6 border-t border-[#E8E5DE] pt-5">
+                  <div className="space-y-0">
+                    <StepRow step="1" title="完成付款" desc="支持信用卡、Apple Pay、Google Pay" />
+                    <StepRow step="2" title="取得启用序号" desc="付款成功后页面自动显示，同时发送至你的邮箱" />
+                    <StepRow step="3" title="前往商品官网" desc="在官网输入启用序号，登入或注册理财宝帐号" />
+                    <StepRow step="4" title="下载 APP" desc="App Store / Google Play 搜索「MIKE是麦克」并登入" />
+                    <StepRow step="5" title="开始学习" desc="APP 内观看课程、加入社群、使用全部工具" isLast />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 30 天退款保证 */}
+            <div className="bg-white rounded-lg border border-[#E8E5DE] overflow-hidden">
+              <button
+                onClick={() => setExpandedSections(prev => {
+                  const next = new Set(prev);
+                  next.has('guarantee') ? next.delete('guarantee') : next.add('guarantee');
+                  return next;
+                })}
+                className="w-full flex items-center justify-between p-5 lg:p-6 cursor-pointer hover:bg-neutral-50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B8953F" strokeWidth="2">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
+                  <h2 className="text-lg font-bold text-neutral-900">30 天无理由退款保证</h2>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-neutral-900 mb-1">30 天无理由退款保证</h3>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-neutral-400 transition-transform ${expandedSections.has('guarantee') ? 'rotate-180' : ''}`}>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+              {expandedSections.has('guarantee') && (
+                <div className="px-5 lg:px-6 pb-5 lg:pb-6 border-t border-[#E8E5DE] pt-4">
                   <p className="text-sm text-neutral-500 leading-relaxed">
                     如果你觉得课程不适合你，30 天内联系客服即可全额退款，不需要任何理由。
                     我们对课程质量有绝对信心，你可以零风险体验。
@@ -567,7 +807,7 @@ export default function CheckoutPage() {
                     退款联系：<a href="mailto:cmoney_overseas@cmoney.com.tw" className="text-[#B8953F] underline underline-offset-2">cmoney_overseas@cmoney.com.tw</a>
                   </p>
                 </div>
-              </div>
+              )}
             </div>
 
           </div>
@@ -610,39 +850,52 @@ export default function CheckoutPage() {
         </div>
       </main>
 
-      {/* Mobile sticky checkout bar — visible when selection made but not yet confirmed */}
-      {selectedIds.length > 0 && !checkoutConfirmed && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E8E5DE] shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-          {/* Trust strip */}
-          <div className="flex items-center justify-center gap-1.5 bg-green-50 border-b border-green-200 px-3 py-1.5 text-xs text-green-700">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <polyline points="9 12 11 14 15 10" />
-            </svg>
-            <span className="font-semibold">30 天无理由退款保证</span>
-            <span className="text-green-600">· 零风险</span>
-          </div>
-          <div className="flex items-center gap-3 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-            <div className="flex-1 min-w-0">
-              <div className="text-xs text-neutral-500">已选 {selectedIds.length} 项</div>
-              <div className="text-lg font-bold text-[#B8953F] leading-tight">
-                ${total} <span className="text-xs font-medium">USD</span>
-              </div>
+      {/* Mobile sticky checkout bar — hidden when checkout section is visible */}
+      {selectedIds.length > 0 && !checkoutConfirmed && !checkoutVisible && (() => {
+        const originalTotal = selectedProducts.reduce((sum, p) => sum + (p.originalPrice || p.price), 0);
+        const hasDiscount = originalTotal > total;
+        const discountPct = hasDiscount ? Math.round((1 - total / originalTotal) * 100) : 0;
+        return (
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#F5F0E8] border-t border-[#B8953F]/40 shadow-[0_-4px_16px_rgba(0,0,0,0.1)]">
+            {/* Trust strip */}
+            <div className="flex items-center justify-center gap-1.5 bg-green-50 border-b border-green-200 px-3 py-1.5 text-xs text-green-700">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <polyline points="9 12 11 14 15 10" />
+              </svg>
+              <span className="font-semibold">30 天无理由退款保证</span>
+              <span className="text-green-600">· 零风险</span>
             </div>
-            <button
-              onClick={() => {
-                handleConfirmCheckout('mobile_bar');
-                requestAnimationFrame(() => {
-                  checkoutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-              }}
-              className="bg-[#B8953F] hover:bg-[#A6842F] text-white font-bold px-6 py-3 rounded-lg transition-colors shadow-md whitespace-nowrap"
-            >
-              确认并结账
-            </button>
+            <div className="flex items-center gap-3 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-neutral-500">已选 {selectedIds.length} 项</div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-lg font-bold text-[#B8953F] leading-tight">
+                    ${total} <span className="text-xs font-medium">USD</span>
+                  </span>
+                  {hasDiscount && (
+                    <>
+                      <span className="text-xs text-neutral-400 line-through">${originalTotal}</span>
+                      <span className="text-[10px] text-white bg-red-500 px-1 py-0.5 rounded font-bold">{discountPct}%OFF</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  handleConfirmCheckout('mobile_bar');
+                  requestAnimationFrame(() => {
+                    checkoutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  });
+                }}
+                className="bg-[#B8953F] hover:bg-[#A6842F] text-white font-bold px-6 py-3 rounded-lg transition-colors shadow-md whitespace-nowrap"
+              >
+                确认并结账
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <FloatingFAQChat
         webinarId={webinarId}
@@ -701,8 +954,8 @@ function ProductCard({
       aria-pressed={selected}
       aria-disabled={disabled}
     >
-      <div className="p-5">
-        <div className="flex items-start gap-3">
+      <div className="px-4 py-4 md:p-5">
+        <div className="flex items-start gap-2.5 md:gap-3">
           {/* Checkbox / radio indicator */}
           <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${
             selected ? 'border-[#B8953F] bg-[#B8953F]' : 'border-neutral-300'
@@ -716,27 +969,28 @@ function ProductCard({
 
           <div className="flex-1 min-w-0">
             {/* Title row */}
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h3 className="font-bold text-neutral-900">{product.name}</h3>
+            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-1">
+              <h3 className="font-bold text-neutral-900 text-base">{product.name}</h3>
               {isBundle && (
                 <span className="text-xs text-white bg-[#B8953F] px-2 py-0.5 rounded font-bold">最推荐</span>
               )}
-              {product.bonus && !isBundle && (
-                <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">
-                  {product.bonus}
-                </span>
+              {(product.id === 'options' || product.id === 'etf-options') && (
+                <>
+                  <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">线上课程</span>
+                  <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">无期限 · 无限次数观看</span>
+                </>
               )}
             </div>
 
             {/* Description */}
-            <p className="text-sm text-neutral-500 mb-2">{product.description}</p>
+            <p className="text-sm md:text-base text-neutral-500 mb-2">{product.description}</p>
 
             {/* Includes list — bundle shows original prices inline */}
             {isBundle ? (
               <ul className="space-y-1.5">
                 {[
-                  { name: 'ETF 实战课程（无期限回看）', origPrice: '$384 USD' },
-                  { name: '期权策略课程（无期限回看）', origPrice: '$312 USD' },
+                  { name: 'ETF 实战课程（无期限 · 无限次数观看）', origPrice: '$384 USD' },
+                  { name: '期权策略课程（无期限 · 无限次数观看）', origPrice: '$312 USD' },
                   { name: 'APP 一年完整权限', origPrice: '$1,000 USD/年' },
                 ].map((item, i) => (
                   <li key={i} className="flex items-start justify-between gap-2 text-xs">
@@ -749,10 +1003,10 @@ function ProductCard({
                 ))}
               </ul>
             ) : (
-              <ul className="space-y-1">
+              <ul className="hidden md:block space-y-1.5">
                 {product.includes.map((item, i) => (
-                  <li key={i} className="flex items-start gap-1.5 text-xs text-neutral-600">
-                    <span className="text-[#B8953F] shrink-0">&#10003;</span>
+                  <li key={i} className="flex items-start gap-1.5 text-sm leading-relaxed text-neutral-600">
+                    <span className="text-[#B8953F] shrink-0 mt-0.5">&#10003;</span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -769,16 +1023,23 @@ function ProductCard({
               </div>
             )}
 
-            {/* Price — bottom right */}
-            <div className={`flex flex-wrap items-baseline justify-end gap-2 ${isBundle ? 'mt-3' : 'mt-1'}`}>
-              <span className="text-2xl font-bold text-[#B8953F]">${product.price} <span className="text-base font-semibold">USD</span></span>
-              {product.originalPrice && (
-                <>
-                  <span className="text-sm text-neutral-400 line-through">${product.originalPrice}+ USD</span>
-                  <span className="text-xs text-white bg-red-500 px-1.5 py-0.5 rounded font-bold">
-                    {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
-                  </span>
-                </>
+            {/* Price + discount + bonus */}
+            <div className={`${isBundle || product.originalPrice ? 'mt-3' : 'mt-1'}`}>
+              <div className="flex flex-wrap items-baseline justify-end gap-2">
+                <span className="text-2xl font-bold text-[#B8953F]">${product.price} <span className="text-base font-semibold">USD</span></span>
+                {product.originalPrice && (
+                  <>
+                    <span className="text-sm text-neutral-400 line-through">${product.originalPrice}+ USD</span>
+                    <span className="text-xs text-white bg-red-500 px-1.5 py-0.5 rounded font-bold">
+                      {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
+                    </span>
+                  </>
+                )}
+              </div>
+              {product.bonus && !isBundle && (
+                <p className="text-sm text-red-500 font-bold text-right mt-1.5">
+                  🎁 直播限定再送 $129 USD APP 权限（1 个月 · 到期不扣款 · 安心体验）
+                </p>
               )}
             </div>
 
@@ -936,6 +1197,14 @@ function CheckoutSection({
                   </div>
                   <div className="text-right shrink-0">
                     <div className="font-bold text-neutral-900">${p.price} <span className="text-xs font-medium text-neutral-500">USD</span></div>
+                    {p.originalPrice && (
+                      <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                        <span className="text-xs text-neutral-400 line-through">${p.originalPrice}</span>
+                        <span className="text-[10px] text-white bg-red-500 px-1 py-0.5 rounded font-bold">
+                          {Math.round((1 - p.price / p.originalPrice) * 100)}% OFF
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </li>
               ))}

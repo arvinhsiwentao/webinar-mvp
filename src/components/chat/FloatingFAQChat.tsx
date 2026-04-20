@@ -144,10 +144,10 @@ export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, c
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="text-neutral-400 hover:text-neutral-600 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-neutral-200 hover:bg-neutral-300 text-neutral-600 transition-colors"
               aria-label="关闭"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
@@ -234,13 +234,24 @@ export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, c
 
       {/* Hint tooltip */}
       {showHint && !open && (
-        <button
-          onClick={() => { setShowHint(false); setHintDismissed(true); setOpen(true); trackGA4('c_chatbot_open', { page_source: pageSource }); }}
-          className="bg-white border border-[#E8E5DE] rounded-lg shadow-lg px-4 py-2.5 text-sm text-neutral-800 animate-in fade-in slide-in-from-bottom-2 duration-300 cursor-pointer hover:bg-[#FAFAF7] transition-colors flex items-center gap-2"
-        >
-          <span>有课程问题？点我咨询</span>
-          <span className="text-[#B8953F]">&#10132;</span>
-        </button>
+        <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <button
+            onClick={() => { setShowHint(false); setHintDismissed(true); setOpen(true); trackGA4('c_chatbot_open', { page_source: pageSource }); }}
+            className="bg-white border border-[#E8E5DE] rounded-lg shadow-lg px-4 py-2.5 text-sm text-neutral-800 cursor-pointer hover:bg-[#FAFAF7] transition-colors flex items-center gap-2"
+          >
+            <span>有课程问题？点我咨询</span>
+            <span className="text-[#B8953F]">&#10132;</span>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowHint(false); setHintDismissed(true); }}
+            className="w-6 h-6 flex items-center justify-center rounded-full bg-neutral-200 hover:bg-neutral-300 text-neutral-500 transition-colors shrink-0"
+            aria-label="关闭提示"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
       )}
 
       {/* Floating trigger button */}
