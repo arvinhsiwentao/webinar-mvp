@@ -52,9 +52,9 @@ export default function CheckoutPage() {
   const allProducts = useMemo(() => getAllProducts(), []);
   const total = useMemo(() => calculateTotal(selectedIds), [selectedIds]);
 
-  // Ordered list for individual-product section: OPTIONS → ETF+OPTIONS → APP_QUARTERLY
+  // Ordered list for individual-product section: APP_MONTHLY → OPTIONS → ETF+OPTIONS (cheapest first)
   const individualProducts = useMemo(() => {
-    const order: ProductId[] = [PRODUCT_IDS.OPTIONS, PRODUCT_IDS.ETF_OPTIONS, PRODUCT_IDS.APP_QUARTERLY];
+    const order: ProductId[] = [PRODUCT_IDS.APP_MONTHLY, PRODUCT_IDS.OPTIONS, PRODUCT_IDS.ETF_OPTIONS];
     return order
       .map(id => allProducts.find(p => p.id === id))
       .filter((p): p is ProductConfig => !!p);
@@ -79,7 +79,7 @@ export default function CheckoutPage() {
       text: '上完课最大的改变不是赚多少，是终于不焦虑了。市场再震荡也能睡好觉。',
       name: '赵先生',
     },
-    [PRODUCT_IDS.APP_QUARTERLY]: {
+    [PRODUCT_IDS.APP_MONTHLY]: {
       text: '通勤路上听 Mike 语音直播，我就知道这周该不该调整。即时互动课程替代不了。',
       name: '林先生',
     },
@@ -441,9 +441,12 @@ export default function CheckoutPage() {
                           )}
                         </div>
 
-                        {/* Name + price */}
+                        {/* Name + badge + price */}
                         <div className="flex-1 min-w-0">
                           <div className="font-bold text-neutral-900 text-sm">{product.name}</div>
+                          {product.id === 'app-monthly' && (
+                            <span className="text-[10px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded font-medium mt-0.5 inline-block">到期不自动扣款 · 安心体验</span>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <div className="text-right">
@@ -979,6 +982,9 @@ function ProductCard({
                   <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">线上课程</span>
                   <span className="text-xs text-[#B8953F] bg-[rgba(184,149,63,0.08)] px-2 py-0.5 rounded font-medium">无期限 · 无限次数观看</span>
                 </>
+              )}
+              {product.id === 'app-monthly' && (
+                <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded font-medium">到期不自动扣款 · 安心体验</span>
               )}
             </div>
 

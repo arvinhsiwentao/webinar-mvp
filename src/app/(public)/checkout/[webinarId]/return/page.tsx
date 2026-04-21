@@ -305,7 +305,7 @@ export default function CheckoutReturnPage() {
           <div className="space-y-3">
             {(() => {
               const pids = activationCodes.map(c => c.productId);
-              const hasApp = pids.some(id => ['app-quarterly', 'bundle', 'options', 'etf-options'].includes(id));
+              const hasApp = pids.some(id => ['app-monthly', 'bundle', 'options', 'etf-options'].includes(id));
               const hasOptions = pids.some(id => ['options', 'etf-options', 'bundle'].includes(id));
               const hasEtf = pids.some(id => ['etf-options', 'bundle'].includes(id));
               const links = [];

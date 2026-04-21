@@ -26,7 +26,7 @@ export interface ProductConfig {
 export const PRODUCT_IDS = {
   OPTIONS: 'options',
   ETF_OPTIONS: 'etf-options',
-  APP_QUARTERLY: 'app-quarterly',
+  APP_MONTHLY: 'app-monthly',
   BUNDLE: 'bundle',
 } as const;
 
@@ -42,7 +42,7 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     name: '期权策略课程',
     shortName: '期权课程',
     price: 99,
-    originalPrice: 441,
+    originalPrice: 312,
     stripePriceId: process.env.STRIPE_PRICE_OPTIONS || 'price_1TKLLiGXZySy2dKhqUbjD9h4',
     sheetName: '期權+App(月)',
     productPackageId: '8892',
@@ -57,7 +57,7 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     name: 'ETF+期权课程组合',
     shortName: 'ETF+期权',
     price: 249,
-    originalPrice: 825,
+    originalPrice: 696,
     stripePriceId: process.env.STRIPE_PRICE_ETF_OPTIONS || 'price_1TKLLiGXZySy2dKh7DKleiYU',
     sheetName: '期權+ETF+App(月)',
     productPackageId: '8891',
@@ -67,16 +67,16 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     bonus: '直播限时加赠 1 个月 APP 完整权限（价值 $129 USD）',
     isBundle: false,
   },
-  [PRODUCT_IDS.APP_QUARTERLY]: {
-    id: PRODUCT_IDS.APP_QUARTERLY,
-    name: 'MIKE是麦克 APP 季度方案',
-    shortName: 'APP季方案',
-    price: 249,
-    originalPrice: 360,
-    stripePriceId: process.env.STRIPE_PRICE_APP_QUARTERLY || 'price_1TKLLjGXZySy2dKhHUDFHsIz',
-    sheetName: 'App(季)',
-    productPackageId: '8893',
-    salesCode: '13199',
+  [PRODUCT_IDS.APP_MONTHLY]: {
+    id: PRODUCT_IDS.APP_MONTHLY,
+    name: 'MIKE是麦克 APP 月方案',
+    shortName: 'APP月方案',
+    price: 79,
+    originalPrice: 129,
+    stripePriceId: process.env.STRIPE_PRICE_APP_MONTHLY || 'price_1TOUJiGXZySy2dKhuDWlHGkL',
+    sheetName: 'App(月)',
+    productPackageId: '6718',
+    salesCode: '10060',
     description: '每天 10 分钟，系统告诉你该不该动',
     includes: ['价值灯号 — 绿灯加仓、黄灯观望、红灯不动', 'Mike 每日更新他在看什么股', '双周语音直播，通勤路上就能听', '学员社群，波动时五分钟有答案'],
     isBundle: false,
@@ -106,7 +106,7 @@ export function getProduct(id: string): ProductConfig | undefined {
 export function getAllProducts(): ProductConfig[] {
   return [
     PRODUCTS[PRODUCT_IDS.BUNDLE],
-    PRODUCTS[PRODUCT_IDS.APP_QUARTERLY],
+    PRODUCTS[PRODUCT_IDS.APP_MONTHLY],
     PRODUCTS[PRODUCT_IDS.ETF_OPTIONS],
     PRODUCTS[PRODUCT_IDS.OPTIONS],
   ];
@@ -120,14 +120,14 @@ export function getExcludedProducts(selectedId: ProductId): ProductId[] {
   switch (selectedId) {
     case PRODUCT_IDS.BUNDLE:
       // Bundle includes everything — disable all others
-      return [PRODUCT_IDS.OPTIONS, PRODUCT_IDS.ETF_OPTIONS, PRODUCT_IDS.APP_QUARTERLY];
+      return [PRODUCT_IDS.OPTIONS, PRODUCT_IDS.ETF_OPTIONS, PRODUCT_IDS.APP_MONTHLY];
     case PRODUCT_IDS.ETF_OPTIONS:
       // ETF+Options includes Options — disable Options and Bundle
       return [PRODUCT_IDS.OPTIONS, PRODUCT_IDS.BUNDLE];
     case PRODUCT_IDS.OPTIONS:
       // Options conflicts with ETF+Options and Bundle
       return [PRODUCT_IDS.ETF_OPTIONS, PRODUCT_IDS.BUNDLE];
-    case PRODUCT_IDS.APP_QUARTERLY:
+    case PRODUCT_IDS.APP_MONTHLY:
       // APP quarterly conflicts with Bundle (which has APP annual)
       return [PRODUCT_IDS.BUNDLE];
     default:

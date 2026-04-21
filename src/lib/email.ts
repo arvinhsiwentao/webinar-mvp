@@ -300,7 +300,7 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
   const productIds = codes.map(c => c.productId);
   const hasOptions = productIds.some(id => id === 'options' || id === 'etf-options' || id === 'bundle');
   const hasEtf = productIds.some(id => id === 'etf-options' || id === 'bundle');
-  const hasApp = productIds.some(id => id === 'app-quarterly' || id === 'bundle' || id === 'options' || id === 'etf-options');
+  const hasApp = productIds.some(id => id === 'app-monthly' || id === 'bundle' || id === 'options' || id === 'etf-options');
 
   const productLinksHtml = [
     hasApp ? `<li><a href="${appLink}" style="color: #B8953F;">Mike是麦克 美股财富导航 App 下载</a></li>` : '',
