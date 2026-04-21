@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Webinar } from '@/lib/types';
@@ -178,6 +178,27 @@ export default function HomePageV2() {
     }
     setSlotSeats(seats);
   }, [evergreenSlots]);
+
+  // 报名人数 — localStorage 持久化，封顶 100
+  const [registeredCount, setRegisteredCount] = useState(0);
+  useEffect(() => {
+    const key = 'webinar-v2-registered-count';
+    const stored = localStorage.getItem(key);
+    let count = 0;
+    if (stored) {
+      count = parseInt(stored, 10) || 0;
+      // 回访 30% 机率 +1~3
+      if (Math.random() < 0.3 && count < 100) {
+        count += Math.floor(Math.random() * 3) + 1;
+        count = Math.min(count, 100);
+        localStorage.setItem(key, String(count));
+      }
+    } else {
+      count = Math.floor(Math.random() * 26) + 60; // 首次 60-85
+      localStorage.setItem(key, String(count));
+    }
+    setRegisteredCount(count);
+  }, []);
 
   const refreshEvergreenSlots = useCallback(async () => {
     try {
@@ -369,7 +390,7 @@ export default function HomePageV2() {
           <button
             ref={heroCTARef}
             onClick={() => scrollToSchedule('hero')}
-            className="hero-cta group relative overflow-hidden px-14 py-5 md:px-16 md:py-4.5 lg:px-20 lg:py-5 rounded-2xl border border-[#C9A962] bg-gradient-to-r from-[#1a1508]/80 to-[#0f1a2e]/80 backdrop-blur-sm text-[#E8D5A3] text-xl md:text-xl lg:text-2xl font-bold tracking-widest cursor-pointer whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_15px_rgba(201,169,98,0.4),0_0_40px_rgba(201,169,98,0.2),0_0_80px_rgba(184,149,63,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(201,169,98,0.7),0_0_60px_rgba(201,169,98,0.4),0_0_120px_rgba(37,99,235,0.2),inset_0_1px_2px_rgba(255,255,255,0.2)] hover:border-[#E8D5A3] hover:scale-105 active:scale-95 md:animate-[ctaGlow_3s_ease-in-out_infinite]"
+            className="hero-cta group relative overflow-hidden px-14 py-5 md:px-16 md:py-4.5 lg:px-20 lg:py-5 rounded-2xl bg-[#B8953F] text-white text-xl md:text-xl lg:text-2xl font-bold tracking-widest cursor-pointer whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_20px_rgba(184,149,63,0.5),0_0_50px_rgba(184,149,63,0.25)] hover:shadow-[0_0_30px_rgba(184,149,63,0.7),0_0_70px_rgba(184,149,63,0.4)] hover:bg-[#A6842F] hover:scale-105 active:scale-95"
           >
             {/* 顶部玻璃高光 */}
             <span className="absolute inset-x-0 top-0 h-[45%] pointer-events-none rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" />
@@ -383,22 +404,20 @@ export default function HomePageV2() {
             </span>
             {/* 底部蓝色科技光边 — hover 时显现 */}
             <span className="absolute bottom-0 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-[#2563eb]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <span className="relative z-10">免费观看直播 →</span>
+            <span className="relative z-10">限时免费报名 →</span>
           </button>
           {(() => {
             const firstSlot = evergreenSlots[0];
             const seats = firstSlot ? slotSeats[firstSlot.slotTime] : null;
             return seats ? (
-              <p className="mt-3 text-xs text-red-400 flex items-center justify-center gap-1.5">
+              <p className="mt-3 text-base text-red-400 flex items-center justify-center gap-1.5">
                 <span className="relative flex h-2 w-2 flex-shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
                 </span>
-                仅剩 <span className="font-bold text-red-300">{seats}</span> 个免费名额
+                仅剩 <span className="font-bold text-red-300">{seats}</span> 个名额
               </p>
-            ) : (
-              <p className="mt-3 text-xs text-neutral-500">免费 · 名额有限</p>
-            );
+            ) : null;
           })()}
         </div>
       </div>
@@ -470,24 +489,6 @@ export default function HomePageV2() {
             ))}
           </div>
 
-          {/* Bonus: 一对一持仓分析 */}
-          <ScrollReveal delay={400}>
-            <div className="mt-8 bg-[#C9A962]/10 border border-[#C9A962]/30 rounded-lg px-6 py-5 flex items-start gap-4">
-              <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[#B8953F] flex items-center justify-center mt-0.5">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                </svg>
-              </span>
-              <div>
-                <p className="text-base md:text-lg font-bold text-[#E8D5A3]">
-                  限额加赠：Mike 一对一持仓分析
-                </p>
-                <p className="text-sm text-neutral-400 mt-1 leading-relaxed">
-                  报名讲座即有机会获得 Mike 本人亲自帮你诊断持仓，名额有限，先到先得。
-                </p>
-              </div>
-            </div>
-          </ScrollReveal>
 
           {/* Mid-page CTA — 桌机保留，手机有 sticky bar 不需要 */}
           <ScrollReveal delay={500}>
@@ -499,7 +500,7 @@ export default function HomePageV2() {
                 <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[ctaShimmer_1.5s_ease-in-out_infinite]" />
                 </span>
-                <span className="relative z-10">免费观看直播 →</span>
+                <span className="relative z-10">限时免费报名 →</span>
               </button>
             </div>
           </ScrollReveal>
@@ -825,11 +826,8 @@ export default function HomePageV2() {
         <div className="max-w-3xl mx-auto flex flex-col items-center">
           <ScrollReveal>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-              免费名额有限 · 选择你的场次
+              限时免费公开 · 选择你的场次
             </h2>
-            <p className="text-xs text-[#C9A962] text-center mb-6">
-              🎁 报名即有机会获得 Mike 一对一持仓分析（价值 $6,000+ USD）
-            </p>
           </ScrollReveal>
 
 
@@ -869,7 +867,8 @@ export default function HomePageV2() {
               const remaining = slotSeats[dateStr];
 
               return (
-                <ScrollReveal key={idx} delay={idx * 100}>
+                <React.Fragment key={idx}>
+                <ScrollReveal delay={idx * 100}>
                   <div className={`bg-white/[0.04] rounded-xl border border-[#C9A962]/20 hover:border-[#C9A962]/40 transition-all duration-300 overflow-hidden ${hideOnMobile ? 'hidden md:block' : ''}`}>
                     <div className="flex items-center gap-5 px-6 py-5">
                       {/* 日期信息 */}
@@ -904,15 +903,22 @@ export default function HomePageV2() {
                     )}
                     {/* 底部操作栏 */}
                     <div className="flex items-center justify-between px-6 py-3 bg-white/[0.02] border-t border-white/5">
-                      {remaining !== undefined && (
-                        <p className="text-xs text-red-400 flex items-center gap-1.5">
-                          <span className="relative flex h-2 w-2 flex-shrink-0">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-                          </span>
-                          仅剩 <span className="font-bold text-red-300">{remaining}</span> 个名额
-                        </p>
-                      )}
+                      <div className="flex flex-col gap-0.5">
+                        {remaining !== undefined && (
+                          <>
+                            <p className="text-xs text-neutral-500">
+                              已有 <span className="text-[#C9A962] font-semibold">{80 - remaining}</span> 人报名
+                            </p>
+                            <p className="text-xs text-red-400 flex items-center gap-1.5">
+                              <span className="relative flex h-2 w-2 flex-shrink-0">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                              </span>
+                              仅剩 <span className="font-bold text-red-300">{remaining}</span> 个名额
+                            </p>
+                          </>
+                        )}
+                      </div>
                       <button
                         onClick={() => {
                           trackGA4('c_schedule_card_click', { slot_index: idx, slot_type: item.type, remaining_seats: remaining ?? 0 });
@@ -926,6 +932,31 @@ export default function HomePageV2() {
                     </div>
                   </div>
                 </ScrollReveal>
+                {/* 已额满假卡 — 穿插在第 2 張后面，制造「中间场次也抢完了」 */}
+                {idx === 1 && evergreenSlots.length > 2 && (() => {
+                  // 场次 3 的早场（场次 3 时间 - 10 小时）
+                  const slot3Time = evergreenSlots[2]?.slotTime;
+                  if (!slot3Time) return null;
+                  const soldOutDate = new Date(new Date(slot3Time).getTime() - 10 * 3600000);
+                  const { date: soldOutFullDate } = formatInTimezone(soldOutDate.toISOString(), evergreenTimezone);
+                  return (
+                    <div className="bg-white/[0.02] rounded-xl border border-white/10 opacity-50 overflow-hidden mt-5">
+                      <div className="flex items-center gap-5 px-6 py-5">
+                        <div className="flex-1">
+                          <p className="text-base md:text-lg font-bold text-neutral-500">{soldOutFullDate}</p>
+                          <p className="text-sm text-neutral-600 mt-0.5">
+                            {formatInTimezone(soldOutDate.toISOString(), 'America/Los_Angeles').time} 美西 (PT) / {formatInTimezone(soldOutDate.toISOString(), 'America/New_York').time} 美东 (ET)
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between px-6 py-3 bg-white/[0.02] border-t border-white/5">
+                        <p className="text-xs text-neutral-500">已有 <span className="text-neutral-400 font-semibold">80</span> 人报名</p>
+                        <span className="text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded">已额满</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </React.Fragment>
               );
             })}
             {/* 展開更多場次 — 手機預設收起 */}
@@ -940,6 +971,7 @@ export default function HomePageV2() {
                 </svg>
               </button>
             )}
+
           </div>
 
         </div>
@@ -1068,7 +1100,7 @@ export default function HomePageV2() {
           <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-[ctaShimmer_3s_ease-in-out_infinite]" />
           </span>
-          <span className="relative z-10">免费报名 · 立即观看 →</span>
+          <span className="relative z-10">限时免费 · 立即报名 →</span>
         </button>
       </div>
 
