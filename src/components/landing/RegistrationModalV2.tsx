@@ -212,7 +212,6 @@ export default function RegistrationModalV2({
               </span>
               <span className="relative z-10 flex flex-col items-center leading-snug">
                 <span className="text-lg">{submitting ? '处理中...' : '立即报名'}</span>
-                {!submitting && <span className="text-sm text-white/90 animate-pulse">✦ 获得 Mike 一对一持仓分析的机会 ✦</span>}
               </span>
             </button>
           </form>

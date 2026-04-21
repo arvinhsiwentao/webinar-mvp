@@ -18,7 +18,7 @@ for (const line of envContent.split('\n')) {
   }
 }
 
-const FILE_ID = '1epHP6gh3WfyMjzQJtJLHQls5Jxz8Y4xj';
+const FILE_ID = '1UKMzl_jWB7ItkFt-sx8ZwQJtrtNWBctf';
 // New Google Drive endpoint that handles large file virus scan bypass
 const VIDEO_URL = `https://drive.usercontent.google.com/download?id=${FILE_ID}&export=download&authuser=0&confirm=t`;
 
