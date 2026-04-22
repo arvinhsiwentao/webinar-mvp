@@ -404,8 +404,8 @@ export default function HomePageV2() {
             {/* 底部蓝色科技光边 — hover 时显现 */}
             <span className="absolute bottom-0 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-[#2563eb]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
             <span className="relative z-10 flex flex-col items-center gap-0.5">
-              <span className="text-base font-normal tracking-wide">价值 <span className="text-lg font-extrabold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">$219 USD</span> 的投资策略 · 限时免费</span>
-              <span className="text-xl md:text-xl lg:text-2xl tracking-widest">立即报名直播 →</span>
+              <span className="text-xs md:text-sm font-normal tracking-wide whitespace-nowrap">价值 <span className="text-sm md:text-base font-extrabold text-white">$219 USD</span> 的投资策略 · 限时 <span className="font-extrabold text-sm md:text-base text-[#FFEB3B]">8hr</span> 免费</span>
+              <span className="text-lg md:text-xl lg:text-2xl tracking-widest">立即报名直播 →</span>
             </span>
           </button>
           {(() => {
@@ -1103,7 +1103,7 @@ export default function HomePageV2() {
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-[ctaShimmer_3s_ease-in-out_infinite]" />
           </span>
           <span className="relative z-10 flex flex-col items-center gap-0.5">
-            <span className="text-xs font-normal">价值 <span className="text-sm font-extrabold text-white">$219 USD</span> 的投资策略 · 限时免费</span>
+            <span className="text-xs font-normal">价值 <span className="text-sm font-extrabold text-white">$219 USD</span> 的投资策略 · 限时<span className="font-extrabold text-lg text-[#FFEB3B] mx-1">8hr</span>免费</span>
             <span className="text-base">立即报名直播 →</span>
           </span>
         </button>
@@ -1160,6 +1160,7 @@ export default function HomePageV2() {
         hideSlotSelector={modalSource === 'schedule_card'}
         source={modalSource}
         remainingSeats={modalRemainingSeats}
+        registeredCount={registeredCount}
       />
     </div>
   );

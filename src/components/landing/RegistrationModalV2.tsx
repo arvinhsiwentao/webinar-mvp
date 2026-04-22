@@ -27,6 +27,8 @@ interface RegistrationModalV2Props {
   source?: string;
   /** 剩余名额（从场次卡片传入，增强 FOMO） */
   remainingSeats?: number;
+  /** 已报名人数 */
+  registeredCount?: number;
 }
 
 export default function RegistrationModalV2({
@@ -48,6 +50,7 @@ export default function RegistrationModalV2({
   hideSlotSelector = false,
   source = '',
   remainingSeats,
+  registeredCount,
 }: RegistrationModalV2Props) {
   const handleClose = useCallback(() => {
     trackGA4('c_modal_close', {
@@ -91,7 +94,7 @@ export default function RegistrationModalV2({
       />
 
       {/* Modal — 手機: bottom sheet；桌機: 居中 */}
-      <div className="relative w-full md:max-w-md md:mx-4 bg-[#111318] border border-[#C9A962]/20 rounded-t-2xl md:rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom md:zoom-in-95 duration-300">
+      <div className="relative w-full md:max-w-lg md:mx-4 bg-[#111318] border border-[#C9A962]/20 rounded-t-2xl md:rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom md:zoom-in-95 duration-300">
         {/* 關閉按鈕 */}
         <button
           onClick={handleClose}
@@ -105,7 +108,7 @@ export default function RegistrationModalV2({
 
         <div className="px-6 md:px-10 pt-4 md:pt-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {/* Heading */}
-          <h2 className="text-xl md:text-2xl font-bold text-center text-white mb-5" style={{ fontFamily: '"Noto Serif SC", serif' }}>
+          <h2 className="text-lg md:text-2xl font-bold text-center text-white mb-5 pr-6 md:pr-0" style={{ fontFamily: '"Noto Serif SC", serif' }}>
             免费领取价值 <span className="text-[#B8953F]">$219 USD</span> 的直播席位
           </h2>
 
@@ -188,15 +191,20 @@ export default function RegistrationModalV2({
               </div>
             )}
 
-            {/* Remaining seats FOMO */}
-            {remainingSeats !== undefined && (
+            {/* FOMO indicators */}
+            {(remainingSeats !== undefined || (registeredCount !== undefined && registeredCount > 0)) && (
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20">
                 <span className="relative flex h-2 w-2 flex-shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
                 </span>
                 <p className="text-sm text-red-300">
-                  该场次仅剩 <span className="font-bold text-red-200">{remainingSeats}</span> 个名额，即将截止
+                  {registeredCount !== undefined && registeredCount > 0 && (
+                    <><span className="font-bold text-red-200">{registeredCount}</span> 人已报名 · </>
+                  )}
+                  {remainingSeats !== undefined && (
+                    <>仅剩 <span className="font-bold text-red-200">{remainingSeats}</span> 个名额</>
+                  )}
                 </p>
               </div>
             )}
