@@ -78,7 +78,6 @@ const TESTIMONIALS = [
 
 export default function HomePageV2() {
   const router = useRouter();
-
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -390,7 +389,7 @@ export default function HomePageV2() {
           <button
             ref={heroCTARef}
             onClick={() => scrollToSchedule('hero')}
-            className="hero-cta group relative overflow-hidden px-14 py-5 md:px-16 md:py-4.5 lg:px-20 lg:py-5 rounded-2xl bg-[#B8953F] text-white text-xl md:text-xl lg:text-2xl font-bold tracking-widest cursor-pointer whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_20px_rgba(184,149,63,0.5),0_0_50px_rgba(184,149,63,0.25)] hover:shadow-[0_0_30px_rgba(184,149,63,0.7),0_0_70px_rgba(184,149,63,0.4)] hover:bg-[#A6842F] hover:scale-105 active:scale-95"
+            className="hero-cta group relative overflow-hidden px-8 py-4 md:px-16 md:py-5 lg:px-20 lg:py-5 rounded-2xl bg-[#B8953F] text-white text-xl md:text-xl lg:text-2xl font-bold tracking-wider cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_20px_rgba(184,149,63,0.5),0_0_50px_rgba(184,149,63,0.25)] hover:shadow-[0_0_30px_rgba(184,149,63,0.7),0_0_70px_rgba(184,149,63,0.4)] hover:bg-[#A6842F] hover:scale-105 active:scale-95"
           >
             {/* 顶部玻璃高光 */}
             <span className="absolute inset-x-0 top-0 h-[45%] pointer-events-none rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" />
@@ -404,13 +403,16 @@ export default function HomePageV2() {
             </span>
             {/* 底部蓝色科技光边 — hover 时显现 */}
             <span className="absolute bottom-0 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-[#2563eb]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <span className="relative z-10">限时免费报名 →</span>
+            <span className="relative z-10 flex flex-col items-center gap-0.5">
+              <span className="text-base font-normal tracking-wide">价值 <span className="text-lg font-extrabold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">$219 USD</span> 的投资策略 · 限时免费</span>
+              <span className="text-xl md:text-xl lg:text-2xl tracking-widest">立即报名直播 →</span>
+            </span>
           </button>
           {(() => {
             const firstSlot = evergreenSlots[0];
             const seats = firstSlot ? slotSeats[firstSlot.slotTime] : null;
             return seats ? (
-              <p className="mt-3 text-base text-red-400 flex items-center justify-center gap-1.5">
+              <p className="mt-1.5 text-base text-red-400 flex items-center justify-center gap-1.5">
                 <span className="relative flex h-2 w-2 flex-shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
@@ -1095,12 +1097,15 @@ export default function HomePageV2() {
         {/* CTA 按鈕 — 發光 + shimmer */}
         <button
           onClick={() => scrollToSchedule('sticky')}
-          className="w-full relative overflow-hidden bg-[#B8953F] text-white py-3.5 text-base font-bold rounded-lg shadow-[0_0_20px_rgba(184,149,63,0.5)] hover:shadow-[0_0_30px_rgba(184,149,63,0.7)] hover:bg-[#A6842F] transition-all"
+          className="w-full relative overflow-hidden bg-[#B8953F] text-white font-bold rounded-lg py-2.5 shadow-[0_0_20px_rgba(184,149,63,0.5)] hover:shadow-[0_0_30px_rgba(184,149,63,0.7)] hover:bg-[#A6842F] transition-all"
         >
           <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-[ctaShimmer_3s_ease-in-out_infinite]" />
           </span>
-          <span className="relative z-10">限时免费 · 立即报名 →</span>
+          <span className="relative z-10 flex flex-col items-center gap-0.5">
+            <span className="text-xs font-normal">价值 <span className="text-sm font-extrabold text-white">$219 USD</span> 的投资策略 · 限时免费</span>
+            <span className="text-base">立即报名直播 →</span>
+          </span>
         </button>
       </div>
 

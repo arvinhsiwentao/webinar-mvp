@@ -106,7 +106,7 @@ export default function RegistrationModalV2({
         <div className="px-6 md:px-10 pt-4 md:pt-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {/* Heading */}
           <h2 className="text-xl md:text-2xl font-bold text-center text-white mb-5" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-            锁定你的免费席位
+            免费领取价值 <span className="text-[#B8953F]">$219 USD</span> 的直播席位
           </h2>
 
           {/* 已选场次提示 */}
@@ -211,7 +211,7 @@ export default function RegistrationModalV2({
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[ctaShimmer_2s_ease-in-out_infinite]" />
               </span>
               <span className="relative z-10 flex flex-col items-center leading-snug">
-                <span className="text-lg">{submitting ? '处理中...' : '立即报名'}</span>
+                <span className="text-lg">{submitting ? '处理中...' : '马上抢免费席位 →'}</span>
               </span>
             </button>
           </form>
