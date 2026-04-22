@@ -1160,7 +1160,7 @@ export default function HomePageV2() {
         hideSlotSelector={modalSource === 'schedule_card'}
         source={modalSource}
         remainingSeats={modalRemainingSeats}
-        registeredCount={registeredCount}
+        registeredCount={modalRemainingSeats !== undefined ? 80 - modalRemainingSeats : registeredCount}
       />
     </div>
   );
