@@ -389,7 +389,7 @@ export default function HomePageV2() {
           <button
             ref={heroCTARef}
             onClick={() => scrollToSchedule('hero')}
-            className="hero-cta group relative overflow-hidden px-8 py-4 md:px-16 md:py-5 lg:px-20 lg:py-5 rounded-2xl bg-[#B8953F] text-white text-xl md:text-xl lg:text-2xl font-bold tracking-wider cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_20px_rgba(184,149,63,0.5),0_0_50px_rgba(184,149,63,0.25)] hover:shadow-[0_0_30px_rgba(184,149,63,0.7),0_0_70px_rgba(184,149,63,0.4)] hover:bg-[#A6842F] hover:scale-105 active:scale-95"
+            className="hero-cta group relative overflow-hidden px-14 py-5 md:px-16 md:py-4.5 lg:px-20 lg:py-5 rounded-2xl bg-[#B8953F] text-white text-xl md:text-xl lg:text-2xl font-bold tracking-widest cursor-pointer whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_0_20px_rgba(184,149,63,0.5),0_0_50px_rgba(184,149,63,0.25)] hover:shadow-[0_0_30px_rgba(184,149,63,0.7),0_0_70px_rgba(184,149,63,0.4)] hover:bg-[#A6842F] hover:scale-105 active:scale-95"
           >
             {/* 顶部玻璃高光 */}
             <span className="absolute inset-x-0 top-0 h-[45%] pointer-events-none rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" />
@@ -403,10 +403,7 @@ export default function HomePageV2() {
             </span>
             {/* 底部蓝色科技光边 — hover 时显现 */}
             <span className="absolute bottom-0 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-[#2563eb]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <span className="relative z-10 flex flex-col items-center gap-0.5">
-              <span className="text-xs md:text-sm font-normal tracking-wide whitespace-nowrap">价值 <span className="text-sm md:text-base font-extrabold text-white">$219 USD</span> 的投资策略 · 限时 <span className="font-extrabold text-sm md:text-base text-[#FFEB3B]">8hr</span> 免费</span>
-              <span className="text-lg md:text-xl lg:text-2xl tracking-widest">立即报名直播 →</span>
-            </span>
+            <span className="relative z-10">免费观看直播 →</span>
           </button>
           {(() => {
             const firstSlot = evergreenSlots[0];
@@ -491,6 +488,24 @@ export default function HomePageV2() {
             ))}
           </div>
 
+          {/* Bonus: 一对一持仓分析 */}
+          <ScrollReveal delay={400}>
+            <div className="mt-8 bg-[#C9A962]/10 border border-[#C9A962]/30 rounded-lg px-6 py-5 flex items-start gap-4">
+              <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[#B8953F] flex items-center justify-center mt-0.5">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                </svg>
+              </span>
+              <div>
+                <p className="text-base md:text-lg font-bold text-[#E8D5A3]">
+                  限额加赠：Mike 一对一持仓分析
+                </p>
+                <p className="text-sm text-neutral-400 mt-1 leading-relaxed">
+                  报名讲座即有机会获得 Mike 本人亲自帮你诊断持仓，名额有限，先到先得。
+                </p>
+              </div>
+            </div>
+          </ScrollReveal>
 
           {/* Mid-page CTA — 桌机保留，手机有 sticky bar 不需要 */}
           <ScrollReveal delay={500}>
@@ -828,8 +843,11 @@ export default function HomePageV2() {
         <div className="max-w-3xl mx-auto flex flex-col items-center">
           <ScrollReveal>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-              限时免费公开 · 选择你的场次
+              免费名额有限 · 选择你的场次
             </h2>
+            <p className="text-xs text-[#C9A962] text-center mb-6">
+              🎁 报名即有机会获得 Mike 一对一持仓分析（价值 $6,000+ USD）
+            </p>
           </ScrollReveal>
 
 
@@ -1097,15 +1115,12 @@ export default function HomePageV2() {
         {/* CTA 按鈕 — 發光 + shimmer */}
         <button
           onClick={() => scrollToSchedule('sticky')}
-          className="w-full relative overflow-hidden bg-[#B8953F] text-white font-bold rounded-lg py-2.5 shadow-[0_0_20px_rgba(184,149,63,0.5)] hover:shadow-[0_0_30px_rgba(184,149,63,0.7)] hover:bg-[#A6842F] transition-all"
+          className="w-full relative overflow-hidden bg-[#B8953F] text-white py-3.5 text-base font-bold rounded-lg shadow-[0_0_20px_rgba(184,149,63,0.5)] hover:shadow-[0_0_30px_rgba(184,149,63,0.7)] hover:bg-[#A6842F] transition-all"
         >
           <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-[ctaShimmer_3s_ease-in-out_infinite]" />
           </span>
-          <span className="relative z-10 flex flex-col items-center gap-0.5">
-            <span className="text-xs font-normal">价值 <span className="text-sm font-extrabold text-white">$219 USD</span> 的投资策略 · 限时<span className="font-extrabold text-lg text-[#FFEB3B] mx-1">8hr</span>免费</span>
-            <span className="text-base">立即报名直播 →</span>
-          </span>
+          <span className="relative z-10">限时免费 · 立即报名 →</span>
         </button>
       </div>
 

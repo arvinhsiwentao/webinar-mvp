@@ -94,7 +94,7 @@ export default function RegistrationModalV2({
       />
 
       {/* Modal — 手機: bottom sheet；桌機: 居中 */}
-      <div className="relative w-full md:max-w-lg md:mx-4 bg-[#111318] border border-[#C9A962]/20 rounded-t-2xl md:rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom md:zoom-in-95 duration-300">
+      <div className="relative w-full md:max-w-md md:mx-4 bg-[#111318] border border-[#C9A962]/20 rounded-t-2xl md:rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom md:zoom-in-95 duration-300">
         {/* 關閉按鈕 */}
         <button
           onClick={handleClose}
@@ -108,8 +108,8 @@ export default function RegistrationModalV2({
 
         <div className="px-6 md:px-10 pt-4 md:pt-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {/* Heading */}
-          <h2 className="text-lg md:text-2xl font-bold text-center text-white mb-5 pr-6 md:pr-0" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-            免费领取价值 <span className="text-[#B8953F]">$219 USD</span> 的直播席位
+          <h2 className="text-xl md:text-2xl font-bold text-center text-white mb-5" style={{ fontFamily: '"Noto Serif SC", serif' }}>
+            锁定你的免费席位
           </h2>
 
           {/* 已选场次提示 */}
@@ -219,7 +219,8 @@ export default function RegistrationModalV2({
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[ctaShimmer_2s_ease-in-out_infinite]" />
               </span>
               <span className="relative z-10 flex flex-col items-center leading-snug">
-                <span className="text-lg">{submitting ? '处理中...' : '马上抢免费席位 →'}</span>
+                <span className="text-lg">{submitting ? '处理中...' : '立即报名'}</span>
+                {!submitting && <span className="text-sm text-white/90 animate-pulse">✦ 获得 Mike 一对一持仓分析的机会 ✦</span>}
               </span>
             </button>
           </form>
