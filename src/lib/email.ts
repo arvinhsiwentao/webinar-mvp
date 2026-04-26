@@ -582,6 +582,14 @@ export function postWebinarEmail(to: string, name: string, checkoutUrl: string):
           <p style="margin:12px 0 0 0;font-size:12px;color:#9CA3AF;">直播间专属价格 · 限时有效</p>
         </td></tr>
 
+        <!-- ── WhatsApp 联络 ── -->
+        <tr><td style="height:1px;background-color:#E8E5DE;font-size:0;line-height:0;">&nbsp;</td></tr>
+        <tr><td style="padding:24px 40px;text-align:center;">
+          <p style="margin:0 0 16px 0;font-size:14px;color:#1A1A1A;">有任何问题，随时找我们</p>
+          <a href="https://wa.me/886981159288?text=${encodeURIComponent('你好，我想咨询课程相关问题')}" style="display:inline-block;background:#25D366;color:#fff;font-size:13px;font-weight:700;text-decoration:none;padding:10px 20px;border-radius:6px;">💬 WhatsApp 咨询客服小帮手</a>
+          <p style="margin:12px 0 0 0;font-size:13px;color:#6B6B6B;">或发送邮件至 <a href="mailto:cmoney_overseas@cmoney.com.tw" style="color:#B8953F;text-decoration:none;">cmoney_overseas@cmoney.com.tw</a></p>
+        </td></tr>
+
         <!-- Footer -->
         <tr><td style="padding:20px 40px;background-color:#FAFAF7;border-top:1px solid #E8E5DE;">
           <p style="margin:0 0 4px 0;font-size:11px;color:#9CA3AF;text-align:center;">此邮件由系统自动发送，请勿直接回复</p>
