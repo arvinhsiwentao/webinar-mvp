@@ -305,6 +305,16 @@ export default function LiveRoomPage() {
       if (remaining > 0) params.set('t', remaining.toString());
     }
 
+    // Fire post-webinar email (deduped server-side)
+    if (email) {
+      const checkoutUrl = `${window.location.origin}/checkout/${webinarId}?${params.toString()}`;
+      fetch(`/api/webinar/${webinarId}/post-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name: userName, checkoutUrl }),
+      }).catch(() => {});
+    }
+
     // Open checkout in new tab (preserves livestream)
     window.open(`/checkout/${webinarId}?${params.toString()}`, '_blank');
   }, [webinarId, searchParams, currentTime]);

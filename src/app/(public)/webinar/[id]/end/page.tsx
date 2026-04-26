@@ -24,6 +24,29 @@ export default function EndPage() {
     setCurrentUrl(window.location.href);
   }, []);
 
+  // Fire post-webinar email once webinar loads (deduped server-side)
+  useEffect(() => {
+    if (!webinar || !userEmail) return;
+    let email = userEmail;
+    try {
+      const sticky = localStorage.getItem(`webinar-${webinarId}-evergreen`);
+      if (sticky) { const p = JSON.parse(sticky); email = p.email || email; }
+    } catch { /* ignore */ }
+    if (!email) return;
+    const p = new URLSearchParams();
+    p.set('email', email);
+    if (userName !== '观众') p.set('name', userName);
+    p.set('source', 'end');
+    const utms = getStoredUtmParams();
+    for (const [k, v] of Object.entries(utms)) p.set(k, v);
+    const checkoutUrl = `${window.location.origin}/checkout/${webinarId}?${p.toString()}`;
+    fetch(`/api/webinar/${webinarId}/post-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name: userName !== '观众' ? userName : '', checkoutUrl }),
+    }).catch(() => {});
+  }, [webinar, webinarId, userEmail, userName]);
+
   useEffect(() => {
     async function fetchWebinar() {
       try {
