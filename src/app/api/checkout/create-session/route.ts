@@ -6,7 +6,7 @@ import { getProduct, PRODUCT_IDS, type ProductId } from '@/lib/products';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { webinarId, email, name, source, bonusDeadline, productIds } = body;
+    const { webinarId, email, name, source, bonusDeadline, productIds, gaClientId, utm } = body;
 
     if (!webinarId || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -71,6 +71,11 @@ export async function POST(request: NextRequest) {
         source: source || 'direct',
         order_source: 'mike_webinar',
         productIds: ids.join(','),
+        ga_client_id: gaClientId || '',
+        utm_source: utm?.utm_source || '',
+        utm_medium: utm?.utm_medium || '',
+        utm_campaign: utm?.utm_campaign || '',
+        utm_content: utm?.utm_content || '',
       },
       payment_intent_data: {
         metadata: {

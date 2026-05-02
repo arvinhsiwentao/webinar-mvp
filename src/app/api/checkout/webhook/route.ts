@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { fulfillOrder } from '@/lib/fulfillment';
+import { notifyPurchase } from '@/lib/server-notifications';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -35,6 +36,25 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[Webhook] fulfillOrder result: ${result.status}`);
+
+    // Server-side notifications (GA4 Measurement Protocol + Google Chat)
+    // Best-effort, non-blocking — don't fail the webhook response
+    if (result.status === 'fulfilled') {
+      const meta = session.metadata || {};
+      notifyPurchase({
+        sessionId: session.id,
+        email: session.customer_email || meta.email || '',
+        name: meta.name || '',
+        amount: session.amount_total || 0,
+        currency: session.currency || 'usd',
+        productIds: meta.productIds || '',
+        gaClientId: meta.ga_client_id || undefined,
+        utmSource: meta.utm_source || undefined,
+        utmMedium: meta.utm_medium || undefined,
+        utmCampaign: meta.utm_campaign || undefined,
+        utmContent: meta.utm_content || undefined,
+      }).catch(err => console.error('[Webhook] Notification error:', err));
+    }
   }
 
   return NextResponse.json({ received: true });

@@ -19,6 +19,7 @@ import {
 } from '@/lib/products';
 import { trackGA4 } from '@/lib/analytics';
 import { useCheckoutTracking } from '@/hooks/useCheckoutTracking';
+import { getStoredUtmParams } from '@/lib/utils';
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
@@ -245,6 +246,9 @@ export default function CheckoutPage() {
         ...(confirmedBundleSelected ? {
           bonusDeadline: (() => { try { return localStorage.getItem(storageKey) || ''; } catch { return ''; } })(),
         } : {}),
+        // GA4 + UTM for server-side tracking
+        gaClientId: (() => { try { const m = document.cookie.match(/_ga=GA\d+\.\d+\.(.+)/); return m?.[1] || ''; } catch { return ''; } })(),
+        utm: getStoredUtmParams(),
       }),
     });
 
