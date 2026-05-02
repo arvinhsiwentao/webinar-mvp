@@ -57,6 +57,12 @@ html {
   outline-offset: 2px;
 }
 
+/* Delayed fade-in for autoplay fallback button */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Hero entrance animation */
 @keyframes heroFadeIn {
   from {

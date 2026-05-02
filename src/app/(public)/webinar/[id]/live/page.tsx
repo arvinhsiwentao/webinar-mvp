@@ -55,7 +55,7 @@ export default function LiveRoomPage() {
   const [loading, setLoading] = useState(true);
   const [eventPhase, setEventPhase] = useState<'loading' | 'pre_event' | 'pre_show' | 'live' | 'ended'>('loading');
   const [isMuted, setIsMuted] = useState(false);
-  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(true);
   const playerInstanceRef = useRef<Player | null>(null);
 
   // Video state
@@ -210,35 +210,9 @@ export default function LiveRoomPage() {
       };
       player.on('playing', onPlaying);
 
-      // Detect total autoplay failure — only when tab is visible.
-      // Background tabs always block autoplay, so checking there gives false positives.
-      // The visibilitychange handler handles recovery when the user returns.
-      const scheduleAutoplayCheck = () => {
-        setTimeout(() => {
-          if (!player.isDisposed() && player.paused()) {
-            setAutoplayBlocked(true);
-          }
-        }, 3000);
-      };
-
-      if (document.visibilityState === 'visible') {
-        scheduleAutoplayCheck();
-      } else {
-        // Tab is hidden — defer the check until tab becomes visible
-        const onVisible = () => {
-          if (document.visibilityState !== 'visible') return;
-          document.removeEventListener('visibilitychange', onVisible);
-          // Give the visibilitychange play handler time to attempt playback first
-          setTimeout(() => {
-            if (!player.isDisposed() && player.paused()) {
-              scheduleAutoplayCheck();
-            }
-          }, 500);
-        };
-        document.addEventListener('visibilitychange', onVisible);
-      }
-
-      player.on('play', () => {
+      // Play button is shown by default (autoplayBlocked starts as true).
+      // Hide it as soon as playback actually starts — covers both autoplay success and manual click.
+      player.on('playing', () => {
         setAutoplayBlocked(false);
       });
     }
@@ -405,23 +379,32 @@ export default function LiveRoomPage() {
                       onUnmute={handleUnmute}
                     />
                   )}
-                  {/* Autoplay blocked fallback */}
+                  {/* Play button — visible immediately, hides when playback starts */}
                   {autoplayBlocked && !isReplay && eventPhase === 'live' && (
                     <button
                       onClick={() => {
-                        playerInstanceRef.current?.play();
-                        setAutoplayBlocked(false);
+                        const p = playerInstanceRef.current;
+                        if (p) {
+                          p.muted(false);
+                          p.play()?.catch(() => {
+                            // fallback: try muted if unmuted still fails
+                            p.muted(true);
+                            setIsMuted(true);
+                            p.play()?.catch(() => {});
+                          });
+                        }
                       }}
-                      className="absolute inset-0 z-30 flex items-center justify-center bg-black/50 cursor-pointer"
+                      className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 cursor-pointer animate-[fadeIn_1s_ease-in_0.8s_both]"
                       aria-label="点击开始直播"
                     >
-                      <div className="flex flex-col items-center gap-3 text-white">
-                        <div className="w-20 h-20 rounded-full bg-[#B8953F] flex items-center justify-center">
-                          <svg className="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <div className="flex flex-col items-center gap-4 text-white">
+                        <div className="w-24 h-24 rounded-full bg-[#B8953F] flex items-center justify-center shadow-[0_0_30px_rgba(184,149,63,0.5)] animate-pulse">
+                          <svg className="w-12 h-12 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                           </svg>
                         </div>
-                        <span className="text-sm font-medium">点击开始直播</span>
+                        <span className="text-lg font-bold">点击开始观看直播</span>
+                        <span className="text-sm text-white/60">直播已准备就绪</span>
                       </div>
                     </button>
                   )}
