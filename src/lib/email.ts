@@ -343,7 +343,7 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
   const serviceEmail = 'cmoney_overseas@cmoney.com.tw';
   const serviceHours = '北京时间週一到週五 8：30 ~ 17：30';
   const mikeWhatsApp = 'https://wa.me/15109927777?text=' + encodeURIComponent('我已购买课程套餐，想与 Mike 老师做一对一持仓分析');
-  const csWhatsApp = 'https://wa.me/886981159288?text=' + encodeURIComponent('你好，我想咨询课程相关问题');
+  const csWhatsApp = 'https://wa.me/886917642752?text=' + encodeURIComponent('你好，我想咨询课程相关问题');
 
   // Build product display name from codes
   const codes = data.activationCodes || (data.activationCode
@@ -586,7 +586,7 @@ export function postWebinarEmail(to: string, name: string, checkoutUrl: string):
         <tr><td style="height:1px;background-color:#E8E5DE;font-size:0;line-height:0;">&nbsp;</td></tr>
         <tr><td style="padding:24px 40px;text-align:center;">
           <p style="margin:0 0 16px 0;font-size:14px;color:#1A1A1A;">有任何问题，随时找我们</p>
-          <a href="https://wa.me/886981159288?text=${encodeURIComponent('你好，我想咨询课程相关问题')}" style="display:inline-block;background:#25D366;color:#fff;font-size:13px;font-weight:700;text-decoration:none;padding:10px 20px;border-radius:6px;">💬 WhatsApp 咨询客服小帮手</a>
+          <a href="https://wa.me/886917642752?text=${encodeURIComponent('你好，我想咨询课程相关问题')}" style="display:inline-block;background:#25D366;color:#fff;font-size:13px;font-weight:700;text-decoration:none;padding:10px 20px;border-radius:6px;">💬 WhatsApp 咨询客服小帮手</a>
           <p style="margin:12px 0 0 0;font-size:13px;color:#6B6B6B;">或发送邮件至 <a href="mailto:cmoney_overseas@cmoney.com.tw" style="color:#B8953F;text-decoration:none;">cmoney_overseas@cmoney.com.tw</a></p>
         </td></tr>
 

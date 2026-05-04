@@ -338,7 +338,7 @@ export default function CheckoutReturnPage() {
           <p className="text-sm text-neutral-500 mb-3">※ 如您遇到任何问题，欢迎联系客服</p>
           <div className="flex flex-col items-center gap-3 mb-3">
             <a
-              href="https://wa.me/886981159288?text=%E4%BD%A0%E5%A5%BD%EF%BC%8C%E6%88%91%E6%83%B3%E5%92%A8%E8%AF%A2%E8%AF%BE%E7%A8%8B%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98"
+              href="https://wa.me/886917642752?text=%E4%BD%A0%E5%A5%BD%EF%BC%8C%E6%88%91%E6%83%B3%E5%92%A8%E8%AF%A2%E8%AF%BE%E7%A8%8B%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#25D366] hover:bg-[#20BD5A] text-white text-sm font-medium transition-colors"

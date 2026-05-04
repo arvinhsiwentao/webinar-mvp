@@ -108,6 +108,6 @@ export const faqItems: FAQItem[] = [
   },
 ];
 
-export const WHATSAPP_NUMBER = '886981159288';
+export const WHATSAPP_NUMBER = '886917642752';
 export const WHATSAPP_DEFAULT_MESSAGE = '你好，我想咨询课程相关问题';
 export const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_DEFAULT_MESSAGE)}`;
