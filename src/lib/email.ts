@@ -504,11 +504,11 @@ export function postWebinarEmail(to: string, name: string, checkoutUrl: string):
           <p style="margin:0 0 16px 0;font-size:16px;font-weight:700;color:#1A1A1A;">完整大纲回顾</p>
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             ${[
-              ['01', '普通人靠薪水为什么存不到钱？', '解析「高收入高支出」的困境，为什么投资不是选项，而是必须。'],
-              ['02', 'AI 六层架构 — 2026 年的机会在哪一层', '拆解 AI 产业链六层结构，资金正在往哪里流、哪些标的还在合理估值。'],
+              ['01', '为什么光靠薪水，财务状况几乎不可能改变', '通胀每年 3%-5%，加薪 2%-3%，购买力持续下降。投资不是选项，是必须。'],
+              ['02', '2026 年 AI + 降息 + 政策转向，机会在哪一层', 'AI 产业链六层结构拆解，三大趋势交叉叠加，找到真正的超额回报机会。'],
               ['03', '从负债 50 万到 43 岁财务自由 — Mike 做对了什么', '不是励志故事，是走过弯路之后建立框架的真实转折。你不需要再犯同样的错。'],
-              ['04', '一套可执行的攻守框架 — ETF 怎么配、期权怎么用', '成长型、防御型、收益型、进阶型 — 四类 ETF 配置逻辑；跌市收保费的期权策略。'],
-              ['05', '真实学员案例 — 从什么都不敢动到每天十分钟搞定', '不同背景、不同本金，用同一套框架，走出了属于自己的节奏。'],
+              ['04', '一套可执行的攻守框架 — ETF 怎么配、期权怎么用', '四类 ETF 配置 + Sell Put/Call 防守策略 + 动态再平衡，完整闭环。'],
+              ['05', '真实学员案例 — 跟着框架一步步做出来的', '不同背景、不同本金，用同一套框架，走出了属于自己的节奏。'],
             ].map(([num, title, desc], i) => `
             <tr><td style="padding-bottom:${i < 4 ? '14px' : '0'};">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
@@ -521,6 +521,66 @@ export function postWebinarEmail(to: string, name: string, checkoutUrl: string):
                 </td>
               </tr></table>
             </td></tr>`).join('')}
+          </table>
+        </td></tr>
+
+        <!-- ── Section: 课程大纲 ── -->
+        <tr><td style="height:1px;background-color:#E8E5DE;font-size:0;line-height:0;">&nbsp;</td></tr>
+        <tr><td style="padding:24px 40px 20px 40px;">
+          <p style="margin:0 0 4px 0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#B8953F;font-weight:600;">课程包含什么</p>
+          <p style="margin:0 0 16px 0;font-size:16px;font-weight:700;color:#1A1A1A;">直播是概览，课程是操作手册</p>
+
+          <!-- ETF 课程 -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E5DE;border-radius:6px;margin-bottom:12px;">
+            <tr><td style="padding:16px 20px;">
+              <p style="margin:0 0 8px 0;font-size:14px;font-weight:700;color:#B8953F;">ETF 进阶资产放大术 ｜ 28 单元 · 无期限回看</p>
+              <p style="margin:0;font-size:13px;color:#4B5563;line-height:1.8;">
+                CH.1 投资重构观 — 四类 ETF 分类与应用<br>
+                CH.2 主题先于股价 — 趋势交叉点判断<br>
+                CH.3 ETF 筛选逻辑 — 营收、现金流、市值<br>
+                CH.4 Mike 战法 1 — 涨市攻、跌市守<br>
+                CH.5 Mike 战法 2 — 杠杆型、加密货币 ETF<br>
+                CH.6 动态再平衡 — PMI、财报信号<br>
+                CH.7 策略落地 — 执行与优化流程<br>
+                <span style="color:#B8953F;">特别收录 川普 2.0 时代 ETF 布局</span>
+              </p>
+            </td></tr>
+          </table>
+
+          <!-- 期权课程 -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E5DE;border-radius:6px;margin-bottom:12px;">
+            <tr><td style="padding:16px 20px;">
+              <p style="margin:0 0 8px 0;font-size:14px;font-weight:700;color:#B8953F;">震荡行情的美股期权操作解析 ｜ 18 单元 · 无期限回看</p>
+              <p style="margin:0;font-size:13px;color:#4B5563;line-height:1.8;">
+                CH.1 熊市才是机会 — 看懂回调本质<br>
+                CH.2 美股估值逻辑 — 判断贵不贵<br>
+                CH.3 蜡烛图与技术面 — 进场时机<br>
+                CH.4 期权是什么 — 为什么不是高风险<br>
+                CH.5 资金配置 — 分批进场策略<br>
+                CH.6 Sell Put 完整操作<br>
+                CH.7 Sell Call 完整操作<br>
+                CH.8 实战 SOP — 完整操作流程<br>
+                <span style="color:#B8953F;">特别收录 川普关税分析 + 学员 Q&A</span>
+              </p>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <!-- ── Section: APP 工具 ── -->
+        <tr><td style="height:1px;background-color:#E8E5DE;font-size:0;line-height:0;">&nbsp;</td></tr>
+        <tr><td style="padding:24px 40px 20px 40px;">
+          <p style="margin:0 0 4px 0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#B8953F;font-weight:600;">APP 工具</p>
+          <p style="margin:0 0 16px 0;font-size:16px;font-weight:700;color:#1A1A1A;">Mike是麦克 APP — 你的投资学习平台</p>
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E5DE;border-radius:6px;">
+            <tr><td style="padding:16px 20px;">
+              <p style="margin:0;font-size:13px;color:#4B5563;line-height:2;">
+                <span style="color:#B8953F;font-weight:600;">首页</span> — 大盘四大指数即时走势 + 重要经济数据发布日历<br>
+                <span style="color:#B8953F;font-weight:600;">选股</span> — 麦克精选持仓清单 + 价值灯号（红/黄/绿，5 分钟扫完）<br>
+                <span style="color:#B8953F;font-weight:600;">社团</span> — Mike 每日观点分享 + 学员持仓讨论 + VIP 即时聊天室<br>
+                <span style="color:#B8953F;font-weight:600;">内容</span> — 时事深度文章 + 语音直播回放 + YouTube 付费影片 + 课程
+              </p>
+            </td></tr>
           </table>
         </td></tr>
 
@@ -543,7 +603,9 @@ export function postWebinarEmail(to: string, name: string, checkoutUrl: string):
                   </td>
                   <td style="text-align:right;vertical-align:top;white-space:nowrap;padding-left:12px;">
                     <span style="display:inline-block;background:#B8953F;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;margin-bottom:6px;">推荐</span><br>
+                    <span style="font-size:13px;color:#9CA3AF;text-decoration:line-through;">$1696</span><br>
                     <span style="font-size:20px;font-weight:700;color:#B8953F;">$599</span>
+                    <span style="font-size:11px;color:#ef4444;font-weight:600;">65% OFF</span>
                   </td>
                 </tr>
               </table>
@@ -552,10 +614,10 @@ export function postWebinarEmail(to: string, name: string, checkoutUrl: string):
 
           <!-- Other products -->
           ${[
-            ['ETF+期权课程组合', '完整攻守框架 — ETF配置 + 期权策略 + 加赠1个月APP', '$249'],
-            ['期权策略课程', '市场越跌越赚钱的防守策略 + 加赠1个月APP', '$99'],
-            ['APP 月方案', '每天 10 分钟，灯号告诉你该不该动', '$49'],
-          ].map(([n, desc, price]) => `
+            ['ETF+期权课程组合', '完整攻守框架 — ETF配置 + 期权策略 + 加赠1个月APP', '$696', '$249', '64% OFF'],
+            ['期权策略课程', '市场越跌越赚钱的防守策略 + 加赠1个月APP', '$312', '$99', '68% OFF'],
+            ['APP 月方案', '每天 10 分钟，灯号告诉你该不该动', '$129', '$49', '62% OFF'],
+          ].map(([n, desc, origPrice, price, discount]) => `
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E5DE;border-radius:6px;margin-bottom:8px;">
             <tr><td style="padding:14px 20px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
@@ -564,7 +626,9 @@ export function postWebinarEmail(to: string, name: string, checkoutUrl: string):
                   <p style="margin:0;font-size:12px;color:#6B6B6B;">${desc}</p>
                 </td>
                 <td style="text-align:right;vertical-align:middle;padding-left:12px;white-space:nowrap;">
+                  <span style="font-size:12px;color:#9CA3AF;text-decoration:line-through;">${origPrice}</span><br>
                   <span style="font-size:16px;font-weight:700;color:#B8953F;">${price}</span>
+                  <span style="font-size:10px;color:#ef4444;font-weight:600;">${discount}</span>
                 </td>
               </tr></table>
             </td></tr>
@@ -580,6 +644,7 @@ export function postWebinarEmail(to: string, name: string, checkoutUrl: string):
             前往专属结帐页面
           </a>
           <p style="margin:12px 0 0 0;font-size:12px;color:#9CA3AF;">直播间专属价格 · 限时有效</p>
+          <p style="margin:16px 0 0 0;font-size:13px;color:#16a34a;font-weight:600;">🛡️ 所有方案均享 30 天无理由退款保证 · 零风险体验</p>
         </td></tr>
 
         <!-- ── WhatsApp 联络 ── -->
