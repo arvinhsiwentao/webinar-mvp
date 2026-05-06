@@ -68,6 +68,31 @@ export async function POST(req: NextRequest) {
       console.error(`[Inquiry] Failed to send notification email for inquiry from ${email} (${displayName}). Question saved to DB — check chatbot_inquiries table.`);
     }
 
+    // 3. Send Google Chat notification (best-effort)
+    const chatWebhookUrl = process.env.GOOGLE_CHAT_WEBHOOK_URL;
+    if (chatWebhookUrl) {
+      fetch(chatWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cards: [{
+            header: {
+              title: '💬 新的课程咨询',
+              subtitle: displayName,
+            },
+            sections: [{
+              widgets: [
+                { keyValue: { topLabel: '称呼', content: displayName } },
+                { keyValue: { topLabel: '邮箱', content: email } },
+                { keyValue: { topLabel: '来源', content: pageSource || 'unknown' } },
+                { keyValue: { topLabel: '问题', content: question.substring(0, 200) } },
+              ],
+            }],
+          }],
+        }),
+      }).catch(err => console.error('[Inquiry] Google Chat notification failed:', err));
+    }
+
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json(
