@@ -29,7 +29,12 @@ export async function POST(
   // Mark as sent first to prevent race condition from simultaneous CTA + end page triggers
   audit({ type: 'post_webinar_email_sent', email, webinarId });
 
-  const emailData = postWebinarEmail(email, name || '', checkoutUrl);
+  const slidesUrl = process.env.SLIDES_URL;
+  if (!slidesUrl) {
+    console.warn('[post-email] SLIDES_URL env var not set — download button will be broken');
+  }
+
+  const emailData = postWebinarEmail(email, name || '', checkoutUrl, slidesUrl || '#');
   sendEmail(emailData); // fire and forget
 
   return NextResponse.json({ ok: true });

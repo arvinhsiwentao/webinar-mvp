@@ -453,11 +453,11 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
   };
 }
 
-export function postWebinarEmail(to: string, name: string, checkoutUrl: string): EmailParams {
+export function postWebinarEmail(to: string, name: string, checkoutUrl: string, slidesUrl: string): EmailParams {
   const displayName = name || '学员';
   return {
     to,
-    subject: `${displayName}，Mike直播完整大纲 + 你的专属结帐链接`,
+    subject: `${displayName}，今天的直播简报已送达 + 一份独家精华文章给你`,
     html: `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -471,183 +471,88 @@ export function postWebinarEmail(to: string, name: string, checkoutUrl: string):
         <!-- Gold top bar -->
         <tr><td style="height:4px;background:linear-gradient(90deg,#B8953F,#C9A962,#B8953F);font-size:0;line-height:0;">&nbsp;</td></tr>
 
-        <!-- Header -->
-        <tr><td style="padding:32px 40px 28px 40px;">
+        <!-- Mike letter opening -->
+        <tr><td style="padding:32px 40px 8px 40px;">
           <p style="margin:0 0 4px 0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#B8953F;font-weight:600;">Mike是麦克</p>
-          <h1 style="margin:0 0 16px 0;font-size:22px;font-weight:700;color:#1A1A1A;">${displayName}，感谢今天花时间听完</h1>
-          <p style="margin:0 0 12px 0;font-size:15px;color:#1A1A1A;line-height:1.7;">如果你看完之后，脑子里还有这些声音：</p>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAFAF7;border-left:3px solid #B8953F;border-radius:0 4px 4px 0;margin-bottom:20px;">
-            <tr><td style="padding:14px 20px;">
-              <p style="margin:0 0 8px 0;font-size:14px;color:#4B5563;">「现在市场这么乱，油价、地缘政治……这时候进场真的没问题吗？」</p>
-              <p style="margin:0 0 8px 0;font-size:14px;color:#4B5563;">「AI 已经涨了这么多，我现在进场是不是太晚了？」</p>
-              <p style="margin:0;font-size:14px;color:#4B5563;">「道理我都懂，但真的不知道第一步该怎么踏出去……」</p>
-            </td></tr>
-          </table>
-          <p style="margin:0 0 14px 0;font-size:15px;color:#1A1A1A;line-height:1.7;">这很正常。你能问出这几个问题，说明你在认真想这件事——不是随便来凑热闹的。</p>
-          <p style="margin:0 0 14px 0;font-size:15px;color:#1A1A1A;line-height:1.7;">很多人遇到这种感觉，选择继续等——等市场更明朗一点、等自己再多了解一点、等「时机对了」再进场。但时机，从来不会自动变对。<strong>等待本身，是有成本的。</strong></p>
-          <p style="margin:0 0 16px 0;font-size:15px;color:#1A1A1A;line-height:1.7;">今天讲的这套攻守系统，核心不是「帮你预测市场」，而是——不管市场往哪走，你都有清楚的动作可以执行：</p>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-            <tr><td style="padding:4px 0 4px 16px;border-left:2px solid #B8953F;">
-              <p style="margin:0 0 10px 0;font-size:14px;color:#1A1A1A;line-height:1.6;"><strong>市场上涨时：</strong>你知道该分批布局哪几类 ETF，不会因为追高而套在高点</p>
-              <p style="margin:0 0 10px 0;font-size:14px;color:#1A1A1A;line-height:1.6;"><strong>市场下跌时：</strong>防守仓位已经帮你在收保费，不需要盯盘、不需要恐慌</p>
-              <p style="margin:0;font-size:14px;color:#1A1A1A;line-height:1.6;"><strong>市场横盘时：</strong>你知道该等，还是该用期权策略在波动中创造收益</p>
-            </td></tr>
-          </table>
-          <p style="margin:0 0 14px 0;font-size:15px;color:#1A1A1A;line-height:1.7;">不同起点的人，都在用这套框架走出了自己的节奏——有从零开始的全职妈妈，有每天没时间却靠灯号系统管仓的科技上班族，也有餐厅生意繁忙却依然冷静持仓的经营者。</p>
-          <p style="margin:0;font-size:15px;color:#1A1A1A;line-height:1.7;">你今天坐下来听完，说明你也已经准备好了。下面是今天讲过的完整内容，以及帮你整理好的方案——不用重新想，看一遍就知道下一步该怎么走。</p>
+          <h1 style="margin:0 0 18px 0;font-size:22px;font-weight:700;color:#1A1A1A;line-height:1.4;">嗨 ${displayName}，我是 Mike</h1>
+          <p style="margin:0 0 16px 0;font-size:15px;color:#1A1A1A;line-height:1.7;">谢谢你今天花时间看完整场直播。完整简报附在这封信里，方便你回去再消化一遍，哪个段落想再看一眼，直接打开就有。</p>
         </td></tr>
 
-        <!-- ── Section: 直播课大纲 ── -->
-        <tr><td style="height:1px;background-color:#E8E5DE;font-size:0;line-height:0;">&nbsp;</td></tr>
-        <tr><td style="padding:24px 40px 20px 40px;">
-          <p style="margin:0 0 4px 0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#B8953F;font-weight:600;">今天讲了什么</p>
-          <p style="margin:0 0 16px 0;font-size:16px;font-weight:700;color:#1A1A1A;">完整大纲回顾</p>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-            ${[
-              ['01', '为什么光靠薪水，财务状况几乎不可能改变', '通胀每年 3%-5%，加薪 2%-3%，购买力持续下降。投资不是选项，是必须。'],
-              ['02', '2026 年 AI + 降息 + 政策转向，机会在哪一层', 'AI 产业链六层结构拆解，三大趋势交叉叠加，找到真正的超额回报机会。'],
-              ['03', '从负债 50 万到 43 岁财务自由 — Mike 做对了什么', '不是励志故事，是走过弯路之后建立框架的真实转折。你不需要再犯同样的错。'],
-              ['04', '一套可执行的攻守框架 — ETF 怎么配、期权怎么用', '四类 ETF 配置 + Sell Put/Call 防守策略 + 动态再平衡，完整闭环。'],
-              ['05', '真实学员案例 — 跟着框架一步步做出来的', '不同背景、不同本金，用同一套框架，走出了属于自己的节奏。'],
-            ].map(([num, title, desc], i) => `
-            <tr><td style="padding-bottom:${i < 4 ? '14px' : '0'};">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-                <td style="vertical-align:top;padding-right:14px;width:32px;">
-                  <div style="width:28px;height:28px;border-radius:50%;border:1px solid #B8953F;text-align:center;line-height:28px;font-size:12px;font-weight:700;color:#B8953F;margin-top:2px;">${num}</div>
-                </td>
-                <td style="vertical-align:top;">
-                  <p style="margin:0 0 3px 0;font-size:14px;font-weight:700;color:#1A1A1A;">${title}</p>
-                  <p style="margin:0;font-size:13px;color:#6B6B6B;line-height:1.5;">${desc}</p>
-                </td>
-              </tr></table>
-            </td></tr>`).join('')}
+        <!-- Slides download card -->
+        <tr><td style="padding:0 40px 20px 40px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAFAF7;border:1px solid #E8E5DE;border-radius:8px;">
+            <tr>
+              <td style="padding:14px 8px 14px 18px;vertical-align:middle;width:1%;white-space:nowrap;">
+                <div style="width:42px;height:42px;background:#FFFFFF;border:1px solid #E8E5DE;border-radius:6px;text-align:center;line-height:42px;font-size:20px;">📑</div>
+              </td>
+              <td style="padding:14px 8px;vertical-align:middle;">
+                <p style="margin:0 0 2px 0;font-size:14px;font-weight:700;color:#1A1A1A;">今天的直播完整简报</p>
+                <p style="margin:0;font-size:12px;color:#6B6B6B;">PDF · 点击下载，离线随时回看</p>
+              </td>
+              <td style="padding:14px 18px 14px 8px;vertical-align:middle;text-align:right;width:1%;white-space:nowrap;">
+                <a href="${slidesUrl}" style="display:inline-block;background-color:#1A1A1A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;padding:9px 18px;border-radius:4px;">
+                  下载 →
+                </a>
+              </td>
+            </tr>
           </table>
         </td></tr>
 
-        <!-- ── Section: 课程大纲 ── -->
-        <tr><td style="height:1px;background-color:#E8E5DE;font-size:0;line-height:0;">&nbsp;</td></tr>
-        <tr><td style="padding:24px 40px 20px 40px;">
-          <p style="margin:0 0 4px 0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#B8953F;font-weight:600;">课程包含什么</p>
-          <p style="margin:0 0 16px 0;font-size:16px;font-weight:700;color:#1A1A1A;">直播是概览，课程是操作手册</p>
-
-          <!-- ETF 课程 -->
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E5DE;border-radius:6px;margin-bottom:12px;">
-            <tr><td style="padding:16px 20px;">
-              <p style="margin:0 0 8px 0;font-size:14px;font-weight:700;color:#B8953F;">ETF 进阶资产放大术 ｜ 28 单元 · 无期限回看</p>
-              <p style="margin:0;font-size:13px;color:#4B5563;line-height:1.8;">
-                CH.1 投资重构观 — 四类 ETF 分类与应用<br>
-                CH.2 主题先于股价 — 趋势交叉点判断<br>
-                CH.3 ETF 筛选逻辑 — 营收、现金流、市值<br>
-                CH.4 Mike 战法 1 — 涨市攻、跌市守<br>
-                CH.5 Mike 战法 2 — 杠杆型、加密货币 ETF<br>
-                CH.6 动态再平衡 — PMI、财报信号<br>
-                CH.7 策略落地 — 执行与优化流程<br>
-                <span style="color:#B8953F;">特别收录 川普 2.0 时代 ETF 布局</span>
-              </p>
-            </td></tr>
-          </table>
-
-          <!-- 期权课程 -->
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E5DE;border-radius:6px;margin-bottom:12px;">
-            <tr><td style="padding:16px 20px;">
-              <p style="margin:0 0 8px 0;font-size:14px;font-weight:700;color:#B8953F;">震荡行情的美股期权操作解析 ｜ 18 单元 · 无期限回看</p>
-              <p style="margin:0;font-size:13px;color:#4B5563;line-height:1.8;">
-                CH.1 熊市才是机会 — 看懂回调本质<br>
-                CH.2 美股估值逻辑 — 判断贵不贵<br>
-                CH.3 蜡烛图与技术面 — 进场时机<br>
-                CH.4 期权是什么 — 为什么不是高风险<br>
-                CH.5 资金配置 — 分批进场策略<br>
-                CH.6 Sell Put 完整操作<br>
-                CH.7 Sell Call 完整操作<br>
-                CH.8 实战 SOP — 完整操作流程<br>
-                <span style="color:#B8953F;">特别收录 川普关税分析 + 学员 Q&A</span>
-              </p>
-            </td></tr>
-          </table>
+        <!-- Survey lead-in -->
+        <tr><td style="padding:0 40px 16px 40px;">
+          <p style="margin:0 0 12px 0;font-size:15px;color:#1A1A1A;line-height:1.7;">另外，我还有一份礼物想送给你，<strong>相信对你一定有帮助</strong>。只要花 3 分钟帮我填个问卷，跟我聊聊你看完直播之后的想法，就免费送给你。每一个回答都会让我知道下次怎么讲得更清楚、要补什么内容、可以怎么再多帮上你一点。</p>
+          <p style="margin:0;font-size:15px;color:#1A1A1A;line-height:1.7;">没有对错，凭直觉回答就好。你的回答只有我和小团队会看到，不会用于其他用途。</p>
         </td></tr>
 
-        <!-- ── Section: APP 工具 ── -->
-        <tr><td style="height:1px;background-color:#E8E5DE;font-size:0;line-height:0;">&nbsp;</td></tr>
-        <tr><td style="padding:24px 40px 20px 40px;">
-          <p style="margin:0 0 4px 0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#B8953F;font-weight:600;">APP 工具</p>
-          <p style="margin:0 0 16px 0;font-size:16px;font-weight:700;color:#1A1A1A;">Mike是麦克 APP — 你的投资学习平台</p>
-
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E5DE;border-radius:6px;">
-            <tr><td style="padding:16px 20px;">
-              <p style="margin:0;font-size:13px;color:#4B5563;line-height:2;">
-                <span style="color:#B8953F;font-weight:600;">首页</span> — 大盘四大指数即时走势 + 重要经济数据发布日历<br>
-                <span style="color:#B8953F;font-weight:600;">选股</span> — 麦克精选持仓清单 + 价值灯号（红/黄/绿，5 分钟扫完）<br>
-                <span style="color:#B8953F;font-weight:600;">社团</span> — Mike 每日观点分享 + 学员持仓讨论 + VIP 即时聊天室<br>
-                <span style="color:#B8953F;font-weight:600;">内容</span> — 时事深度文章 + 语音直播回放 + YouTube 付费影片 + 课程
-              </p>
-            </td></tr>
-          </table>
-        </td></tr>
-
-        <!-- ── Section: 方案整理 ── -->
-        <tr><td style="height:1px;background-color:#E8E5DE;font-size:0;line-height:0;">&nbsp;</td></tr>
-        <tr><td style="padding:24px 40px 20px 40px;">
-          <p style="margin:0 0 4px 0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#B8953F;font-weight:600;">方案整理</p>
-          <p style="margin:0 0 4px 0;font-size:16px;font-weight:700;color:#1A1A1A;">选择适合你的方案</p>
-          <p style="margin:0 0 16px 0;font-size:13px;color:#6B6B6B;">以下价格为直播间专属，已帮你锁定。</p>
-
-          <!-- Bundle (推荐) -->
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAFAF7;border:2px solid #B8953F;border-radius:6px;margin-bottom:10px;">
-            <tr><td style="padding:16px 20px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td>
-                    <p style="margin:0 0 3px 0;font-size:15px;font-weight:700;color:#1A1A1A;">完整组合包</p>
-                    <p style="margin:0 0 6px 0;font-size:12px;color:#6B6B6B;">ETF课程 + 期权课程 + APP一年权限</p>
-                    <p style="margin:0;font-size:12px;color:#B8953F;font-weight:600;">+ 直播限定：Mike 一对一持仓分析（每位都送）</p>
-                  </td>
-                  <td style="text-align:right;vertical-align:top;white-space:nowrap;padding-left:12px;">
-                    <span style="display:inline-block;background:#B8953F;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;margin-bottom:6px;">推荐</span><br>
-                    <span style="font-size:13px;color:#9CA3AF;text-decoration:line-through;">$1696</span><br>
-                    <span style="font-size:20px;font-weight:700;color:#B8953F;">$599</span>
-                    <span style="font-size:11px;color:#ef4444;font-weight:600;">65% OFF</span>
-                  </td>
-                </tr>
+        <!-- Gift card with survey CTA -->
+        <tr><td style="padding:16px 40px 24px 40px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAFAF7;border:2px solid #B8953F;border-radius:8px;">
+            <tr><td style="padding:24px 26px;">
+              <span style="display:inline-block;background:#B8953F;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:0.8px;">🎁 你的礼物</span>
+              <p style="margin:14px 0 4px 0;font-size:12px;color:#6B6B6B;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;">独家精华文章</p>
+              <p style="margin:0 0 14px 0;font-size:18px;font-weight:700;color:#1A1A1A;line-height:1.5;">《2026 年资本流向与普通人的投资战略》</p>
+              <p style="margin:0 0 14px 0;font-size:14px;color:#4B5563;line-height:1.7;">这一份不是公开内容，是我私下整理给认真听课的学员，把今年这场地缘 + AI + 能源大变局，用我自己的判断和操作摊开来讲，<strong style="color:#1A1A1A;">不是网上那些虚的宏观分析</strong>。里面包括：</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px 0;">
+                ${[
+                  '美国怎么用 AI 主导权 + 全球关键资源 + 重塑供应链三条主线，重新分配下一轮资本红利',
+                  '地缘危机与能源真相：为什么油价暴涨反而常常是通缩前兆？霍尔木兹海峡冲突背后真正的资本流向',
+                  '2026 大盘三档情境预判：短期 / 中期 / 极端情境下的具体操作节奏（含 SPX 目标位 + 联准会降息预期判断）',
+                  '具体标的拆解：特斯拉 / OKL — 怎么看、怎么操作、仓位多少才合理',
+                  '普通人唯一能掌控的筹码：仓位管理 + 现金弹性的实战拆解',
+                ].map(item => `
+                <tr><td style="padding:5px 0;">
+                  <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+                    <td style="vertical-align:top;padding-right:10px;color:#B8953F;font-size:14px;font-weight:bold;line-height:1.6;">•</td>
+                    <td style="font-size:14px;color:#1A1A1A;line-height:1.6;">${item}</td>
+                  </tr></table>
+                </td></tr>`).join('')}
               </table>
+              <div style="text-align:center;">
+                <a href="https://www.surveycake.com/s/VXgA6" style="display:inline-block;background-color:#B8953F;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;padding:13px 32px;letter-spacing:0.5px;border-radius:4px;">
+                  填问卷领精华文章 →
+                </a>
+              </div>
             </td></tr>
           </table>
-
-          <!-- Other products -->
-          ${[
-            ['ETF+期权课程组合', '完整攻守框架 — ETF配置 + 期权策略 + 加赠1个月APP', '$696', '$249', '64% OFF'],
-            ['期权策略课程', '市场越跌越赚钱的防守策略 + 加赠1个月APP', '$312', '$99', '68% OFF'],
-            ['APP 月方案', '每天 10 分钟，灯号告诉你该不该动', '$129', '$49', '62% OFF'],
-          ].map(([n, desc, origPrice, price, discount]) => `
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E8E5DE;border-radius:6px;margin-bottom:8px;">
-            <tr><td style="padding:14px 20px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-                <td>
-                  <p style="margin:0 0 2px 0;font-size:14px;font-weight:700;color:#1A1A1A;">${n}</p>
-                  <p style="margin:0;font-size:12px;color:#6B6B6B;">${desc}</p>
-                </td>
-                <td style="text-align:right;vertical-align:middle;padding-left:12px;white-space:nowrap;">
-                  <span style="font-size:12px;color:#9CA3AF;text-decoration:line-through;">${origPrice}</span><br>
-                  <span style="font-size:16px;font-weight:700;color:#B8953F;">${price}</span>
-                  <span style="font-size:10px;color:#ef4444;font-weight:600;">${discount}</span>
-                </td>
-              </tr></table>
-            </td></tr>
-          </table>`).join('')}
         </td></tr>
 
-        <!-- ── CTA ── -->
-        <tr><td style="height:1px;background-color:#E8E5DE;font-size:0;line-height:0;">&nbsp;</td></tr>
-        <tr><td style="padding:28px 40px 32px 40px;text-align:center;">
-          <p style="margin:0 0 6px 0;font-size:15px;font-weight:700;color:#1A1A1A;">想清楚了，随时都欢迎。</p>
-          <p style="margin:0 0 20px 0;font-size:14px;color:#6B6B6B;">你的专属链接已帮你保留直播间价格：</p>
-          <a href="${checkoutUrl}" style="display:inline-block;background-color:#B8953F;color:#FFFFFF;font-size:16px;font-weight:700;text-decoration:none;padding:14px 48px;letter-spacing:0.5px;">
+        <!-- Checkout CTA divider -->
+        <tr><td style="padding:24px 40px 0 40px;">
+          <div style="border-top:1px solid #E8E5DE;height:1px;font-size:0;line-height:0;">&nbsp;</div>
+        </td></tr>
+
+        <!-- Checkout CTA -->
+        <tr><td style="padding:36px 40px 36px 40px;text-align:center;">
+          <p style="margin:0 0 12px 0;font-size:20px;font-weight:700;color:#1A1A1A;">加入 Mike 的投资学习社群</p>
+          <p style="margin:0 0 24px 0;font-size:15px;color:#6B6B6B;line-height:1.7;">想清楚了，随时都欢迎。专属链接已帮你保留直播间价格</p>
+          <a href="${checkoutUrl}" style="display:inline-block;background-color:#B8953F;color:#FFFFFF;font-size:16px;font-weight:700;text-decoration:none;padding:14px 48px;letter-spacing:0.5px;border-radius:4px;">
             前往专属结帐页面
           </a>
           <p style="margin:12px 0 0 0;font-size:12px;color:#9CA3AF;">直播间专属价格 · 限时有效</p>
           <p style="margin:16px 0 0 0;font-size:13px;color:#16a34a;font-weight:600;">🛡️ 所有方案均享 30 天无理由退款保证 · 零风险体验</p>
         </td></tr>
 
-        <!-- ── WhatsApp 联络 ── -->
+        <!-- WhatsApp -->
         <tr><td style="height:1px;background-color:#E8E5DE;font-size:0;line-height:0;">&nbsp;</td></tr>
         <tr><td style="padding:24px 40px;text-align:center;">
           <p style="margin:0 0 16px 0;font-size:14px;color:#1A1A1A;">有任何问题，随时找我们</p>

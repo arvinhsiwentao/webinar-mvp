@@ -265,7 +265,7 @@ export default function LiveRoomPage() {
     const params = new URLSearchParams();
     if (email) params.set('email', email);
     if (userName) params.set('name', userName);
-    params.set('source', 'live');
+    params.set('source', 'cta');
 
     // Append UTM attribution for cross-tab checkout
     const utmParams = getStoredUtmParams();
@@ -292,6 +292,85 @@ export default function LiveRoomPage() {
     // Open checkout in new tab (preserves livestream)
     window.open(`/checkout/${webinarId}?${params.toString()}`, '_blank');
   }, [webinarId, searchParams, currentTime]);
+
+  // Keep latest currentTime in a ref so unload listeners can read it without
+  // forcing the effect to re-bind every 0.1 s playback tick.
+  const currentTimeRef = useRef(0);
+  useEffect(() => {
+    currentTimeRef.current = currentTime;
+  }, [currentTime]);
+
+  // Fire post-webinar email when viewer leaves /live with ≥ 23 min watched.
+  // pagehide fires immediately; visibilitychange→hidden waits 30 s before firing
+  // (cancelled if user comes back) to distinguish real exit from tab-switching.
+  // sendBeacon survives page unload. Server-side dedup blocks duplicates with
+  // the existing CTA-click and end-page triggers.
+  const emailLeaveFired = useRef(false);
+  const hiddenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    const fireLeaveEmail = () => {
+      if (emailLeaveFired.current) return;
+      if (currentTimeRef.current < 23 * 60) return;
+
+      let email = '';
+      try {
+        const sticky = localStorage.getItem(`webinar-${webinarId}-evergreen`);
+        if (sticky) email = JSON.parse(sticky).email || '';
+      } catch { /* ignore */ }
+      if (!email) email = searchParams.get('email') || '';
+      if (!email) return;
+
+      emailLeaveFired.current = true;
+
+      const params = new URLSearchParams();
+      params.set('email', email);
+      if (userName !== '观众') params.set('name', userName);
+      params.set('source', 'left_23min');
+      const utms = getStoredUtmParams();
+      for (const [k, v] of Object.entries(utms)) params.set(k, v);
+      const checkoutUrl = `${window.location.origin}/checkout/${webinarId}?${params.toString()}`;
+
+      const payload = JSON.stringify({
+        email,
+        name: userName !== '观众' ? userName : '',
+        checkoutUrl,
+      });
+      const blob = new Blob([payload], { type: 'application/json' });
+      navigator.sendBeacon(`/api/webinar/${webinarId}/post-email`, blob);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        // Wait 30 s before firing — distinguish real exit from tab-switching
+        if (hiddenTimerRef.current) clearTimeout(hiddenTimerRef.current);
+        hiddenTimerRef.current = setTimeout(fireLeaveEmail, 30 * 1000);
+      } else if (document.visibilityState === 'visible') {
+        // User came back, cancel pending fire
+        if (hiddenTimerRef.current) {
+          clearTimeout(hiddenTimerRef.current);
+          hiddenTimerRef.current = null;
+        }
+      }
+    };
+
+    const handlePageHide = () => {
+      // Tab close / navigation / refresh — fire immediately, no delay
+      if (hiddenTimerRef.current) {
+        clearTimeout(hiddenTimerRef.current);
+        hiddenTimerRef.current = null;
+      }
+      fireLeaveEmail();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
+      if (hiddenTimerRef.current) clearTimeout(hiddenTimerRef.current);
+    };
+  }, [userName, webinarId, searchParams]);
 
   if (loading) {
     return (
