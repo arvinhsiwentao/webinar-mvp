@@ -4,6 +4,7 @@ import { useEffect, useCallback } from 'react';
 import { formatDate, formatTime } from '@/lib/utils';
 import { getTimezoneLabel } from '@/lib/timezone';
 import { trackGA4 } from '@/lib/analytics';
+import GoogleQuickFillButton from '@/components/registration/GoogleQuickFillButton';
 
 interface RegistrationModalV2Props {
   isOpen: boolean;
@@ -29,6 +30,14 @@ interface RegistrationModalV2Props {
   remainingSeats?: number;
   /** 已报名人数 */
   registeredCount?: number;
+  /** Google OAuth Client ID — 提供時顯示「一鍵填寫」按鈕 */
+  googleClientId?: string;
+  /** Google 回填觸發 */
+  onGoogleFilled?: (data: { email: string; name: string }) => void;
+  /** Email 是否被 Google 鎖定 */
+  googleFillActive?: boolean;
+  /** 清除 Google 填寫狀態，讓用戶手填別的 email */
+  onResetGoogleFill?: () => void;
 }
 
 export default function RegistrationModalV2({
@@ -51,6 +60,10 @@ export default function RegistrationModalV2({
   source = '',
   remainingSeats,
   registeredCount,
+  googleClientId,
+  onGoogleFilled,
+  googleFillActive = false,
+  onResetGoogleFill,
 }: RegistrationModalV2Props) {
   const handleClose = useCallback(() => {
     trackGA4('c_modal_close', {
@@ -122,6 +135,21 @@ export default function RegistrationModalV2({
             </div>
           )}
 
+          {/* Google 一鍵填寫 */}
+          {googleClientId && onGoogleFilled && (
+            <div className="mb-5">
+              <GoogleQuickFillButton
+                clientId={googleClientId}
+                onFilled={onGoogleFilled}
+              />
+              <div className="flex items-center gap-3 mt-4">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-xs text-neutral-500">或手动填写</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+            </div>
+          )}
+
           <form onSubmit={onSubmit} className="space-y-4">
             {/* Name field */}
             <div className="relative">
@@ -141,21 +169,63 @@ export default function RegistrationModalV2({
             </div>
 
             {/* Email field */}
-            <div className="relative">
-              <input
-                type="text"
-                value={email}
-                onChange={(e) => onEmailChange(e.target.value)}
-                placeholder="电子邮箱 *"
-                className="w-full h-[50px] px-4 pr-10 text-base bg-white/[0.06] border border-white/10 rounded-lg text-white placeholder-neutral-500 focus:border-[#C9A962] focus:outline-none transition-colors"
-                required
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <rect x="2" y="4" width="20" height="16" rx="2"/>
-                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                </svg>
-              </span>
+            <div>
+              {googleFillActive ? (
+                // 鎖定態：明顯的「已驗證 chip」樣式，跟 input 完全不同視覺
+                <div className="relative flex items-center gap-3 h-[50px] pl-4 pr-12 bg-[#C9A962]/[0.08] border border-[#C9A962]/40 rounded-lg cursor-not-allowed">
+                  {/* Google G logo */}
+                  <svg width="18" height="18" viewBox="0 0 18 18" className="flex-shrink-0">
+                    <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+                    <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                    <path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/>
+                    <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/>
+                  </svg>
+                  {/* Email text — 暗灰色，明顯非輸入態 */}
+                  <span className="flex-1 text-base text-neutral-300 truncate select-text">
+                    {email}
+                  </span>
+                  {/* 鎖頭 icon */}
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#C9A962]/60">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </span>
+                  {/* Hidden input 維持 form submit 行為 */}
+                  <input type="hidden" name="email" value={email} required />
+                </div>
+              ) : (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={email}
+                    onChange={(e) => onEmailChange(e.target.value)}
+                    placeholder="电子邮箱 *"
+                    className="w-full h-[50px] px-4 pr-10 text-base bg-white/[0.06] border border-white/10 rounded-lg text-white placeholder-neutral-500 focus:border-[#C9A962] focus:outline-none transition-colors"
+                    required
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <rect x="2" y="4" width="20" height="16" rx="2"/>
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                  </span>
+                </div>
+              )}
+              {googleFillActive && (
+                <div className="mt-1.5 flex items-center justify-between text-xs">
+                  <span className="text-[#C9A962]/80">✓ 来自你的 Google 帐号</span>
+                  {onResetGoogleFill && (
+                    <button
+                      type="button"
+                      onClick={onResetGoogleFill}
+                      className="text-neutral-400 hover:text-white underline cursor-pointer"
+                    >
+                      使用其他 email
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Slot selector — 只在非预选模式显示 */}

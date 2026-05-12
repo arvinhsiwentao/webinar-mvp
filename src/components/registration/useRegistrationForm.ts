@@ -30,6 +30,30 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
   const [phone, setPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+  const [googleFillActive, setGoogleFillActive] = useState(false);
+
+  const handleGoogleFilled = ({ email: gEmail, name: gName }: { email: string; name: string }) => {
+    setEmail(gEmail);
+    if (gName) setName(gName);
+    setGoogleFillActive(true);
+    setFormError('');
+    // Google 路徑下，GA4 enhanced measurement 抓不到 setState 觸發的 form 互動，
+    // 用獨立事件名（c_google_form_start）標記漏斗起點，避免污染既有 form_start tag
+    trackGA4('c_google_form_start', {
+      form_id: 'webinar_registration',
+      form_destination: '/api/register',
+      webinar_id: String(webinarId),
+    });
+    trackGA4('c_google_quick_fill', {
+      webinar_id: String(webinarId),
+      source: source || '',
+    });
+  };
+
+  const resetGoogleFill = () => {
+    setEmail('');
+    setGoogleFillActive(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +90,7 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
       trackGA4('sign_up', {
         method: source ? `webinar_registration_${source}` : 'webinar_registration',
         webinar_id: String(webinarId),
+        quick_fill: googleFillActive,
       });
       onSuccess(name.trim() || '学员');
     } catch (err) {
@@ -82,5 +107,8 @@ export function useRegistrationForm({ webinarId, onSuccess, onFormSubmit, emailE
     submitting,
     formError,
     handleSubmit,
+    googleFillActive,
+    handleGoogleFilled,
+    resetGoogleFill,
   };
 }

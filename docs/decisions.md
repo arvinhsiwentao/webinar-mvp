@@ -166,3 +166,8 @@ Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Strip
 
 **Decision:** In livestream mode, disable Video.js's native fullscreen button and replace with a custom button that fullscreens the wrapper `<div>`, not the `<video>` element. CSS fixed-position fallback for older iOS.
 **Why:** On mobile (especially iOS Safari), native video fullscreen exposes browser controls (duration, seekable progress bar, pause) that reveal the video is pre-recorded. Fullscreening the container div keeps our custom Video.js controls (hidden progress, LIVE pill, blocked seeking) active on both iOS and Android.
+
+### 2026-05-12: Google 一鍵填寫 — GIS + 後端驗 token，不建 session
+
+**決策：** 報名 modal 加 Google Identity Services (GIS) 一鍵填寫按鈕。用戶選帳號後，前端拿 ID token 送 `/api/auth/google-verify`，後端用 `google-auth-library` 驗簽名後回 email/name，前端把值塞進表單。**驗完即丟，不發 cookie、不建 user table、不寫 session。** Email 鎖為 readonly（保證真實），name 可改（允許中文化），phone 不變。實際 submit 仍走原本 `/api/register`。
+**Why:** 降低報名摩擦是主要目的，不是要做會員系統。選 GIS 而非 Supabase Auth / NextAuth 是因為它純前端、無 session 模型，跟現有 admin 密碼認證互不污染。`/api/register` origin-agnostic 設計剛好接得起來，evergreen / dedup / SendGrid / webhook 全部繼承。

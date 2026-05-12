@@ -1176,6 +1176,10 @@ export default function HomePageV2() {
         source={modalSource}
         remainingSeats={modalRemainingSeats}
         registeredCount={modalRemainingSeats !== undefined ? 80 - modalRemainingSeats : registeredCount}
+        googleClientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+        onGoogleFilled={form.handleGoogleFilled}
+        googleFillActive={form.googleFillActive}
+        onResetGoogleFill={form.resetGoogleFill}
       />
     </div>
   );

@@ -88,6 +88,7 @@ Route groups：`(public)/`（觀眾頁面）、`(admin)/`（管理後台）
 | `/api/subtitles/logs` | GET | 字幕生成日誌 |
 | `/api/cron/reminders` | GET | 24h/1h 郵件提醒（CRON_SECRET 保護） |
 | `/api/cron/orders-sync` | GET | 訂單同步至 Google Sheets（CRON_SECRET 保護） |
+| `/api/auth/google-verify` | POST | 驗 Google ID token 回 email/name（給報名 modal 一鍵填寫用，**不發 session**） |
 
 ### Admin（middleware 保護 `/admin/*` 和 `/api/admin/*`）
 

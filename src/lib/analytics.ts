@@ -2,7 +2,7 @@ type GA4Item = { item_id: string; item_name: string; price: number; quantity: nu
 
 type GA4EventMap = {
   // GA4 Recommended events
-  sign_up: { method: string; webinar_id: string }
+  sign_up: { method: string; webinar_id: string; quick_fill?: boolean }
   begin_checkout: { currency: string; value: number; items: GA4Item[]; cta_id?: string; video_time_sec?: number; source?: string; product_ids?: string[]; num_items?: number }
   purchase: { transaction_id: string; value: number; currency: string; items: GA4Item[] }
 
@@ -45,6 +45,8 @@ type GA4EventMap = {
   c_nav_click: { nav_item: string }
   c_modal_close: { had_input: boolean; source: string }
   c_schedule_card_click: { slot_index: number; slot_type: string; remaining_seats: number }
+  c_google_quick_fill: { webinar_id: string; source: string }
+  c_google_form_start: { form_id: string; form_destination: string; webinar_id: string }
 }
 
 type GA4EventName = keyof GA4EventMap
