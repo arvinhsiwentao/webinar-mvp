@@ -171,3 +171,8 @@ Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Strip
 
 **決策：** 報名 modal 加 Google Identity Services (GIS) 一鍵填寫按鈕。用戶選帳號後，前端拿 ID token 送 `/api/auth/google-verify`，後端用 `google-auth-library` 驗簽名後回 email/name，前端把值塞進表單。**驗完即丟，不發 cookie、不建 user table、不寫 session。** Email 鎖為 readonly（保證真實），name 可改（允許中文化），phone 不變。實際 submit 仍走原本 `/api/register`。
 **Why:** 降低報名摩擦是主要目的，不是要做會員系統。選 GIS 而非 Supabase Auth / NextAuth 是因為它純前端、無 session 模型，跟現有 admin 密碼認證互不污染。`/api/register` origin-agnostic 設計剛好接得起來，evergreen / dedup / SendGrid / webhook 全部繼承。
+
+### 2026-05-13: Post-webinar email 名單記錄到 Supabase + 即時 append Google Sheet
+
+**決策：** 在 `/api/webinar/[id]/post-email` 寄信時 fire-and-forget 寫入新表 `post_webinar_email_recipients`（denormalize UTM from registrations 快照），Supabase insert 成功後**即時 append 一列到 Google Sheet**（`RETARGETING_SPREADSHEET_ID` env var、Retargeting tab）。**不走 cron**。
+**Why:** 行銷部門需要「看過直播的有意願受眾」名單做 EDM + Google Ads/Meta Custom Audience，且想即時看到新名單不要等。Supabase 當 source of truth（即時、可分析），Sheet 是行銷便利鏡像。Sheet 寫入失敗只 log 不阻擋；用戶自行對照兩邊有無落差，DB 為準。UTM denormalize 避免日後 registrations 表更新後失去「轉換當下」歸因 snapshot。Dedup 重用 audit 機制 + DB unique constraint 雙保險，既有 3 個觸發 caller 完全不動。**取捨：** 放棄 cron clear-and-rewrite 的完美一致性，換取即時性 + 程式簡單性。

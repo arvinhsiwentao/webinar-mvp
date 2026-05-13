@@ -201,3 +201,18 @@ export interface RegisterRequest {
   utmContent?: string;
   gclid?: string;
 }
+
+export interface PostWebinarEmailRecipient {
+  id: string;
+  webinarId: string;
+  email: string;
+  name: string;
+  sentAt: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmContent?: string;
+  gclid?: string;
+  registeredAt?: string;
+  createdAt: string;
+}

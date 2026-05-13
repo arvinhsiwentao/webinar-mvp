@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail, postWebinarEmail } from '@/lib/email';
 import { audit, hasPostWebinarEmailSent } from '@/lib/audit';
+import { recordPostWebinarRecipient } from '@/lib/db';
 
 export async function POST(
   request: NextRequest,
@@ -36,6 +37,11 @@ export async function POST(
 
   const emailData = postWebinarEmail(email, name || '', checkoutUrl, slidesUrl || '#');
   sendEmail(emailData); // fire and forget
+
+  // Retargeting list: snapshot recipient + UTM into dedicated table (fire and forget)
+  recordPostWebinarRecipient({ webinarId, email, name: name || '' }).catch(err =>
+    console.error('[post-email] recordPostWebinarRecipient failed:', err)
+  );
 
   return NextResponse.json({ ok: true });
 }

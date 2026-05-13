@@ -51,7 +51,7 @@ Route groups：`(public)/`（觀眾頁面）、`(admin)/`（管理後台）
 
 - `src/lib/supabase.ts` — Supabase client（lazy-init proxy）
 - `src/lib/db.ts` — CRUD 函數，自動 snake_case ↔ camelCase 轉換
-- **Tables：** `webinars`, `registrations`, `chat_messages`, `orders`, `video_files`, `events`
+- **Tables：** `webinars`, `registrations`, `chat_messages`, `orders`, `video_files`, `events`, `post_webinar_email_recipients`
 - **JSONB 欄位：** `auto_chat`, `cta_events`, `highlights`, `subtitle_cues`, `evergreen`（隨 parent webinar 讀寫）
 - **Atomic lock：** `updateOrderStatus(id, fromStatus, toStatus)` 防止重複履約
 

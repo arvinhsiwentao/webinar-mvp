@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
-import { Webinar, Registration, ChatMessageData, Order, VideoFile } from './types';
+import { Webinar, Registration, ChatMessageData, Order, VideoFile, PostWebinarEmailRecipient } from './types';
+import { appendRetargetingRowToSheet } from './google-sheets';
 
 // --- Column name mapping ---
 // Supabase uses snake_case, TypeScript uses camelCase
@@ -376,4 +377,55 @@ export async function deleteVideoFile(id: string): Promise<boolean> {
     .eq('id', id);
   if (error) throw error;
   return (count ?? 0) > 0;
+}
+
+// --- Post-webinar email retargeting list ---
+
+export async function recordPostWebinarRecipient(args: {
+  webinarId: string;
+  email: string;
+  name: string;
+}): Promise<void> {
+  // Resolve URL alias (e.g. "1") to real UUID — webinar_id column is typed uuid
+  const webinar = await getWebinarById(args.webinarId).catch(() => null);
+  if (!webinar) {
+    console.error('[recordPostWebinarRecipient] webinar not found:', args.webinarId);
+    return;
+  }
+  const resolvedWebinarId = webinar.id;
+
+  // Look up registration to snapshot UTM attribution at email-send time
+  const registration = await getRegistrationByEmail(resolvedWebinarId, args.email).catch(() => null);
+
+  const insertRow = {
+    webinar_id: resolvedWebinarId,
+    email: args.email,
+    name: args.name || '',
+    sent_at: new Date().toISOString(),
+    utm_source: registration?.utmSource ?? null,
+    utm_medium: registration?.utmMedium ?? null,
+    utm_campaign: registration?.utmCampaign ?? null,
+    utm_content: registration?.utmContent ?? null,
+    gclid: registration?.gclid ?? null,
+    registered_at: registration?.registeredAt ?? null,
+  };
+
+  const { data, error } = await supabase
+    .from('post_webinar_email_recipients')
+    .insert(insertRow)
+    .select()
+    .single();
+
+  if (error) {
+    // Unique violation (23505) on (webinar_id, email) — already recorded, dedup OK
+    if (error.code === '23505') return;
+    console.error('[recordPostWebinarRecipient] insert failed:', error);
+    return;
+  }
+
+  // Real-time mirror to Google Sheet (fire-and-forget — Supabase is source of truth,
+  // marketing manually reconciles any Sheet drift)
+  appendRetargetingRowToSheet(snakeToCamel<PostWebinarEmailRecipient>(data)).catch(err =>
+    console.error('[recordPostWebinarRecipient] sheet append failed:', err)
+  );
 }

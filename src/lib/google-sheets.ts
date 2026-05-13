@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { Order } from './types';
+import { Order, PostWebinarEmailRecipient } from './types';
 
 const SPREADSHEET_ID = '1W9tK97n004XI7UbN_VuECcb_ZVVWmwa31sWRadBxZOQ';
 const DEFAULT_SHEET_NAME = '工作表1';
@@ -8,6 +8,8 @@ const MAX_RETRIES = 3;
 
 const ORDERS_SPREADSHEET_ID = '1sba5HDJav8aUO5L59-JmkeV2QXp8F6gpR4PUOLXMqD8';
 const ORDERS_SHEET_RANGE = 'Orders!A:M';
+
+const RETARGETING_SHEET_RANGE = 'Retargeting!A:K';
 
 function getAuth() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
@@ -179,4 +181,50 @@ export async function syncOrdersToSheet(
   });
 
   return dataRows.length;
+}
+
+/**
+ * Append a single post-webinar email recipient row to the retargeting Google Sheet.
+ * Real-time write — called fire-and-forget after Supabase insert succeeds.
+ * Supabase remains the source of truth; the Sheet is a marketing-convenience mirror.
+ * Silently no-ops if env vars are missing (not all environments configure the Sheet).
+ */
+export async function appendRetargetingRowToSheet(
+  recipient: PostWebinarEmailRecipient
+): Promise<void> {
+  const auth = getAuth();
+  if (!auth) {
+    console.warn('[appendRetargeting] GOOGLE_SERVICE_ACCOUNT_KEY not configured, skipping');
+    return;
+  }
+
+  const spreadsheetId = process.env.RETARGETING_SPREADSHEET_ID;
+  if (!spreadsheetId) {
+    console.warn('[appendRetargeting] RETARGETING_SPREADSHEET_ID not configured, skipping');
+    return;
+  }
+
+  const sheets = google.sheets({ version: 'v4', auth });
+
+  const row = [
+    recipient.email,
+    recipient.name,
+    recipient.sentAt,
+    recipient.webinarId,
+    recipient.utmSource ?? '',
+    recipient.utmMedium ?? '',
+    recipient.utmCampaign ?? '',
+    recipient.utmContent ?? '',
+    recipient.gclid ?? '',
+    recipient.registeredAt ?? '',
+    recipient.createdAt,
+  ];
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: RETARGETING_SHEET_RANGE,
+    valueInputOption: 'RAW',
+    insertDataOption: 'INSERT_ROWS',
+    requestBody: { values: [row] },
+  });
 }
