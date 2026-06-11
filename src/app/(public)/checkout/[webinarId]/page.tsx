@@ -71,7 +71,7 @@ export default function CheckoutPage() {
   );
 
   // Testimonial shown inside each product card — one per plan, tied to live script moments
-  const testimonialByProduct: Record<ProductId, { text: string; name: string }> = {
+  const testimonialByProduct: Partial<Record<ProductId, { text: string; name: string }>> = {
     [PRODUCT_IDS.OPTIONS]: {
       text: '学会 Sell Put 后，市场跌的时候也能收保费，心态完全不一样。',
       name: '陈先生',

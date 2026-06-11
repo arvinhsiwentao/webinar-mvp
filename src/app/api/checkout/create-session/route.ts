@@ -6,7 +6,7 @@ import { getProduct, PRODUCT_IDS, type ProductId } from '@/lib/products';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { webinarId, email, name, source, bonusDeadline, productIds, gaClientId, utm } = body;
+    const { webinarId, email, name, source, bonusDeadline, productIds, gaClientId, utm, funnel, angle } = body;
 
     if (!webinarId || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -56,13 +56,22 @@ export async function POST(request: NextRequest) {
 
     const isBundle = ids.includes(PRODUCT_IDS.BUNDLE);
 
+    // Resolve the post-payment return URL. The us-stock-course ($1) funnel has its
+    // own return page (and must keep "webinar" out of the URL); every other funnel
+    // keeps the existing /checkout/[id]/return behavior.
+    const safeAngle = typeof angle === 'string' ? encodeURIComponent(angle) : '';
+    const isUsStockCourse = funnel === 'us_stock_course';
+    const returnUrl = isUsStockCourse
+      ? `${baseUrl}/us-stock-course/checkout/return?session_id={CHECKOUT_SESSION_ID}${safeAngle ? `&angle=${safeAngle}` : ''}`
+      : `${baseUrl}/checkout/${resolvedId}/return?session_id={CHECKOUT_SESSION_ID}`;
+
     // Create Stripe Checkout Session in embedded mode
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded',
       locale: 'auto',
       line_items: lineItems,
       mode: 'payment',
-      return_url: `${baseUrl}/checkout/${resolvedId}/return?session_id={CHECKOUT_SESSION_ID}`,
+      return_url: returnUrl,
       customer_email: email,
       metadata: {
         webinarId: resolvedId,
@@ -101,6 +110,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         source: source || 'direct',
         order_source: 'mike_webinar',
+        funnel: isUsStockCourse ? 'us_stock_course' : 'webinar',
         productIds: ids.join(','),
         productNames: productNames.join(','),
         ...(isBundle && bonusDeadline ? { bonusDeadline } : {}),

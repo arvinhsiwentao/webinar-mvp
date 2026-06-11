@@ -74,6 +74,8 @@ npm test         # Subtitle pipeline tests (tsx --test)
 | `CRON_SECRET` | 選用 | Cron job 認證 |
 | `NEXT_PUBLIC_GTM_ID` | 選用 | Google Tag Manager |
 | `NEXT_PUBLIC_BASE_URL` | 選用 | 公開 URL（郵件連結、Stripe 回調） |
+| `STRIPE_PRICE_US_STOCK_1PLUS3` | us-stock 漏斗 | $1 課程 SKU 的 Stripe Price ID |
+| `US_STOCK_CONTAINER_WEBINAR_ID` | us-stock 漏斗 | $1 直購訂單掛靠的容器 webinar UUID |
 
 ## 頁面流程
 

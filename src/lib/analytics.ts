@@ -47,6 +47,15 @@ type GA4EventMap = {
   c_schedule_card_click: { slot_index: number; slot_type: string; remaining_seats: number }
   c_google_quick_fill: { webinar_id: string; source: string }
   c_google_form_start: { form_id: string; form_destination: string; webinar_id: string }
+
+  // us-stock-course funnel ($1 direct-purchase) — DEDICATED events so they never
+  // mix with the webinar funnel's standard purchase/begin_checkout (which would
+  // pollute Google Ads Smart Bidding via the shared GA4 property). Mark the three
+  // conversion events as key events in GA4 and import into the $1 Ads account.
+  c_us_stock_course_cta_click: { angle: string; position: string }
+  c_us_stock_course_begin_checkout: { angle: string; currency: string; value: number; items: GA4Item[] }
+  c_us_stock_course_add_payment_info: { angle: string }
+  c_us_stock_course_purchase: { transaction_id: string; value: number; currency: string; items: GA4Item[]; angle: string }
 }
 
 type GA4EventName = keyof GA4EventMap
@@ -65,6 +74,10 @@ const CONVERSION_EVENTS: ReadonlySet<string> = new Set([
   'c_end_page_cta_click',
   'c_chatbot_inquiry_submit',
   'c_confirm_click',
+  // us-stock-course $1 funnel conversions
+  'c_us_stock_course_begin_checkout',
+  'c_us_stock_course_add_payment_info',
+  'c_us_stock_course_purchase',
 ])
 
 function getCookie(name: string): string | null {

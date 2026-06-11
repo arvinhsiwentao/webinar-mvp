@@ -9,7 +9,7 @@ interface NavItem {
   label: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
+const DEFAULT_NAV_ITEMS: NavItem[] = [
   { id: 'content', label: '讲座内容' },
   { id: 'speaker', label: '讲师介绍' },
   { id: 'testimonials', label: '学员反馈' },
@@ -20,9 +20,14 @@ const NAV_ITEMS: NavItem[] = [
 interface StickyNavProps {
   onCtaClick: () => void;
   logoSrc?: string;
+  /** Override the section anchors (defaults to the webinar landing's sections). */
+  navItems?: NavItem[];
+  /** Override the CTA button label (defaults to 免费报名). */
+  ctaLabel?: string;
 }
 
-export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
+export default function StickyNav({ onCtaClick, logoSrc, navItems, ctaLabel }: StickyNavProps) {
+  const NAV_ITEMS = navItems ?? DEFAULT_NAV_ITEMS;
   const [activeId, setActiveId] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -67,9 +72,14 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
   }, [menuOpen]);
 
   const scrollTo = useCallback((id: string) => {
+    trackGA4('c_nav_click', { nav_item: id });
+    if (id === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setMenuOpen(false);
+      return;
+    }
     const el = document.getElementById(id);
     if (!el) return;
-    trackGA4('c_nav_click', { nav_item: id });
     const navHeight = 56;
     const top = el.getBoundingClientRect().top + window.scrollY - navHeight;
     window.scrollTo({ top, behavior: 'smooth' });
@@ -79,7 +89,7 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-40">
       <div className="bg-[#0a0a08]/95 backdrop-blur-md border-b border-[#C9A962]/15 shadow-[0_1px_8px_rgba(0,0,0,0.3)]">
-        <div className="max-w-5xl mx-auto h-14 flex items-center justify-between px-4 md:px-6">
+        <div className="max-w-6xl mx-auto h-14 flex items-center justify-between px-4 md:px-6">
           {/* Logo + Brand name */}
           <div className="flex-shrink-0 mr-4 flex items-center gap-2.5">
             {logoSrc ? (
@@ -96,7 +106,7 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
 
           {/* Desktop: horizontal nav items */}
           <div className="hidden md:flex flex-1 overflow-x-auto no-scrollbar">
-            <div className="flex items-center gap-2 min-w-max">
+            <div className="flex items-center gap-0.5 min-w-max">
               {NAV_ITEMS.map((item) => {
                 const isActive = activeId === item.id;
                 return (
@@ -104,7 +114,7 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
                     key={item.id}
                     onClick={() => scrollTo(item.id)}
                     className={`
-                      relative px-4 py-2 text-[15px] font-semibold rounded-md
+                      relative px-2.5 py-2 text-sm font-semibold rounded-md
                       transition-colors duration-200 whitespace-nowrap cursor-pointer
                       ${isActive
                         ? 'text-[#C9A962]'
@@ -115,7 +125,7 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
                   >
                     {item.label}
                     <span
-                      className="absolute bottom-0 left-3 right-3 h-0.5 bg-[#C9A962] rounded-full transition-all duration-300"
+                      className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#C9A962] rounded-full transition-all duration-300"
                       style={{
                         opacity: isActive ? 1 : 0,
                         transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
@@ -172,13 +182,13 @@ export default function StickyNav({ onCtaClick, logoSrc }: StickyNavProps) {
           </div>
 
           {/* Desktop CTA button */}
-          <div className="hidden md:block flex-shrink-0 ml-4">
+          <div className="hidden md:block flex-shrink-0 ml-3">
             <button
               onClick={onCtaClick}
-              className="text-sm font-semibold px-5 py-2 rounded-lg border border-[#C9A962]/50 text-[#E8D5A3] bg-[#C9A962]/10 hover:bg-[#C9A962]/20 hover:border-[#C9A962] transition-all duration-300 cursor-pointer"
+              className="text-sm font-semibold px-4 py-2 rounded-lg border border-[#C9A962]/50 text-[#E8D5A3] bg-[#C9A962]/10 hover:bg-[#C9A962]/20 hover:border-[#C9A962] transition-all duration-300 cursor-pointer whitespace-nowrap"
               style={{ fontFamily: '"Noto Serif SC", serif' }}
             >
-              免费报名
+              {ctaLabel ?? '免费报名'}
             </button>
           </div>
         </div>

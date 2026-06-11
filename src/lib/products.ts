@@ -28,6 +28,8 @@ export const PRODUCT_IDS = {
   ETF_OPTIONS: 'etf-options',
   APP_MONTHLY: 'app-monthly',
   BUNDLE: 'bundle',
+  // us-stock-course $1 funnel (1+3: 9-chapter course + 3-day app VIP)
+  US_STOCK_1PLUS3: 'us-stock-1plus3',
 } as const;
 
 export type ProductId = typeof PRODUCT_IDS[keyof typeof PRODUCT_IDS];
@@ -94,6 +96,25 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     description: 'ETF课程 + 期权课程 + APP一年权限',
     includes: ['ETF 实战课程（无期限回看）', '期权策略课程（无期限回看）', 'APP 一年完整权限'],
     isBundle: true,
+  },
+  // us-stock-course $1 funnel. NOT included in getAllProducts() — it is only ever
+  // bought via the dedicated /us-stock-course checkout (fixed single product), so
+  // it must not appear in the legacy $599 multi-select checkout.
+  // PREREQUISITE (Phase 0): set STRIPE_PRICE_US_STOCK_1PLUS3, and replace the
+  // sheetName / productPackageId / salesCode placeholders with the real CMoney values.
+  [PRODUCT_IDS.US_STOCK_1PLUS3]: {
+    id: PRODUCT_IDS.US_STOCK_1PLUS3,
+    name: '$1 美股入门套餐｜9 章课程 + 3 天 App VIP',
+    shortName: '1+3 入门套餐',
+    price: 1,
+    originalPrice: 49,
+    stripePriceId: process.env.STRIPE_PRICE_US_STOCK_1PLUS3 || 'price_REPLACE_ME_US_STOCK_1PLUS3',
+    sheetName: 'TODO_US_STOCK_REDEMPTION_TAB', // CMoney 兑换序号 Google Sheet 分頁名
+    productPackageId: 'TODO_US_STOCK_PACKAGE_ID',
+    salesCode: 'TODO_US_STOCK_SALES_CODE',
+    description: '9 章 Mike 亲录美股投资课程 + 3 天 App VIP 全功能体验',
+    includes: ['9 章美股投资线上课程（永久持有）', '3 天 App VIP 全功能（到期自动降级，不扣款）'],
+    isBundle: false,
   },
 };
 

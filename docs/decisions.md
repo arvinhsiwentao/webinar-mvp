@@ -176,3 +176,13 @@ Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Strip
 
 **決策：** 在 `/api/webinar/[id]/post-email` 寄信時 fire-and-forget 寫入新表 `post_webinar_email_recipients`（denormalize UTM from registrations 快照），Supabase insert 成功後**即時 append 一列到 Google Sheet**（`RETARGETING_SPREADSHEET_ID` env var、Retargeting tab）。**不走 cron**。
 **Why:** 行銷部門需要「看過直播的有意願受眾」名單做 EDM + Google Ads/Meta Custom Audience，且想即時看到新名單不要等。Supabase 當 source of truth（即時、可分析），Sheet 是行銷便利鏡像。Sheet 寫入失敗只 log 不阻擋；用戶自行對照兩邊有無落差，DB 為準。UTM denormalize 避免日後 registrations 表更新後失去「轉換當下」歸因 snapshot。Dedup 重用 audit 機制 + DB unique constraint 雙保險，既有 3 個觸發 caller 完全不動。**取捨：** 放棄 cron clear-and-rewrite 的完美一致性，換取即時性 + 程式簡單性。
+
+### 2026-06-11: 新增 us-stock-course（$1 / 1+3）直購漏斗 + GA4 事件隔離
+
+**決策：** 在自控的 Next.js domain 新建一條與模擬直播無關的直購鏈路 `/us-stock-course/{author,news,feature}` → `/us-stock-course/checkout` → `/us-stock-course/checkout/return`，賣 $1 的「9 章課程 + 3 天 App VIP」(1+3)。免登入結帳（只填 email）、付款後秀序號 + 引導去 cmoney.tw 兌換。重用既有 Stripe Embedded Checkout + `fulfillOrder` 序號發放 + landing 元件 + 深色金色設計系統。3 切角共用 `UsStockCourseBody`，只差前導影片(Mux HLS)與 hook 文案(`ANGLE_CONFIG`)。結帳/兌換頁三切角共用，`angle` 走 `?angle=` query 做歸因。
+**Why（為何要這條鏈路）：** 現有 webinar→$599 對冷流量轉換太差；CMoney 的 $1 LP 又因「立即購買強制先登入」把高摩擦放在付款前，冷流量大量流失。把登入挪到付款後（已付錢→sunk cost→登入摩擦趨近於零），並降門檻到 $1。
+**GA4 事件隔離（關鍵）：** 兩條漏斗共用同一個 GA4 資源，若新漏斗沿用標準 `purchase`/`begin_checkout`，$1 成交會污染 webinar 的 Google Ads Smart Bidding（即使不同廣告帳號也一樣，根因在 GA4 事件層）。**決策：新漏斗完全不發 `purchase`/`begin_checkout`，改發專屬事件** `c_us_stock_course_begin_checkout`(進入購買頁) / `c_us_stock_course_add_payment_info`(Stripe 表單渲染) / `c_us_stock_course_purchase`(購買完成)，三者加進 `CONVERSION_EVENTS` 自動帶 gclid/utm；CTA 用 `c_us_stock_course_cta_click`、scroll depth `page:'us_stock_course_'+angle`、order metadata 標 `funnel:'us_stock_course'`。webinar 那邊零改動、轉換維持純淨。return 頁 purchase value 用真實 $1（不 fallback `DEFAULT_PRODUCT_PRICE=599`）。
+**容器 webinar：** 訂單 FK 需掛一個隱形 `webinars` row（`US_STOCK_CONTAINER_WEBINAR_ID` env，用 UUID 不用數字索引——`getWebinarById` 數字版是按 created_at 第 N 筆會位移），永不出現在任何網址。
+**前導影片：** 走 Mux HLS（`IntroVideoPlayer` 用 hls.js + 原生 controls，非鎖定版 VideoPlayer——行銷片要正常播放控制）。
+**Phase 0 前提（非程式，上線前備齊）：** $1 Stripe Price ID(`STRIPE_PRICE_US_STOCK_1PLUS3`)、CMoney 兌換序號 Google Sheet 分頁 + 商品包/銷售碼（填 `products.ts` 的 `us-stock-1plus3`）、容器 webinar UUID、3 支 hook 上 Mux 取 playbackId 填 `ANGLE_CONFIG`、3 個轉換事件在 GA4 標為關鍵事件並匯入 $1 廣告帳號。
+**取捨：** 新漏斗不發標準 GA4 電商事件 → 失去 GA4 內建 Monetization/購買漏斗報表，換取 Google Ads 出價乾淨隔離（對「兩條漏斗別互相打架」這個首要目標是正確取捨）。
