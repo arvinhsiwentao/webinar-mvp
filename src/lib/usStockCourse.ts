@@ -95,25 +95,25 @@ export const ANGLE_CONFIG: Record<UsStockAngle, AngleConfig> = {
     qr: '/images/us-stock/qr-author.webp',
     appUrl: 'https://cmoneymike.onelink.me/ZEaW/w7ntvnjd',
   },
-  // 🅱 时事切角 — FOMO：震荡行情中的工具
+  // 🅱 时事切角 — hero 文案沿用 author 定稿（仅 intro 影片 / QR / onelink 因归因而不同）
   news: {
     introVideoHls: 'https://stream.mux.com/qzsDylu8pTAFI8xRhqavri1z9dTcmSHt6TZEAtXwZsw.m3u8',
     poster: '/images/us-stock/cover.webp',
-    heroHeadline: '行情乱的时候，你需要的不是更多新闻，是一套判断框架',
-    heroSub: '战争、IPO、AI 轮动 — 不知道该不该动仓位？先看大盘风向，再决定出手',
+    heroHeadline: '从负债 50 万到财务自由的投资框架',
+    heroSub: '',
     hookCopy:
-      '每天看财经新闻、Reddit、Twitter，越看越乱，行情一震荡就不知道该不该动。这 9 章课带你建立 4 步骤框架，从「凭感觉」升级到「有纪律地执行」。',
+      '你现在的迷茫，怕买错、怕亏钱、光靠薪水看不到尽头，我全都经历过。这 9 章课，是我花十几年验证、真正能复制的方法。',
     qr: '/images/us-stock/qr-news.webp',
     appUrl: 'https://cmoneymike.onelink.me/ZEaW/w873ef51',
   },
-  // 🅲 功能切角 — 理性：12 板块系统找 AI 趋势股
+  // 🅲 功能切角 — hero 文案沿用 author 定稿（仅 intro 影片 / QR / onelink 因归因而不同）
   feature: {
     introVideoHls: 'https://stream.mux.com/Q36DQ9ig9XZd5ObGj7lxeBNmleDSEUC7cfFv01wmmp7c.m3u8',
     poster: '/images/us-stock/cover.webp',
-    heroHeadline: '12 板块系统，从 9000+ 支美股里找出 AI 趋势股',
-    heroSub: '以 AI 为中心的板块交集打分 — 自己研究太花时间，用系统化过滤器',
+    heroHeadline: '从负债 50 万到财务自由的投资框架',
+    heroSub: '',
     hookCopy:
-      'AI 概念股几百支，自己一支支研究太花时间，总是错过行情。这 9 章课教你用 12 板块交集打分系统，让 App 自动算出「个股重视程度分数」，快速锁定趋势股。',
+      '你现在的迷茫，怕买错、怕亏钱、光靠薪水看不到尽头，我全都经历过。这 9 章课，是我花十几年验证、真正能复制的方法。',
     qr: '/images/us-stock/qr-feature.webp',
     appUrl: 'https://cmoneymike.onelink.me/ZEaW/yub9ufpa',
   },
