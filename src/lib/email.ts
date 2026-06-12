@@ -1,5 +1,6 @@
 import { audit } from './audit';
 import { formatInTimezone, getTimezoneLabel } from './timezone';
+import { PRODUCT_IDS } from './products';
 
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@webinar.example.com';
@@ -9,9 +10,11 @@ interface EmailParams {
   to: string;
   subject: string;
   html: string;
+  /** Override the global FROM_NAME for this email (e.g. per funnel). */
+  fromName?: string;
 }
 
-export async function sendEmail({ to, subject, html }: EmailParams): Promise<boolean> {
+export async function sendEmail({ to, subject, html, fromName }: EmailParams): Promise<boolean> {
   if (!SENDGRID_API_KEY) {
     console.warn(`[Email] SENDGRID_API_KEY not set — email NOT sent to ${to}: "${subject}"`);
     audit({ type: 'email_failed', to, template: subject, error: 'SENDGRID_API_KEY not configured' });
@@ -27,7 +30,7 @@ export async function sendEmail({ to, subject, html }: EmailParams): Promise<boo
       },
       body: JSON.stringify({
         personalizations: [{ to: [{ email: to }] }],
-        from: { email: FROM_EMAIL, name: FROM_NAME },
+        from: { email: FROM_EMAIL, name: fromName || FROM_NAME },
         subject,
         content: [{ type: 'text/html', value: html }],
       }),
@@ -333,6 +336,8 @@ export interface PurchaseEmailData {
   orderId: string;
   email: string;
   bonusEligible?: boolean;
+  /** us-stock funnel: link to the standalone activation tutorial page. */
+  tutorialUrl?: string;
 }
 
 export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams {
@@ -340,6 +345,8 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
   const appLink = 'https://cmoneymike.onelink.me/ZEaW/kkyo4oqs';
   const course1Link = 'https://cmy.tw/00CKIq';
   const course2Link = 'https://cmy.tw/00ChKt';
+  const usStockCourseLink = 'https://www.cmoney.tw/course-media/17781/chapters';
+  const usStockAppLink = 'https://cmoneymike.onelink.me/ZEaW/hqq09hla';
   const serviceEmail = 'cmoney_overseas@cmoney.com.tw';
   const serviceHours = '北京时间週一到週五 8：30 ~ 17：30';
   const mikeWhatsApp = 'https://wa.me/15109927777?text=' + encodeURIComponent('我已购买课程套餐，想与 Mike 老师做一对一持仓分析');
@@ -349,16 +356,19 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
   const codes = data.activationCodes || (data.activationCode
     ? [{ productId: 'bundle', productName: '美股二加一实战组合包', code: data.activationCode }]
     : []);
-  const productDisplayName = codes.length === 1
-    ? codes[0].productName
-    : codes.map(c => c.productName).join(' + ');
+  const isUsStock = codes.some(c => c.productId === PRODUCT_IDS.US_STOCK_1PLUS3);
+  const productDisplayName = isUsStock
+    ? 'US$1 美股入门课'
+    : (codes.length === 1
+        ? codes[0].productName
+        : codes.map(c => c.productName).join(' + '));
 
   // Build activation codes HTML
   const codesHtml = codes.map(c => `
     <div style="border: 2px solid #B8953F; border-radius: 8px; padding: 20px; text-align: center; margin: 16px 0;">
       <p style="margin: 0 0 4px 0; font-size: 13px; color: #6B6B6B;">${c.productName}</p>
       <p style="margin: 0 0 8px 0; font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #B8953F;">${c.code}</p>
-      <p style="margin: 0; font-size: 12px; color: #B8953F;">仅限单次使用 · 到期日：${codeExpiry}</p>
+      <p style="margin: 0; font-size: 12px; color: #B8953F;">${isUsStock ? '仅限单次使用' : `仅限单次使用 · 到期日：${codeExpiry}`}</p>
     </div>
   `).join('');
 
@@ -368,18 +378,24 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
   const hasEtf = productIds.some(id => id === 'etf-options' || id === 'bundle');
   const hasApp = productIds.some(id => id === 'app-monthly' || id === 'bundle' || id === 'options' || id === 'etf-options');
 
-  const productLinksHtml = [
-    hasApp ? `<li><a href="${appLink}" style="color: #B8953F;">Mike是麦克 美股财富导航 App 下载</a></li>` : '',
-    hasOptions ? `<li><a href="${course1Link}" style="color: #B8953F;">震荡行情的美股期权操作解析 线上课程观看</a></li>` : '',
-    hasEtf ? `<li><a href="${course2Link}" style="color: #B8953F;">ETF 进阶资产放大术 线上课程观看</a></li>` : '',
-  ].filter(Boolean).join('\n');
+  const productLinksHtml = isUsStock
+    ? [
+        `<li><a href="${usStockCourseLink}" style="color: #B8953F;">点此观看课程</a></li>`,
+        `<li><a href="${usStockAppLink}" style="color: #B8953F;">点此下载 Mike是麦克 App</a></li>`,
+      ].join('\n')
+    : [
+        hasApp ? `<li><a href="${appLink}" style="color: #B8953F;">Mike是麦克 美股财富导航 App 下载</a></li>` : '',
+        hasOptions ? `<li><a href="${course1Link}" style="color: #B8953F;">震荡行情的美股期权操作解析 线上课程观看</a></li>` : '',
+        hasEtf ? `<li><a href="${course2Link}" style="color: #B8953F;">ETF 进阶资产放大术 线上课程观看</a></li>` : '',
+      ].filter(Boolean).join('\n');
 
   return {
     to: data.to,
+    fromName: isUsStock ? 'Mike US$1美股入门课' : undefined,
     subject: `感谢您购买【${productDisplayName}】，请查收您的商品启用序号`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1A1A1A; line-height: 1.8;">
-        <p style="font-size: 16px;">${data.name} 用户您好，感谢您购买【${productDisplayName}｜Mike 是麦克】，以下是您的订单资讯与商品启用序号，请妥善保存此邮件。</p>
+        <p style="font-size: 16px;">${isUsStock ? '用户您好' : `${data.name} 用户您好`}，感谢您购买【${productDisplayName}｜Mike 是麦克】，以下是您的订单资讯与商品启用序号，请妥善保存此邮件。</p>
 
         <!-- Order Info Table -->
         <table style="width: 100%; border-collapse: collapse; margin: 24px 0; border: 1px solid #E8E5DE; background: #FAFAF7;">
@@ -405,13 +421,17 @@ export function purchaseConfirmationEmail(data: PurchaseEmailData): EmailParams 
 
         <!-- Instructions -->
         <h3 style="margin: 24px 0 12px 0; font-size: 16px;">启用步骤</h3>
-        <p style="font-size: 13px; color: #6B6B6B; margin-bottom: 8px;">每个商品需分别启用序号：</p>
+        ${isUsStock
+          ? `<div style="border: 1px solid #E8E5DE; border-radius: 8px; padding: 16px 20px; background: #FAFAF7;">
+          <p style="margin: 0;"><a href="${data.tutorialUrl}" style="color: #B8953F; font-weight: bold; font-size: 15px;">点此查看启用图文教学 →</a></p>
+        </div>`
+          : `<p style="font-size: 13px; color: #6B6B6B; margin-bottom: 8px;">每个商品需分别启用序号：</p>
         <ol style="line-height: 2; padding-left: 20px;">
           <li>前往<a href="https://www.cmoney.tw/" style="color: #B8953F;">商品官网</a></li>
           <li>点击右上角「登入 / 注册」，完成登入或注册理财宝帐号</li>
           <li>登入后，将鼠标移动到右上角，在下拉选单中选择「启用序号」</li>
           <li>输入上方商品启用序号，点击「启用序号」按钮，即可看到「序号启用成功！」</li>
-        </ol>
+        </ol>`}
 
         <!-- Product Links -->
         <h3 style="margin: 24px 0 12px 0; font-size: 16px;">商品启用后，可前往以下页面使用权限：</h3>

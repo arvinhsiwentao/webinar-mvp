@@ -13,13 +13,18 @@ export interface ProductConfig {
   price: number; // USD
   originalPrice?: number; // USD — official website price for comparison
   stripePriceId: string;
-  sheetName: string; // Google Sheet tab name for activation codes
+  sheetName: string; // Google Sheet tab name for activation codes (single-code default)
   productPackageId: string; // 商品包編號 — for fulfillment tracking
   salesCode: string; // 銷售代碼 — for fulfillment tracking
   description: string;
   includes: string[]; // What's included (for display)
   bonus?: string; // e.g., "送1个月APP权限"
   isBundle: boolean;
+  /**
+   * Optional: dispense MULTIPLE codes for one product (e.g. course + app VIP),
+   * each claimed from its own sheet tab. When set, overrides sheetName at fulfillment.
+   */
+  codeSheets?: { label: string; sheet: string }[];
 }
 
 // Product IDs — used throughout the app
@@ -100,8 +105,7 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
   // us-stock-course $1 funnel. NOT included in getAllProducts() — it is only ever
   // bought via the dedicated /us-stock-course checkout (fixed single product), so
   // it must not appear in the legacy $599 multi-select checkout.
-  // PREREQUISITE (Phase 0): set STRIPE_PRICE_US_STOCK_1PLUS3, and replace the
-  // sheetName / productPackageId / salesCode placeholders with the real CMoney values.
+  // Dispenses TWO codes per purchase: a course code + an App VIP code (codeSheets).
   [PRODUCT_IDS.US_STOCK_1PLUS3]: {
     id: PRODUCT_IDS.US_STOCK_1PLUS3,
     name: '$1 美股入门套餐｜9 章课程 + 3 天 App VIP',
@@ -109,9 +113,13 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     price: 1,
     originalPrice: 49,
     stripePriceId: process.env.STRIPE_PRICE_US_STOCK_1PLUS3 || 'price_REPLACE_ME_US_STOCK_1PLUS3',
-    sheetName: 'TODO_US_STOCK_REDEMPTION_TAB', // CMoney 兑换序号 Google Sheet 分頁名
-    productPackageId: 'TODO_US_STOCK_PACKAGE_ID',
-    salesCode: 'TODO_US_STOCK_SALES_CODE',
+    sheetName: '掘金1+3_課程序號', // default/fallback; codeSheets below is what's used
+    codeSheets: [
+      { label: '课程启用序号', sheet: '掘金1+3_課程序號' },
+      { label: 'App 3 天 VIP 启用序号', sheet: '掘金1+3_App序號' },
+    ],
+    productPackageId: '68713', // 權限包編號
+    salesCode: '3320',         // 銷售編號
     description: '9 章 Mike 亲录美股投资课程 + 3 天 App VIP 全功能体验',
     includes: ['9 章美股投资线上课程（永久持有）', '3 天 App VIP 全功能（到期自动降级，不扣款）'],
     isBundle: false,

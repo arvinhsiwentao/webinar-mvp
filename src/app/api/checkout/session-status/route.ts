@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import { getStripeForSessionId } from '@/lib/stripe';
 import { getOrderBySessionId } from '@/lib/db';
 import { fulfillOrder } from '@/lib/fulfillment';
 import { getProduct } from '@/lib/products';
@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing session_id' }, { status: 400 });
     }
 
+    const stripe = getStripeForSessionId(sessionId);
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.status === 'complete') {
@@ -56,10 +57,15 @@ export async function GET(request: NextRequest) {
         const productIds = productIdsStr ? productIdsStr.split(',') : [];
         const productNames = productNamesStr ? productNamesStr.split(',') : [];
         const codes = order.activationCode ? order.activationCode.split(',') : [];
+        // Per-code labels persisted at fulfillment (a product may emit >1 labeled code).
+        // Fall back to product names for legacy single-code orders.
+        const codeLabels = order.metadata?.codeLabels
+          ? order.metadata.codeLabels.split(',')
+          : productNames;
 
         const activationCodes = codes.map((code, i) => ({
-          productId: productIds[i] || '',
-          productName: productNames[i] || '',
+          productId: productIds[i] || productIds[0] || '',
+          productName: (codeLabels[i] || '').trim(),
           code: code.trim(),
         }));
 

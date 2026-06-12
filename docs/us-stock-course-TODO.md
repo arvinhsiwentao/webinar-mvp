@@ -14,11 +14,21 @@
 - GA4 專屬事件 `c_us_stock_course_*`（begin_checkout / add_payment_info / purchase / cta_click），purchase value 用真實 $1
 - 文件：architecture.md / decisions.md / CLAUDE.md 已更新
 
-## ⛔ Phase 0 前提（上線前必補，目前是 placeholder）
-- [ ] **`STRIPE_PRICE_US_STOCK_1PLUS3`** env — $1 SKU 的 Stripe Price ID（現為 `price_REPLACE_ME_US_STOCK_1PLUS3`）
-- [ ] **`US_STOCK_CONTAINER_WEBINAR_ID`** env — 建一筆容器 `webinars` row，填它的 UUID（現為 `TODO_US_STOCK_CONTAINER_WEBINAR_UUID`）
-      ⚠️ 沒填這個，結帳頁按「前往付款」會失敗（create-session 找不到容器 → 404）
-- [ ] **`products.ts` 的 `us-stock-1plus3`** — `sheetName` / `productPackageId` / `salesCode` 換成 CMoney 真值（現為 `TODO_*`）；序號 Google Sheet 分頁要預填可用兌換序號
+## ⛔ Phase 0 前提（上線前必補）
+- [x] **`STRIPE_PRICE_US_STOCK_1PLUS3`** — ✅ 2026-06-12 `price_1ThJmaGXZySy2dKhrUjpvgE8`（LIVE，$1 one-time，product `prod_UghAD8vcugFhRx`「Mike是麦克 - US$1 美股入门课」）。已寫入 `.env.local`
+- [x] **`US_STOCK_CONTAINER_WEBINAR_ID`** — ✅ 2026-06-12 `147249ab-97d6-4f6c-9043-88ebcc10834c`（隱形 draft 容器，`scripts/create-us-stock-container.ts`）。已寫入 `.env.local`。create-session 已驗證回 `cs_live_…`
+- [x] **`products.ts` 的 `us-stock-1plus3`** — ✅ 2026-06-12 `productPackageId=68713`（權限包）、`salesCode=3320`（銷售）；**發兩組序號**（codeSheets）：課程 `掘金1+3_課程序號` + App `掘金1+3_App序號`。fulfillment 改成支援一商品多 sheet（`fulfillment.ts`）
+- [x] **序號 Sheet 內容** — ✅ 2026-06-12 兩分頁各 12 組假序號可用（`scripts/check-us-stock-codes.ts` 驗證）。在試算表 `1W9tK97n004XI7UbN_VuECcb_ZVVWmwa31sWRadBxZOQ`。
+- [x] **沙盒隔離測試環境** — ✅ live key 不動；新增 us-stock 專屬 sandbox key：`STRIPE_US_STOCK_SECRET_KEY`/`NEXT_PUBLIC_STRIPE_US_STOCK_PUBLISHABLE_KEY`，test price `price_1ThJrjGXZySy2dKh1421gni3`。`getStripeForFunnel`/`getStripeForSessionId`（`lib/stripe.ts`）依 funnel / `cs_test_` 前綴分流。create-session 已驗證回 `cs_test_`。
+
+### 🔄 測完上線（us-stock 切回 LIVE）
+- [ ] `.env.local` 刪掉 `STRIPE_US_STOCK_SECRET_KEY` + `NEXT_PUBLIC_STRIPE_US_STOCK_PUBLISHABLE_KEY` 兩行（funnel 自動 fallback 回 live `stripe`）
+- [ ] `STRIPE_PRICE_US_STOCK_1PLUS3` 改回 LIVE `price_1ThJmaGXZySy2dKhrUjpvgE8`
+- [ ] Zeabur 正式環境設這 env：`STRIPE_PRICE_US_STOCK_1PLUS3`（live）、`US_STOCK_CONTAINER_WEBINAR_ID`、`NEXT_PUBLIC_BASE_URL=https://mike.cmoney.cc`（email 教學連結 = 此網域；不設則 fallback 也是 mike.cmoney.cc）
+- 註：本機 email 連結是 `localhost` 屬正常（`.env.local` 的 `NEXT_PUBLIC_BASE_URL`）；return 頁按鈕是相對路徑、自動跟網域。FROM_NAME us-stock 寄件者已用程式覆蓋成「Mike US$1美股入门课」，不需設 env。
+- [ ] 容器 webinar UUID 在正式 Supabase 也要存在（目前那筆是同一個 prod DB，已 OK）
+- [ ] webhook：us-stock 走 polling fulfillment 即可；若要 webhook 補強，需另設 live webhook（現有 webhook 用 live secret，會處理 live us-stock 訂單）
+- ⚠️ 正式 LIVE：完整測試購買 = 真實 $1（可退）。
 - [x] **`ANGLE_CONFIG[*].introVideoHls`** — ✅ 2026-06-11 3 支 hook 已上 Mux 並填入；poster 用 Mux thumbnail。Asset/playback：author `hUPl34zJltX96FmBOKOw372UC8N00Qi9lB6mjByCV13M`、news `qzsDylu8pTAFI8xRhqavri1z9dTcmSHt6TZEAtXwZsw`、feature `Q36DQ9ig9XZd5ObGj7lxeBNmleDSEUC7cfFv01wmmp7c`。上傳腳本 `scripts/upload-intro-videos-to-mux.ts`
 - [ ] **GA4 後台** — 把 `c_us_stock_course_begin_checkout` / `_add_payment_info` / `_purchase` 標成「關鍵事件」→ 匯入 $1 的 Google Ads 帳號當轉換動作
 

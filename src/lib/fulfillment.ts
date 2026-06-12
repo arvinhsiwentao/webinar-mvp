@@ -51,23 +51,29 @@ export async function fulfillOrder(
       : []; // legacy orders without productIds
 
     if (productIds.length > 0) {
-      // Multi-product: claim a code from each product's sheet
+      // Claim a code from each product's sheet. A product may dispense MULTIPLE
+      // codes (e.g. course + App VIP) via codeSheets; otherwise its single sheetName.
       for (const pid of productIds) {
         const product = getProduct(pid);
         if (!product) {
           console.warn(`[Fulfillment] Unknown product ID: ${pid}, skipping`);
           continue;
         }
-        const code = await claimActivationCode(
-          resolvedPaymentIntentId || order.id,
-          order.email,
-          product.sheetName
-        );
-        activationCodes.push({
-          productId: pid,
-          productName: product.name,
-          code,
-        });
+        const sources = product.codeSheets && product.codeSheets.length > 0
+          ? product.codeSheets
+          : [{ label: product.name, sheet: product.sheetName }];
+        for (const src of sources) {
+          const code = await claimActivationCode(
+            resolvedPaymentIntentId || order.id,
+            order.email,
+            src.sheet
+          );
+          activationCodes.push({
+            productId: pid,
+            productName: src.label,
+            code,
+          });
+        }
       }
     } else {
       // Legacy single-product: claim from default sheet
@@ -89,13 +95,16 @@ export async function fulfillOrder(
     // Load webinar (kept for backward compat / legacy orders)
     const webinar = await getWebinarById(order.webinarId);
 
-    // Store all codes as comma-separated (primary code = first one)
+    // Store all codes as comma-separated (primary code = first one).
+    // Persist the per-code labels too, so the return page can show them correctly
+    // (a single product may dispense multiple labeled codes — e.g. course + app).
     const allCodes = activationCodes.map(c => c.code).join(',');
+    const allLabels = activationCodes.map(c => c.productName).join(',');
 
     // Build per-product fulfillment fields from products.ts
     // For multi-product orders, join with comma so all products are tracked
-    const fulfilledProducts = activationCodes
-      .map(c => getProduct(c.productId))
+    const fulfilledProducts = [...new Set(activationCodes.map(c => c.productId))]
+      .map(pid => getProduct(pid))
       .filter((p): p is NonNullable<typeof p> => p !== undefined);
     const productPackageIds = fulfilledProducts.map(p => p.productPackageId).join(',');
     const salesCodes = fulfilledProducts.map(p => p.salesCode).join(',');
@@ -110,6 +119,7 @@ export async function fulfillOrder(
       // Use per-product values if available, fall back to webinar level for legacy orders
       productPackageId: productPackageIds || webinar?.productPackageId,
       salesCode: salesCodes || webinar?.salesCode,
+      metadata: { ...order.metadata, codeLabels: allLabels },
     });
 
     audit({
@@ -146,6 +156,12 @@ export async function fulfillOrder(
       bonusEligible = Date.now() < parseInt(bonusDeadline, 10);
     }
 
+    // us-stock funnel: link the email to the standalone (public) tutorial page —
+    // NOT the return page, which is gated on a valid Stripe session.
+    const isUsStock = productIdsStr.includes(PRODUCT_IDS.US_STOCK_1PLUS3);
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mike.cmoney.cc';
+    const tutorialUrl = isUsStock ? `${baseUrl}/us-stock-course/tutorial` : undefined;
+
     const emailParams = purchaseConfirmationEmail({
       to: order.email,
       name: order.name || order.email,
@@ -154,6 +170,7 @@ export async function fulfillOrder(
       orderId: resolvedPaymentIntentId || stripeSessionId,
       email: order.email,
       bonusEligible,
+      tutorialUrl,
     });
     const emailSent = await sendEmail(emailParams);
     if (!emailSent) {

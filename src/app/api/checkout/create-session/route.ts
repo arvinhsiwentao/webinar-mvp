@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import { getStripeForFunnel } from '@/lib/stripe';
 import { getWebinarById, getOrdersByEmail, createOrder } from '@/lib/db';
 import { getProduct, PRODUCT_IDS, type ProductId } from '@/lib/products';
 
@@ -8,7 +8,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { webinarId, email, name, source, bonusDeadline, productIds, gaClientId, utm, funnel, angle } = body;
 
-    if (!webinarId || !email) {
+    if (!email) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // us-stock-course: the container webinar id lives server-side only (not NEXT_PUBLIC),
+    // so the client can't send it — resolve it here from the env.
+    const effectiveWebinarId = funnel === 'us_stock_course'
+      ? (process.env.US_STOCK_CONTAINER_WEBINAR_ID || webinarId)
+      : webinarId;
+
+    if (!effectiveWebinarId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -31,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Resolve webinar (handles numeric ID → UUID conversion)
-    const webinar = await getWebinarById(webinarId);
+    const webinar = await getWebinarById(effectiveWebinarId);
     if (!webinar) {
       return NextResponse.json({ error: 'Webinar not found' }, { status: 404 });
     }
@@ -55,6 +65,7 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (host ? `${proto}://${host}` : 'https://mike.cmoney.cc');
 
     const isBundle = ids.includes(PRODUCT_IDS.BUNDLE);
+    const stripe = getStripeForFunnel(funnel);
 
     // Resolve the post-payment return URL. The us-stock-course ($1) funnel has its
     // own return page (and must keep "webinar" out of the URL); every other funnel

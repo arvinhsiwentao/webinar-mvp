@@ -14,7 +14,12 @@ import {
   US_STOCK_FUNNEL,
 } from '@/lib/usStockCourse';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+// us-stock funnel uses its own (sandbox) publishable key when set; else the live key.
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_US_STOCK_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
+    ''
+);
 
 function CheckoutInner() {
   const searchParams = useSearchParams();

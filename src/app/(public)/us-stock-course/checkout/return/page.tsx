@@ -22,7 +22,7 @@ function ReturnInner() {
 
   const [status, setStatus] = useState<PageStatus>('loading');
   const [customerEmail, setCustomerEmail] = useState('');
-  const [activationCode, setActivationCode] = useState('');
+  const [activationCodes, setActivationCodes] = useState<{ productId: string; productName: string; code: string }[]>([]);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -72,7 +72,11 @@ function ReturnInner() {
           }
 
           if (data.orderStatus === 'fulfilled' && data.activationCode) {
-            setActivationCode(data.activationCode);
+            setActivationCodes(
+              Array.isArray(data.activationCodes) && data.activationCodes.length > 0
+                ? data.activationCodes
+                : [{ productId: '', productName: '商品启用序号', code: data.activationCode }]
+            );
             setCustomerEmail(data.customerEmail || '');
             setStatus('fulfilled');
             stopPolling();
@@ -157,67 +161,46 @@ function ReturnInner() {
 
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-4">购买成功，迈出了最重要的一步！</h1>
 
-        {/* Activation code */}
-        <div className="my-6">
-          <div className="border-2 border-[#C9A962] rounded-xl p-6 text-center bg-[#C9A962]/[0.06]">
-            <p className="text-sm text-neutral-400 mb-2">商品启用序号</p>
-            <p className="text-2xl font-bold tracking-[4px] text-[#E8D5A3]">{activationCode}</p>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(activationCode);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-              }}
-              className="mt-3 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-[#B8953F] text-white hover:bg-[#A6842F]"
-            >
-              {copied ? '✓ 已复制' : '一键复制'}
-            </button>
-          </div>
-          <p className="text-xs text-[#C9A962] text-center mt-2">※ 每个序号仅限单次使用，启用后即失效，请勿分享给他人</p>
+        {/* Activation codes — labeled boxes + a single copy-all button below */}
+        <div className="my-6 space-y-3">
+          {activationCodes.map((item, idx) => (
+            <div key={idx} className="border-2 border-[#C9A962] rounded-xl p-5 text-center bg-[#C9A962]/[0.06]">
+              <p className="text-sm text-[#E8D5A3] mb-1.5 font-semibold">{item.productName || '商品启用序号'}</p>
+              <p className="text-2xl font-bold tracking-[3px] text-white break-all">{item.code}</p>
+            </div>
+          ))}
+          <button
+            onClick={() => {
+              const text = activationCodes.map(c => `${c.productName || '商品启用序号'}：${c.code}`).join('\n');
+              navigator.clipboard.writeText(text);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}
+            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-lg text-base font-semibold transition-colors bg-[#B8953F] text-white hover:bg-[#A6842F]"
+          >
+            {copied ? '✓ 已复制两组序号' : '一键复制两组序号'}
+          </button>
         </div>
 
-        <p className="text-neutral-400 leading-relaxed mb-1">
-          我们也已将序号发送至 <span className="font-medium text-[#E8D5A3]">{customerEmail}</span>
-        </p>
-        <p className="text-neutral-500 text-sm mb-10">没收到？请检查垃圾邮件文件夹</p>
-
-        {/* Redemption steps — go log in & redeem on cmoney.tw */}
-        <div className="bg-white/[0.04] rounded-xl border border-[#C9A962]/20 p-6 md:p-8 text-left">
-          <p className="text-sm font-semibold text-white mb-4 tracking-wide">启用步骤</p>
-          <div className="space-y-4">
-            {[
-              { step: '1', content: <span>前往 <a href="https://www.cmoney.tw/" target="_blank" rel="noopener noreferrer" className="text-[#E8D5A3] underline underline-offset-2 font-medium">CMoney 官网</a></span> },
-              { step: '2', content: <span>输入上方商品启用序号</span> },
-              { step: '3', content: <span>点击「启用序号」</span> },
-              { step: '4', content: <span>如你尚未登入或注册理财宝帐号，请登入或注册（你已完成付款，仅需登入即可领取）</span> },
-              { step: '5', content: <span>登入帐号并启用序号后，即可看到「序号启用成功！」</span> },
-            ].map((item) => (
-              <div key={item.step} className="flex items-start gap-4">
-                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#0a0a08] border border-[#C9A962]/40 flex items-center justify-center text-sm font-semibold text-[#C9A962] mt-0.5">{item.step}</span>
-                <span className="text-sm text-neutral-400 leading-relaxed">{item.content}</span>
-              </div>
-            ))}
-          </div>
+        {/* Key reminders — enlarged, must-read (2 things) */}
+        <div className="bg-[#C9A962]/[0.1] border border-[#C9A962]/40 rounded-xl p-5 md:p-6 text-left mb-6">
+          <p className="text-base md:text-lg font-bold text-[#E8D5A3] mb-4 text-center">⚠️ 请务必完成以下 2 件事</p>
+          <ul className="space-y-3 text-base md:text-lg text-neutral-200 leading-relaxed">
+            <li>📸 <span className="font-bold text-white">截图保存或点击复制</span>，将两组序号保存于您方便管理的地方，避免日后遗失</li>
+            <li>📧 确认信已寄到 <span className="font-semibold text-[#E8D5A3] break-all">{customerEmail}</span>，<span className="font-bold text-white">没收到请检查垃圾邮件 / 促销邮件</span></li>
+          </ul>
         </div>
 
-        {/* Product access */}
-        <div className="bg-white/[0.04] rounded-xl border border-[#C9A962]/20 p-6 md:p-8 text-left mt-4">
-          <p className="text-sm font-semibold text-white mb-1 tracking-wide">启用后，可前往以下页面使用</p>
-          <p className="text-xs text-neutral-500 mb-4">请确保已登入你的帐号</p>
-          <div className="space-y-3 text-sm text-neutral-400">
-            <div className="flex items-start gap-3">
-              <span className="text-[#C9A962] mt-0.5">•</span>
-              <span>9 章美股投资线上课程：登入 CMoney 后于「我的课程」观看</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-[#C9A962] mt-0.5">•</span>
-              <span>
-                Mike是麦克 App（3 天 VIP）：
-                <a href="https://cmoneymike.onelink.me/ZEaW/kkyo4oqs" target="_blank" rel="noopener noreferrer" className="text-[#E8D5A3] underline underline-offset-2 break-all">点此下载</a>
-                ，登入后 VIP 自动启用
-              </span>
-            </div>
-          </div>
+        {/* How to activate — standalone block, links to the tutorial page */}
+        <div className="bg-white/[0.04] rounded-xl border border-[#C9A962]/20 p-6 md:p-8 text-center">
+          <h2 className="text-lg md:text-xl font-bold text-white mb-4">如何启用序号？</h2>
+          <a
+            href="/us-stock-course/tutorial"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#B8953F] text-white text-base font-semibold hover:bg-[#A6842F] transition-colors"
+          >
+            点此看启用图文教学 →
+          </a>
+          <p className="text-xs text-[#C9A962] mt-5">※ 每个序号仅限单次使用，启用后即失效，请勿分享给他人</p>
         </div>
 
         {/* Support */}
