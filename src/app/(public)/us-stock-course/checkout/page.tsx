@@ -71,7 +71,7 @@ function CheckoutInner() {
         angle,
         productIds: [US_STOCK_PRODUCT_ID],
         gaClientId: (() => {
-          try { const m = document.cookie.match(/_ga=GA\d+\.\d+\.(.+)/); return m?.[1] || ''; } catch { return ''; }
+          try { const m = document.cookie.match(/_ga=GA\d+\.\d+\.([^;]+)/); return m?.[1] || ''; } catch { return ''; }
         })(),
         utm: getStoredUtmParams(),
       }),

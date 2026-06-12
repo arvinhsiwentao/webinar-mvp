@@ -91,11 +91,14 @@ export async function POST(request: NextRequest) {
         source: source || 'direct',
         order_source: 'mike_webinar',
         productIds: ids.join(','),
-        ga_client_id: gaClientId || '',
-        utm_source: utm?.utm_source || '',
-        utm_medium: utm?.utm_medium || '',
-        utm_campaign: utm?.utm_campaign || '',
-        utm_content: utm?.utm_content || '',
+        // Clamp — Stripe metadata values cap at 500 chars. ga_client_id should be
+        // ~21 chars, but a greedy cookie parse once leaked the whole cookie string;
+        // clamp defensively so a malformed value can never break checkout again.
+        ga_client_id: (gaClientId || '').slice(0, 100),
+        utm_source: (utm?.utm_source || '').slice(0, 200),
+        utm_medium: (utm?.utm_medium || '').slice(0, 200),
+        utm_campaign: (utm?.utm_campaign || '').slice(0, 200),
+        utm_content: (utm?.utm_content || '').slice(0, 200),
       },
       payment_intent_data: {
         metadata: {

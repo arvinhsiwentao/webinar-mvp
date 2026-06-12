@@ -247,7 +247,7 @@ export default function CheckoutPage() {
           bonusDeadline: (() => { try { return localStorage.getItem(storageKey) || ''; } catch { return ''; } })(),
         } : {}),
         // GA4 + UTM for server-side tracking
-        gaClientId: (() => { try { const m = document.cookie.match(/_ga=GA\d+\.\d+\.(.+)/); return m?.[1] || ''; } catch { return ''; } })(),
+        gaClientId: (() => { try { const m = document.cookie.match(/_ga=GA\d+\.\d+\.([^;]+)/); return m?.[1] || ''; } catch { return ''; } })(),
         utm: getStoredUtmParams(),
       }),
     });
