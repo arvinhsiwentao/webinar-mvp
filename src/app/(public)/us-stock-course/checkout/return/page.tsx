@@ -191,7 +191,7 @@ function ReturnInner() {
               setCopied(true);
               setTimeout(() => setCopied(false), 2000);
             }}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-lg text-base font-semibold transition-colors bg-[#B8953F] text-white hover:bg-[#A6842F]"
+            className="inline-flex items-center justify-center gap-1.5 px-6 py-2.5 rounded-lg text-sm md:text-base font-semibold transition-colors bg-[#B8953F] text-white hover:bg-[#A6842F]"
           >
             {copied ? '✓ 已复制两组序号' : '一键复制两组序号'}
           </button>
