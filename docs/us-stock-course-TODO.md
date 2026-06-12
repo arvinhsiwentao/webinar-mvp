@@ -21,6 +21,21 @@
 - [x] **序號 Sheet 內容** — ✅ 2026-06-12 兩分頁各 12 組假序號可用（`scripts/check-us-stock-codes.ts` 驗證）。在試算表 `1W9tK97n004XI7UbN_VuECcb_ZVVWmwa31sWRadBxZOQ`。
 - [x] **沙盒隔離測試環境** — ✅ live key 不動；新增 us-stock 專屬 sandbox key：`STRIPE_US_STOCK_SECRET_KEY`/`NEXT_PUBLIC_STRIPE_US_STOCK_PUBLISHABLE_KEY`，test price `price_1ThJrjGXZySy2dKh1421gni3`。`getStripeForFunnel`/`getStripeForSessionId`（`lib/stripe.ts`）依 funnel / `cs_test_` 前綴分流。create-session 已驗證回 `cs_test_`。
 
+### 🔧 Zeabur 環境變數（在 dashboard 設定）
+> 變數**名稱固定用正式的**，值可先放測試的（程式只認名稱）。其他既有的 app 變數（`STRIPE_SECRET_KEY`、`SUPABASE_*`、`STRIPE_WEBHOOK_SECRET`、舊 `STRIPE_PRICE_*`）webinar 漏斗已在用，不用動。
+
+| 變數名 | 測試階段值 | 正式（LIVE）值 |
+|---|---|---|
+| `STRIPE_PRICE_US_STOCK_1PLUS3` | `price_1ThJrjGXZySy2dKh1421gni3`（test） | `price_1ThJmaGXZySy2dKhrUjpvgE8`（live） |
+| `STRIPE_US_STOCK_SECRET_KEY` | `sk_test_…`（見本機 `.env.local`） | **刪除**（沒此 key → 自動 fallback live `STRIPE_SECRET_KEY`） |
+| `NEXT_PUBLIC_STRIPE_US_STOCK_PUBLISHABLE_KEY` | `pk_test_…`（見 `.env.local`） | **刪除** |
+| `US_STOCK_CONTAINER_WEBINAR_ID` | `147249ab-97d6-4f6c-9043-88ebcc10834c` | 同左（不變） |
+| `NEXT_PUBLIC_BASE_URL` | `https://mike.cmoney.cc` | 同左（不變） |
+
+- **金流分流邏輯**：有設 `STRIPE_US_STOCK_SECRET_KEY` → 走沙盒；刪掉 → 走 live。轉正式只動 2 件事：刪兩個 `*_US_STOCK_*` key + price 換 live。
+- ⚠️ `NEXT_PUBLIC_*` 是 **build 時編進前端**，Zeabur 改完要 **重新 build/redeploy** 才生效。
+- ⚠️ 沙盒測試時兩個序號分頁仍是**假序號**，換真序號前勿開真實廣告。
+
 ### 🔄 測完上線（us-stock 切回 LIVE）
 - [ ] `.env.local` 刪掉 `STRIPE_US_STOCK_SECRET_KEY` + `NEXT_PUBLIC_STRIPE_US_STOCK_PUBLISHABLE_KEY` 兩行（funnel 自動 fallback 回 live `stripe`）
 - [ ] `STRIPE_PRICE_US_STOCK_1PLUS3` 改回 LIVE `price_1ThJmaGXZySy2dKhrUjpvgE8`

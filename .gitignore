@@ -50,6 +50,13 @@ gemini金钥.txt
 gemini金鑰.txt
 *.key
 
+# PII / customer data exports + generated previews (never commit)
+*.csv
+scripts/*-email-preview.html
+scripts/*-preview.html
+*retargeting*
+*pending-checkouts*
+
 # webinar working files (transcripts, scripts — not source code)
 *直播腳本*
 *直播脚本*
