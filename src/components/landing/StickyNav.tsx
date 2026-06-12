@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import Image from 'next/image';
 import { trackGA4 } from '@/lib/analytics';
 
@@ -24,9 +24,11 @@ interface StickyNavProps {
   navItems?: NavItem[];
   /** Override the CTA button label (defaults to 免费报名). */
   ctaLabel?: string;
+  /** Replace the CTA button with custom content (e.g. a countdown), shown on all viewports. */
+  rightSlot?: ReactNode;
 }
 
-export default function StickyNav({ onCtaClick, logoSrc, navItems, ctaLabel }: StickyNavProps) {
+export default function StickyNav({ onCtaClick, logoSrc, navItems, ctaLabel, rightSlot }: StickyNavProps) {
   const NAV_ITEMS = navItems ?? DEFAULT_NAV_ITEMS;
   const [activeId, setActiveId] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -137,59 +139,64 @@ export default function StickyNav({ onCtaClick, logoSrc, navItems, ctaLabel }: S
             </div>
           </div>
 
-          {/* Mobile: hamburger button */}
-          <div className="md:hidden flex-1 flex justify-end" ref={menuRef}>
-            <button
-              onClick={() => setMenuOpen(prev => !prev)}
-              className="p-2 text-neutral-400 hover:text-[#C9A962] transition-colors"
-              aria-label="选单"
-            >
-              {menuOpen ? (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              ) : (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
-                </svg>
-              )}
-            </button>
+          {/* Right area: rightSlot (e.g. countdown) → desktop CTA / mobile hamburger */}
+          <div className="flex items-center gap-2 flex-shrink-0 ml-2 md:ml-3">
+            {rightSlot}
 
-            {/* Dropdown menu */}
-            {menuOpen && (
-              <div className="absolute top-14 right-4 bg-[#0a0a08]/95 backdrop-blur-md border border-[#C9A962]/20 rounded-lg shadow-xl py-2 min-w-[160px] animate-in fade-in slide-in-from-top-2 duration-200">
-                {NAV_ITEMS.map((item) => {
-                  const isActive = activeId === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => scrollTo(item.id)}
-                      className={`
-                        w-full text-left px-4 py-2.5 text-sm font-medium transition-colors
-                        ${isActive
-                          ? 'text-[#C9A962] bg-[#C9A962]/10'
-                          : 'text-neutral-400 hover:text-neutral-200 hover:bg-white/5'
-                        }
-                      `}
-                      style={{ fontFamily: '"Noto Serif SC", "Songti SC", "SimSun", serif' }}
-                    >
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Desktop CTA button — only when no rightSlot is provided */}
+            {!rightSlot && (
+              <button
+                onClick={onCtaClick}
+                className="hidden md:block text-sm font-semibold px-4 py-2 rounded-lg border border-[#C9A962]/50 text-[#E8D5A3] bg-[#C9A962]/10 hover:bg-[#C9A962]/20 hover:border-[#C9A962] transition-all duration-300 cursor-pointer whitespace-nowrap"
+                style={{ fontFamily: '"Noto Serif SC", serif' }}
+              >
+                {ctaLabel ?? '免费报名'}
+              </button>
             )}
-          </div>
 
-          {/* Desktop CTA button */}
-          <div className="hidden md:block flex-shrink-0 ml-3">
-            <button
-              onClick={onCtaClick}
-              className="text-sm font-semibold px-4 py-2 rounded-lg border border-[#C9A962]/50 text-[#E8D5A3] bg-[#C9A962]/10 hover:bg-[#C9A962]/20 hover:border-[#C9A962] transition-all duration-300 cursor-pointer whitespace-nowrap"
-              style={{ fontFamily: '"Noto Serif SC", serif' }}
-            >
-              {ctaLabel ?? '免费报名'}
-            </button>
+            {/* Mobile hamburger */}
+            <div className="md:hidden" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen(prev => !prev)}
+                className="p-2 text-neutral-400 hover:text-[#C9A962] transition-colors"
+                aria-label="选单"
+              >
+                {menuOpen ? (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                ) : (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+                  </svg>
+                )}
+              </button>
+
+              {/* Dropdown menu */}
+              {menuOpen && (
+                <div className="absolute top-14 right-4 bg-[#0a0a08]/95 backdrop-blur-md border border-[#C9A962]/20 rounded-lg shadow-xl py-2 min-w-[160px] animate-in fade-in slide-in-from-top-2 duration-200">
+                  {NAV_ITEMS.map((item) => {
+                    const isActive = activeId === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => scrollTo(item.id)}
+                        className={`
+                          w-full text-left px-4 py-2.5 text-sm font-medium transition-colors
+                          ${isActive
+                            ? 'text-[#C9A962] bg-[#C9A962]/10'
+                            : 'text-neutral-400 hover:text-neutral-200 hover:bg-white/5'
+                          }
+                        `}
+                        style={{ fontFamily: '"Noto Serif SC", "Songti SC", "SimSun", serif' }}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -7,8 +7,12 @@ import { trackGA4 } from '@/lib/analytics';
 import ScrollReveal from '@/components/landing/ScrollReveal';
 import FAQAccordion from '@/components/landing/FAQAccordion';
 import StickyNav from '@/components/landing/StickyNav';
+import PromoCountdown from '@/components/us-stock-course/PromoCountdown';
 import IntroVideoPlayer from '@/components/us-stock-course/IntroVideoPlayer';
 import { ANGLE_CONFIG, TRAILERS, type UsStockAngle } from '@/lib/usStockCourse';
+
+const WHATSAPP_CS_URL = 'https://wa.me/886917642752?text=' + encodeURIComponent('你好，我想咨询 US$1 美股入门课');
+const WA_PATH = 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z';
 
 const NAV_ITEMS = [
   { id: 'top', label: '首页' },
@@ -135,7 +139,7 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
 
   return (
     <div className="min-h-screen bg-[#0a0a08] text-neutral-200">
-      <StickyNav onCtaClick={() => goCheckout('nav')} logoSrc="/icon.png" navItems={NAV_ITEMS} ctaLabel="立即购买 $1" />
+      <StickyNav onCtaClick={() => goCheckout('nav')} logoSrc="/icon.png" navItems={NAV_ITEMS} rightSlot={<PromoCountdown />} />
       <div className="h-14" />
 
       {/* ===== Hero ===== */}
@@ -604,11 +608,50 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
       >
         <button
           onClick={() => goCheckout('sticky')}
-          className="w-full bg-[#B8953F] text-white py-3.5 text-base font-semibold rounded-lg hover:bg-[#A6842F] transition-colors"
+          className="w-full bg-[#B8953F] text-white py-3 rounded-lg hover:bg-[#A6842F] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5"
         >
-          US$1 立即购买课程 + App VIP
+          <span className="text-xs text-white/70">原价 <span className="line-through">US$49</span></span>
+          <span className="text-xl font-extrabold leading-none">US$1</span>
+          <span className="text-base font-bold">立即购买 →</span>
         </button>
       </div>
+
+      {/* ===== Desktop floating offer card — price + buy + CS, unified width ===== */}
+      <div className="hidden md:flex fixed right-5 bottom-8 z-50 flex-col gap-2.5 w-44 bg-[#1a1508]/80 backdrop-blur-md border border-[#C9A962]/40 rounded-2xl p-4 shadow-[0_8px_30px_rgba(0,0,0,0.55),0_0_24px_rgba(201,169,98,0.12)]">
+        <div className="text-center">
+          <p className="text-xs text-neutral-400">原价 <span className="line-through">US$49</span></p>
+          <p className="text-xl font-bold text-[#ef4444] leading-tight">限时特价 US$1</p>
+          <p className="text-[11px] text-[#E8D5A3] mt-1.5 pt-1.5 border-t border-[#C9A962]/20">🎁 赠送 App 3 天 VIP 权限</p>
+        </div>
+        <button
+          onClick={() => goCheckout('floating')}
+          className="w-full bg-[#B8953F] text-white py-2.5 rounded-lg text-sm font-bold hover:bg-[#A6842F] transition-colors"
+        >
+          立即购买 →
+        </button>
+        <a
+          href={WHATSAPP_CS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackExternalLink('whatsapp_cs', 'floating')}
+          className="w-full flex items-center justify-center gap-1.5 bg-[#25D366] text-white py-2 rounded-lg text-sm font-semibold hover:bg-[#20BD5A] transition-colors"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d={WA_PATH} /></svg>
+          咨询客服
+        </a>
+      </div>
+
+      {/* ===== Mobile floating WhatsApp CS — appears on scroll, won't block the first screen ===== */}
+      <a
+        href={WHATSAPP_CS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => trackExternalLink('whatsapp_cs', 'floating_mobile')}
+        aria-label="WhatsApp 咨询客服"
+        className={`md:hidden fixed right-4 bottom-24 z-50 ${scrolledDown ? 'flex' : 'hidden'} items-center justify-center w-[52px] h-[52px] rounded-full bg-[#25D366] text-white shadow-[0_4px_20px_rgba(37,211,102,0.5)] active:scale-95 transition-transform`}
+      >
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d={WA_PATH} /></svg>
+      </a>
     </div>
   );
 }
