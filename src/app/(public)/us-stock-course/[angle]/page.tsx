@@ -17,10 +17,10 @@ export async function generateMetadata({
   if (!isValidAngle(angle)) return {};
   const cfg = ANGLE_CONFIG[angle];
   return {
-    title: `${cfg.heroHeadline}｜$1 美股入门套餐`,
+    title: `${cfg.heroHeadline}｜US$1 美股入门课`,
     description: cfg.heroSub,
     openGraph: {
-      title: `${cfg.heroHeadline}｜$1 美股入门套餐`,
+      title: `${cfg.heroHeadline}｜US$1 美股入门课`,
       description: cfg.heroSub,
     },
   };

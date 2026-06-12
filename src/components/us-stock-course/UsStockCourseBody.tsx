@@ -83,11 +83,10 @@ const STEPS = [
 ];
 
 const FAQ_ITEMS = [
-  { question: '我是投资新手，能跟得上吗？', answer: '9 章课程从零开始一步一步带你建立完整框架。会员里很多都是从零开始的，跟着 9 章走完、搭配 App 工具操作 3 天，你会有自己的判断起点。' },
+  { question: '我是投资新手，能跟得上吗？', answer: '9 章课程从零开始一步一步带你建立完整框架。学员里很多都是从零开始的，跟着 9 章走完、搭配 App 工具操作 3 天，你会有自己的判断起点。' },
   { question: 'App VIP 权限到期后会自动扣款吗？', answer: '不会自动扣款。3 天到期 App 自动降回免费版，你的卡不会被再扣任何钱，喜欢再升级。' },
   { question: '3 天期间能用全部 VIP 功能吗？还是有限制？', answer: '完整 VIP 功能全开放、没有任何限制。' },
-  { question: '北美 / 海外信用卡能结账吗？安全吗？', answer: '可以，跨境支付走 Stripe，跟北美主流网站一样安全，支援 Apple Pay。' },
-  { question: '购买后怎么领取？', answer: '付款后页面会立即显示启用序号，也会寄到你的邮箱。前往 CMoney 官网登入帐号、输入序号即可启用 — 你已完成付款，仅需登入即可领取。' },
+  { question: '北美 / 海外信用卡能结账吗？安全吗？', answer: '可以，跨境支付走 Stripe，跟北美主流网站一样安全，支援 Apple Pay / Google Pay。' },
 ];
 
 export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
@@ -210,7 +209,7 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
             {PAIN_POINTS.map((p, idx) => (
               <ScrollReveal key={idx} delay={idx * 100}>
                 <div className="flex items-stretch gap-4 bg-white/[0.04] rounded-2xl border border-[#C9A962]/20 overflow-hidden">
-                  <p className="flex-1 text-base md:text-lg text-neutral-200 leading-relaxed self-center pl-5 py-4">{p.text}</p>
+                  <p className="flex-1 text-base md:text-xl text-neutral-200 leading-relaxed self-center pl-5 py-4">{p.text}</p>
                   <Image src={p.img} alt="" width={360} height={360} className="w-24 h-24 md:w-32 md:h-32 object-cover flex-shrink-0" />
                 </div>
               </ScrollReveal>
@@ -229,10 +228,10 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
           <div className="max-w-sm mx-auto">
             {FRAMEWORK.map((item, idx) => (
               <ScrollReveal key={item.num} delay={idx * 80} className="w-full">
-                <div className="text-center bg-white/[0.04] rounded-xl px-6 py-5 border border-[#C9A962]/20">
-                  <div className="w-10 h-10 mx-auto rounded-full bg-[#C9A962]/15 border border-[#C9A962]/40 flex items-center justify-center text-[#C9A962] font-bold mb-3">{item.num}</div>
-                  <h3 className="text-lg font-bold text-neutral-100 mb-1">{item.title}</h3>
-                  <p className="text-sm text-neutral-400 leading-relaxed">{item.desc}</p>
+                <div className="text-center bg-white/[0.04] rounded-xl px-6 py-6 border border-[#C9A962]/20">
+                  <div className="w-10 h-10 md:w-12 md:h-12 mx-auto rounded-full bg-[#C9A962]/15 border border-[#C9A962]/40 flex items-center justify-center text-[#C9A962] font-bold mb-3">{item.num}</div>
+                  <h3 className="text-xl md:text-2xl font-bold text-neutral-100 mb-1.5">{item.title}</h3>
+                  <p className="text-base md:text-lg text-neutral-400 leading-relaxed">{item.desc}</p>
                 </div>
                 {idx < FRAMEWORK.length - 1 && (
                   <div className="flex justify-center py-3">
@@ -288,7 +287,7 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
                 </h2>
                 <p className="text-sm text-[#C9A962] font-medium mb-5">美股投资人 / YouTube 创作者</p>
 
-                <div className="space-y-4 text-base text-neutral-400 leading-relaxed">
+                <div className="space-y-4 text-base md:text-lg text-neutral-400 leading-relaxed">
                   <p>
                     著有投资畅销书《人生重启》，曾受邀电视财经节目分享投资策略，
                     并与台湾最大财经平台 CMoney 合作推出投资工具。
@@ -467,7 +466,7 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
 
             {/* Desktop: comparison table */}
             <div className="hidden md:block overflow-hidden rounded-xl border border-[#C9A962]/20">
-              <table className="w-full text-base">
+              <table className="w-full text-lg">
                 <thead>
                   <tr className="bg-[#C9A962]/10 text-[#E8D5A3]">
                     <th className="text-left px-4 py-3.5 font-semibold">功能</th>
@@ -503,7 +502,7 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
               <ScrollReveal key={idx} delay={idx * 80}>
                 <div className="flex items-center gap-4 bg-white/[0.04] rounded-lg px-5 py-4 border border-[#C9A962]/20">
                   <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#C9A962]/10 flex items-center justify-center text-[#C9A962] text-xs font-bold">{String(idx + 1).padStart(2, '0')}</span>
-                  <p className="text-sm md:text-base text-neutral-300">{title}</p>
+                  <p className="text-base md:text-lg text-neutral-300">{title}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -527,8 +526,8 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
                       <span className="text-sm md:text-base font-bold text-[#C9A962]">{no}</span>
                     </div>
                     <div className="pt-1 pb-2 flex-1">
-                      <h3 className="text-base md:text-lg font-bold text-neutral-200 mb-1">{title}</h3>
-                      <p className="text-base text-neutral-400 leading-relaxed">{desc}</p>
+                      <h3 className="text-lg md:text-xl font-bold text-neutral-200 mb-1">{title}</h3>
+                      <p className="text-base md:text-lg text-neutral-400 leading-relaxed">{desc}</p>
                       {no === '4' && (
                         <div className="mt-4 flex flex-col sm:flex-row items-center gap-4 bg-white/[0.03] border border-[#C9A962]/20 rounded-xl p-4 w-fit">
                           <div className="w-28 h-28 rounded-lg overflow-hidden bg-white p-1 flex-shrink-0">
@@ -574,7 +573,7 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
         <div className="max-w-2xl mx-auto text-center">
           <ScrollReveal>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-4" style={{ fontFamily: '"Noto Serif SC", serif' }}>$1 开始，给自己一张投资地图</h2>
-            <p className="text-base text-neutral-400 mb-8 leading-relaxed max-w-lg mx-auto">9 章课程永久持有 + 3 天 App VIP 全功能。原价 $49，限时 $1，到期不自动扣款。</p>
+            <p className="text-base text-neutral-400 mb-8 leading-relaxed max-w-lg mx-auto">9 章课程永久持有 + 赠送 3 天 App VIP 权限</p>
           </ScrollReveal>
           <ScrollReveal delay={150}>
             <button

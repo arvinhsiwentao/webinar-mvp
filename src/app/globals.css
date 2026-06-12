@@ -99,6 +99,12 @@ html {
   50% { transform: translateY(-3px); opacity: 1; }
 }
 
+/* us-stock-course gold pill — gentle breathing (scale + soft glow) */
+@keyframes pillBreathe {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(201, 169, 98, 0); }
+  50% { transform: scale(1.04); box-shadow: 0 0 18px rgba(201, 169, 98, 0.3); }
+}
+
 /* Photo marquee — infinite horizontal scroll */
 @keyframes marqueeScroll {
   from { transform: translateX(0); }
