@@ -18,7 +18,18 @@ interface PurchaseNotificationData {
   utmMedium?: string;
   utmCampaign?: string;
   utmContent?: string;
+  /** Funnel tag — 'us_stock_course' renders a dedicated $1-course card. */
+  funnel?: string;
+  /** us-stock ad angle (author/news/feature) — shown on the $1-course card. */
+  angle?: string;
 }
+
+/** Friendly labels for the us-stock-course ad angles. */
+const US_STOCK_ANGLE_LABELS: Record<string, string> = {
+  author: '作者切角',
+  news: '时事切角',
+  feature: '功能切角',
+};
 
 /**
  * Send purchase event to GA4 via Measurement Protocol.
@@ -109,10 +120,13 @@ export async function sendGoogleChatPurchaseNotification(data: PurchaseNotificat
 
   const now = new Date().toLocaleString('zh-TW', { timeZone: 'America/Los_Angeles' });
 
+  const isUsStock = data.funnel === 'us_stock_course';
+  const angleLabel = data.angle ? (US_STOCK_ANGLE_LABELS[data.angle] || data.angle) : '';
+
   const message = {
     cards: [{
       header: {
-        title: '💰 新訂單！',
+        title: isUsStock ? '💳 $1 美股课・新订单！' : '💰 新訂單！',
         subtitle: `${data.name || data.email}`,
       },
       sections: [{
@@ -123,6 +137,13 @@ export async function sendGoogleChatPurchaseNotification(data: PurchaseNotificat
               content: `${data.name || '—'} (${data.email})`,
             },
           },
+          // us-stock only: which ad angle drove this $1 order
+          ...(isUsStock && angleLabel ? [{
+            keyValue: {
+              topLabel: '切角',
+              content: angleLabel,
+            },
+          }] : []),
           {
             keyValue: {
               topLabel: '方案',

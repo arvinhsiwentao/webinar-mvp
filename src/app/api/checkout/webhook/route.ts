@@ -40,6 +40,11 @@ export async function POST(request: NextRequest) {
     // Google Chat notification (best-effort, non-blocking)
     if (result.status === 'fulfilled') {
       const meta = session.metadata || {};
+      // funnel/angle aren't stored as their own session fields, but `source` encodes
+      // them for the $1 funnel: `us_stock_course_{angle}` (e.g. us_stock_course_author).
+      const source = meta.source || '';
+      const isUsStock = source.startsWith('us_stock_course');
+      const angle = isUsStock ? source.replace('us_stock_course_', '') : undefined;
       sendGoogleChatPurchaseNotification({
         sessionId: session.id,
         email: session.customer_email || meta.email || '',
@@ -51,6 +56,8 @@ export async function POST(request: NextRequest) {
         utmMedium: meta.utm_medium || undefined,
         utmCampaign: meta.utm_campaign || undefined,
         utmContent: meta.utm_content || undefined,
+        funnel: isUsStock ? 'us_stock_course' : 'webinar',
+        angle,
       }).catch(err => console.error('[Webhook] Chat notification error:', err));
     }
   }
