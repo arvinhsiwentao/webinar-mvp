@@ -102,6 +102,14 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
     trackGA4('c_external_link_click', { link_type: linkType, link_position: linkPosition });
   };
 
+  const trackVideoPlay = (videoId: string, videoLabel: string) => {
+    trackGA4('c_us_stock_course_video_play', { angle, video_id: videoId, video_label: videoLabel });
+  };
+
+  const trackCsClick = (position: string) => {
+    trackGA4('c_us_stock_course_cs_click', { angle, position });
+  };
+
   // Hide the mobile sticky CTA whenever an inline CTA (hero or final) is on screen —
   // avoids showing two CTAs at once.
   const heroCtaRef = useRef<HTMLButtonElement>(null);
@@ -168,7 +176,7 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
               </svg>
             </div>
             <div className="relative rounded-2xl overflow-hidden border border-[#C9A962]/25 shadow-[0_0_40px_rgba(201,169,98,0.12)] aspect-video bg-black mb-4 max-w-[46rem] mx-auto">
-              <IntroVideoPlayer src={cfg.introVideoHls} poster={cfg.poster} />
+              <IntroVideoPlayer src={cfg.introVideoHls} poster={cfg.poster} onPlay={() => trackVideoPlay('hero', 'hero_intro')} />
             </div>
           </ScrollReveal>
 
@@ -424,7 +432,7 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
               {TRAILERS.map((t) => (
                 <ScrollReveal key={t.label}>
                   <div className="relative rounded-2xl overflow-hidden border border-[#C9A962]/25 shadow-[0_0_30px_rgba(201,169,98,0.1)] aspect-video bg-black">
-                    <IntroVideoPlayer src={t.hls} poster={t.poster} lazy />
+                    <IntroVideoPlayer src={t.hls} poster={t.poster} lazy onPlay={() => trackVideoPlay(`trailer_${t.label.toLowerCase()}`, t.title)} />
                   </div>
                   <p className="text-center mt-3 text-base text-neutral-300">
                     <span className="text-[#C9A962] font-bold">{t.label}</span>
@@ -632,7 +640,7 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
           href={WHATSAPP_CS_URL}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => trackExternalLink('whatsapp_cs', 'floating')}
+          onClick={() => trackCsClick('floating')}
           className="w-full flex items-center justify-center gap-1.5 bg-[#25D366] text-white py-2 rounded-lg text-sm font-semibold hover:bg-[#20BD5A] transition-colors"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d={WA_PATH} /></svg>
@@ -645,7 +653,7 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
         href={WHATSAPP_CS_URL}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() => trackExternalLink('whatsapp_cs', 'floating_mobile')}
+        onClick={() => trackCsClick('floating_mobile')}
         aria-label="WhatsApp 咨询客服"
         className={`md:hidden fixed right-4 bottom-24 z-50 ${scrolledDown ? 'flex' : 'hidden'} items-center justify-center w-[52px] h-[52px] rounded-full bg-[#25D366] text-white shadow-[0_4px_20px_rgba(37,211,102,0.5)] active:scale-95 transition-transform`}
       >

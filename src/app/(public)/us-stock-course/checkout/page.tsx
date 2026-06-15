@@ -36,6 +36,10 @@ function CheckoutInner() {
 
   const beginTracked = useRef(false);
   const paymentInfoTracked = useRef(false);
+  const inputStartTracked = useRef(false);
+  const dwellTracked = useRef(false);
+  const reachedPaymentRef = useRef(false);
+  const startTimeRef = useRef(0);
 
   const ga4Items = useMemo(
     () => [{
@@ -57,6 +61,30 @@ function CheckoutInner() {
       items: ga4Items,
     });
   }, [angle, product, ga4Items]);
+
+  // Checkout dwell time — fire once when the user leaves the page (tab hidden, browser
+  // close, or SPA navigation back to the course page). reached_payment tells us whether
+  // they got past the email gate into the Stripe step before leaving.
+  useEffect(() => {
+    startTimeRef.current = Date.now();
+    const fireDwell = () => {
+      if (dwellTracked.current) return;
+      dwellTracked.current = true;
+      trackGA4('c_us_stock_course_checkout_dwell', {
+        angle,
+        dwell_sec: Math.round((Date.now() - startTimeRef.current) / 1000),
+        reached_payment: reachedPaymentRef.current,
+      });
+    };
+    const onVisibility = () => { if (document.visibilityState === 'hidden') fireDwell(); };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', fireDwell);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', fireDwell);
+      fireDwell(); // SPA navigation away from the checkout route
+    };
+  }, [angle]);
 
   const fetchClientSecret = useCallback(async () => {
     const res = await fetch('/api/checkout/create-session', {
@@ -132,13 +160,20 @@ function CheckoutInner() {
                 }
                 setEmailError('');
                 setEmail(trimmed);
+                reachedPaymentRef.current = true;
                 setEmailSubmitted(true);
               }}
             >
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  if (!inputStartTracked.current && e.target.value) {
+                    inputStartTracked.current = true;
+                    trackGA4('c_us_stock_course_checkout_input_start', { angle });
+                  }
+                  setEmail(e.target.value);
+                }}
                 placeholder="your@email.com"
                 autoFocus
                 className="w-full px-4 py-3.5 text-base rounded-lg bg-white border border-[#E8E5DE] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#B8953F] focus:ring-1 focus:ring-[#B8953F] mb-3"

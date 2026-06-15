@@ -56,6 +56,13 @@ type GA4EventMap = {
   c_us_stock_course_begin_checkout: { angle: string; currency: string; value: number; items: GA4Item[] }
   c_us_stock_course_add_payment_info: { angle: string }
   c_us_stock_course_purchase: { transaction_id: string; value: number; currency: string; items: GA4Item[]; angle: string }
+
+  // us-stock-course engagement events (not conversions) — measure how the LP/checkout
+  // is consumed so we can see where drop-off happens before the begin_checkout step.
+  c_us_stock_course_video_play: { angle: string; video_id: string; video_label: string }
+  c_us_stock_course_cs_click: { angle: string; position: string }
+  c_us_stock_course_checkout_input_start: { angle: string }
+  c_us_stock_course_checkout_dwell: { angle: string; dwell_sec: number; reached_payment: boolean }
 }
 
 type GA4EventName = keyof GA4EventMap

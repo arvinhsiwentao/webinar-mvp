@@ -19,12 +19,15 @@ export default function IntroVideoPlayer({
   poster,
   lazy = false,
   className = '',
+  onPlay,
 }: {
   src: string | null;
   poster: string;
   /** Defer buffering until the user clicks play (for secondary/below-fold videos). */
   lazy?: boolean;
   className?: string;
+  /** Fired once, when the user first clicks play (for analytics). */
+  onPlay?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<{ destroy: () => void; startLoad: () => void } | null>(null);
@@ -70,6 +73,7 @@ export default function IntroVideoPlayer({
 
   const handlePlay = () => {
     setStarted(true);
+    onPlay?.(); // first-play analytics (splash only renders while !started, so fires once)
     hlsRef.current?.startLoad?.(); // begin buffering now (no-op if already loading)
     const v = videoRef.current;
     if (v) v.play().catch(() => { /* user can press the native control */ });
