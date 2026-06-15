@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: '购买后如何兑换课程、下载 Mike是麦克 App 并确认 3 天 VIP 权限的图文教学',
 };
 
-const COURSE_LINK = 'https://www.cmoney.tw/course-media/17781/chapters';
+const COURSE_LINK = 'https://www.cmoney.tw/course-media/17781/chapters?platform=5';
 const APP_LINK = 'https://cmoneymike.onelink.me/ZEaW/hqq09hla';
 const CMONEY_LINK = 'https://www.cmoney.tw/app/';
 const SUPPORT_EMAIL = 'cmoney_overseas@cmoney.com.tw';
