@@ -20,6 +20,7 @@ export default function IntroVideoPlayer({
   lazy = false,
   className = '',
   onPlay,
+  objectFit = 'cover',
 }: {
   src: string | null;
   poster: string;
@@ -28,6 +29,8 @@ export default function IntroVideoPlayer({
   className?: string;
   /** Fired once, when the user first clicks play (for analytics). */
   onPlay?: () => void;
+  /** 'contain' shows the whole frame (e.g. portrait tutorial clips); 'cover' fills/crops. */
+  objectFit?: 'cover' | 'contain';
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<{ destroy: () => void; startLoad: () => void } | null>(null);
@@ -96,7 +99,7 @@ export default function IntroVideoPlayer({
         preload={lazy ? 'none' : 'metadata'}
         controls={started}
         onError={() => setFailed(true)}
-        className={`w-full h-full object-cover bg-black ${className}`}
+        className={`w-full h-full ${objectFit === 'contain' ? 'object-contain' : 'object-cover'} bg-black ${className}`}
       />
 
       {/* Click-to-play splash: white play button pops on any cover; prompt label lives
