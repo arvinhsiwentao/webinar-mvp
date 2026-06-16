@@ -8,24 +8,42 @@ const STORAGE_KEY = 'us-stock-promo-deadline';
 
 /**
  * Promo countdown shown in the nav. The deadline is stored on first visit, so a
- * returning visitor continues from where they left off (does NOT restart).
+ * returning visitor continues from where they left off. Once it hits zero it just
+ * restarts a fresh cycle — there's no real "price goes back up" mechanism behind
+ * it, so an expired timer would only look broken. Restarting keeps the urgency.
  */
 export default function PromoCountdown() {
   const [remaining, setRemaining] = useState<number | null>(null);
 
   useEffect(() => {
+    // Start a fresh promo cycle and persist its deadline.
+    const startFresh = () => {
+      const deadline = Date.now() + DURATION_MS;
+      try { localStorage.setItem(STORAGE_KEY, String(deadline)); } catch { /* ignore */ }
+      return deadline;
+    };
+
     let deadline = 0;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       deadline = stored ? parseInt(stored, 10) : 0;
-      if (!deadline || Number.isNaN(deadline)) {
-        deadline = Date.now() + DURATION_MS;
-        localStorage.setItem(STORAGE_KEY, String(deadline));
+      // Missing, invalid, or already expired → begin a new cycle.
+      if (!deadline || Number.isNaN(deadline) || deadline <= Date.now()) {
+        deadline = startFresh();
       }
     } catch {
       deadline = Date.now() + DURATION_MS;
     }
-    const tick = () => setRemaining(Math.max(0, deadline - Date.now()));
+
+    const tick = () => {
+      let rem = deadline - Date.now();
+      if (rem <= 0) {
+        // Hit zero — loop straight into a new cycle instead of freezing at 00:00:00.
+        deadline = startFresh();
+        rem = deadline - Date.now();
+      }
+      setRemaining(rem);
+    };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
