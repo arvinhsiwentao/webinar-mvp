@@ -127,6 +127,15 @@ export async function POST(request: NextRequest) {
         funnel: isUsStockCourse ? 'us_stock_course' : 'webinar',
         productIds: ids.join(','),
         productNames: productNames.join(','),
+        // Attribution — persisted to the order so 1+3 reconciliation can attribute
+        // purchases to campaign/ad from the order itself (server-side, survives the
+        // GA4 in-app-webview tracking gap). Empty when the visit carried no params.
+        utm_source: utm?.utm_source || '',
+        utm_medium: utm?.utm_medium || '',
+        utm_campaign: utm?.utm_campaign || '',
+        utm_content: utm?.utm_content || '',
+        gclid: utm?.gclid || '',
+        ga_client_id: (gaClientId || '').slice(0, 100),
         ...(isBundle && bonusDeadline ? { bonusDeadline } : {}),
       },
     });
