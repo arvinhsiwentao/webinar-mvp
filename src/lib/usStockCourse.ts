@@ -83,11 +83,18 @@ export interface AngleConfig {
  * (https://stream.mux.com/{playbackId}.m3u8). Until then introVideoHls stays null
  * and the page renders the poster only.
  */
+// All 3 angles share the same intro hook video (single unified hook).
+const SHARED_INTRO_HLS = 'https://stream.mux.com/Hy02CXc024kEbiWUjnS8WsWnx9Vq8IUXDgiF9b5h24wjs.m3u8';
+// Poster = video's actual first frame, so muted-autoplay transitions seamlessly from
+// "paused-looking" thumbnail to playing video — instead of jumping from a static
+// course-cover artwork into Mike's face.
+const SHARED_INTRO_POSTER = 'https://image.mux.com/Hy02CXc024kEbiWUjnS8WsWnx9Vq8IUXDgiF9b5h24wjs/thumbnail.webp?time=0';
+
 export const ANGLE_CONFIG: Record<UsStockAngle, AngleConfig> = {
   // 🅰 作者切角 — 信任：Mike 是谁、负债到财富自由
   author: {
-    introVideoHls: 'https://stream.mux.com/hUPl34zJltX96FmBOKOw372UC8N00Qi9lB6mjByCV13M.m3u8',
-    poster: '/images/us-stock/cover.webp',
+    introVideoHls: SHARED_INTRO_HLS,
+    poster: SHARED_INTRO_POSTER,
     heroHeadline: '从负债 50 万到财务自由的投资框架',
     heroSub: '',
     hookCopy:
@@ -95,10 +102,10 @@ export const ANGLE_CONFIG: Record<UsStockAngle, AngleConfig> = {
     qr: '/images/us-stock/qr-author.webp',
     appUrl: 'https://cmoneymike.onelink.me/ZEaW/w7ntvnjd',
   },
-  // 🅱 时事切角 — hero 文案沿用 author 定稿（仅 intro 影片 / QR / onelink 因归因而不同）
+  // 🅱 时事切角 — hero 文案沿用 author 定稿（仅 QR / onelink 因归因而不同）
   news: {
-    introVideoHls: 'https://stream.mux.com/qzsDylu8pTAFI8xRhqavri1z9dTcmSHt6TZEAtXwZsw.m3u8',
-    poster: '/images/us-stock/cover.webp',
+    introVideoHls: SHARED_INTRO_HLS,
+    poster: SHARED_INTRO_POSTER,
     heroHeadline: '行情乱的时候，你需要的是一套判断框架',
     heroSub: '',
     hookCopy:
@@ -106,10 +113,10 @@ export const ANGLE_CONFIG: Record<UsStockAngle, AngleConfig> = {
     qr: '/images/us-stock/qr-news.webp',
     appUrl: 'https://cmoneymike.onelink.me/ZEaW/w873ef51',
   },
-  // 🅲 功能切角 — hero 文案沿用 author 定稿（仅 intro 影片 / QR / onelink 因归因而不同）
+  // 🅲 功能切角 — hero 文案沿用 author 定稿（仅 QR / onelink 因归因而不同）
   feature: {
-    introVideoHls: 'https://stream.mux.com/Q36DQ9ig9XZd5ObGj7lxeBNmleDSEUC7cfFv01wmmp7c.m3u8',
-    poster: '/images/us-stock/cover.webp',
+    introVideoHls: SHARED_INTRO_HLS,
+    poster: SHARED_INTRO_POSTER,
     heroHeadline: '12 板块系统找出 AI 趋势股',
     heroSub: '',
     hookCopy:

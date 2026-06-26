@@ -39,9 +39,9 @@ const REVIEWS = [
 
 const FRAMEWORK = [
   { num: '1', title: '看大盘', desc: '先看清市场风向，掌握现在该不该出手' },
-  { num: '2', title: '筛板块', desc: '再分辨哪些板块站在风口、钱正往哪流' },
-  { num: '3', title: '挑个股', desc: '接着从板块里挑出真正值得押的几支股' },
-  { num: '4', title: '找买点', desc: '最后判断估值与时机，不被情绪牵着走' },
+  { num: '2', title: '找风口', desc: '再找出哪些板块站在风口、钱正在往哪流' },
+  { num: '3', title: '找交集', desc: '接着找到多个风口板块交集、真正值得押的几支股' },
+  { num: '4', title: '看买点', desc: '最后判断估值与时机，不被情绪牵着走' },
 ];
 
 const CHAPTERS = [
@@ -168,24 +168,23 @@ export default function UsStockCourseBody({ angle }: { angle: UsStockAngle }) {
           </ScrollReveal>
 
           <ScrollReveal delay={120}>
-            {/* Prompt label above the frame, arrow inline (right) pointing down at the video */}
-            <div className="mt-8 md:mt-9 mb-3 flex items-center justify-center gap-2">
-              <p className="text-[#E8D5A3] text-sm md:text-base font-medium tracking-wide">⏱ 1 分钟，先听听 Mike 怎么说</p>
-              <svg className="w-5 h-5 text-[#C9A962] animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 5v14M19 12l-7 7-7-7" />
-              </svg>
+            <div className="relative rounded-2xl overflow-hidden border border-[#C9A962]/25 shadow-[0_0_40px_rgba(201,169,98,0.12)] aspect-video bg-black mt-8 md:mt-9 mb-3 max-w-[46rem] mx-auto">
+              <IntroVideoPlayer src={cfg.introVideoHls} poster={cfg.poster} autoplay onPlay={() => trackVideoPlay('hero', 'hero_intro')} />
             </div>
-            <div className="relative rounded-2xl overflow-hidden border border-[#C9A962]/25 shadow-[0_0_40px_rgba(201,169,98,0.12)] aspect-video bg-black mb-4 max-w-[46rem] mx-auto">
-              <IntroVideoPlayer src={cfg.introVideoHls} poster={cfg.poster} onPlay={() => trackVideoPlay('hero', 'hero_intro')} />
+            {/* Prompt label below the frame, arrow inline pointing up at the video */}
+            <div className="mb-4 flex items-center justify-center gap-2">
+              <p className="text-[#E8D5A3] text-sm md:text-base font-medium tracking-wide">⏱ 2 分钟，先听听 Mike 怎么说</p>
+              <svg className="w-5 h-5 text-[#C9A962] animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 19V5M5 12l7-7 7 7" />
+              </svg>
             </div>
           </ScrollReveal>
 
           <ScrollReveal delay={200}>
-            <p className="text-sm md:text-base text-neutral-400 leading-relaxed max-w-xl mx-auto mt-2 mb-7">{cfg.hookCopy}</p>
             <button
               ref={heroCtaRef}
               onClick={() => goCheckout('hero')}
-              className="group relative overflow-hidden px-9 py-3.5 text-lg md:px-12 md:py-5 md:text-xl rounded-2xl bg-[#B8953F] text-white font-bold tracking-widest cursor-pointer transition-all duration-500 shadow-[0_0_20px_rgba(184,149,63,0.5)] hover:bg-[#A6842F] hover:scale-105 active:scale-95"
+              className="group relative overflow-hidden mt-12 md:mt-16 px-9 py-3.5 text-lg md:px-12 md:py-5 md:text-xl rounded-2xl bg-[#B8953F] text-white font-bold tracking-widest cursor-pointer transition-all duration-500 shadow-[0_0_20px_rgba(184,149,63,0.5)] hover:bg-[#A6842F] hover:scale-105 active:scale-95"
             >
               <span className="relative z-10">US$1 立即购买 →</span>
             </button>
