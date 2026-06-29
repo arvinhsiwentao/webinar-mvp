@@ -76,10 +76,16 @@ export async function POST(request: NextRequest) {
       ? `${baseUrl}/us-stock-course/checkout/return?session_id={CHECKOUT_SESSION_ID}${safeAngle ? `&angle=${safeAngle}` : ''}`
       : `${baseUrl}/checkout/${resolvedId}/return?session_id={CHECKOUT_SESSION_ID}`;
 
-    // Create Stripe Checkout Session in embedded mode
+    // Create Stripe Checkout Session in embedded mode.
+    // us_stock_course 鎖 zh + usd + 關閉 Adaptive Pricing：
+    // LP 全為簡中、廣告主打 US$1，避免 Stripe 依 browser 切繁中、
+    // 或依 IP 拋出 TWD/USD 貨幣選擇器；其他 funnel 維持原行為。
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded',
-      locale: 'auto',
+      locale: isUsStockCourse ? 'zh' : 'auto',
+      ...(isUsStockCourse
+        ? { currency: 'usd' as const, adaptive_pricing: { enabled: false } }
+        : {}),
       line_items: lineItems,
       mode: 'payment',
       return_url: returnUrl,
