@@ -188,7 +188,7 @@ export function confirmationEmail(to: string, name: string, title: string, start
             <tr><td style="padding:7px 0;">
               <table role="presentation" cellpadding="0" cellspacing="0"><tr>
                 <td style="vertical-align:top;padding-right:12px;color:#B8953F;font-size:15px;font-weight:bold;line-height:1.5;">&#10003;</td>
-                <td style="font-size:14px;color:#1A1A1A;line-height:1.6;">2026 三重机会窗口（AI + 降息 + 川普 2.0）— 钱现在在哪一层、接下来往哪流</td>
+                <td style="font-size:14px;color:#1A1A1A;line-height:1.6;">2026 三重机会窗口（AI + 降息 + 川普 2.0）— 钱现在在往哪流、下一步站哪里</td>
               </tr></table>
             </td></tr>
             <tr><td style="padding:7px 0;">
@@ -200,7 +200,7 @@ export function confirmationEmail(to: string, name: string, title: string, start
             <tr><td style="padding:7px 0;">
               <table role="presentation" cellpadding="0" cellspacing="0"><tr>
                 <td style="vertical-align:top;padding-right:12px;color:#B8953F;font-size:15px;font-weight:bold;line-height:1.5;">&#10003;</td>
-                <td style="font-size:14px;color:#1A1A1A;line-height:1.6;">Mike 从负债 50 万到 43 岁财务自由，他做对了什么</td>
+                <td style="font-size:14px;color:#1A1A1A;line-height:1.6;">Mike 开杠杆一天亏掉 50 万美金，后来怎么从「赌」变成「判断」</td>
               </tr></table>
             </td></tr>
           </table>
@@ -225,7 +225,7 @@ export function confirmationEmail(to: string, name: string, title: string, start
                 <td style="vertical-align:middle;padding-right:14px;width:32px;">
                   <div style="width:28px;height:28px;border-radius:50%;border:1px solid #B8953F;text-align:center;line-height:28px;font-size:12px;font-weight:700;color:#B8953F;">02</div>
                 </td>
-                <td style="vertical-align:middle;font-size:14px;font-weight:600;color:#1A1A1A;">AI 六层架构 — 2026 年的机会在哪一层</td>
+                <td style="vertical-align:middle;font-size:14px;font-weight:600;color:#1A1A1A;">三四五攻守罗盘 — Mike 每天在用的判断系统</td>
               </tr></table>
             </td></tr>
             <tr><td style="padding-bottom:12px;">
@@ -233,7 +233,7 @@ export function confirmationEmail(to: string, name: string, title: string, start
                 <td style="vertical-align:middle;padding-right:14px;width:32px;">
                   <div style="width:28px;height:28px;border-radius:50%;border:1px solid #B8953F;text-align:center;line-height:28px;font-size:12px;font-weight:700;color:#B8953F;">03</div>
                 </td>
-                <td style="vertical-align:middle;font-size:14px;font-weight:600;color:#1A1A1A;">从负债 50 万到 43 岁财务自由 — Mike 做对了什么</td>
+                <td style="vertical-align:middle;font-size:14px;font-weight:600;color:#1A1A1A;">一天亏 50 万美金之后 — 从「赌对」到「判断对」</td>
               </tr></table>
             </td></tr>
             <tr><td style="padding-bottom:12px;">

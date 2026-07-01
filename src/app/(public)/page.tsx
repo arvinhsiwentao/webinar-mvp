@@ -71,7 +71,7 @@ const TESTIMONIALS = [
   {
     name: '铭泽',
     title: '餐厅经营者 · 美股投资一年多',
-    quote: '「天天看 AI 新闻，买了一堆 AI 股票但总是追高被套。听完 Mike 讲 AI 六层架构，才知道自己一直在买最上面那层。调整配置之后，心态完全不一样了，不再每天焦虑了。」',
+    quote: '「天天看 AI 新闻，买了一堆 AI 股票但总是追高被套。听完 Mike 讲判断三问和找交集，才明白自己以前根本没在判断、只是在追。现在出手前先问自己三个问题，心态完全不一样，不再每天焦虑了。」',
   },
 ];
 
@@ -471,9 +471,9 @@ export default function HomePageV2() {
 
           <div className="space-y-5">
             {[
-              '2026 三重机会窗口（AI + 降息 + 川普 2.0）— 钱现在在哪一层、接下来往哪流',
+              '2026 三重机会窗口（AI + 降息 + 川普 2.0）— 钱现在在往哪流、下一步站哪里',
               '一套你能立刻执行的攻守框架 — 什么时候买、怎么配、什么时候不动',
-              'Mike 从负债 50 万到 43 岁财务自由，他做对了什么',
+              'Mike 开杠杆一天亏掉 50 万美金，后来怎么从「赌」变成「判断」',
             ].map((item, idx) => (
               <ScrollReveal key={idx} delay={idx * 80}>
                 <div className="flex items-start gap-4">
@@ -498,10 +498,10 @@ export default function HomePageV2() {
               </span>
               <div>
                 <p className="text-base md:text-lg font-bold text-[#E8D5A3]">
-                  限额加赠：Mike 一对一持仓分析
+                  限量机会：Mike 一对一持仓诊断
                 </p>
                 <p className="text-sm text-neutral-400 mt-1 leading-relaxed">
-                  报名讲座即有机会获得 Mike 本人亲自帮你诊断持仓，名额有限，先到先得。
+                  认真参与讲座的观众，有机会获得 Mike 本人亲自帮你诊断持仓，名额有限、先到先得。
                 </p>
               </div>
             </div>
@@ -551,12 +551,12 @@ export default function HomePageV2() {
                 },
                 {
                   num: '02',
-                  title: 'AI 六层架构 — 2026 年的机会在哪一层',
-                  desc: '拆解 AI 产业链六层结构，告诉你资金正在往哪里流、哪些标的还在合理估值。',
+                  title: '三四五攻守罗盘 — Mike 每天在用的判断系统',
+                  desc: '判断三问、狙击四步法、五动口诀（选·配·放·守·调）— 把复杂决策收敛成一套可复制的操作顺序。',
                 },
                 {
                   num: '03',
-                  title: '从负债 50 万到 43 岁财务自由 — Mike 做对了什么',
+                  title: '一天亏 50 万美金之后 — 从「赌对」到「判断对」',
                   desc: '不是励志故事，是走过的弯路和建立框架后的转折。你不需要再犯一次同样的错。',
                 },
                 {
@@ -625,7 +625,7 @@ export default function HomePageV2() {
 
                 <div className="space-y-4 text-base text-neutral-400 leading-relaxed">
                   <p>
-                    32 岁负债 50 万美金，没有背景、没有人脉。你现在经历的迷茫——怕买错、怕亏钱、光靠薪水看不到尽头——Mike 全都经历过。靠着自己摸索出的投资框架，43 岁实现财务自由。走过的每一个弯路，都变成了现在能教给你的方法。
+                    出生在一个很普通的家庭，也曾经背了一身债、每天睡不着，直到 35 岁才还清。尝到特斯拉的甜头后开了杠杆，2023 年一天亏掉 50 万美金——那次让他彻底明白：赚钱靠风口，守钱靠系统。你现在经历的迷茫——怕买错、怕亏钱、光靠薪水看不到尽头——Mike 全都经历过。沉下心两年、每天钻研五六个小时，他把投资从「赌对」彻底改成「判断对」，走过的每一个弯路，都变成了现在能教给你的方法。
                   </p>
                   <p>
                     著有投资畅销书《人生重启》，曾受邀电视财经节目分享投资策略，
@@ -846,7 +846,7 @@ export default function HomePageV2() {
               免费名额有限 · 选择你的场次
             </h2>
             <p className="text-xs text-[#C9A962] text-center mb-6">
-              🎁 报名即有机会获得 Mike 一对一持仓分析（价值 $6,000+ USD）
+              🎁 报名讲座，有机会获得 Mike 本人亲自持仓诊断
             </p>
           </ScrollReveal>
 

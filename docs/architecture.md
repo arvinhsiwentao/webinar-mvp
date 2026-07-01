@@ -20,7 +20,7 @@ Route groups：`(public)/`（觀眾頁面）、`(admin)/`（管理後台）
 
 | Route | Purpose |
 |-------|---------|
-| `/` | Landing page，硬編碼 webinar ID `1`。Modal 報名。Hero 圖 + 倒數 + 權益 |
+| `/` | Landing page，硬編碼 webinar ID `1`。Modal 報名。Hero 圖 + 倒數 + 權益。行銷文案（含 email 提醒信）以最新直播母帶為準，見 decisions.md 2026-07-01 |
 | `/demo` | 測試用直播間 |
 | `/webinar/[id]/lobby` | 等候室：倒數計時、行事曆整合、30 分鐘入場門檻。自動偵測 evergreen 時段 |
 | `/webinar/[id]/confirm` | 重定向 → `/lobby`（向下相容） |

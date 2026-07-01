@@ -186,3 +186,9 @@ Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Strip
 **前導影片：** 走 Mux HLS（`IntroVideoPlayer` 用 hls.js + 原生 controls，非鎖定版 VideoPlayer——行銷片要正常播放控制）。
 **Phase 0 前提（非程式，上線前備齊）：** $1 Stripe Price ID(`STRIPE_PRICE_US_STOCK_1PLUS3`)、CMoney 兌換序號 Google Sheet 分頁 + 商品包/銷售碼（填 `products.ts` 的 `us-stock-1plus3`）、容器 webinar UUID、3 支 hook 上 Mux 取 playbackId 填 `ANGLE_CONFIG`、3 個轉換事件在 GA4 標為關鍵事件並匯入 $1 廣告帳號。
 **取捨：** 新漏斗不發標準 GA4 電商事件 → 失去 GA4 內建 Monetization/購買漏斗報表，換取 Google Ads 出價乾淨隔離（對「兩條漏斗別互相打架」這個首要目標是正確取捨）。
+
+### 2026-07-01: Landing 文案對齊最新直播母帶（20260629 Mike 銷講）
+
+**決策：** 把 landing（`src/app/(public)/page.tsx`）與提醒信（`src/lib/email.ts`）的行銷文案改為對齊最新一版直播影片實際內容。三處重點：(1) 核心方法論從舊版「AI 六層架構」改為影片實際講的「**三四五攻守羅盤**」（判斷三問 / 狙擊四步法 / 五動口訣 選·配·放·守·調）；(2) 講師故事從查無實據的「32 歲負債 50 萬 → 43 歲財務自由」改為影片講得出來的「2023 年開槓桿一天虧 50 萬美金、35 歲還清一身債、沉下心兩年從『賭對』到『判斷對』」；(3) 一對一持倉分析拿掉「價值 $6,000+ USD」贈品框架，改軟性「有機會獲得診斷」。
+**Why：** 影片母帶換版後方法論命名與生平數字都變了，舊文案會讓看完直播的用戶發現「報名頁講的跟影片不是同一套」而破壞信任。$6,000 這個數字影片沒有、且與結帳頁「一對一分析只對 $6,000+ 海外財富之旅學員開放」的定位自相矛盾，當報名贈品是誤導。email 大綱與 landing 同源，一併同步避免前後不一致。
+**範圍：** 純文案替換，無結構變更（故不動 architecture.md）。P1「ETF 主題型 vs 進階型」、「40 分鐘 vs 實際 36 分」與 P2 強化項（金句標題、2000 萬觀看、四種不適合的人篩選區）未做，留待後續。
