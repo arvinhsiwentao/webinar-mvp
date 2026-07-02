@@ -192,3 +192,25 @@ Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Strip
 **決策：** 把 landing（`src/app/(public)/page.tsx`）與提醒信（`src/lib/email.ts`）的行銷文案改為對齊最新一版直播影片實際內容。三處重點：(1) 核心方法論從舊版「AI 六層架構」改為影片實際講的「**三四五攻守羅盤**」（判斷三問 / 狙擊四步法 / 五動口訣 選·配·放·守·調）；(2) 講師故事從查無實據的「32 歲負債 50 萬 → 43 歲財務自由」改為影片講得出來的「2023 年開槓桿一天虧 50 萬美金、35 歲還清一身債、沉下心兩年從『賭對』到『判斷對』」；(3) 一對一持倉分析拿掉「價值 $6,000+ USD」贈品框架，改軟性「有機會獲得診斷」。
 **Why：** 影片母帶換版後方法論命名與生平數字都變了，舊文案會讓看完直播的用戶發現「報名頁講的跟影片不是同一套」而破壞信任。$6,000 這個數字影片沒有、且與結帳頁「一對一分析只對 $6,000+ 海外財富之旅學員開放」的定位自相矛盾，當報名贈品是誤導。email 大綱與 landing 同源，一併同步避免前後不一致。
 **範圍：** 純文案替換，無結構變更（故不動 architecture.md）。P1「ETF 主題型 vs 進階型」、「40 分鐘 vs 實際 36 分」與 P2 強化項（金句標題、2000 萬觀看、四種不適合的人篩選區）未做，留待後續。
+
+### 2026-07-02: 移除棄用的 /v2 冷流量 landing
+
+**決策：** 刪除 `src/app/(public)/v2/page.tsx`（僅此一檔）。`/v2` 是 2026-03-30 為 Google Ads 冷流量做的深色版 landing，已棄用。
+**關鍵發現：** `/v2` 當初夾帶的共用元件（`RegistrationModalV2`、`ScrollReveal`、`CountUpNumber`、`FAQAccordion`、`StickyNav`）與圖片（hero-v2、community-*、tvbs、book-cover、mike-profile）後來被「扶正」——現行主 landing `/`（`page.tsx`）與 us-stock-course 都在 import 這些元件。所以只刪路由檔，元件/圖片/globals.css 動畫/layout 字體/analytics 事件全部保留。
+**驗證：** 全 `src/` grep 無任何連結或 redirect 指向 `/v2`，刪除無死連結風險。
+
+### 2026-07-02: Webinar A/B Test — 真人 (Webinar 1) vs HeyGen AI 分身 (Webinar 3)（規劃，實作中）
+
+**背景：** 老闆要同時測試「真人主講」vs「HeyGen AI 分身主講」哪個轉換好。不覆蓋舊版，開新的一場並行測試。
+**命名：** HeyGen 這場命名為 **Webinar 3**（非 Webinar 2），使標籤與 `webinar_id`／created_at 索引一致（皆為 3）。**「Webinar 2」跳過不使用**——created_at 索引 2 已被 us-stock `1_plus_3` 隱形容器 webinar（`147249ab-...`，標題「請勿刪除」）佔用，為避免混淆而略過。
+**場次對應（明確定義）：**
+- **Webinar 1 = 真人影片，landing = `/`（根目錄）**，UUID `50ddbae7-c89b-406a-b0c3-afe154b3671c`
+- **Webinar 3 = HeyGen AI 分身影片，landing = `/free-webinar`**（新建，`DEFAULT_WEBINAR_ID='3'`）
+**做法：** 走「複製路由（方案 A）」——`/free-webinar` 複製自 `/`，`DEFAULT_WEBINAR_ID='3'` 並貼上第二份 inline 文案。不做資料驅動文案（方案 B）欄位化重構，此作者未來不會持續長此類 A/B，B 屬過度工程。
+**區分參數：** 沿用既有 `webinar_id`。待補：`purchase`、`begin_checkout` 兩事件目前未帶 `webinar_id`，實作時補上。
+**Email 分場：** `confirmationEmail`（報名成功信）的「帶走這些／直播課大綱」為硬編對齊 Webinar 1 腳本，須分場（新增 `webinar-email-content.ts` 內容表）；`reminderEmail`(24h/1h) 只帶 title 不需改；購買/直播後信共用。
+**分流：** 兩個獨立 URL + 不同 Google Ads campaign 各自導流。取捨：campaign 成效天然可分、實作單純，但受眾/文案不對等 → 非隔離單一變數 A/B，結論解讀為「Webinar 1 整套 vs Webinar 3 整套」，非純粹「真人 vs AI」。
+**流程頁 URL：** 走方案(甲)——`/webinar/1/*`、`/webinar/3/*` 沿用數字 id，接受用戶理論上可手改網址跨場（實務極少、事件會正確記成實際觀看那場）。不改 UUID。
+**識別碼一致性：** 流程頁 `webinar_id` 取自 URL `params.id`，直接進 landing 送數字、提醒信進送 UUID → 同場混用兩值。由儀表板端 CASE 映射（`'1'`|`UUID_1`→webinar_1；`'3'`|`UUID_3`→webinar_3）收斂，不改流程頁。
+**儀表板（ads-ai-agent，待資料進來後做）：** BQ 預計算 SQL 目前沒撈 `webinar_id`（混算）。需 SQL 撈出並映射 variant → API 加參數 → 前端「全域切換 + 漏斗並排」。
+**SOT：** 完整計畫見 `C:\Users\user1\.claude\plans\drifting-dancing-galaxy.md`。
