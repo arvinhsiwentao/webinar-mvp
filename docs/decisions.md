@@ -205,7 +205,8 @@ Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Strip
 **命名：** HeyGen 這場命名為 **Webinar 3**（非 Webinar 2），使標籤與 `webinar_id`／created_at 索引一致（皆為 3）。**「Webinar 2」跳過不使用**——created_at 索引 2 已被 us-stock `1_plus_3` 隱形容器 webinar（`147249ab-...`，標題「請勿刪除」）佔用，為避免混淆而略過。
 **場次對應（明確定義）：**
 - **Webinar 1 = 真人影片，landing = `/`（根目錄）**，UUID `50ddbae7-c89b-406a-b0c3-afe154b3671c`
-- **Webinar 3 = HeyGen AI 分身影片，landing = `/free-webinar`**（新建，`DEFAULT_WEBINAR_ID='3'`）
+- **Webinar 3 = HeyGen AI 分身影片，landing = `/free-webinar`**（新建，`DEFAULT_WEBINAR_ID='3'`），UUID `dbdf8b45-5f80-47d3-82c0-4a10a184dee4`（2026-07-02 clone 自 Webinar 1，created_at 索引 3，影片 `G8i4OAM7...`）
+- **對帳：** `orders.webinar_id` 存 resolved UUID → Webinar 3 訂單＝`WHERE webinar_id='dbdf8b45-...'`（決定不加編號欄，日後用 SQL view 分開）。
 **做法：** 走「複製路由（方案 A）」——`/free-webinar` 複製自 `/`，`DEFAULT_WEBINAR_ID='3'` 並貼上第二份 inline 文案。不做資料驅動文案（方案 B）欄位化重構，此作者未來不會持續長此類 A/B，B 屬過度工程。
 **區分參數：** 沿用既有 `webinar_id`。待補：`purchase`、`begin_checkout` 兩事件目前未帶 `webinar_id`，實作時補上。
 **Email 分場：** `confirmationEmail`（報名成功信）的「帶走這些／直播課大綱」為硬編對齊 Webinar 1 腳本，須分場（新增 `webinar-email-content.ts` 內容表）；`reminderEmail`(24h/1h) 只帶 title 不需改；購買/直播後信共用。
