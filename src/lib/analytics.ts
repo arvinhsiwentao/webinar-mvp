@@ -3,8 +3,8 @@ type GA4Item = { item_id: string; item_name: string; price: number; quantity: nu
 type GA4EventMap = {
   // GA4 Recommended events
   sign_up: { method: string; webinar_id: string; quick_fill?: boolean }
-  begin_checkout: { currency: string; value: number; items: GA4Item[]; cta_id?: string; video_time_sec?: number; source?: string; product_ids?: string[]; num_items?: number }
-  purchase: { transaction_id: string; value: number; currency: string; items: GA4Item[] }
+  begin_checkout: { currency: string; value: number; items: GA4Item[]; webinar_id?: string; cta_id?: string; video_time_sec?: number; source?: string; product_ids?: string[]; num_items?: number }
+  purchase: { transaction_id: string; value: number; currency: string; items: GA4Item[]; webinar_id?: string }
 
   // Custom events (c_ prefix)
   c_scroll_depth: { percent: number; page: string }

@@ -175,6 +175,7 @@ export default function CheckoutPage() {
       num_toggles_before_confirm: numTogglesRef.current,
     });
     trackGA4('begin_checkout', {
+      webinar_id: webinarId,
       currency: 'USD',
       value: total,
       items: productIds.map(pid => {

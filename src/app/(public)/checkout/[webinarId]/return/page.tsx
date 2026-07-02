@@ -67,6 +67,7 @@ export default function CheckoutReturnPage() {
                   quantity: 1,
                 }];
             trackGA4('purchase', {
+              webinar_id: webinarId,
               transaction_id: sessionId || `session_${Date.now()}`,
               value: purchaseValue,
               currency: purchaseCurrency,
