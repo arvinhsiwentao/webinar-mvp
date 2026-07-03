@@ -9,6 +9,15 @@ export async function POST(
 ) {
   const { id: webinarId } = await params;
 
+  // TEMP gate：暫停 Webinar 1(真人)的 post-webinar EDM。
+  // 原因：SLIDES_URL 是全站共用且目前指向 Webinar 3 的簡報，避免寄給 W1 觀眾錯的簡報。
+  // W1 有自己的簡報後移除此 gate（或改為 per-webinar slidesUrl）。
+  // 涵蓋 W1 的兩種 id 表示：數字別名 '1'（直接進）與 UUID（提醒信進）。
+  const POST_EMAIL_DISABLED_WEBINARS = new Set(['1', '50ddbae7-c89b-406a-b0c3-afe154b3671c']);
+  if (POST_EMAIL_DISABLED_WEBINARS.has(webinarId)) {
+    return NextResponse.json({ ok: true, skipped: 'disabled_for_webinar_1' });
+  }
+
   let body: { email?: string; name?: string; checkoutUrl?: string };
   try {
     body = await request.json();
