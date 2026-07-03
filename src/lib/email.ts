@@ -1,6 +1,7 @@
 import { audit } from './audit';
 import { formatInTimezone, getTimezoneLabel } from './timezone';
 import { PRODUCT_IDS } from './products';
+import { getConfirmationEmailContent } from './webinar-email-content';
 
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@webinar.example.com';
@@ -50,7 +51,9 @@ export async function sendEmail({ to, subject, html, fromName }: EmailParams): P
   }
 }
 
-export function confirmationEmail(to: string, name: string, title: string, startTime: string, liveUrl: string, speakerAvatarUrl?: string, timezone: string = 'America/Chicago', duration: number = 60): EmailParams {
+export function confirmationEmail(to: string, name: string, title: string, startTime: string, liveUrl: string, speakerAvatarUrl?: string, timezone: string = 'America/Chicago', duration: number = 60, webinarId?: string): EmailParams {
+  // 分場文案（帶走這些 / 大綱）；未登錄的 webinar 回傳預設（Webinar 1 三四五版）
+  const c = getConfirmationEmailContent(webinarId);
   const { date: dateFormatted, time: ptTime } = formatInTimezone(startTime, 'America/Los_Angeles');
   const { time: etTime } = formatInTimezone(startTime, 'America/New_York');
   const timeFormatted = `${ptTime} 美西 (PT) / ${etTime} 美东 (ET)`;
@@ -188,7 +191,7 @@ export function confirmationEmail(to: string, name: string, title: string, start
             <tr><td style="padding:7px 0;">
               <table role="presentation" cellpadding="0" cellspacing="0"><tr>
                 <td style="vertical-align:top;padding-right:12px;color:#B8953F;font-size:15px;font-weight:bold;line-height:1.5;">&#10003;</td>
-                <td style="font-size:14px;color:#1A1A1A;line-height:1.6;">2026 三重机会窗口（AI + 降息 + 川普 2.0）— 钱现在在往哪流、下一步站哪里</td>
+                <td style="font-size:14px;color:#1A1A1A;line-height:1.6;">${c.takeaway1}</td>
               </tr></table>
             </td></tr>
             <tr><td style="padding:7px 0;">
@@ -200,7 +203,7 @@ export function confirmationEmail(to: string, name: string, title: string, start
             <tr><td style="padding:7px 0;">
               <table role="presentation" cellpadding="0" cellspacing="0"><tr>
                 <td style="vertical-align:top;padding-right:12px;color:#B8953F;font-size:15px;font-weight:bold;line-height:1.5;">&#10003;</td>
-                <td style="font-size:14px;color:#1A1A1A;line-height:1.6;">Mike 开杠杆一天亏掉 50 万美金，后来怎么从「赌」变成「判断」</td>
+                <td style="font-size:14px;color:#1A1A1A;line-height:1.6;">${c.takeaway3}</td>
               </tr></table>
             </td></tr>
           </table>
@@ -225,7 +228,7 @@ export function confirmationEmail(to: string, name: string, title: string, start
                 <td style="vertical-align:middle;padding-right:14px;width:32px;">
                   <div style="width:28px;height:28px;border-radius:50%;border:1px solid #B8953F;text-align:center;line-height:28px;font-size:12px;font-weight:700;color:#B8953F;">02</div>
                 </td>
-                <td style="vertical-align:middle;font-size:14px;font-weight:600;color:#1A1A1A;">三四五攻守罗盘 — Mike 每天在用的判断系统</td>
+                <td style="vertical-align:middle;font-size:14px;font-weight:600;color:#1A1A1A;">${c.outline02}</td>
               </tr></table>
             </td></tr>
             <tr><td style="padding-bottom:12px;">
@@ -233,7 +236,7 @@ export function confirmationEmail(to: string, name: string, title: string, start
                 <td style="vertical-align:middle;padding-right:14px;width:32px;">
                   <div style="width:28px;height:28px;border-radius:50%;border:1px solid #B8953F;text-align:center;line-height:28px;font-size:12px;font-weight:700;color:#B8953F;">03</div>
                 </td>
-                <td style="vertical-align:middle;font-size:14px;font-weight:600;color:#1A1A1A;">一天亏 50 万美金之后 — 从「赌对」到「判断对」</td>
+                <td style="vertical-align:middle;font-size:14px;font-weight:600;color:#1A1A1A;">${c.outline03}</td>
               </tr></table>
             </td></tr>
             <tr><td style="padding-bottom:12px;">
