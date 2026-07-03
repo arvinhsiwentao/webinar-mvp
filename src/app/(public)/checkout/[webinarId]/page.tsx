@@ -573,9 +573,6 @@ export default function CheckoutPage() {
                         {!bonusExpired && (
                           <div className="mt-3 bg-[#B8953F]/5 border border-[#B8953F]/20 rounded-md px-3 py-3">
                             <p className="text-sm font-bold text-[#B8953F] mb-1">🎁 购买组合包额外获得：Mike 一对一持仓分析</p>
-                            <p className="text-xs text-neutral-600 leading-relaxed mb-2">
-                              通常只对参加 <span className="font-bold text-[#B8953F]">$6,000+ USD</span> 海外财富之旅的学员开放。A 同学 15 支 ETF 精简到 6 支，思路立刻清晰。
-                            </p>
                           </div>
                         )}
 
@@ -669,7 +666,6 @@ export default function CheckoutPage() {
                       {!bonusExpired && (
                         <div className="bg-[#B8953F]/5 border border-[#B8953F]/20 rounded-md px-3 py-2.5">
                           <p className="text-sm font-bold text-[#B8953F] mb-1">🎁 额外获得：Mike 一对一持仓分析</p>
-                          <p className="text-xs text-neutral-600">通常只对参加 $6,000+ USD 海外财富之旅的学员开放</p>
                         </div>
                       )}
                     </div>
