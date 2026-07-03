@@ -7,7 +7,7 @@ type GA4EventMap = {
   purchase: { transaction_id: string; value: number; currency: string; items: GA4Item[]; webinar_id?: string }
 
   // Custom events (c_ prefix)
-  c_scroll_depth: { percent: number; page: string }
+  c_scroll_depth: { percent: number; page: string; webinar_id?: string }
   c_signup_button_click: { button_position: string; webinar_id: string }
   c_add_to_calendar: { method: string; webinar_id: string }
   c_enter_live: { webinar_id: string; entry_method: 'button' | 'countdown_auto' | 'redirect_live' }

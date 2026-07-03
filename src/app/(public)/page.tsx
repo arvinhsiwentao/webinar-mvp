@@ -287,7 +287,7 @@ export default function HomePageV2() {
       for (const m of [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]) {
         if (scrollPct >= m && !milestones.has(m)) {
           milestones.add(m);
-          trackGA4('c_scroll_depth', { percent: m, page: 'landing' });
+          trackGA4('c_scroll_depth', { percent: m, page: 'landing', webinar_id: DEFAULT_WEBINAR_ID });
         }
       }
     };
