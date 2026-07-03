@@ -58,9 +58,14 @@ export default function WebinarList({
               </p>
 
               {/* Quick Stats */}
-              <div className="flex gap-4 text-xs text-neutral-400">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-400">
                 <span>{webinar.autoChat.length} 条自动消息</span>
                 <span>{webinar.ctaEvents.length} 个 CTA</span>
+                <span className="font-mono text-neutral-500">ID {webinar.id.slice(0, 8)}</span>
+                <span>创建 {webinar.createdAt ? formatDateTime(webinar.createdAt) : '—'}</span>
+                <span className="font-mono text-neutral-500" title={webinar.videoUrl}>
+                  影片 {webinar.videoUrl?.replace('https://stream.mux.com/', '').slice(0, 10) || '—'}
+                </span>
               </div>
             </div>
 
