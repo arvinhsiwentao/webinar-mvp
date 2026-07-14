@@ -76,8 +76,8 @@ export interface AngleConfig {
 
 /**
  * Per-angle differences. Everything else (痛点/框架/9章/App表/FAQ) is shared in
- * UsStockCourseBody. Copy sourced from 1_plus_3_landingpage/LP_B_COPY.md +
- * PROJECT_BACKGROUND.md §4 (audience per angle).
+ * UsStockCourseBody. Copy sourced from the marketing project's LP_B_COPY.md +
+ * PROJECT_BACKGROUND.md §4 (audience per angle) — see docs/WEBSITE_FACTS.md.
  *
  * PREREQUISITE (Phase 0): upload the 3 hook mp4s to Mux and paste the HLS URLs
  * (https://stream.mux.com/{playbackId}.m3u8). Until then introVideoHls stays null

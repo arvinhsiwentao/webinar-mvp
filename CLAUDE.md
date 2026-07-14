@@ -110,5 +110,26 @@ Landing page 硬編碼 webinar ID `1`。管理後台在 `/admin`。詳見 `docs/
 
 - `docs/architecture.md` — 系統架構詳細文件（hooks 自動維護）
 - `docs/decisions.md` — 架構決策日誌（只追加）
+- `docs/WEBSITE_FACTS.md` — **給行銷側看的網站事實**（路由 / GA4 事件 / SKU / 場次 UUID）。改了這些東西之後要更新它，然後跑行銷專案的 `sync-context.ps1`
+- `docs/marketing/PROJECT_BACKGROUND_快照.md` — 1+3 產品與漏斗背景（**唯讀快照**，正本在行銷專案）
 
 規則：CLAUDE.md 是摘要，architecture.md 是細節，兩者不重複。
+
+## 相關專案
+
+這個 repo **只放網站程式碼**。素材與行銷內容住在別的地方：
+
+| 專案 | 位置 | 是什麼 |
+|---|---|---|
+| **webinar-1plus3-marketing** | `Desktop\webinar-1plus3-marketing` | 1+3 漏斗行銷專案：短影音廣告、LP 文案、Appier onboarding、廣告素材 |
+| **webinar-media** | `Desktop\webinar-media` | 直播母帶、簡報、截圖封存（唯讀） |
+| **ads-ai-agent** | `Desktop\ads-ai-agent` | 廣告投放 AI Agent + 成效儀表板（會讀本站的 GA4/BQ 資料） |
+
+**不變量：這個 repo 不讀自己以外的任何路徑。**（2026-07-14 切分時建立；`assets-source/` 就是為此把 build 素材收回來的。）
+
+需要行銷背景 → 讀 `docs/marketing/PROJECT_BACKGROUND_快照.md`，不要跑去行銷專案翻檔案。
+
+判斷檔案該放哪：
+> 會被程式碼讀到 → **這裡**
+> 會被行銷 AI 讀來做決策 → `webinar-1plus3-marketing`
+> 只是成品或原始素材 → `webinar-media`

@@ -50,6 +50,15 @@ gemini金钥.txt
 gemini金鑰.txt
 *.key
 
+# 金鑰防護網。這些規則原本是為了擋 1_plus_3_landingpage/ 底下的金鑰（該資料夾已於
+# 2026-07-14 切分為 Desktop\webinar-1plus3-marketing）。規則保留當防護網 —— 就算日後
+# 有人又把金鑰檔放進 repo，也不會被 commit。
+*API KEY*.txt
+*服務帳戶金鑰*/
+overseas-author-*.json
+admob-*.json
+*service-account*.json
+
 # PII / customer data exports + generated previews (never commit)
 *.csv
 scripts/*-email-preview.html
@@ -57,20 +66,6 @@ scripts/*-preview.html
 *retargeting*
 *pending-checkouts*
 
-# webinar working files (transcripts, scripts — not source code)
-*直播腳本*
-*直播脚本*
-*直播影片*
-*逐字稿*
-
-# slide generation tooling (standalone Python, outside Next.js app)
-generate_*.py
-regenerate_*.py
-test_slide.py
-slide_generation_prompt.md
-
-# generated slide / video assets
-slide_*.png
-/slides/
-/streamlive_videos/
-/streamlive_videos_v3/
+# build 輸入的原始素材（PNG/SVG）。網站用的是轉好的 webp，那些在 public/ 且有進 git。
+# 原料不版控，成品才版控。備份在 Desktop\webinar-media\。詳見 assets-source/README.md
+/assets-source/
