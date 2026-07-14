@@ -115,6 +115,19 @@ Landing page 硬編碼 webinar ID `1`。管理後台在 `/admin`。詳見 `docs/
 
 規則：CLAUDE.md 是摘要，architecture.md 是細節，兩者不重複。
 
+## 改了路由 / GA4 事件 / SKU / 場次之後
+
+**一定要更新 `docs/WEBSITE_FACTS.md`，然後跑：**
+
+```powershell
+C:\Users\user1\Desktop\webinar-1plus3-marketing\sync-context.ps1
+```
+
+行銷側就是靠那份快照認識這個網站的。**不同步的話，行銷 AI 會拿著過期的網址、事件名、價格去做決策。**
+（已經發生過一次：`PROJECT_BACKGROUND.md` 說 3 切角各有前導片，但程式碼早就改成三切角共用同一支了。）
+
+改完就同步，快照永遠不會過期。
+
 ## 相關專案
 
 這個 repo **只放網站程式碼**。素材與行銷內容住在別的地方：
