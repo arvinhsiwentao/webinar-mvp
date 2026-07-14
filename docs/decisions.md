@@ -214,4 +214,5 @@ Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Strip
 **流程頁 URL：** 走方案(甲)——`/webinar/1/*`、`/webinar/3/*` 沿用數字 id，接受用戶理論上可手改網址跨場（實務極少、事件會正確記成實際觀看那場）。不改 UUID。
 **識別碼一致性：** 流程頁 `webinar_id` 取自 URL `params.id`，直接進 landing 送數字、提醒信進送 UUID → 同場混用兩值。由儀表板端 CASE 映射（`'1'`|`UUID_1`→webinar_1；`'3'`|`UUID_3`→webinar_3）收斂，不改流程頁。
 **儀表板（ads-ai-agent，待資料進來後做）：** BQ 預計算 SQL 目前沒撈 `webinar_id`（混算）。需 SQL 撈出並映射 variant → API 加參數 → 前端「全域切換 + 漏斗並排」。
+**⚠️ BQ 取值雷（2026-07-03 實測）：** 事件 `webinar_id` 每筆都有帶，GTM/GA4 設定正常。但**數字 id（'1'/'3'）被 GA4 存進 `int_value`、UUID 存進 `string_value`**，且數字那批是多數（c_video_progress 502 int vs 138 string）。故儀表板抽 `webinar_id` 必須 `COALESCE(string_value, CAST(int_value AS STRING))`，只讀 string_value 會漏掉大半。
 **SOT：** 完整計畫見 `C:\Users\user1\.claude\plans\drifting-dancing-galaxy.md`。
