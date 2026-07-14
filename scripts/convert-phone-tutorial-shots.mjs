@@ -3,7 +3,7 @@
 import sharp from 'sharp';
 import { readdirSync, mkdirSync } from 'fs';
 
-const SRC = '1_plus_3_landingpage/啟用教學/手機板';
+const SRC = 'assets-source/us-stock-tutorial/phone';
 const OUT = 'public/images/us-stock/tutorial/phone';
 
 mkdirSync(OUT, { recursive: true });
