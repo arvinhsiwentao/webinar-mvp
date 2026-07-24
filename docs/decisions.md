@@ -216,3 +216,19 @@ Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Strip
 **儀表板（ads-ai-agent，待資料進來後做）：** BQ 預計算 SQL 目前沒撈 `webinar_id`（混算）。需 SQL 撈出並映射 variant → API 加參數 → 前端「全域切換 + 漏斗並排」。
 **⚠️ BQ 取值雷（2026-07-03 實測）：** 事件 `webinar_id` 每筆都有帶，GTM/GA4 設定正常。但**數字 id（'1'/'3'）被 GA4 存進 `int_value`、UUID 存進 `string_value`**，且數字那批是多數（c_video_progress 502 int vs 138 string）。故儀表板抽 `webinar_id` 必須 `COALESCE(string_value, CAST(int_value AS STRING))`，只讀 string_value 會漏掉大半。
 **SOT：** 完整計畫見 `C:\Users\user1\.claude\plans\drifting-dancing-galaxy.md`。
+
+### 2026-07-24: AI Mike（Webinar 3）影片大改版 — V8「體驗課架構版」
+
+**背景：** Webinar 3 的 AI Mike 影片重錄為 V8「體驗課架構版」，站上對應的落地頁／結帳／EDM／客服全部對齊。這是一顆里程碑 commit。
+**範圍原則：** 只改 Webinar 3；連「結帳只留 $599」「拿掉問卷」這類共用 code 的結構改動，也加條件分支隔離，Webinar 1 完全不動。
+**結帳 599-only：** `checkout/[webinarId]/page.tsx` 加 `only599 = webinarId==='3'`（單欄版面、隱藏其他方案、強制 bundle）。`products.ts` 商品目錄不刪，只 UI 過濾。
+**啟用教學統一：** 新建 `/activation-tutorial`（App 內啟用圖文＋Mux 操作影片），**購買確認信與購買成功頁都導到這一頁**。購買成功頁移除舊的「前往商品官網輸入序號」5 步 + 課程導轉連結整段（us-stock 走自己的 `/us-stock-course/checkout/return`，不受影響）。教學頁做成 Webinar 1/3 通用（描述泛用「課程」，不綁 ETF/期權兩門）。
+**一對一持倉分析上購買成功頁：** 原本只在購買確認信（`bonusEligible`）。改為購買成功頁也顯示（gated on `bonusEligible`）。`session-status` API 新增回傳 `bonusEligible`（與 fulfillment 同規則：bundle + `Date.now() < bonusDeadline`）。憑證講法：信件「此封確認郵件」、頁面「此頁面或確認郵件」。
+**post-webinar 門檻 23→34 分：** `live/page.tsx` 全域（非分場，Webinar 1 停寄信只記名單，實務只影響再行銷名單門檻）。
+**Mux 影片（回退錨點）：**
+- **舊 playbackId（回退用）：`G8i4OAM7T0...`**（DB webinar 3 換片前的值，見上方 2026-07-02 條目）
+- **新 V8 playbackId：`02xyFyKO0102aIGvkGhgf4GbCkSs9P2d9qlNdRv01yYAdlY`**（assetId `BdO31gSW...`，3102s）。**DB 尚未換**——待時間軸（autochat-v7 + CTA 2763）測過才一起寫入。
+- 上片方法：`scripts/upload_to_mux.py`（Mux URL Import，Mux 直接從 Drive 拉，快；token 已改讀環境變數）。
+**Code 回退錨點：** `git tag pre-ai-mike-v3 8a1d725`（改版前 baseline）。
+**延後（未進此 commit）：** DB 換 playbackId + 寫 autochat-v7/CTA（等時間軸測過）；客服交接文件已寫（`docs/marketing/`）。
+**SOT：** `C:\Users\user1\.claude\plans\commit-ai-mike-landingpage-dreamy-dragonfly.md`。

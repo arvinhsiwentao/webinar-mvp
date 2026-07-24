@@ -21,14 +21,16 @@ Route groups：`(public)/`（觀眾頁面）、`(admin)/`（管理後台）
 | Route | Purpose |
 |-------|---------|
 | `/` | Landing page，硬編碼 webinar ID `1`。Modal 報名。Hero 圖 + 倒數 + 權益。行銷文案（含 email 提醒信）以最新直播母帶為準，見 decisions.md 2026-07-01 |
+| `/free-webinar` | **Webinar 3** landing（AI Mike 分身主講，A/B 對照組），`DEFAULT_WEBINAR_ID='3'`。V8 體驗課架構版，見 decisions.md 2026-07-24 |
 | `/demo` | 測試用直播間 |
 | `/webinar/[id]/lobby` | 等候室：倒數計時、行事曆整合、30 分鐘入場門檻。自動偵測 evergreen 時段 |
 | `/webinar/[id]/confirm` | 重定向 → `/lobby`（向下相容） |
 | `/webinar/[id]/waiting` | 重定向 → `/lobby`（向下相容） |
 | `/webinar/[id]/live` | 直播間：影片 + 4-tab 側邊欄（資訊/觀眾/聊天/優惠）+ CTA 疊層 |
 | `/webinar/[id]/end` | 結束頁：銷售文案 + CTA + 社群分享 |
-| `/checkout/[webinarId]` | 兩欄結帳：行銷文案 + Stripe Embedded Checkout |
-| `/checkout/[webinarId]/return` | 付款確認頁：輪詢狀態、顯示啟用碼 |
+| `/checkout/[webinarId]` | 結帳：行銷文案 + Stripe Embedded Checkout。**Webinar 3 只留 $599 組合包**（`only599`，單欄）、鎖簡中 + 美金 |
+| `/checkout/[webinarId]/return` | 付款確認頁：輪詢狀態、顯示啟用碼、導 `/activation-tutorial`；`bonusEligible` 時顯示一對一持倉分析卡 |
+| `/activation-tutorial` | App 內啟用圖文教學（Webinar 1/3 通用）：下載→更多→啟用序號→看課程，含 Mux 操作影片。購買信與購買成功頁都導這 |
 | `/us-stock-course/[angle]` | **$1 直購漏斗** LP（angle=author/news/feature，3 切角共用 body）。詳見「us-stock-course 漏斗」 |
 | `/us-stock-course/checkout` | 精簡結帳（免登入、固定 $1 商品、3 切角共用，`?angle=` 歸因） |
 | `/us-stock-course/checkout/return` | 直購兌換頁：序號 + 去 cmoney.tw 兌換步驟 |

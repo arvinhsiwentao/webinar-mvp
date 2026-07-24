@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getStripeForSessionId } from '@/lib/stripe';
 import { getOrderBySessionId } from '@/lib/db';
 import { fulfillOrder } from '@/lib/fulfillment';
-import { getProduct } from '@/lib/products';
+import { getProduct, PRODUCT_IDS } from '@/lib/products';
 
 type PurchaseItem = { item_id: string; item_name: string; price: number; quantity: number };
 
@@ -69,11 +69,17 @@ export async function GET(request: NextRequest) {
           code: code.trim(),
         }));
 
+        // 1-on-1 bonus eligibility — same rule as fulfillment (bundle + within 2h window).
+        const isBundle = productIdsStr.includes(PRODUCT_IDS.BUNDLE);
+        const bonusDeadline = order.metadata?.bonusDeadline;
+        const bonusEligible = isBundle && !!bonusDeadline && Date.now() < parseInt(bonusDeadline, 10);
+
         return NextResponse.json({
           status: session.status,
           orderStatus: order.status,
           activationCode: order.status === 'fulfilled' ? order.activationCode : undefined,
           activationCodes: order.status === 'fulfilled' ? activationCodes : undefined,
+          bonusEligible: order.status === 'fulfilled' ? bonusEligible : undefined,
           customerEmail: session.customer_details?.email || session.customer_email,
           amountTotal: session.amount_total,
           currency: session.currency,

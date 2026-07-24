@@ -22,58 +22,73 @@ const DEFAULT_WEBINAR_ID = '3';
 const FAQ_ITEMS = [
   {
     question: '我完全不懂投资，也能听懂吗？',
-    answer: '完全可以。这场讲座从零基础出发，用最简单的方式讲解核心策略。不需要任何金融背景，只要你想改善财务状况，就能从中获益。',
+    answer: '完全可以。这堂课不讲复杂的技术指标和 K 线，Mike 讲的是最底层的逻辑，一步一步带你走。零基础、没有任何金融背景，也一样听得懂。',
   },
   {
-    question: '讲座是中文还是英文？',
+    question: '我资金不多、平常也没时间盯盘，适合来吗？',
+    answer: '适合。Mike 教的方法跟你钱多钱少、有没有时间盯盘没关系，几千块、一天花几分钟一样能上手。这堂课就是先帮你把观念和框架建起来，钱会慢慢跟上。',
+  },
+  {
+    question: '体验课是中文还是英文？',
     answer: '全程中文（普通话）。Mike 是北美华人，讲解方式接地气，零基础也能听懂。',
   },
   {
-    question: '免费讲座，会不会一直推销？',
-    answer: '讲座以干货分享为主，Mike 会完整讲解他的投资框架和策略逻辑。讲座最后会介绍进一步学习的机会，自由选择，没有任何压力。',
-  },
-  {
-    question: '我的个人信息安全吗？',
-    answer: '我们严格保护你的隐私，不会将你的信息出售给任何第三方。注册信息仅用于发送讲座相关通知。',
+    question: '我已经在投资美股了，这堂课对我还有帮助吗？',
+    answer: '非常有帮助。很多学员本身已有投资经验，但缺少一套系统化的框架来整合碎片知识。Mike 会讲解完整的选股步骤和仓位配置逻辑，帮你从「凭感觉操作」升级到「有纪律地执行」。',
   },
   {
     question: '错过直播时间怎么办？',
-    answer: '注册后系统会发送提醒邮件。如果错过了，你可以选择下一个可用场次重新参加。',
+    answer: '报名后系统会发送提醒邮件。如果错过了，你可以选择下一个可用场次重新参加。',
   },
   {
-    question: '我已经在投资美股了，这场讲座对我还有帮助吗？',
-    answer: '非常有帮助。很多学员本身已有投资经验，但缺少一套系统化的框架来整合碎片知识。Mike 会讲解完整的配置逻辑和进出场判断系统，帮你从「凭感觉操作」升级到「有纪律地执行」。',
+    question: '我的个人信息安全吗？',
+    answer: '我们严格保护你的隐私，不会将你的信息出售给任何第三方。报名信息仅用于发送体验课相关通知。',
   },
 ];
 
-// ─── Pain points（覆盖 P1–P5 全部受众） ───
-const PAIN_POINTS = [
-  { text: '年薪十万，扣完房租、保险、孩子教育，每月真正存下来的不到两千——你知道不能光靠薪水，但不知道从哪开始',
-    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /> },
-  { text: 'YouTube 看了上百个视频，ETF、期权、AI 什么都懂一点，但打开帐户还是不知道怎么配——信息越多反而越不敢动',
-    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /> },
-  { text: '看到 AI 股票涨就想追，跌了又怕套在高点——没有框架，每一次操作都像在赌',
-    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /> },
+// ─── Hook 痛点：AI 涨疯又逢大回调，散户的纠结（V8 开场 + 环节 6-7 卡点）───
+const HOOK_PAINS = [
+  {
+    // 上升趋势：AI 涨疯、别人一直赚，你还没上车
+    text: '最近 AI 涨疯了，你还没上车，看着别人一直赚，越等越焦虑，怕这波时代红利跟你没关系',
+    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />,
+  },
+  {
+    // 回落曲线：想进场却遇上大回调，怕买在山顶
+    text: '关注 AI 一阵子了、也想进场，偏偏遇上一个大回调，又怕现在一买，就套在山顶',
+    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />,
+  },
+  {
+    // 地图：摸不清 AI 整张版图，不知从哪研究起
+    text: '想搞懂 AI 到底怎么投，却不知道从哪研究起，一堆概念，始终摸不清整张版图',
+    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />,
+  },
 ];
 
-// ─── Testimonials（对应 Campaign A/B/C 受众） ───
-const TESTIMONIALS = [
-  {
-    name: '泽宇',
-    title: '邮务士 · 刚开始接触投资',
-    quote: '「以前觉得投资是有钱人的事，光靠薪水根本存不下来。听完 Mike 的讲座才发现，原来几百块就能开始，重点是方法对。现在每月定投 ETF，虽然金额不大，但终于觉得自己的钱在帮我工作了。」',
-  },
-  {
-    name: '晓妍',
-    title: '科技业新鲜人 · 美股投资两年',
-    quote: '「之前看了一堆 YouTube 影片，ETF、期权什么都懂一点，但打开帐户就不知道该怎么配。Mike 帮我把这些碎片整理成一套框架，现在每天十分钟看完就好，不用再花三个小时盯盘了。」',
-  },
-  {
-    name: '铭泽',
-    title: '餐厅经营者 · 美股投资一年多',
-    quote: '「天天看 AI 新闻，买了一堆 AI 股票但总是追高被套。听完 Mike 讲 AI 六层架构，才知道自己一直在买最上面那层。调整配置之后，心态完全不一样了，不再每天焦虑了。」',
-  },
+// ─── 筛选受众：这堂课适合谁 / 不适合谁（V8 环节 2）───
+const SUITABLE = [
+  '想吃到 AI 这波时代红利，但不想靠运气、想靠一套方法',
+  '怕现在进场买在山顶，想学会怎么判断买点、分批进场',
+  '想慢慢脱离「通胀 + 资本收割」，一步步走向长期财务增长',
+  '愿意花一小时，建立一套自己就能判断的选股逻辑',
 ];
+const NOT_SUITABLE = [
+  '只想要一支明牌、一个代码，明天冲、后天就翻倍',
+  '想一夜暴富，不愿意搞懂为什么涨、为什么跌',
+  '习惯听消息追高杀低，不想自己做一点功课',
+];
+
+// ─── 学员实证截图（真实截图，已隐去姓名/头像/账号；金额为自家 LP 允许）───
+const PROOF_BIG = [
+  { src: '/images/proof/proof-12.webp', cap: '还是学生，跟着一路加仓持有，资产曲线一直往上走' },
+  { src: '/images/proof/proof-10.webp', cap: '白手起家，AMD 抱了快三年，走在财务自由的路上' },
+  { src: '/images/proof/proof-24.webp', cap: '靠美股获利，去年移居日本、在大阪买下一套公寓' },
+  { src: '/images/proof/proof-25.webp', cap: '戒掉熬夜做短线，改走长线价值投资，账户盈利超过 300%' },
+];
+const PROOF_MARQUEE = [
+  'proof-33', 'proof-30', 'proof-5', 'proof-37', 'proof-29', 'proof-39', 'proof-40',
+  'proof-7', 'proof-14', 'proof-21', 'proof-22', 'proof-23', 'proof-2', 'proof-11', 'proof-20',
+].map((n) => `/images/proof/${n}.webp`);
 
 
 export default function HomePageV2() {
@@ -368,10 +383,10 @@ export default function HomePageV2() {
         <div className="relative">
           <picture>
             {/* V2 hero banners */}
-            <source media="(min-width: 768px)" srcSet="/images/hero-v2-desktop.webp" />
+            <source media="(min-width: 768px)" srcSet="/images/ai-mike-v3-desktop.webp" />
             <img
-              src="/images/hero-v2-mobile.webp"
-              alt="AI时代，普通人最好的美股机会来了 — 一套不用盯盘、可复制的高胜率投资策略"
+              src="/images/ai-mike-v3-mobile.webp"
+              alt="AI时代，普通人最好的美股机会来了，一套不用盯盘、可复制的高胜率投资策略"
               className="w-full h-auto block max-h-[60vh] md:max-h-none object-cover object-top"
               fetchPriority="high"
             />
@@ -403,7 +418,7 @@ export default function HomePageV2() {
             </span>
             {/* 底部蓝色科技光边 — hover 时显现 */}
             <span className="absolute bottom-0 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-[#2563eb]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <span className="relative z-10">免费观看直播 →</span>
+            <span className="relative z-10">免费观看体验课 →</span>
           </button>
           {(() => {
             const firstSlot = evergreenSlots[0];
@@ -430,16 +445,13 @@ export default function HomePageV2() {
       <section id="content" className="pt-6 md:pt-10 pb-16 md:pb-24 px-6 lg:px-12 bg-[#0f0f0d]">
         <div className="max-w-2xl mx-auto">
           <ScrollReveal>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-              你是不是也卡在这里？
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-10 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
+              最近 AI 涨疯了，你却更纠结了？
             </h2>
-            <p className="text-neutral-400 text-center mb-10 text-sm md:text-base">
-              不是你不够聪明，是少了一张地图
-            </p>
           </ScrollReveal>
 
           <div className="space-y-4">
-            {PAIN_POINTS.map((point, idx) => (
+            {HOOK_PAINS.map((point, idx) => (
               <ScrollReveal key={idx} delay={idx * 100}>
                 <div className="flex items-center gap-5 bg-white/[0.04] rounded-lg px-6 py-5 border border-[#C9A962]/20 hover:border-[#C9A962]/40 hover:bg-white/[0.06] transition-all duration-300">
                   <span className="flex-shrink-0 w-11 h-11 rounded-xl bg-[#C9A962]/10 border border-[#C9A962]/20 flex items-center justify-center">
@@ -447,7 +459,7 @@ export default function HomePageV2() {
                       {point.icon}
                     </svg>
                   </span>
-                  <p className="text-base md:text-lg text-neutral-300 leading-relaxed">{point.text}</p>
+                  <p className="text-lg md:text-xl text-neutral-300 leading-relaxed">{point.text}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -461,51 +473,32 @@ export default function HomePageV2() {
       <section className="py-16 md:py-24 px-6 lg:px-12 bg-[#111318]">
         <div className="max-w-2xl mx-auto">
           <ScrollReveal>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-              40 分钟，你将带走这些
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-10 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
+              免费体验课 1 小时，带走的是付费程度的干货
             </h2>
-            <p className="text-neutral-400 text-center mb-10 text-sm md:text-base">
-              不是鸡汤，是一套你听完就能开始执行的策略
-            </p>
           </ScrollReveal>
 
-          <div className="space-y-5">
+          <div className="space-y-4">
             {[
-              '2026 三重机会窗口（AI + 降息 + 川普 2.0）— 钱现在在哪一层、接下来往哪流',
-              '一套你能立刻执行的攻守框架 — 什么时候买、怎么配、什么时候不动',
-              'Mike 从负债 50 万到 43 岁财务自由，他做对了什么',
-            ].map((item, idx) => (
+              { title: '一张 Mike 亲手整理的 AI 完整版图', desc: '六层架构怎么分、十二大板块各自的重点股票清单，一次看懂 AI 到底该怎么投' },
+              { title: '最新的 AI 趋势判断', desc: '现在进场到底还来不来得及、资金正在往哪个板块冲、下一棒的机会又在哪里' },
+              { title: '一套最好的进场方法', desc: '什么时候该出手、怎么分批买，不追高、也不套在山顶' },
+            ].map((b, idx) => (
               <ScrollReveal key={idx} delay={idx * 80}>
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#C9A962]/20 border border-[#C9A962]/40 flex items-center justify-center mt-0.5">
-                    <svg className="w-4 h-4 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-start gap-4 bg-white/[0.03] rounded-xl border border-[#C9A962]/20 px-6 py-5 hover:border-[#C9A962]/40 hover:bg-white/[0.05] transition-all duration-300">
+                  <div className="flex-shrink-0 w-9 h-9 rounded-full bg-[#C9A962]/20 border border-[#C9A962]/40 flex items-center justify-center mt-0.5">
+                    <svg className="w-5 h-5 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <p className="text-base md:text-lg text-neutral-300 leading-relaxed">{item}</p>
+                  <div>
+                    <p className="text-lg md:text-xl font-bold text-[#E8D5A3] mb-1.5 leading-snug">{b.title}</p>
+                    <p className="text-base md:text-lg text-neutral-400 leading-relaxed">{b.desc}</p>
+                  </div>
                 </div>
               </ScrollReveal>
             ))}
           </div>
-
-          {/* Bonus: 一对一持仓分析 */}
-          <ScrollReveal delay={400}>
-            <div className="mt-8 bg-[#C9A962]/10 border border-[#C9A962]/30 rounded-lg px-6 py-5 flex items-start gap-4">
-              <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[#B8953F] flex items-center justify-center mt-0.5">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                </svg>
-              </span>
-              <div>
-                <p className="text-base md:text-lg font-bold text-[#E8D5A3]">
-                  限额加赠：Mike 一对一持仓分析
-                </p>
-                <p className="text-sm text-neutral-400 mt-1 leading-relaxed">
-                  报名讲座即有机会获得 Mike 本人亲自帮你诊断持仓，名额有限，先到先得。
-                </p>
-              </div>
-            </div>
-          </ScrollReveal>
 
           {/* Mid-page CTA — 桌机保留，手机有 sticky bar 不需要 */}
           <ScrollReveal delay={500}>
@@ -525,16 +518,130 @@ export default function HomePageV2() {
       </section>
 
       {/* ================================================================
-          Section 4.5: COURSE OUTLINE — 直播课大纲
+          Section 4.2: 筛选受众 — 这堂课适合谁 / 不适合谁（独立区块）
+          ================================================================ */}
+      <section className="py-16 md:py-24 px-6 lg:px-12 bg-[#0f0f0d]">
+        <div className="max-w-3xl mx-auto">
+          <ScrollReveal>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-10 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
+              这堂课适合谁？不适合谁？
+            </h2>
+          </ScrollReveal>
+
+          <div className="grid md:grid-cols-2 gap-5">
+            {/* 不适合（左） */}
+            <ScrollReveal>
+              <div className="h-full bg-white/[0.03] rounded-xl border border-white/10 px-6 py-6">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-white/5 border border-white/15 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </span>
+                  <h3 className="text-lg font-bold text-neutral-400">这些人，这堂课可能不适合你</h3>
+                </div>
+                <ul className="space-y-3">
+                  {NOT_SUITABLE.map((t, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-lg md:text-xl text-neutral-400 leading-relaxed">
+                      <span className="flex-shrink-0 mt-3 w-1.5 h-1.5 rounded-full bg-neutral-600" />
+                      <span>{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </ScrollReveal>
+            {/* 适合（右） */}
+            <ScrollReveal delay={120}>
+              <div className="h-full bg-[#C9A962]/[0.06] rounded-xl border border-[#C9A962]/30 px-6 py-6">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#C9A962]/20 border border-[#C9A962]/40 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                  </span>
+                  <h3 className="text-lg font-bold text-[#E8D5A3]">这堂课，为你准备</h3>
+                </div>
+                <ul className="space-y-3">
+                  {SUITABLE.map((t, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-lg md:text-xl text-neutral-200 leading-relaxed">
+                      <span className="flex-shrink-0 mt-3 w-1.5 h-1.5 rounded-full bg-[#C9A962]" />
+                      <span>{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================
+          Section 4.3: TESTIMONIALS — 学员实证（真实截图，排在筛选后 / 大纲前）
+          ================================================================ */}
+      <section id="testimonials" className="py-16 md:py-24 px-6 lg:px-12 bg-[#111318]">
+        <div className="max-w-4xl mx-auto">
+          <ScrollReveal>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
+              真实学员，真实结果
+            </h2>
+            <p className="text-neutral-400 text-center mb-10 text-sm md:text-base">
+              以下都是真实学员的回馈截图，为保护隐私，姓名与头像已做隐去处理
+            </p>
+          </ScrollReveal>
+
+          {/* 4 张大卡 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-3xl mx-auto">
+            {PROOF_BIG.map((p, idx) => (
+              <ScrollReveal key={idx} delay={idx * 100}>
+                <figure className="h-full bg-white/[0.03] rounded-xl border border-[#C9A962]/20 overflow-hidden">
+                  <div className="bg-[#0f0f0d]">
+                    <Image
+                      src={p.src}
+                      alt="学员实证截图"
+                      width={640}
+                      height={640}
+                      className="w-full h-auto block"
+                    />
+                  </div>
+                  <figcaption className="px-5 py-4 text-base md:text-lg text-neutral-300 leading-relaxed border-t border-white/5">
+                    {p.cap}
+                  </figcaption>
+                </figure>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+
+        {/* 学员实证跑马灯 */}
+        <div className="mt-12 -mx-6 md:-mx-[calc(50vw-50%)] overflow-hidden">
+          <p className="text-xs text-neutral-500 text-center mb-5 tracking-widest uppercase px-6">更多真实回馈</p>
+          <div className="flex animate-[marqueeScroll_45s_linear_infinite] hover:[animation-play-state:paused] gap-4 w-max">
+            {[...Array(2)].map((_, setIdx) => (
+              <div key={setIdx} className="flex gap-4">
+                {PROOF_MARQUEE.map((src, num) => (
+                  <div key={`${setIdx}-${num}`} className="flex-shrink-0 w-52 h-52 md:w-56 md:h-56 rounded-lg overflow-hidden bg-[#1a1a18] border border-white/10">
+                    <Image
+                      src={src}
+                      alt="学员实证截图"
+                      width={360}
+                      height={360}
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================================
+          Section 4.5: COURSE OUTLINE — 体验课大纲
           ================================================================ */}
       <section className="py-16 md:py-24 px-6 lg:px-12 bg-[#0f0f0d]">
         <div className="max-w-2xl mx-auto">
           <ScrollReveal>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-              直播课大纲
+              体验课大纲
             </h2>
             <p className="text-neutral-400 text-center mb-12 text-sm md:text-base">
-              40 分钟，从「为什么要行动」到「具体怎么做」，完整走一遍
+一小时，从「为什么要行动」到「具体怎么做」，完整走一遍
             </p>
           </ScrollReveal>
 
@@ -546,28 +653,23 @@ export default function HomePageV2() {
               {[
                 {
                   num: '01',
-                  title: '普通人靠薪水为什么存不到钱？',
-                  desc: '解析受薪阶级「高收入高支出」的困境，为什么投资不是选项而是必须。',
+                  title: 'AI 六层架构：2026 年的机会在哪一层',
+                  desc: '拆解 AI 产业链六层结构，告诉你资金正在往哪里流、哪些标的还在合理估值，现在进场还来不来得及。',
                 },
                 {
                   num: '02',
-                  title: 'AI 六层架构 — 2026 年的机会在哪一层',
-                  desc: '拆解 AI 产业链六层结构，告诉你资金正在往哪里流、哪些标的还在合理估值。',
+                  title: '选股四动作：看大盘 → 找风口 → 找交集 → 找买点',
+                  desc: 'Mike 每天在用的一套选股系统，从大盘往下一层层走，让你不再听人报明牌，自己就能判断一支股能不能买。',
                 },
                 {
                   num: '03',
-                  title: '从负债 50 万到 43 岁财务自由 — Mike 做对了什么',
-                  desc: '不是励志故事，是走过的弯路和建立框架后的转折。你不需要再犯一次同样的错。',
+                  title: '仓位配置：核心 / 卫星 / 现金，依年龄怎么调',
+                  desc: '选对股只是一半，配置是更重要的另一半。核心仓、卫星仓、现金三块怎么分，二十岁跟五十岁完全不一样。',
                 },
                 {
                   num: '04',
-                  title: '一套可执行的投资框架 — 长短线怎么配、ETF 怎么选',
-                  desc: '成长型、防御型、收益型、进阶型 — 四类 ETF 配置逻辑，攻守兼备的实战系统。',
-                },
-                {
-                  num: '05',
-                  title: '真实学员案例 — 从零开始到稳定执行',
-                  desc: '如何启动这套框架从「什么都不敢动」走到「每天十分钟搞定」。',
+                  title: '真实学员实证 + 一天几分钟，怎么用工具上手',
+                  desc: '一群跟你一样的普通人靠这套做出结果；最后带你看怎么把整套变成一天只花几分钟就能做的事。',
                 },
               ].map((item, idx) => (
                 <ScrollReveal key={idx} delay={idx * 100}>
@@ -578,8 +680,8 @@ export default function HomePageV2() {
                     </div>
                     {/* 内容 */}
                     <div className="pt-1 pb-2">
-                      <h3 className="text-base md:text-lg font-bold text-neutral-200 mb-1.5">{item.title}</h3>
-                      <p className="hidden md:block text-sm md:text-base text-neutral-500 leading-relaxed">{item.desc}</p>
+                      <h3 className="text-lg md:text-xl font-bold text-neutral-200 mb-1.5">{item.title}</h3>
+                      <p className="hidden md:block text-base md:text-lg text-neutral-500 leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
                 </ScrollReveal>
@@ -623,16 +725,13 @@ export default function HomePageV2() {
                   {webinar.speakerTitle || '美股投资人 / YouTube 创作者'}
                 </p>
 
-                <div className="space-y-4 text-base text-neutral-400 leading-relaxed">
+                <div className="space-y-4 text-lg md:text-xl text-neutral-400 leading-relaxed">
                   <p>
-                    32 岁负债 50 万美金，没有背景、没有人脉。你现在经历的迷茫——怕买错、怕亏钱、光靠薪水看不到尽头——Mike 全都经历过。靠着自己摸索出的投资框架，43 岁实现财务自由。走过的每一个弯路，都变成了现在能教给你的方法。
+                    32 岁负债 50 万美金，没有背景、没有人脉。你现在经历的迷茫，怕买错、怕亏钱、光靠薪水看不到尽头，Mike 全都经历过。靠着自己摸索出的投资框架，43 岁实现财务自由。走过的每一个弯路，都变成了现在能教给你的方法。
                   </p>
                   <p>
                     著有投资畅销书《人生重启》，曾受邀电视财经节目分享投资策略，
                     并与台湾最大财经平台 CMoney 合作推出投资工具。
-                  </p>
-                  <p className="font-medium text-neutral-200">
-                    这场讲座，Mike 会把这套花了四年验证的完整框架，毫无保留地讲给你听。
                   </p>
                 </div>
 
@@ -793,50 +892,6 @@ export default function HomePageV2() {
       </section>
 
       {/* ================================================================
-          Section 6: TESTIMONIALS — 学员见证（placeholder）
-          ================================================================ */}
-      <section id="testimonials" className="py-16 md:py-24 px-6 lg:px-12 bg-[#0f0f0d]">
-        <div className="max-w-3xl mx-auto">
-          <ScrollReveal>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-              他们也曾跟你一样犹豫
-            </h2>
-            <p className="text-neutral-400 text-center mb-10 text-sm md:text-base">
-              听听参加过讲座的学员怎么说
-            </p>
-          </ScrollReveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, idx) => (
-              <ScrollReveal key={idx} delay={idx * 120}>
-                <div className="bg-white/[0.04] border border-[#C9A962]/20 rounded-lg p-6 h-full flex flex-col">
-                  {/* Stars */}
-                  <div className="flex gap-0.5 mb-3">
-                    {[...Array(5)].map((_, i) => (
-                      <svg key={i} className="w-4 h-4 text-[#C9A962]" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-
-                  {/* Quote */}
-                  <p className="text-base text-neutral-400 leading-relaxed flex-1 mb-4">
-                    {t.quote}
-                  </p>
-
-                  {/* Author */}
-                  <div className="pt-4 border-t border-white/10">
-                    <p className="text-sm font-medium text-neutral-200">{t.name}</p>
-                    {t.title && <p className="text-xs text-neutral-500">{t.title}</p>}
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================================
           Section 7: DATE SCHEDULE + COUNTDOWN
           ================================================================ */}
       <section id="schedule" ref={scheduleRef} className="py-16 md:py-24 px-6 lg:px-12 bg-[#111318]">
@@ -845,8 +900,8 @@ export default function HomePageV2() {
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center" style={{ fontFamily: '"Noto Serif SC", serif' }}>
               免费名额有限 · 选择你的场次
             </h2>
-            <p className="text-xs text-[#C9A962] text-center mb-6">
-              🎁 报名即有机会获得 Mike 一对一持仓分析（价值 $6,000+ USD）
+            <p className="text-sm md:text-base text-[#C9A962] text-center mb-6">
+              🎁 报名即有机会获得 Mike 一对一持仓分析
             </p>
           </ScrollReveal>
 
@@ -859,7 +914,7 @@ export default function HomePageV2() {
               <svg className="w-4 h-4 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
               </svg>
-              <p className="text-sm font-medium text-[#E8D5A3]">请选择一个场次时间报名</p>
+              <p className="text-base md:text-lg font-medium text-[#E8D5A3]">请选择一个场次时间报名</p>
             </div>
           </div>
 
@@ -893,8 +948,8 @@ export default function HomePageV2() {
                     <div className="flex items-center gap-5 px-6 py-5">
                       {/* 日期信息 */}
                       <div className="flex-1">
-                        <p className="text-base md:text-lg font-bold text-neutral-200">{fullDate}</p>
-                        <p className="text-sm text-[#C9A962] mt-0.5">
+                        <p className="text-lg md:text-xl font-bold text-neutral-200">{fullDate}</p>
+                        <p className="text-base md:text-lg text-[#C9A962] mt-1">
                           {formatInTimezone(dateStr, 'America/Los_Angeles').time} 美西 (PT) / {formatInTimezone(dateStr, 'America/New_York').time} 美东 (ET)
                         </p>
                       </div>
@@ -905,16 +960,16 @@ export default function HomePageV2() {
                         {new Date(dateStr) <= new Date() ? (
                           <div className="flex items-center justify-center gap-2">
                             <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-                            <p className="text-sm font-semibold text-[#E8D5A3]">
+                            <p className="text-base md:text-lg font-semibold text-[#E8D5A3]">
                               直播已经开始，立即报名收听
                             </p>
                           </div>
                         ) : (
                           <>
-                            <p className="text-sm font-semibold text-[#E8D5A3] mb-3 text-center">
+                            <p className="text-base md:text-lg font-semibold text-[#E8D5A3] mb-3 text-center">
                               最近一场即将开始，免费报名立即观看
                             </p>
-                            <div className="[&_p]:text-neutral-300 [&_p]:text-sm mb-3">
+                            <div className="[&_p]:text-neutral-300 [&_p]:text-base mb-3">
                               <PersistentCountdown slots={evergreenSlots.slice(0, 1)} />
                             </div>
                           </>
@@ -926,10 +981,10 @@ export default function HomePageV2() {
                       <div className="flex flex-col gap-0.5">
                         {remaining !== undefined && (
                           <>
-                            <p className="text-xs text-neutral-500">
+                            <p className="text-sm md:text-base text-neutral-500">
                               已有 <span className="text-[#C9A962] font-semibold">{80 - remaining}</span> 人报名
                             </p>
-                            <p className="text-xs text-red-400 flex items-center gap-1.5">
+                            <p className="text-sm md:text-base text-red-400 flex items-center gap-1.5">
                               <span className="relative flex h-2 w-2 flex-shrink-0">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
@@ -945,7 +1000,7 @@ export default function HomePageV2() {
                           setSelectedSlotTime(dateStr);
                           openModal('schedule_card', remaining);
                         }}
-                        className="ml-auto text-sm font-semibold px-5 py-2 rounded-lg border border-[#C9A962]/50 text-[#E8D5A3] bg-[#C9A962]/10 hover:bg-[#C9A962]/20 hover:border-[#C9A962] transition-all duration-300 cursor-pointer"
+                        className="ml-auto text-base font-semibold px-6 py-2.5 rounded-lg border border-[#C9A962]/50 text-[#E8D5A3] bg-[#C9A962]/10 hover:bg-[#C9A962]/20 hover:border-[#C9A962] transition-all duration-300 cursor-pointer"
                       >
                         立即报名
                       </button>
@@ -963,15 +1018,15 @@ export default function HomePageV2() {
                     <div className="bg-white/[0.02] rounded-xl border border-white/10 opacity-50 overflow-hidden mt-5">
                       <div className="flex items-center gap-5 px-6 py-5">
                         <div className="flex-1">
-                          <p className="text-base md:text-lg font-bold text-neutral-500">{soldOutFullDate}</p>
-                          <p className="text-sm text-neutral-600 mt-0.5">
+                          <p className="text-lg md:text-xl font-bold text-neutral-500">{soldOutFullDate}</p>
+                          <p className="text-base md:text-lg text-neutral-600 mt-1">
                             {formatInTimezone(soldOutDate.toISOString(), 'America/Los_Angeles').time} 美西 (PT) / {formatInTimezone(soldOutDate.toISOString(), 'America/New_York').time} 美东 (ET)
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between px-6 py-3 bg-white/[0.02] border-t border-white/5">
-                        <p className="text-xs text-neutral-500">已有 <span className="text-neutral-400 font-semibold">80</span> 人报名</p>
-                        <span className="text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded">已额满</span>
+                        <p className="text-sm md:text-base text-neutral-500">已有 <span className="text-neutral-400 font-semibold">80</span> 人报名</p>
+                        <span className="text-sm md:text-base font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded">已额满</span>
                       </div>
                     </div>
                   );
@@ -1021,10 +1076,10 @@ export default function HomePageV2() {
         <div className="max-w-2xl mx-auto text-center">
           <ScrollReveal>
             <h2 className="text-xl md:text-3xl font-bold text-white mb-4" style={{ fontFamily: '"Noto Serif SC", serif' }}>
-              你不需要很厉害才开始<br className="md:hidden" />但你需要现在就开始
+              未来最大的风险，<br className="md:hidden" />不是亏损，是你还没上车
             </h2>
             <p className="text-base text-neutral-400 mb-6 leading-relaxed max-w-lg mx-auto">
-              AI 时代的投资机会不会等人。这场讲座限时免费公开，Mike 将完整分享他的投资框架，听完你就能开始行动。
+              AI 这波机会的窗口，现在才刚打开，你越早进来，复利滚的时间就越长。这堂体验课限时免费，听完你就知道第一步该怎么走。
             </p>
           </ScrollReveal>
 
@@ -1037,14 +1092,14 @@ export default function HomePageV2() {
                 <span className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[ctaShimmer_1.5s_ease-in-out_infinite]" />
                 </span>
-                <span className="relative z-10">免费报名，观看讲座</span>
+                <span className="relative z-10">免费报名，观看体验课</span>
               </button>
             </div>
           </ScrollReveal>
 
           <ScrollReveal delay={300}>
-            <p className="text-xs text-neutral-600 mt-8 leading-relaxed max-w-md mx-auto">
-              {webinar.disclaimerText || '本次讲座内容仅为知识分享与经验探讨，不构成任何形式的投资建议、理财推荐或收益保证。所有提及的策略、工具及案例均为 Mike 个人投资经验分享。'}
+            <p className="text-sm md:text-base text-neutral-500 mt-8 leading-relaxed max-w-xl mx-auto">
+              {(webinar.disclaimerText || '本次体验课内容仅为知识分享与经验探讨，不构成任何形式的投资建议、理财推荐或收益保证。所有提及的策略、工具及案例均为 Mike 个人投资经验分享。').replace(/讲座/g, '体验课')}
             </p>
           </ScrollReveal>
         </div>
@@ -1063,9 +1118,6 @@ export default function HomePageV2() {
                 Mike是麦克
               </span>
             </div>
-            <p className="text-xs text-neutral-600 max-w-sm text-center leading-relaxed">
-              一套普通人也能复制的美股投资框架，让每个人都能从「不知道怎么开始」走向「有系统、有信心」。
-            </p>
           </div>
 
           {/* 社群链接 */}

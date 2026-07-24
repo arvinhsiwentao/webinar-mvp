@@ -1,0 +1,577 @@
+{
+  "autoChat": [
+    {
+      "timeSec": 1,
+      "name": "David",
+      "message": "大家好"
+    },
+    {
+      "timeSec": 2,
+      "name": "Amy",
+      "message": "晚上好～"
+    },
+    {
+      "timeSec": 3,
+      "name": "早晚爆富",
+      "message": "到"
+    },
+    {
+      "timeSec": 4,
+      "name": "Jerry",
+      "message": "多伦多路过"
+    },
+    {
+      "timeSec": 5,
+      "name": "小火车",
+      "message": "报到🙋"
+    },
+    {
+      "timeSec": 6,
+      "name": "三宝妈",
+      "message": "签到"
+    },
+    {
+      "timeSec": 7,
+      "name": "Coco",
+      "message": "hi"
+    },
+    {
+      "timeSec": 9,
+      "name": "Cindy",
+      "message": "👋"
+    },
+    {
+      "timeSec": 11,
+      "name": "幸运草",
+      "message": "追 Mike 频道两年了 第一次直播"
+    },
+    {
+      "timeSec": 14,
+      "name": "大熊",
+      "message": "湾区潜水"
+    },
+    {
+      "timeSec": 23,
+      "name": "阿凯",
+      "message": "声音大家 ok 吗"
+    },
+    {
+      "timeSec": 26,
+      "name": "小美",
+      "message": "正常"
+    },
+    {
+      "timeSec": 36,
+      "name": "Helen",
+      "message": "好多人"
+    },
+    {
+      "timeSec": 39,
+      "name": "Alex",
+      "message": "1"
+    },
+    {
+      "timeSec": 40,
+      "name": "David",
+      "message": "1"
+    },
+    {
+      "timeSec": 41,
+      "name": "王强",
+      "message": "1"
+    },
+    {
+      "timeSec": 42,
+      "name": "Linda",
+      "message": "2"
+    },
+    {
+      "timeSec": 43,
+      "name": "小林",
+      "message": "2"
+    },
+    {
+      "timeSec": 44,
+      "name": "Peter",
+      "message": "2"
+    },
+    {
+      "timeSec": 45,
+      "name": "Nicole",
+      "message": "2"
+    },
+    {
+      "timeSec": 46,
+      "name": "Barbie",
+      "message": "3"
+    },
+    {
+      "timeSec": 47,
+      "name": "VvnUS",
+      "message": "1"
+    },
+    {
+      "timeSec": 48,
+      "name": "慧慧",
+      "message": "3"
+    },
+    {
+      "timeSec": 49,
+      "name": "Frank",
+      "message": "2"
+    },
+    {
+      "timeSec": 50,
+      "name": "陈静",
+      "message": "1"
+    },
+    {
+      "timeSec": 51,
+      "name": "阿德",
+      "message": "3"
+    },
+    {
+      "timeSec": 52,
+      "name": "Vicky",
+      "message": "2"
+    },
+    {
+      "timeSec": 53,
+      "name": "老张",
+      "message": "3"
+    },
+    {
+      "timeSec": 54,
+      "name": "Momo",
+      "message": "1"
+    },
+    {
+      "timeSec": 55,
+      "name": "Sam",
+      "message": "2"
+    },
+    {
+      "timeSec": 57,
+      "name": "Ryan",
+      "message": "我 3😂"
+    },
+    {
+      "timeSec": 59,
+      "name": "芊芊",
+      "message": "2 举手"
+    },
+    {
+      "timeSec": 64,
+      "name": "David",
+      "message": "我完全零基础 这样听得懂吗"
+    },
+    {
+      "timeSec": 80,
+      "name": "小火车",
+      "message": "资金不多 平常也没空盯盘 能开始吗"
+    },
+    {
+      "timeSec": 86,
+      "name": "David",
+      "message": "👌"
+    },
+    {
+      "timeSec": 97,
+      "name": "阿明",
+      "message": "以前都跟着别人买 套了好几次😭"
+    },
+    {
+      "timeSec": 126,
+      "name": "阿明",
+      "message": "… 中枪"
+    },
+    {
+      "timeSec": 144,
+      "name": "Aaron",
+      "message": "哈哈 够直接"
+    },
+    {
+      "timeSec": 159,
+      "name": "小鱼",
+      "message": "不报明牌 反而想听"
+    },
+    {
+      "timeSec": 172,
+      "name": "Luna",
+      "message": "说的就是我"
+    },
+    {
+      "timeSec": 192,
+      "name": "Tom",
+      "message": "免费听到这些 值"
+    },
+    {
+      "timeSec": 232,
+      "name": "Nina",
+      "message": "真人吗"
+    },
+    {
+      "timeSec": 248,
+      "name": "小美",
+      "message": "几百块就能开始啊"
+    },
+    {
+      "timeSec": 296,
+      "name": "Jason",
+      "message": "20 万订阅 有看过"
+    },
+    {
+      "timeSec": 326,
+      "name": "阿杰",
+      "message": "亏 50 万😨"
+    },
+    {
+      "timeSec": 342,
+      "name": "陈静",
+      "message": "敢讲亏钱 挺真"
+    },
+    {
+      "timeSec": 382,
+      "name": "Den",
+      "message": "一直想懂 AI 不知从哪下手"
+    },
+    {
+      "timeSec": 415,
+      "name": "Joyce",
+      "message": "这图清楚"
+    },
+    {
+      "timeSec": 466,
+      "name": "VvnUS",
+      "message": "之前追高 AI 股亏了"
+    },
+    {
+      "timeSec": 490,
+      "name": "大牛",
+      "message": "跟不上 求慢一点点🙏"
+    },
+    {
+      "timeSec": 592,
+      "name": "王强",
+      "message": "原来大跌是洗盘"
+    },
+    {
+      "timeSec": 608,
+      "name": "Ken",
+      "message": "看 VIX 判断 学到"
+    },
+    {
+      "timeSec": 616,
+      "name": "Tom",
+      "message": "这会不会是 AI 泡沫 像 2000 网络股"
+    },
+    {
+      "timeSec": 642,
+      "name": "Tom",
+      "message": "有差 懂了"
+    },
+    {
+      "timeSec": 685,
+      "name": "婷婷",
+      "message": "缺这么久😮"
+    },
+    {
+      "timeSec": 752,
+      "name": "Michael",
+      "message": "卖铲子的最香🤣"
+    },
+    {
+      "timeSec": 827,
+      "name": "小芳",
+      "message": "这么多标的 到底买哪个"
+    },
+    {
+      "timeSec": 862,
+      "name": "Jason",
+      "message": "交集 记下"
+    },
+    {
+      "timeSec": 892,
+      "name": "Luna",
+      "message": "现在进 会不会太晚"
+    },
+    {
+      "timeSec": 982,
+      "name": "Oscar",
+      "message": "OKLO、Rocket Lab✍️"
+    },
+    {
+      "timeSec": 1036,
+      "name": "陈静",
+      "message": "没上车才是风险 有感"
+    },
+    {
+      "timeSec": 1086,
+      "name": "王强",
+      "message": "不梭哈 不杠杆 记住"
+    },
+    {
+      "timeSec": 1116,
+      "name": "Wendy",
+      "message": "Mike 这个 AI 分层地图太有料了 干货👍"
+    },
+    {
+      "timeSec": 1137,
+      "name": "Susan Deng",
+      "message": "NVDA 记忆体 OKLO CRWD 是要全部买吗"
+    },
+    {
+      "timeSec": 1172,
+      "name": "Fiona",
+      "message": "原来配置这么重要"
+    },
+    {
+      "timeSec": 1252,
+      "name": "Kevin",
+      "message": "四步✍️"
+    },
+    {
+      "timeSec": 1280,
+      "name": "小敏",
+      "message": "有点快 但跟上了"
+    },
+    {
+      "timeSec": 1342,
+      "name": "Emma",
+      "message": "费半是 AI 命脉"
+    },
+    {
+      "timeSec": 1462,
+      "name": "老陈",
+      "message": "元宇宙我追过😭"
+    },
+    {
+      "timeSec": 1584,
+      "name": "Ray",
+      "message": "一份钱当好几份用"
+    },
+    {
+      "timeSec": 1672,
+      "name": "志明",
+      "message": "PEG 第一次听懂"
+    },
+    {
+      "timeSec": 1700,
+      "name": "Ella",
+      "message": "不抄底不追高不一次性 记下"
+    },
+    {
+      "timeSec": 1774,
+      "name": "Nicole",
+      "message": "Mike 那仓位到底怎么配"
+    },
+    {
+      "timeSec": 1812,
+      "name": "大C",
+      "message": "依年龄调 有道理"
+    },
+    {
+      "timeSec": 1852,
+      "name": "Luna",
+      "message": "我 30 出头 攻守平衡"
+    },
+    {
+      "timeSec": 1882,
+      "name": "Grace",
+      "message": "移居日本买房 羡慕"
+    },
+    {
+      "timeSec": 1906,
+      "name": "阿华",
+      "message": "都是普通上班族啊"
+    },
+    {
+      "timeSec": 2002,
+      "name": "小美",
+      "message": "就等这个 没时间盯盘"
+    },
+    {
+      "timeSec": 2062,
+      "name": "阿伦",
+      "message": "免费直播 冲"
+    },
+    {
+      "timeSec": 2146,
+      "name": "Tina",
+      "message": "收到 email 了"
+    },
+    {
+      "timeSec": 2192,
+      "name": "Jason",
+      "message": "交集👍"
+    },
+    {
+      "timeSec": 2396,
+      "name": "Andy",
+      "message": "有人带 有人陪 就不瞎撞"
+    },
+    {
+      "timeSec": 2596,
+      "name": "芳姐",
+      "message": "这套挺完整"
+    },
+    {
+      "timeSec": 2622,
+      "name": "Michael",
+      "message": "一个月不到 50"
+    },
+    {
+      "timeSec": 2660,
+      "name": "Leo",
+      "message": "还送两门课"
+    },
+    {
+      "timeSec": 2706,
+      "name": "Nicole",
+      "message": "7 天退款 那试试"
+    },
+    {
+      "timeSec": 2748,
+      "name": "Zoe",
+      "message": "一对一好难得"
+    },
+    {
+      "timeSec": 2778,
+      "name": "Kevin",
+      "message": "下单了"
+    },
+    {
+      "timeSec": 2788,
+      "name": "Emma",
+      "message": "付款成功✅"
+    },
+    {
+      "timeSec": 2800,
+      "name": "阿明",
+      "message": "冲 别没名额"
+    },
+    {
+      "timeSec": 2812,
+      "name": "Grace",
+      "message": "报名好了"
+    },
+    {
+      "timeSec": 2825,
+      "name": "小林",
+      "message": "刚买完"
+    },
+    {
+      "timeSec": 2838,
+      "name": "芊芊",
+      "message": "求一对一名额🙏"
+    },
+    {
+      "timeSec": 2845,
+      "name": "王强",
+      "message": "一个方案 干脆"
+    },
+    {
+      "timeSec": 2915,
+      "name": "Luna",
+      "message": "已下单 去加 WhatsApp"
+    },
+    {
+      "timeSec": 2930,
+      "name": "阿德",
+      "message": "我也是 截图发过去了"
+    },
+    {
+      "timeSec": 2945,
+      "name": "Tom",
+      "message": "Mike 你会在群里报明牌吗"
+    },
+    {
+      "timeSec": 2976,
+      "name": "Tom",
+      "message": "给方法不是给鱼 懂"
+    },
+    {
+      "timeSec": 3068,
+      "name": "Emma",
+      "message": "谢谢 Mike 收获满满"
+    },
+    {
+      "timeSec": 3071,
+      "name": "陈静",
+      "message": "受教了🙏"
+    },
+    {
+      "timeSec": 3074,
+      "name": "Jason",
+      "message": "干货满满 今天没白来"
+    },
+    {
+      "timeSec": 3077,
+      "name": "小美",
+      "message": "笔记记满了"
+    },
+    {
+      "timeSec": 3080,
+      "name": "王强",
+      "message": "讲得真清楚 感谢"
+    },
+    {
+      "timeSec": 3083,
+      "name": "Luna",
+      "message": "已上车 谢谢老师"
+    },
+    {
+      "timeSec": 3086,
+      "name": "老陈",
+      "message": "学到很多"
+    },
+    {
+      "timeSec": 3089,
+      "name": "Grace",
+      "message": "感谢 Mike❤️"
+    },
+    {
+      "timeSec": 3092,
+      "name": "Kevin",
+      "message": "App 里见"
+    },
+    {
+      "timeSec": 3095,
+      "name": "Nicole",
+      "message": "谢谢 期待一对一"
+    },
+    {
+      "timeSec": 3098,
+      "name": "阿华",
+      "message": "太值了 谢谢"
+    },
+    {
+      "timeSec": 3100,
+      "name": "Sophia",
+      "message": "辛苦 Mike 👏"
+    }
+  ],
+  "ctaEvents": [
+    {
+      "showAtSec": 2763,
+      "hideAtSec": 9999,
+      "buttonText": "立即加入",
+      "promoText": "课程 + APP + 1V1 持仓分析",
+      "position": "on_video",
+      "showCountdown": false,
+      "dismissible": true,
+      "color": "#B8953F"
+    },
+    {
+      "showAtSec": 2763,
+      "hideAtSec": 9999,
+      "buttonText": "立即加入",
+      "promoText": "课程 + APP + 加码赠：1V1 持仓分析（限量）",
+      "secondaryText": "体验课限定优惠，结束后恢复原价",
+      "position": "below_video",
+      "showCountdown": false,
+      "dismissible": true,
+      "color": "#B8953F"
+    }
+  ]
+}

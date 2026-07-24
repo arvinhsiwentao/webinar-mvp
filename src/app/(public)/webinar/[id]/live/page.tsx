@@ -310,7 +310,7 @@ export default function LiveRoomPage() {
   useEffect(() => {
     const fireLeaveEmail = () => {
       if (emailLeaveFired.current) return;
-      if (currentTimeRef.current < 23 * 60) return;
+      if (currentTimeRef.current < 34 * 60) return;
 
       let email = '';
       try {
@@ -325,7 +325,7 @@ export default function LiveRoomPage() {
       const params = new URLSearchParams();
       params.set('email', email);
       if (userName !== '观众') params.set('name', userName);
-      params.set('source', 'left_23min');
+      params.set('source', 'left_34min');
       const utms = getStoredUtmParams();
       for (const [k, v] of Object.entries(utms)) params.set(k, v);
       const checkoutUrl = `${window.location.origin}/checkout/${webinarId}?${params.toString()}`;

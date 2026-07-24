@@ -83,7 +83,7 @@ export async function fulfillOrder(
       );
       activationCodes.push({
         productId: 'bundle',
-        productName: '美股二加一实战组合包',
+        productName: '实战组合包－Mike App年方案 + ETF/期权课程',
         code,
       });
     }

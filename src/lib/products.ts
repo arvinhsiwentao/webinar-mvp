@@ -90,7 +90,7 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
   },
   [PRODUCT_IDS.BUNDLE]: {
     id: PRODUCT_IDS.BUNDLE,
-    name: '美股二加一实战组合包',
+    name: '实战组合包－Mike App年方案 + ETF/期权课程',
     shortName: '完整组合包',
     price: 599,
     originalPrice: 1696,

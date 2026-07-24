@@ -10,9 +10,9 @@ interface NavItem {
 }
 
 const DEFAULT_NAV_ITEMS: NavItem[] = [
-  { id: 'content', label: '讲座内容' },
-  { id: 'speaker', label: '讲师介绍' },
+  { id: 'content', label: '体验课内容' },
   { id: 'testimonials', label: '学员反馈' },
+  { id: 'speaker', label: '讲师介绍' },
   { id: 'schedule', label: '场次时间' },
   { id: 'faq', label: '常见问题' },
 ];

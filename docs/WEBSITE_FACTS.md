@@ -6,6 +6,7 @@
 > **SOT 在這裡。**改了路由 / GA4 事件 / SKU / 場次之後，順手更新本檔，然後跑行銷專案的 `sync-context.ps1`。
 >
 > 最後驗證：2026-07-14（每一條都用 grep 從程式碼確認過）
+> 2026-07-24 更新：AI Mike（Webinar 3）大改版相關條目（新增 `/activation-tutorial`、Webinar 3 結帳只留 $599、`bundle` 商品名、post-webinar 門檻 34 分）
 
 ---
 
@@ -16,7 +17,8 @@
 | `/` | **Webinar 1** landing（真人主講影片） | `src/app/(public)/page.tsx` |
 | `/free-webinar` | **Webinar 3** landing（HeyGen AI 分身主講）— A/B 對照組 | `src/app/(public)/free-webinar/page.tsx` |
 | `/webinar/{1,3}/lobby` `/live` `/end` | 等候室 → 直播間 → 結束頁 | `src/app/(public)/webinar/[id]/` |
-| `/checkout/{webinarId}` | $599 課程結帳（Stripe Embedded） | `src/app/(public)/checkout/` |
+| `/checkout/{webinarId}` | 課程結帳（Stripe Embedded）。**Webinar 3 只留 $599 組合包**（`only599` 條件，強制選 bundle）；Webinar 1 仍是 4 方案 | `src/app/(public)/checkout/[webinarId]/page.tsx` |
+| `/activation-tutorial` | **App 內啟用圖文教學**（下載→更多→啟用序號→看課程），含 Mux 操作影片。購買確認信與購買成功頁都導到這 | `src/app/(public)/activation-tutorial/page.tsx` |
 | `/us-stock-course/author` | **$1 漏斗 LP** — 作者切角 | `src/app/(public)/us-stock-course/[angle]/` |
 | `/us-stock-course/news` | 同上 — 時事切角 | 同上 |
 | `/us-stock-course/feature` | 同上 — 功能切角 | 同上 |
@@ -87,7 +89,7 @@ COALESCE(string_value, CAST(int_value AS STRING))
 | 商品 ID | 名稱 | 價格 | 賣在哪 |
 |---|---|---|---|
 | `us-stock-1plus3` | $1 美股入门套餐｜9 章课程 + 3 天 App VIP | **$1**（原價標 $49） | `/us-stock-course/checkout` |
-| `bundle` | 美股二加一实战组合包 | $599 | `/checkout/{webinarId}` |
+| `bundle` | 实战组合包－Mike App年方案 + ETF/期权课程 | $599 | `/checkout/{webinarId}`（Webinar 3 唯一方案） |
 | `etf-options` | ETF+期权课程组合 | $249 | 同上 |
 | `options` | 期权策略课程 | $99 | 同上 |
 | `app-monthly` | MIKE是麦克 APP 月方案 | $49 | 同上 |
@@ -114,7 +116,7 @@ COALESCE(string_value, CAST(int_value AS STRING))
 看完直播的人會收到導向 $1 LP 的 EDM。三個觸發點：
 1. 點 CTA
 2. 走到結束頁
-3. 離開時觀看時長 ≥ 23 分鐘
+3. 離開時觀看時長 ≥ 34 分鐘（原 23 分，2026-07-24 調高；`live/page.tsx` 全域，非分場）
 
 去重靠 audit log + DB unique constraint。名單即時寫進 Supabase `post_webinar_email_recipients`，並同步 append 到 Google Sheet（行銷用）。
 

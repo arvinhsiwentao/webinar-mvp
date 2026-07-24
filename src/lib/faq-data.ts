@@ -108,6 +108,126 @@ export const faqItems: FAQItem[] = [
   },
 ];
 
+// ─── Webinar 3（AI Mike / V8 体验课架构版）专属 FAQ ───
+// 与默认（webinar 1）隔离：只主推 599 完整方案、7 天退款、含一对一持仓分析、用词对齐「体验课」。
+export const FAQ_WEBINAR_3: FAQItem[] = [
+  {
+    id: 'what-plans',
+    question: '有哪些方案可以选？',
+    answer:
+      '体验课专属只推一个方案：完整组合包 $599，一次到位、最划算。\n\n包含三大核心：\n' +
+      '1.「MIKE是麦克」APP 一年完整权限\n' +
+      '2. 震荡行情的美股期权操作解析（线上课程）\n' +
+      '3. ETF 进阶资产放大术（线上课程）\n\n' +
+      '体验课结束后 2 小时内购买，还额外加赠 Mike 一对一持仓分析。',
+  },
+  {
+    id: 'what-included',
+    question: '完整组合包包含什么？',
+    answer:
+      '$599 完整组合包，是体验课学员的专属方案，包含三大核心：\n\n' +
+      '1.「MIKE是麦克」APP 一年完整权限\n' +
+      '包含价值灯号、十二大板块与交集趋势股清单、Mike 关注清单、语音 & 视频直播、学员 & Mike 即时文字聊天室、APP 专属付费内容文章等。\n\n' +
+      '2. 震荡行情的美股期权操作解析（线上课程）\n' +
+      '教你用 Sell Put、Sell Call 在市场波动时收保费。无期限、无限次数观看。\n\n' +
+      '3. ETF 进阶资产放大术（线上课程）\n' +
+      '教你四类 ETF 组合配置、从退休目标倒推配比。无期限、无限次数观看。\n\n' +
+      '体验课结束后 2 小时内购买，额外加赠 Mike 一对一持仓分析。',
+  },
+  {
+    id: 'one-on-one',
+    question: 'Mike 一对一持仓分析怎么进行？',
+    answer:
+      '在体验课结束后 2 小时内购买完整组合包，即可获得 Mike 亲自帮你做的一对一持仓分析。\n\n' +
+      '购买后你会收到一封确认邮件，里面有 Mike 的私人 WhatsApp。把购买截图发给他、说一声你是体验课学员，就能预约。\n' +
+      'Mike 会看你现在的持仓配置，帮你把大方向理清楚。名额有限，先到先得，动作要快。',
+  },
+  {
+    id: 'app-features',
+    question: 'APP 里有什么功能？',
+    answer:
+      '「MIKE是麦克」APP 是你的投资学习 + 实战平台：\n\n' +
+      '• 价值灯号 — 红/黄/绿灯判断个股估值，5 分钟扫完，不用花三小时看盘\n' +
+      '• 十二大板块 + 交集趋势股清单 — Mike 帮你把找风口、找交集算好、标好\n' +
+      '• Mike 关注清单 — Mike 正在研究、追踪的股票即时更新\n' +
+      '• 语音 & 视频直播 — 财报、联准会、突发状况第一时间解读\n' +
+      '• 学员 & Mike 即时文字聊天室 — 随时提问、分享持仓、讨论操作逻辑\n' +
+      '• APP 专属付费内容文章 — Mike 对最新趋势的深度分析',
+  },
+  {
+    id: 'options-course',
+    question: '期权课程教什么？',
+    answer:
+      '《震荡行情的美股期权操作解析》教你在市场波动时也能赚钱的防守策略：\n\n' +
+      '• Sell Put 低接收保费 — 像等房价跌到理想价才买，等待期间还能收租\n' +
+      '• Sell Call 持仓收租 — 手上有 ETF 就能额外收保费，不卖股票也有现金流\n' +
+      '• 风险控制 SOP — 保证金怎么算、什么时候该做什么时候不该做\n\n' +
+      '无期限、无限次数观看。',
+  },
+  {
+    id: 'etf-course',
+    question: 'ETF 课程教什么？',
+    answer:
+      '《ETF 进阶资产放大术》教你从定期定额升级到有系统的主动配置：\n\n' +
+      '• 四类 ETF 组合 — 成长型做加速、防御型做安全垫、收益型提供现金流、主题型博超额回报\n' +
+      '• 从退休目标倒推配比 — 你的目标决定你该偏攻还是偏守\n' +
+      '• 长短线账户策略 + 动态再平衡 — 每季度花十分钟调整，用纪律替代情绪\n\n' +
+      '无期限、无限次数观看。',
+  },
+  {
+    id: 'how-to-use',
+    question: '购买后怎么开始使用？',
+    answer:
+      '1. 完成付款（支持信用卡、Apple Pay、Google Pay）\n' +
+      '2. 付款成功后，页面会立即显示启用序号，并同步发送到你的邮箱\n' +
+      '3. 在 App Store / Google Play 搜索「MIKE是麦克」，下载 App 并登入\n' +
+      '4. 进入 App 的【更多】页，点击【启用序号】\n' +
+      '5. 输入邮件里收到的启用序号，即可开通 App 付费功能与 ETF / 期权课程权限\n' +
+      '6. 开始学习 — 观看课程、加入社群、跟着 Mike 一起操作',
+  },
+  {
+    id: 'beginner',
+    question: '我是投资新手，适合吗？',
+    answer:
+      '适合。ETF 课程从基础配置讲起，不需要任何投资经验。\n\n' +
+      '期权课程是进阶内容，建议先从 ETF 课程开始，搭配 APP 社群里 Mike 每天的实战分享，循序渐进地学习。\n\n' +
+      '很多学员也是从零基础开始，透过框架和社群陪伴，逐步建立自己的投资系统。',
+  },
+  {
+    id: 'refund',
+    question: '可以退款吗？',
+    answer:
+      '可以！我们提供 7 天无理由退款保证。\n\n' +
+      '如果你觉得课程不适合你，7 天内联系客服即可全额退款，不需要任何理由。\n' +
+      '退款请联系：cmoney_overseas@cmoney.com.tw',
+  },
+  {
+    id: 'payment-methods',
+    question: '支持哪些付款方式？',
+    answer:
+      '我们通过 Stripe 安全支付，支持：\n\n' +
+      '• 信用卡 / 借记卡（Visa, MasterCard, AMEX 等）\n' +
+      '• Apple Pay / Google Pay\n\n' +
+      '所有交易都经过 SSL 加密，安全有保障。',
+  },
+  {
+    id: 'course-validity',
+    question: '课程和 APP 有效期多久？',
+    answer:
+      '两门线上课程可以无期限、无限次数回放，没有到期限制。\n\n' +
+      'APP 权限为一年期，到期后可续费继续使用。',
+  },
+];
+
+/** Webinar 3（AI Mike）UUID；landing/live/checkout 也可能用数字别名 '3'。 */
+const WEBINAR_3_HEYGEN_UUID = 'dbdf8b45-5f80-47d3-82c0-4a10a184dee4';
+
+/** 依 webinar id（UUID 或数字别名）取小帮手 FAQ；webinar 3 用专属版，其余用默认（webinar 1）。 */
+export function getFaqItems(webinarId?: string): FAQItem[] {
+  if (webinarId === WEBINAR_3_HEYGEN_UUID || webinarId === '3') return FAQ_WEBINAR_3;
+  return faqItems;
+}
+
 export const WHATSAPP_NUMBER = '886917642752';
 export const WHATSAPP_DEFAULT_MESSAGE = '你好，我想咨询课程相关问题';
 export const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_DEFAULT_MESSAGE)}`;

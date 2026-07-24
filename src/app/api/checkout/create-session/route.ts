@@ -47,6 +47,8 @@ export async function POST(request: NextRequest) {
     }
 
     const resolvedId = webinar.id;
+    // Webinar 3（AI Mike）：与 1+3 一样锁定简体 + 美金（关闭 Adaptive Pricing 的 TWD/USD 选择器）
+    const isWebinar3 = resolvedId === 'dbdf8b45-5f80-47d3-82c0-4a10a184dee4';
 
     // Check for existing purchase (using resolved UUID)
     const existingOrders = await getOrdersByEmail(email, resolvedId);
@@ -77,13 +79,14 @@ export async function POST(request: NextRequest) {
       : `${baseUrl}/checkout/${resolvedId}/return?session_id={CHECKOUT_SESSION_ID}`;
 
     // Create Stripe Checkout Session in embedded mode.
-    // us_stock_course 鎖 zh + usd + 關閉 Adaptive Pricing：
-    // LP 全為簡中、廣告主打 US$1，避免 Stripe 依 browser 切繁中、
-    // 或依 IP 拋出 TWD/USD 貨幣選擇器；其他 funnel 維持原行為。
+    // us_stock_course 与 webinar 3（AI Mike）鎖 zh + usd + 關閉 Adaptive Pricing：
+    // LP 全為簡中、以 USD 計價，避免 Stripe 依 browser 切繁中、
+    // 或依 IP 拋出 TWD/USD 貨幣選擇器；其他 funnel（含 webinar 1）維持原行為。
+    const lockZhUsd = isUsStockCourse || isWebinar3;
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded',
-      locale: isUsStockCourse ? 'zh' : 'auto',
-      ...(isUsStockCourse
+      locale: lockZhUsd ? 'zh' : 'auto',
+      ...(lockZhUsd
         ? { currency: 'usd' as const, adaptive_pricing: { enabled: false } }
         : {}),
       line_items: lineItems,

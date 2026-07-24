@@ -27,6 +27,65 @@ const stripePromise = loadStripe(
 
 const BUNDLE_PRICE = 599;
 
+// Webinar 3（AI Mike）：结帐页只主推 599 组合包
+const WEBINAR_3_CHECKOUT_UUID = 'dbdf8b45-5f80-47d3-82c0-4a10a184dee4';
+
+/** 顶部进度步骤：体验课 → 付款 → 购买完成 */
+function CheckoutStepper() {
+  const steps = [
+    { label: '体验课', state: 'done' as const },
+    { label: '付款', state: 'current' as const },
+    { label: '购买完成', state: 'future' as const },
+  ];
+  return (
+    <div className="flex items-center justify-center">
+      {steps.map((s, i) => (
+        <div key={s.label} className="flex items-center">
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${
+                s.state === 'current'
+                  ? 'bg-[#B8953F] text-white shadow-[0_0_0_3px_rgba(184,149,63,0.15)]'
+                  : s.state === 'done'
+                    ? 'bg-[#B8953F]/15 text-[#B8953F] border border-[#B8953F]/40'
+                    : 'bg-neutral-100 text-neutral-400 border border-neutral-200'
+              }`}
+            >
+              {s.state === 'done' ? '✓' : i + 1}
+            </span>
+            <span
+              className={`text-xs md:text-sm whitespace-nowrap ${
+                s.state === 'current' ? 'font-bold text-[#B8953F]' : s.state === 'done' ? 'text-neutral-600' : 'text-neutral-400'
+              }`}
+            >
+              {s.label}
+            </span>
+          </div>
+          {i < steps.length - 1 && (
+            <span className={`mx-2 md:mx-3 h-px w-4 md:w-8 ${i < 1 ? 'bg-[#B8953F]/40' : 'bg-neutral-200'}`} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** 底部付款方式图示（沿用 1+3 的图档） */
+function PaymentBadges() {
+  return (
+    <div className="mt-8 text-center">
+      <p className="text-sm text-neutral-500 mb-4">🔒 全程安全加密结帐，由 Stripe 处理</p>
+      <Image src="/images/us-stock/pay-stripe.webp" alt="Stripe" width={128} height={64} className="h-10 md:h-12 w-auto mx-auto" />
+      <p className="text-sm text-neutral-400 mt-5 mb-3">支援以下付款方式</p>
+      <div className="flex flex-row flex-wrap items-center justify-center gap-x-4 gap-y-3 md:gap-8">
+        <Image src="/images/us-stock/pay-applepay.webp" alt="Apple Pay" width={100} height={64} className="h-9 md:h-11 w-auto" />
+        <Image src="/images/us-stock/pay-googlepay.webp" alt="Google Pay" width={120} height={64} className="h-9 md:h-11 w-auto" />
+        <Image src="/images/us-stock/pay-link.webp" alt="Link" width={191} height={64} className="h-7 md:h-9 w-auto" />
+      </div>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /*  Checkout Page                                                      */
 /* ------------------------------------------------------------------ */
@@ -35,6 +94,7 @@ export default function CheckoutPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const webinarId = params.webinarId as string;
+  const only599 = webinarId === '3' || webinarId === WEBINAR_3_CHECKOUT_UUID;
 
   const urlEmail = searchParams.get('email') || '';
   const source = searchParams.get('source') || 'direct';
@@ -63,6 +123,11 @@ export default function CheckoutPage() {
   const bundleProduct = useMemo(() => allProducts.find(p => p.isBundle), [allProducts]);
 
   const bundleSelected = selectedIds.includes(PRODUCT_IDS.BUNDLE);
+
+  // Webinar 3：进页自动选中 599 组合包（页面只显示这一个方案）
+  useEffect(() => {
+    if (only599) setSelectedIds([PRODUCT_IDS.BUNDLE]);
+  }, [only599]);
 
   // Selected product configs (for right-column summary)
   const selectedProducts = useMemo(
@@ -235,6 +300,57 @@ export default function CheckoutPage() {
     return () => clearInterval(timer);
   }, [countdown !== null && countdown > 0, webinarId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Webinar 3：一对一持仓分析 假名额（localStorage，符合幻觉原则；首次 6–9，回访 30% 机率 -1）
+  const [bonusSeats, setBonusSeats] = useState<number | null>(null);
+  useEffect(() => {
+    if (!only599) return;
+    const key = 'checkout-1on1-seats';
+    try {
+      const stored = localStorage.getItem(key);
+      let n: number;
+      if (stored) {
+        n = parseInt(stored, 10) || 8;
+        if (Math.random() < 0.3 && n > 3) { n -= 1; localStorage.setItem(key, String(n)); }
+      } else {
+        n = Math.floor(Math.random() * 4) + 6;
+        localStorage.setItem(key, String(n));
+      }
+      setBonusSeats(n);
+    } catch { setBonusSeats(8); }
+  }, [only599]);
+
+  // Webinar 3：侧边「XX 已购买」popup — 每次弹出名额 -1（下限 3），间隔递增（30s、60s、再 +2/3/4… 分）
+  const [buyerPopup, setBuyerPopup] = useState(false);
+  const [faqOpen, setFaqOpen] = useState(false); // QA 小帮手是否展开 → popup 让位
+  const seatsRef = useRef<number | null>(null);
+  useEffect(() => { seatsRef.current = bonusSeats; }, [bonusSeats]);
+  useEffect(() => {
+    if (!only599) return;
+    const gapAt = (i: number) => (i <= 1 ? 30 : i * 60); // 秒：30、60、之后每次 +2/3/4… 分
+    let cancelled = false;
+    let idx = 0;
+    let popTimer: ReturnType<typeof setTimeout>;
+    let hideTimer: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      popTimer = setTimeout(() => {
+        if (cancelled) return;
+        const cur = seatsRef.current;
+        if (cur === null) { schedule(); return; }   // 名额还没载入，稍后再试
+        if (cur <= 3) return;                         // 已到下限 3，停止
+        const next = cur - 1;
+        seatsRef.current = next;
+        setBonusSeats(next);
+        try { localStorage.setItem('checkout-1on1-seats', String(next)); } catch { /* ignore */ }
+        setBuyerPopup(true);
+        hideTimer = setTimeout(() => { if (!cancelled) setBuyerPopup(false); }, 7000);
+        idx += 1;
+        if (next > 3) schedule();                     // 还没到 3，继续排下一个
+      }, gapAt(idx) * 1000);
+    };
+    schedule();
+    return () => { cancelled = true; clearTimeout(popTimer); clearTimeout(hideTimer); };
+  }, [only599]);
+
   // fetchClientSecret uses confirmedProductIds (NOT selectedIds)
   const confirmedBundleSelected = confirmedProductIds.includes(PRODUCT_IDS.BUNDLE);
   const fetchClientSecret = useCallback(async () => {
@@ -296,8 +412,8 @@ export default function CheckoutPage() {
     );
   }
 
-  /* --- Email collection fallback --- */
-  if (!emailSubmitted) {
+  /* --- Email collection fallback (webinar 3 走单栏版自己的 email 步骤) --- */
+  if (!emailSubmitted && !only599) {
     return (
       <div className="min-h-screen bg-[#FAFAF7]">
         <header className="border-b border-[#E8E5DE] bg-white">
@@ -356,6 +472,158 @@ export default function CheckoutPage() {
     : null;
   const bonusExpired = countdown !== null && countdown <= 0;
 
+  /* ============ Webinar 3：单栏精简结帐（focus 结帐，只有 599 一个方案） ============ */
+  if (only599) {
+    const startCheckout = () => {
+      const t = email.trim();
+      if (!t || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)) {
+        setEmailError('请输入有效的邮箱地址');
+        return;
+      }
+      setEmailError('');
+      setEmail(t);
+      handleConfirmCheckout('desktop_summary');
+    };
+    return (
+      <div className="min-h-screen bg-[#FAFAF7] text-neutral-900">
+        {/* Header：安全结账 + 进度条 + 倒数 同一条固定 bar */}
+        <header className="sticky top-0 z-40 border-b border-[#E8E5DE] bg-white/95 backdrop-blur-sm">
+          <div className="max-w-2xl mx-auto px-4 h-14 relative flex items-center">
+            <div className="flex items-center gap-1.5 text-sm text-neutral-400">
+              <LockIcon />
+              <span className="hidden sm:inline">安全结账</span>
+            </div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <CheckoutStepper />
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-2xl mx-auto px-4 py-6 md:py-10">
+          {/* ===== 商品卡 ===== */}
+          <div className="bg-white border border-[#E8E5DE] rounded-2xl overflow-hidden shadow-sm">
+            {/* 横式 hero banner */}
+            <Image src="/images/ai-mike-v3-desktop.webp" alt="Mike 实战组合包－App年方案 + ETF/期权课程" width={1983} height={793} className="w-full h-auto block" priority />
+            <div className="p-5 md:p-6">
+              <h1 className="text-xl md:text-2xl font-bold text-neutral-900 mb-5">体验课学员专属优惠－App年方案</h1>
+
+              {/* 商品内容：App 主品 + 期权/ETF 赠送 */}
+              <div className="space-y-3">
+                {[
+                  { name: 'MIKE APP 一年完整权限', orig: '$599' },
+                  { name: '期权策略课程', orig: '$312' },
+                  { name: 'ETF 实战课程', orig: '$384' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start justify-between gap-2 text-base md:text-lg">
+                    <div className="flex items-start gap-2.5 text-neutral-700">
+                      <span className="text-[#B8953F] font-bold mt-0.5">✓</span>
+                      <span>{item.name}</span>
+                    </div>
+                    <span className="text-sm text-neutral-400 shrink-0 mt-1">原价 {item.orig}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* 价格：左（原价）／右（现价 + 立省） */}
+              <div className="flex items-start justify-end pt-5 mt-5 border-t border-[#E8E5DE]">
+                <div className="text-right">
+                  <div className="text-xs font-semibold text-neutral-500 mb-0.5">体验课专属价</div>
+                  <div className="text-4xl font-extrabold text-[#ef4444] leading-none">US$599</div>
+                  <div className="text-xs font-semibold text-[#ef4444] mt-1.5">立省 US$696 · 54% OFF</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 限时加赠：Mike 一对一持仓分析（独立，紧邻 CTA 制造紧迫感） */}
+          {!bonusExpired && (
+            <div className="mt-4 rounded-2xl border border-[#B8953F]/40 bg-gradient-to-br from-[#B8953F]/[0.10] to-transparent px-5 py-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-lg">🎁</span>
+                <p className="text-base font-bold text-[#B8953F]">限时加赠：Mike 一对一持仓分析</p>
+              </div>
+              <p className="text-sm text-neutral-500 mb-3">Mike 亲自帮你看持仓、理清方向。名额有限，先到先得。</p>
+              <div className="flex items-center justify-between gap-3 border-t border-[#B8953F]/20 pt-3">
+                {countdownDisplay && (
+                  <span className="flex items-center gap-1.5 text-neutral-600 text-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                    倒数 <span className="font-mono font-bold text-neutral-800">{countdownDisplay}</span>
+                  </span>
+                )}
+                {bonusSeats !== null && (
+                  <span className="flex items-center gap-1.5 text-red-600 text-sm font-medium">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                    </span>
+                    仅剩 <span className="font-bold">{bonusSeats}</span> 个名额
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ===== 结帐 ===== */}
+          <div ref={checkoutRef} className="mt-4">
+            {checkoutConfirmed ? (
+              <div className="bg-white border border-[#E8E5DE] rounded-2xl shadow-sm p-2">
+                <div className="flex items-center justify-between px-3 pt-2 pb-1">
+                  <span className="text-sm text-neutral-500">启用序号将寄到：<span className="text-neutral-800 font-medium">{email}</span></span>
+                  <button onClick={() => setCheckoutConfirmed(false)} className="text-sm text-[#B8953F] hover:underline flex-shrink-0">修改邮箱</button>
+                </div>
+                <EmbeddedCheckoutProvider key={sessionKey} stripe={stripePromise} options={{ fetchClientSecret }}>
+                  <EmbeddedCheckout />
+                </EmbeddedCheckoutProvider>
+              </div>
+            ) : (
+              <div className="bg-white border border-[#E8E5DE] rounded-2xl shadow-sm p-5 md:p-6">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">填写邮箱，用于收取购买确认邮件与启用序号</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="w-full px-4 py-3.5 text-base rounded-lg bg-white border border-[#E8E5DE] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#B8953F] focus:ring-1 focus:ring-[#B8953F] mb-3"
+                />
+                {emailError && <p className="text-red-500 text-sm mb-3">{emailError}</p>}
+                <button
+                  onClick={startCheckout}
+                  className="w-full bg-[#B8953F] hover:bg-[#A6842F] text-white font-bold py-3.5 text-base rounded-lg transition-colors"
+                >
+                  立即结帐 →
+                </button>
+                <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-green-700">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" /></svg>
+                  <span>7 天无条件退款保证，不满意全额退</span>
+                </p>
+              </div>
+            )}
+          </div>
+
+          <PaymentBadges />
+        </main>
+
+        {/* 侧边社群证明 popup：XX 已购买（名额持续减少） */}
+        <div
+          style={{ bottom: faqOpen ? 620 : 96 }}
+          className={`fixed right-4 md:right-6 z-50 max-w-[calc(100vw-2rem)] transition-all duration-500 ${buyerPopup ? 'translate-x-0 opacity-100' : 'translate-x-[130%] opacity-0 pointer-events-none'}`}
+        >
+          <div className="flex items-center gap-3 md:gap-4 bg-white border border-[#E8E5DE] rounded-xl md:rounded-2xl shadow-lg md:shadow-xl px-4 py-3 md:px-6 md:py-4">
+            <span className="flex-shrink-0 w-9 h-9 md:w-12 md:h-12 rounded-full bg-green-100 flex items-center justify-center">
+              <svg className="w-4 h-4 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+            </span>
+            <div>
+              <p className="text-sm md:text-lg font-semibold text-neutral-800">有人刚刚购买了组合包</p>
+              <p className="text-xs md:text-sm text-neutral-400">就在刚刚 · 名额持续减少中</p>
+            </div>
+          </div>
+        </div>
+
+        <FloatingFAQChat webinarId={webinarId} pageSource="checkout" onOpenChange={setFaqOpen} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAF7]">
       {/* Header */}
@@ -385,20 +653,24 @@ export default function CheckoutPage() {
           {/* ============ Left column — Content ============ */}
           <div className="space-y-8">
 
-            {/* ==================== Section 1: Headline ==================== */}
-            <div>
-              <h1 className="text-lg lg:text-2xl font-bold text-neutral-900 mb-1">
-                每天 10 分钟，让系统告诉你今天该不该动
-              </h1>
-              <p className="text-sm text-neutral-500">
-                不用盯盘、不靠感觉 —— 灯号亮了就做，灯号没亮就休息，Mike 用万美金学费换来的 SOP，你直接照做
-              </p>
-            </div>
+            {/* ==================== Section 1: Headline（webinar 3 隐藏，文案另议） ==================== */}
+            {!only599 && (
+              <div>
+                <h1 className="text-lg lg:text-2xl font-bold text-neutral-900 mb-1">
+                  每天 10 分钟，让系统告诉你今天该不该动
+                </h1>
+                <p className="text-sm text-neutral-500">
+                  不用盯盘、不靠感觉 —— 灯号亮了就做，灯号没亮就休息，Mike 用万美金学费换来的 SOP，你直接照做
+                </p>
+              </div>
+            )}
 
             {/* ==================== Section 2: Product selector (moved above course details — users already watched the live) ==================== */}
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-neutral-900">选择你的方案</h2>
+              <h2 className="text-lg font-bold text-neutral-900">{only599 ? '你的专属方案' : '选择你的方案'}</h2>
 
+              {!only599 && (
+              <>
               {/* Desktop: full product cards */}
               <div className="hidden md:block space-y-4">
                 {individualProducts.map(product => {
@@ -501,6 +773,8 @@ export default function CheckoutPage() {
                   <div className="flex-1 border-t border-[#E8E5DE]" />
                 </div>
               </div>
+              </>
+              )}
 
               {/* Bundle card — Desktop: full card */}
               {bundleProduct && (
@@ -510,7 +784,7 @@ export default function CheckoutPage() {
                       ? 'border-2 border-[#B8953F] shadow-md'
                       : 'border-2 border-[#B8953F]/30'
                   }`}
-                  onClick={() => toggleProduct(PRODUCT_IDS.BUNDLE)}
+                  onClick={() => { if (!only599) toggleProduct(PRODUCT_IDS.BUNDLE); }}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleProduct(PRODUCT_IDS.BUNDLE); } }}
@@ -612,7 +886,7 @@ export default function CheckoutPage() {
                   {/* Collapsed row */}
                   <div
                     className="flex items-center gap-3 px-4 py-3.5 cursor-pointer"
-                    onClick={() => toggleProduct(PRODUCT_IDS.BUNDLE)}
+                    onClick={() => { if (!only599) toggleProduct(PRODUCT_IDS.BUNDLE); }}
                   >
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
                       selectedIds.includes(PRODUCT_IDS.BUNDLE) ? 'border-[#B8953F] bg-[#B8953F]' : 'border-neutral-300'

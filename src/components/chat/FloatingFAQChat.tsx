@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { faqItems, WHATSAPP_LINK, WHATSAPP_NUMBER, type FAQItem } from '@/lib/faq-data';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { getFaqItems, WHATSAPP_LINK, WHATSAPP_NUMBER, type FAQItem } from '@/lib/faq-data';
 import { trackGA4 } from '@/lib/analytics';
 
 interface FloatingFAQChatProps {
@@ -15,12 +15,16 @@ interface FloatingFAQChatProps {
   currentTime?: number;
   /** Override bottom offset class — e.g. 'bottom-24 lg:bottom-5' to avoid sticky mobile bars */
   bottomOffsetClass?: string;
+  /** Notified when the chat panel opens/closes — lets the parent reposition other floating UI. */
+  onOpenChange?: (open: boolean) => void;
 }
 
 type View = 'faq' | 'ask';
 
-export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, currentTime, bottomOffsetClass = 'bottom-5' }: FloatingFAQChatProps) {
+export default function FloatingFAQChat({ webinarId, pageSource, showAfterSec, currentTime, bottomOffsetClass = 'bottom-5', onOpenChange }: FloatingFAQChatProps) {
+  const faqItems = useMemo(() => getFaqItems(webinarId), [webinarId]);
   const [open, setOpen] = useState(false);
+  useEffect(() => { onOpenChange?.(open); }, [open, onOpenChange]);
   const [view, setView] = useState<View>('faq');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);

@@ -8,6 +8,7 @@ type PageStatus = 'loading' | 'fulfilled' | 'processing' | 'timeout' | 'error';
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 30000;
+const MIKE_WHATSAPP = 'https://wa.me/15109927777?text=' + encodeURIComponent('我已购买课程套餐，想与 Mike 老师做一对一持仓分析');
 
 export default function CheckoutReturnPage() {
   const searchParams = useSearchParams();
@@ -22,6 +23,7 @@ export default function CheckoutReturnPage() {
   const [customerEmail, setCustomerEmail] = useState('');
   const [activationCode, setActivationCode] = useState('');
   const [activationCodes, setActivationCodes] = useState<{ productId: string; productName: string; code: string }[]>([]);
+  const [bonusEligible, setBonusEligible] = useState(false);
   const [copied, setCopied] = useState<string | false>(false);
 
   useEffect(() => {
@@ -84,6 +86,7 @@ export default function CheckoutReturnPage() {
           if (data.orderStatus === 'fulfilled' && data.activationCode) {
             setActivationCode(data.activationCode);
             if (data.activationCodes) setActivationCodes(data.activationCodes);
+            setBonusEligible(!!data.bonusEligible);
             setCustomerEmail(data.customerEmail || '');
             setStatus('fulfilled');
             stopPolling();
@@ -278,61 +281,44 @@ export default function CheckoutReturnPage() {
           没收到？请检查垃圾邮件文件夹
         </p>
 
-        {/* Activation steps */}
-        <div className="bg-white rounded-xl border border-[#E8E5DE] p-8 text-left">
-          <p className="text-sm font-semibold text-neutral-800 mb-4 tracking-wide">启用步骤</p>
-          <div className="space-y-4">
-            {[
-              { step: '1', content: <span>前往<a href="https://www.cmoney.tw/" target="_blank" rel="noopener noreferrer" className="text-[#B8953F] underline underline-offset-2 font-medium">商品官网</a></span> },
-              { step: '2', content: <span>输入上方商品启用序号</span> },
-              { step: '3', content: <span>点击「启用序号」</span> },
-              { step: '4', content: <span>如您尚未登入或注册理财宝帐号，请您登入或注册</span> },
-              { step: '5', content: <span>登入帐号并启用序号后，即可看到「序号启用成功！」</span> },
-            ].map((item) => (
-              <div key={item.step} className="flex items-start gap-4">
-                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#FAFAF7] border border-[#E8E5DE] flex items-center justify-center text-sm font-semibold text-[#B8953F] mt-0.5">
-                  {item.step}
-                </span>
-                <span className="text-sm text-neutral-600 leading-relaxed">{item.content}</span>
-              </div>
-            ))}
-          </div>
+        {/* Activation guide — 导向图文教学页 */}
+        <div className="bg-white rounded-xl border border-[#E8E5DE] p-8 text-center">
+          <p className="text-base font-semibold text-neutral-800 mb-2 tracking-wide">如何启用序号与观看课程？</p>
+          <p className="text-sm text-neutral-500 mb-6">跟着图文教学，一步步完成 App 启用与课程观看</p>
+          <a
+            href="/activation-tutorial"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-8 py-3.5 rounded-lg bg-[#B8953F] text-white text-base font-bold hover:bg-[#A6842F] transition-colors"
+          >
+            📖 点此查看完整图文教学
+          </a>
         </div>
 
-        {/* Product access links — dynamic based on purchase */}
-        <div className="bg-white rounded-xl border border-[#E8E5DE] p-8 text-left mt-4">
-          <p className="text-sm font-semibold text-neutral-800 mb-4 tracking-wide">商品启用后，可前往以下页面使用权限</p>
-          <p className="text-xs text-neutral-400 mb-4">请确保已登入您的帐号</p>
-          <div className="space-y-3">
-            {(() => {
-              const pids = activationCodes.map(c => c.productId);
-              const hasApp = pids.some(id => ['app-monthly', 'bundle', 'options', 'etf-options'].includes(id));
-              const hasOptions = pids.some(id => ['options', 'etf-options', 'bundle'].includes(id));
-              const hasEtf = pids.some(id => ['etf-options', 'bundle'].includes(id));
-              const links = [];
-              if (hasApp) links.push({ name: 'Mike是麦克 美股财富导航 App 下载', url: 'https://cmoneymike.onelink.me/ZEaW/kkyo4oqs' });
-              if (hasOptions) links.push({ name: '震荡行情的美股期权操作解析 线上课程观看', url: 'https://cmy.tw/00CKIq' });
-              if (hasEtf) links.push({ name: 'ETF 进阶资产放大术 线上课程观看', url: 'https://cmy.tw/00ChKt' });
-              // Fallback: if no codes matched (legacy), show all
-              if (links.length === 0) {
-                links.push({ name: 'Mike是麦克 美股财富导航 App 下载', url: 'https://cmoneymike.onelink.me/ZEaW/kkyo4oqs' });
-                links.push({ name: '震荡行情的美股期权操作解析 线上课程观看', url: 'https://cmy.tw/00CKIq' });
-                links.push({ name: 'ETF 进阶资产放大术 线上课程观看', url: 'https://cmy.tw/00ChKt' });
-              }
-              return links.map((link) => (
-                <div key={link.url} className="flex items-start gap-3">
-                  <span className="text-[#B8953F] mt-0.5">•</span>
-                  <span className="text-sm text-neutral-600">
-                    {link.name}：
-                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-[#B8953F] underline underline-offset-2 break-all">
-                      {link.url.includes('onelink') ? '点此下载' : '点此观看'}
-                    </a>
-                  </span>
-                </div>
-              ));
-            })()}
+        {/* 1-on-1 portfolio analysis bonus — only when eligible (bundle + within 2h window) */}
+        {bonusEligible && (
+          <div className="bg-[#FCFAF4] rounded-xl border-2 border-[#B8953F] p-6 md:p-7 text-left mt-4">
+            <h2 className="text-base font-bold text-[#B8953F] mb-3">🎁 体验课限定福利：Mike 一对一持仓分析</h2>
+            <p className="text-sm text-neutral-700 leading-relaxed mb-2">恭喜你！拿到了 Mike 老师亲自帮你做一对一持仓分析的名额。</p>
+            <p className="text-sm text-neutral-700 leading-relaxed mb-3">Mike 会看你现在的持仓与配置，帮你把大方向理清楚、告诉你哪里该调整，让你的第一步走得稳、走得对。</p>
+            <p className="text-sm font-bold text-neutral-800 mb-1">预约方式：</p>
+            <ol className="list-decimal pl-5 space-y-1 text-sm text-neutral-700 leading-relaxed mb-5">
+              <li><strong>截图保存此页面或确认邮件</strong>（作为购买凭证）</li>
+              <li>点击下方 WhatsApp 联系 Mike 老师</li>
+              <li>发送截图，说一声你是体验课学员，即可预约</li>
+            </ol>
+            <div className="text-center">
+              <a
+                href={MIKE_WHATSAPP}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-[#25D366] hover:bg-[#20BD5A] text-white text-sm font-bold transition-colors"
+              >
+                📱 WhatsApp 联系 Mike 老师预约
+              </a>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Customer support */}
         <div className="bg-[#FAFAF7] rounded-xl border border-[#E8E5DE] p-6 text-center mt-4">
