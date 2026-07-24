@@ -1,5 +1,5 @@
 <!-- 這是快照，不是正本。請勿直接編輯這個檔案。 -->
-> 📸 **快照** — 自动同步自 `webinar-1plus3-marketing/PROJECT_BACKGROUND.md`，同步於 2026-07-14
+> 📸 **快照** — 自动同步自 `webinar-1plus3-marketing/PROJECT_BACKGROUND.md`，同步於 2026-07-24
 > 要修改內容，請改**來源檔**，然後重跑 `sync-context.ps1`。
 > 直接改這裡的話，下次同步會被覆蓋掉。
 

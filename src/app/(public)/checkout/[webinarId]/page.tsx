@@ -270,15 +270,19 @@ export default function CheckoutPage() {
       if (stored) {
         const remaining = Math.round((parseInt(stored, 10) - Date.now()) / 1000);
         setCountdown(remaining > 0 ? remaining : 0);
+      } else if (only599) {
+        // Webinar 3：deadline 只由直播页 CTA 种（锚定看直播时间）。这里没读到 → 代表没看直播 /
+        // 晚到 / 从 email 回访 → 视为已过期（0），不显示一对一 bonus，后端也不会发放资格。
+        setCountdown(0);
       } else {
         const deadline = Date.now() + COUNTDOWN_DURATION * 1000;
         localStorage.setItem(storageKey, deadline.toString());
         setCountdown(COUNTDOWN_DURATION);
       }
     } catch {
-      setCountdown(COUNTDOWN_DURATION);
+      setCountdown(only599 ? 0 : COUNTDOWN_DURATION);
     }
-  }, [storageKey, COUNTDOWN_DURATION]);
+  }, [storageKey, COUNTDOWN_DURATION, only599]);
 
   // Tick every second
   const expiredFiredRef = useRef(false);
@@ -300,10 +304,14 @@ export default function CheckoutPage() {
     return () => clearInterval(timer);
   }, [countdown !== null && countdown > 0, webinarId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // 一对一 bonus window 是否已过期（倒数归零）——过期就不再显示假名额 / 社群证明 popup，
+  // 与实际 bonusEligible（后端依 bonusDeadline 判定）保持一致，避免晚到/回访用户看到假紧迫感
+  const bonusExpired = countdown !== null && countdown <= 0;
+
   // Webinar 3：一对一持仓分析 假名额（localStorage，符合幻觉原则；首次 6–9，回访 30% 机率 -1）
   const [bonusSeats, setBonusSeats] = useState<number | null>(null);
   useEffect(() => {
-    if (!only599) return;
+    if (!only599 || bonusExpired) return;
     const key = 'checkout-1on1-seats';
     try {
       const stored = localStorage.getItem(key);
@@ -317,7 +325,7 @@ export default function CheckoutPage() {
       }
       setBonusSeats(n);
     } catch { setBonusSeats(8); }
-  }, [only599]);
+  }, [only599, bonusExpired]);
 
   // Webinar 3：侧边「XX 已购买」popup — 每次弹出名额 -1（下限 3），间隔递增（30s、60s、再 +2/3/4… 分）
   const [buyerPopup, setBuyerPopup] = useState(false);
@@ -325,7 +333,7 @@ export default function CheckoutPage() {
   const seatsRef = useRef<number | null>(null);
   useEffect(() => { seatsRef.current = bonusSeats; }, [bonusSeats]);
   useEffect(() => {
-    if (!only599) return;
+    if (!only599 || bonusExpired) return;
     const gapAt = (i: number) => (i <= 1 ? 30 : i * 60); // 秒：30、60、之后每次 +2/3/4… 分
     let cancelled = false;
     let idx = 0;
@@ -349,7 +357,7 @@ export default function CheckoutPage() {
     };
     schedule();
     return () => { cancelled = true; clearTimeout(popTimer); clearTimeout(hideTimer); };
-  }, [only599]);
+  }, [only599, bonusExpired]);
 
   // fetchClientSecret uses confirmedProductIds (NOT selectedIds)
   const confirmedBundleSelected = confirmedProductIds.includes(PRODUCT_IDS.BUNDLE);
@@ -470,7 +478,6 @@ export default function CheckoutPage() {
   const countdownDisplay = countdown !== null && countdown > 0
     ? `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
     : null;
-  const bonusExpired = countdown !== null && countdown <= 0;
 
   /* ============ Webinar 3：单栏精简结帐（focus 结帐，只有 599 一个方案） ============ */
   if (only599) {

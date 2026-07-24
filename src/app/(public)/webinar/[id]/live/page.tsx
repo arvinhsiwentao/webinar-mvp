@@ -221,8 +221,16 @@ export default function LiveRoomPage() {
   // Handle CTA view/dismiss tracking
   const handleCTAView = useCallback((cta: CTAEvent) => {
     ctaViewTimestamps.current.set(cta.id, Date.now());
+    // Webinar 3：CTA 出现即把「一对一 bonus 窗口」（2h）锚定到「看直播的时间」，供结帐页读取。
+    // 只在真正 live 模式种、且不覆盖既有值 → 晚到 / 从 email 回访的人窗口早已过期，不再显示假名额。
+    if (webinarId === '3' && !isReplay) {
+      try {
+        const key = `checkout-${webinarId}-deadline`;
+        if (!localStorage.getItem(key)) localStorage.setItem(key, String(Date.now() + 2 * 60 * 60 * 1000));
+      } catch { /* ignore */ }
+    }
     trackGA4('c_cta_view', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) });
-  }, [webinarId, currentTime]);
+  }, [webinarId, currentTime, isReplay]);
 
   const handleCTADismiss = useCallback((cta: CTAEvent) => {
     trackGA4('c_cta_dismiss', { webinar_id: webinarId, cta_id: cta.id, cta_type: cta.buttonText.slice(0, 100), video_time_sec: Math.round(currentTime) });
