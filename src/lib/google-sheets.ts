@@ -11,6 +11,9 @@ const ORDERS_SHEET_RANGE = 'Orders!A:M';
 
 const RETARGETING_SHEET_RANGE = 'Retargeting!A:K';
 
+const REGISTRATION_SPREADSHEET_ID = '1MHPJtebVnhIrZX_RWaC1n8wu0qExZFv0ZpLjqsGz7Kc';
+const REGISTRATION_SHEET_RANGE = "'Mike掘金 - 直播報名用戶'!A:A";
+
 function getAuth() {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!keyJson) return null;
@@ -226,5 +229,29 @@ export async function appendRetargetingRowToSheet(
     valueInputOption: 'RAW',
     insertDataOption: 'INSERT_ROWS',
     requestBody: { values: [row] },
+  });
+}
+
+/**
+ * Append a registrant's email to the marketing Google Sheet (column A only).
+ * Real-time write — called fire-and-forget after the Supabase insert succeeds.
+ * Supabase remains the source of truth; the Sheet is a marketing-convenience mirror.
+ * Silently no-ops if GOOGLE_SERVICE_ACCOUNT_KEY is missing.
+ */
+export async function appendRegistrationEmailToSheet(email: string): Promise<void> {
+  const auth = getAuth();
+  if (!auth) {
+    console.warn('[appendRegistrationEmail] GOOGLE_SERVICE_ACCOUNT_KEY not configured, skipping');
+    return;
+  }
+
+  const sheets = google.sheets({ version: 'v4', auth });
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: REGISTRATION_SPREADSHEET_ID,
+    range: REGISTRATION_SHEET_RANGE,
+    valueInputOption: 'RAW',
+    insertDataOption: 'INSERT_ROWS',
+    requestBody: { values: [[email]] },
   });
 }

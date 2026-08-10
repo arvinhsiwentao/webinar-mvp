@@ -232,3 +232,13 @@ Extracted fulfillment logic into shared `src/lib/fulfillment.ts`. Both the Strip
 **Code 回退錨點：** `git tag pre-ai-mike-v3 8a1d725`（改版前 baseline）。
 **延後（未進此 commit）：** DB 換 playbackId + 寫 autochat-v7/CTA（等時間軸測過）；客服交接文件已寫（`docs/marketing/`）。
 **SOT：** `C:\Users\user1\.claude\plans\commit-ai-mike-landingpage-dreamy-dragonfly.md`。
+
+### 2026-08-10: 報名 email 即時鏡像到行銷 Google Sheet
+
+**需求：** Webinar 1／3 報名成功後，把 email append 到「海外美股 - 互動型活動Email名單彙整」的 `Mike掘金 - 直播報名用戶` 分頁 A 欄（spreadsheet `1MHPJteb...`，gid 914645823）。此前報名只進 Supabase `registrations`，Sheet 上完全沒有報名階段名單（只有付款／看完直播的人）。
+**做法：** `appendRegistrationEmailToSheet()`（`google-sheets.ts`），照抄既有 `appendRetargetingRowToSheet()` 的模式，在 `/api/register` 的 Supabase insert 成功後 **fire-and-forget** 呼叫。**不 await** — Sheet 掛掉或配額爆掉絕不能害報名失敗；失敗只 console.error，Supabase 仍留有完整資料可事後補。
+**只寫 email 一欄：** 使用者指定。姓名／UTM／場次都不寫，要分析走 Supabase。
+**W1／W3 不分場：** 共用同一分頁往下 append，不加場次欄。同一 email 報名兩場會出現兩列（`registrations` 的唯一鍵是 `(webinar_id, email)`，本來就允許跨場重複）——刻意接受，使用者要的是純名單。
+**Spreadsheet ID 寫死在 code：** 與啟用碼／訂單同步兩張表一致（只有 retargeting 那張走 env）。省掉 Zeabur 加 env var 這一步。
+**未加場次過濾：** 所有經 `/api/register` 的報名都會寫入。實務上公開報名入口只有 `/`（W1）與 `/free-webinar`（W3），故等同 W1+W3；代價是後台測試報名也會進 Sheet。
+**驗證：** 實測 append 至 A717 成功並刪回原 716 列；`tsc --noEmit` 乾淨。

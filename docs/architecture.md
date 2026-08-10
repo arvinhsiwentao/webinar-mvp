@@ -73,6 +73,10 @@ Route groups：`(public)/`（觀眾頁面）、`(admin)/`（管理後台）
 
 `src/lib/google-sheets.ts` 從預填的 Google Sheet 領取啟用碼（race-condition safe，最多 3 次重試）。`GOOGLE_SERVICE_ACCOUNT_KEY` 未設定時拋錯（無 fallback）。
 
+### 報名名單鏡像（行銷用）
+
+`appendRegistrationEmailToSheet()` 在 `/api/register` 寫入 Supabase 成功後 fire-and-forget，把 email append 到「海外美股 - 互動型活動Email名單彙整」試算表的 `Mike掘金 - 直播報名用戶` 分頁 A 欄（Webinar 1／3 共用同一分頁，不分場）。Supabase 是 source of truth，Sheet 只是行銷方便看的鏡像；Sheet 掛掉不影響報名成功。
+
 ## API Routes
 
 ### Public
@@ -85,7 +89,7 @@ Route groups：`(public)/`（觀眾頁面）、`(admin)/`（管理後台）
 | `/api/webinar/[id]/chat/stream` | GET | SSE 即時聊天串流 |
 | `/api/webinar/[id]/next-slot` | GET | 計算 evergreen 時段 |
 | `/api/webinar/[id]/reassign` | POST | 錯過時段後重新指派 |
-| `/api/register` | POST | 報名（email 查重、evergreen-aware、寄確認信） |
+| `/api/register` | POST | 報名（email 查重、evergreen-aware、寄確認信、email 鏡像至 Google Sheet） |
 | `/api/checkout/create-session` | POST | 建立 Stripe Embedded Checkout session |
 | `/api/checkout/session-status` | GET | 輪詢 Stripe 狀態 + 備用履約 |
 | `/api/checkout/webhook` | POST | Stripe webhook 主要履約 |

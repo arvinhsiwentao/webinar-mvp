@@ -5,6 +5,7 @@ import { validateEmail, buildEmailLink } from '@/lib/utils';
 import { sendEmail, confirmationEmail } from '@/lib/email';
 import { getSlotExpiresAt } from '@/lib/evergreen';
 import { audit } from '@/lib/audit';
+import { appendRegistrationEmailToSheet } from '@/lib/google-sheets';
 
 export async function POST(request: NextRequest) {
   try {
@@ -90,6 +91,12 @@ export async function POST(request: NextRequest) {
     }
 
     audit({ type: 'registration_created', webinarId: resolvedWebinarId, email: body.email, registrationId: registration.id });
+
+    // Mirror the email to the marketing Google Sheet (fire-and-forget — Supabase is
+    // source of truth, and a Sheet outage must never fail a registration)
+    appendRegistrationEmailToSheet(body.email).catch(err =>
+      console.error('[register] sheet append failed:', err)
+    );
 
     // Send confirmation email (fire and forget)
     const host = request.headers.get('host');

@@ -2,10 +2,14 @@
 
 ## 它是什麼
 
-Google Sheets API（一種讓程式自動讀寫 Google 試算表的工具）讓我們的系統能「像機器人一樣」操作 Google 試算表。本專案用它做兩件事：
+Google Sheets API（一種讓程式自動讀寫 Google 試算表的工具）讓我們的系統能「像機器人一樣」操作 Google 試算表。本專案用它做四件事：
 
 1. **領取啟用碼** — 用戶付款成功後，系統自動從試算表中「取走」一組啟用碼，像從倉庫取貨一樣
 2. **訂單同步** — 每天定時把所有訂單資料「搬」到另一張試算表，讓業務團隊不用進後台就能看到銷售狀況
+3. **報名名單鏡像** — 有人報名成功，就把他的 email 即時 append 到行銷名單試算表
+4. **再行銷名單鏡像** — 有人看完直播（觸發 post-webinar EDM），就把他的資料即時 append 到再行銷分頁
+
+> 第 3、4 項都是「鏡像」：資料的正本永遠在 Supabase，試算表只是給行銷同事方便看的副本。寫 Sheet 失敗**不會**讓報名失敗，只會在 log 留下錯誤。
 
 ## 為什麼用 Google Sheets 而不是資料庫
 
@@ -70,6 +74,8 @@ claimActivationCode(orderId, email)（領碼函式）
 |------|---------------|----------|
 | 啟用碼倉庫 | `1W9tK97n...` | `A:E`（A 到 E 欄） |
 | 訂單報表 | `1sba5HDJ...` | `Orders!A:M`（Orders 分頁，A 到 M 欄） |
+| 報名名單 | `1MHPJteb...` | `'Mike掘金 - 直播報名用戶'!A:A`（只寫 A 欄 email） |
+| 再行銷名單 | 讀環境變數 `RETARGETING_SPREADSHEET_ID` | `Retargeting!A:K` |
 
 > 如果要換一張試算表，需要直接改程式碼裡的 ID，目前沒有從設定檔讀取的機制。
 
@@ -111,7 +117,8 @@ claimActivationCode(orderId, email)（領碼函式）
 
 | 檔案 | 說明 |
 |------|------|
-| `src/lib/google-sheets.ts` | 核心邏輯：`claimActivationCode()`（領碼）+ `syncOrdersToSheet()`（訂單同步）+ Google 認證 |
+| `src/lib/google-sheets.ts` | 核心邏輯：`claimActivationCode()`（領碼）+ `syncOrdersToSheet()`（訂單同步）+ `appendRegistrationEmailToSheet()`（報名名單）+ `appendRetargetingRowToSheet()`（再行銷名單）+ Google 認證 |
+| `src/app/api/register/route.ts` | 報名 API — Supabase insert 成功後 fire-and-forget 把 email append 到報名名單 |
 | `src/lib/fulfillment.ts` | `fulfillOrder()`（完成訂單）— 內含原子鎖，呼叫領碼函式，失敗時回滾 |
 | `src/app/api/cron/orders-sync/route.ts` | 訂單同步的 API 端點（定時任務呼叫的入口） |
 | `src/lib/cron-auth.ts` | 定時任務的密碼驗證邏輯（`CRON_SECRET` Bearer token） |
